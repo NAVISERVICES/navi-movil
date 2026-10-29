@@ -195,7 +195,7 @@ if (user) {
     const left = totalGB - u.usedGB, pct = u.usedGB / totalGB;
     $('topupBtn').href = `recargas.html#l${sel + 1}`;
     $('lines').hidden = !fam;
-    $('lines').innerHTML = lines.map((l, i) => `<button data-i="${i}" aria-pressed="${i === sel}"><img src="assets/${l.img}.png" alt="">${l.name}</button>`).join('');
+    $('lines').innerHTML = lines.map((l, i) => `<button data-i="${i}" aria-pressed="${i === sel}"><img src="${avatarSrc(l.phone, l.img)}" alt="">${l.name}</button>`).join('');
 
     $('dLeft').innerHTML = `${left.toFixed(1)} GB <small>disponibles</small>`;
     $('dMeterWrap').setAttribute('aria-valuemax', totalGB); $('dMeterWrap').setAttribute('aria-valuenow', u.usedGB.toFixed(1));

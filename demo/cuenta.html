@@ -26,6 +26,13 @@ header .me img{width:38px;height:38px;border-radius:50%;object-fit:cover;object-
 
 main{padding:36px 0 80px}
 .hi{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+.profile{display:flex;align-items:center;gap:18px}
+.pic{position:relative;width:88px;height:88px;flex:none;cursor:pointer;border-radius:50%}
+.pic img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav);border:3px solid var(--lime)}
+.pic .cam{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--lime);display:grid;place-items:center;font-size:15px;border:3px solid var(--navy);transition:transform .2s}
+.pic:hover .cam,.pic:focus-visible .cam{transform:scale(1.12)}
+.picacts{display:flex;gap:14px;margin-top:6px}
+.link{font-size:13px;font-weight:700;color:var(--lime);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .hi h1{font-size:clamp(32px,4.5vw,52px)}
 .hi h1 em{font-style:normal;color:var(--lime)}
 .hi p{color:var(--muted)}
@@ -155,7 +162,16 @@ main{padding:36px 0 80px}
 
 <main class="wrap">
   <div class="hi">
-    <div><p id="today"></p><h1>¡Hola, <em id="first"></em>!</h1></div>
+    <div class="profile">
+      <label class="pic" for="photoIn" title="Cambiar mi foto">
+        <img id="bigImg" alt="Tu foto de perfil">
+        <span class="cam" aria-hidden="true">📷</span>
+      </label>
+      <input type="file" id="photoIn" accept="image/*" hidden>
+      <div><p id="today"></p><h1>¡Hola, <em id="first"></em>!</h1>
+        <div class="picacts"><label for="photoIn" class="link">Cambiar foto</label><button class="link" id="photoDel" hidden>Quitar foto</button></div>
+      </div>
+    </div>
   </div>
 
   <section class="plan">
@@ -204,7 +220,24 @@ if (user) {
   const [perLabel, months] = PERIOD[p.period];
   const date = d => d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
 
-  $('meImg').src = `assets/${user.img}.png`;
+  // foto de perfil: real si la subió, si no el personaje
+  const paintPhoto = () => {
+    const src = avatarSrc(user.phone, user.img);
+    $('meImg').src = src; $('bigImg').src = src;
+    $('photoDel').hidden = !Photos.get(user.phone);
+    document.querySelectorAll(`img[data-ph="${user.phone}"]`).forEach(i => i.src = src);
+  };
+  paintPhoto();
+  $('photoIn').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try {
+      if (!Photos.set(user.phone, await readPhoto(f))) throw new Error('No hay espacio para guardar la foto en este navegador.');
+      paintPhoto();
+    } catch (err) { alertBox(err.message); }
+  });
+  $('photoDel').addEventListener('click', () => { Photos.set(user.phone, null); paintPhoto(); });
+  const alertBox = msg => { const p = document.createElement('p'); p.className = 'link'; p.style.cssText = 'color:#FF8A8D;text-decoration:none'; p.textContent = msg; document.querySelector('.picacts').after(p); setTimeout(() => p.remove(), 4000); };
   $('meName').textContent = user.name;
   $('first').textContent = fam ? user.name : user.name.split(' ')[0];
   $('today').textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -220,7 +253,7 @@ if (user) {
   const used = DEMO_USED;
   $('usage').innerHTML = fam
     ? '<h3>Datos por línea</h3>' + p.lines.map((l, i) => `
-        <div class="line"><img src="assets/${l.img}.png" alt=""><div><b>${l.name}</b><div class="meter"><i data-w="${used[i] * 100}"></i></div></div><em>${(l.gb * (1 - used[i])).toFixed(1)} de ${l.gb} GB</em></div>`).join('')
+        <div class="line"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt=""><div><b>${l.name}</b><div class="meter"><i data-w="${used[i] * 100}"></i></div></div><em>${(l.gb * (1 - used[i])).toFixed(1)} de ${l.gb} GB</em></div>`).join('')
     : `<h3>Tus datos</h3><div class="usage"><b style="font-family:var(--display);font-size:34px">${(p.gb * (1 - used[0])).toFixed(1)} GB</b> <small>disponibles de ${p.gb} GB</small>
         <div class="meter"><i data-w="${used[0] * 100}"></i></div><small>Llamadas y SMS ilimitados · Redes sociales incluidas</small></div>`;
   $('usage').insertAdjacentHTML('beforeend', '<a class="more" href="movil.html">Ver consumo detallado →</a>');

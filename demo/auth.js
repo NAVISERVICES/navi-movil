@@ -156,6 +156,35 @@ const lineCard = (user, l) => `<div class="idcard">
   <div><b>${lineHolder(user, l)}</b><span>${linePlan(user, l)}</span><span>${l.device.brand === 'Apple' ? '' : l.device.brand + ' '}${l.device.model}</span><span>${fmtPhone(l.phone).replace('+52 ', '')}</span></div>
 </div>`;
 
+// Fotos reales de perfil por número (DEMO: se guardan en este navegador; en producción, en el servidor)
+const Photos = (() => {
+  const KEY = 'navi.photos';
+  const all = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  return {
+    get: id => all()[id] || null,
+    set: (id, url) => {
+      const a = all(); if (url) a[id] = url; else delete a[id];
+      try { localStorage.setItem(KEY, JSON.stringify(a)); return true; } catch { return false; }
+    },
+  };
+})();
+// foto real si la subieron; si no, el personaje de Navi
+const avatarSrc = (id, img) => Photos.get(id) || `assets/${img || 'sofi'}.png`;
+// recorta al centro en cuadrado y reduce a 256 px para que pese poco (~25 KB)
+const readPhoto = (file, size = 256) => new Promise((resolve, reject) => {
+  if (!file || !file.type.startsWith('image/')) return reject(new Error('Elige una imagen (JPG o PNG).'));
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const s = Math.min(img.width, img.height);
+    c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+    URL.revokeObjectURL(img.src);
+    resolve(c.toDataURL('image/jpeg', 0.85));
+  };
+  img.onerror = () => reject(new Error('No pudimos leer esa imagen.'));
+  img.src = URL.createObjectURL(file);
+});
+
 const fmtPhone = p => '+52 ' + p.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
 const fmtImei = i => i.replace(/(\d{2})(\d{6})(\d{6})(\d)/, '$1 $2 $3 $4');
 const maskImei = i => '•• •••••• ••' + i.slice(10, 14) + ' ' + i.slice(14);

@@ -663,7 +663,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!user) return;
   const a = document.getElementById('account');
   a.href = 'cuenta.html';
-  a.innerHTML = `<img src="assets/${user.img}.png" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)"><span class="long">${user.name.split(' ')[0]}</span>`;
+  a.innerHTML = `<img src="${avatarSrc(user.phone, user.img)}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)"><span class="long">${user.name.split(' ')[0]}</span>`;
 })();
 
 // enlaces de la app en las tiendas: mientras estén en null, el botón sale como "Próximamente"

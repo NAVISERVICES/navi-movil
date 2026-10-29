@@ -19,7 +19,8 @@
 :root{--sos:#FF5A5F;--card:#15156E;--line:#ffffff1c;--map:#1A1D72;--street:#2D35A0;--park:#1E5A4E}
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .app{width:min(520px,100%);margin-inline:auto;padding:14px max(16px,env(safe-area-inset-left,0px)) 24px max(16px,env(safe-area-inset-right,0px))}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-14px 0 14px;padding:12px 0;position:sticky;top:0;z-index:25;background:color-mix(in srgb,var(--navy) 92%,transparent);backdrop-filter:blur(10px)}
+.top .btn[hidden]{display:none}
 .top .back{font-size:14px;color:var(--muted)}
 .eyebrow{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--lime)}
 h1{font-size:34px;margin:2px 0 14px}
@@ -107,6 +108,13 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 .who .sw{margin-left:auto;display:flex;gap:6px}
 .sw button{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;border:2px solid #ffffff26;color:var(--muted)}
 .sw button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.person{align-items:flex-start}
+.phbtn{position:relative;flex:none;border-radius:50%}
+.phbtn .cam{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--lime);display:grid;place-items:center;font-size:11px;border:2px solid var(--card)}
+.lnk{font-size:12px;font-weight:700;color:var(--lime);text-decoration:underline;text-underline-offset:3px}
+.lnk.bad{color:#FF8A8D}
+.av{overflow:visible}
+.av img{object-position:50% 15%}
 .field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
 .field input,.field select{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:10px 12px;font-size:15px;color:var(--text)}
 .field input:focus,.field select:focus{outline:none;border-color:var(--lime)}
@@ -151,7 +159,10 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 <div class="app" id="app">
   <div class="top">
     <a class="logo" href="cuenta.html"><img src="assets/navi-logo.png" alt="Navi" style="height:30px"><small>SOS FAMILY</small></a>
-    <a class="back" href="cuenta.html">← Mi Navi</a>
+    <div class="row" style="gap:8px">
+      <a class="btn btn-ghost sm" id="topBack" href="cuenta.html">← Mi Navi</a>
+      <a class="btn btn-ghost sm" id="cfgBtn" href="#red" aria-label="Configuración">⚙️</a>
+    </div>
   </div>
 
   <!-- INICIO -->
@@ -216,8 +227,19 @@ section[data-tab].on{display:block;animation:fade .3s ease}
   <!-- MI RED -->
   <section data-tab="red">
     <span class="eyebrow">Familia Navi</span>
-    <h1>Mi red</h1>
+    <h1>Mi red y ajustes</h1>
     <div class="stack">
+      <div class="card"><h2>Integrantes de la red</h2><p class="muted">Toca una foto para cambiarla por una foto real. Agrega a otras personas aunque no sean líneas Navi: les llega una invitación por SMS.</p>
+        <div class="stack" id="people" style="margin-top:12px"></div>
+        <input type="file" id="pplPhoto" accept="image/*" hidden>
+        <button class="btn out block" id="addPersonBtn" style="margin-top:12px">+ Agregar a mi red</button>
+        <form class="stack" id="addPerson" hidden style="margin-top:12px">
+          <label class="field">Nombre<input id="pName" required placeholder="Ej. Abuela Chayo"></label>
+          <label class="field">Celular<input id="pTel" required inputmode="tel" placeholder="55 1234 5678"></label>
+          <label class="field">Parentesco<select id="pRel"><option>Abuela / Abuelo</option><option>Tía / Tío</option><option>Hija / Hijo</option><option>Pareja</option><option>Amiga / Amigo</option><option>Otro</option></select></label>
+          <button class="btn btn-lime" type="submit">Enviar invitación</button>
+        </form>
+      </div>
       <div class="card"><h2>Lugares</h2><p class="muted">Recibe un aviso cuando lleguen o salgan. Elige a quién escuchar en cada lugar.</p><div class="stack" id="places" style="margin-top:12px"></div>
         <button class="btn out block" id="addPlaceBtn" style="margin-top:12px">+ Agregar lugar</button>
         <form class="stack" id="addPlace" hidden style="margin-top:12px">
@@ -311,6 +333,7 @@ if (user && !user.apps.includes('sos')) {
     { at: null, bat: 12, kmh: 18, seen: 0, route: ['escuela', 'casa'] },
   ];
   const members = lines.map((l, i) => ({ ...l, i, color: COLORS[i % 4], ...STATES[lines.length === 1 ? 0 : i] }));
+  const BASE = members.length; // líneas del plan; después vienen las personas invitadas
   // conductores: el titular y la segunda línea (en el demo, Papá y Mamá)
   const adults = members.slice(0, 2);
 
@@ -325,15 +348,27 @@ if (user && !user.apps.includes('sos')) {
       { who: 1, t: now - 52 * MIN, txt: '¿A qué hora salen de la escuela?' },
       { who: 2, t: now - 49 * MIN, txt: 'A las 2:30 😊' },
     ],
-    events: [], watch: null, expects: {},
+    events: [], watch: null, expects: {}, extra: [],
   });
   let S; try { S = { ...def(), ...JSON.parse(localStorage.getItem(KEY)) }; } catch { S = def(); }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  // personas invitadas a la red (no son líneas del plan): aparecen con "Invitación enviada" hasta que instalen la app
+  const syncExtra = () => {
+    members.length = BASE;
+    (S.extra || []).forEach((x, k) => members.push({ ...x, i: BASE + k, color: COLORS[(BASE + k) % 4], img: null, invited: true, bat: null, seen: null }));
+  };
+  syncExtra();
+  const onMap = () => members.filter(m => !m.invited);
+  const lowBat = m => m.bat != null && m.bat <= 15;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const place = id => S.places.find(p => p.id === id);
   const ago = m => m < 1 ? 'ahora' : m < 60 ? `hace ${Math.round(m)} min` : `hace ${Math.round(m / 60)} h`;
   const hhmm = t => new Date(t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
-  const avatar = (m, size = 40) => `<div class="av" style="width:${size}px;height:${size}px;background:${m.color}"><img src="assets/${m.img}.png" alt=""><i class="${m.i === me && S.paused ? 'paused' : ''}"></i></div>`;
+  // foto real (Photos, compartida con Mi Navi) o personaje; las personas invitadas sin foto muestran su inicial
+  const pic = m => Photos.get(m.phone) || (m.img ? `assets/${m.img}.png` : null);
+  const avatar = (m, size = 40) => `<div class="av" style="width:${size}px;height:${size}px;background:${m.color};font-size:${Math.round(size * .42)}px">${pic(m) ? `<img src="${pic(m)}" alt="">` : m.name[0].toUpperCase()}${m.invited ? '' : `<i class="${m.i === me && S.paused ? 'paused' : ''}"></i>`}</div>`;
   const status = m => {
+    if (m.invited) return 'Invitación enviada por SMS';
     if (m.i === me && S.paused) return 'Ubicación en pausa';
     if (m.route) return `En camino a ${place(m.route[1])?.name || 'Casa'} · ${m.kmh} km/h`;
     return `En ${place(m.at)?.name || 'un lugar'}`;
@@ -346,6 +381,11 @@ if (user && !user.apps.includes('sos')) {
     if (!TABS.includes(t)) t = 'inicio';
     document.querySelectorAll('section[data-tab]').forEach(s => s.classList.toggle('on', s.dataset.tab === t));
     document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.t !== t) a.removeAttribute('aria-current'); else a.setAttribute('aria-current', 'page'); });
+    // regresar: desde Inicio se sale a Mi Navi; desde cualquier otro panel se vuelve al Inicio de SOS
+    const back = $('topBack');
+    if (t === 'inicio') { back.textContent = '← Mi Navi'; back.href = 'cuenta.html'; }
+    else { back.textContent = '← Inicio SOS'; back.href = '#inicio'; }
+    $('cfgBtn').hidden = t === 'red';
     scrollTo(0, 0);
     ({ inicio: renderHome, mapa: renderMap, chat: renderChat, actividad: renderAct, red: renderRed, share: renderShare, acomp: renderAcomp })[t]();
   };
@@ -361,9 +401,11 @@ if (user && !user.apps.includes('sos')) {
     $('pauseSw').setAttribute('aria-checked', !S.paused);
     $('shareTxt').textContent = S.paused ? 'En pausa: tu red te ve como "Ubicación en pausa"' : 'Tu red ve dónde estás';
     $('netCount').textContent = `${members.length} ${members.length === 1 ? 'integrante' : 'integrantes'}`;
-    $('netList').innerHTML = members.map(m => `<div class="row">${avatar(m)}<div style="flex:1;min-width:0"><b>${m.i === me ? m.name + ' (Tú)' : m.name}</b><div class="muted">${status(m)} · ${ago(m.seen)}</div></div>
+    $('netList').innerHTML = members.map(m => m.invited
+      ? `<div class="row">${avatar(m)}<div style="flex:1;min-width:0"><b>${esc(m.name)}</b><div class="muted">${status(m)}</div></div><span class="pill off">Pendiente</span></div>`
+      : `<div class="row">${avatar(m)}<div style="flex:1;min-width:0"><b>${m.i === me ? m.name + ' (Tú)' : m.name}</b><div class="muted">${status(m)} · ${ago(m.seen)}</div></div>
       <span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>`).join('')
-      + (members.length === 1 ? '<p class="muted">Con el Plan Familia, cada línea se suma sola a tu red.</p>' : '');
+      + (BASE === 1 ? '<p class="muted">Con el Plan Familia, cada línea se suma sola a tu red.</p>' : '');
     renderWatch();
   }
   $('pauseSw').addEventListener('click', () => { S.paused = !S.paused; save(); renderHome(); toast(S.paused ? 'Ubicación en pausa' : 'Compartiendo tu ubicación'); });
@@ -395,7 +437,7 @@ if (user && !user.apps.includes('sos')) {
     const where = S.paused ? 'tu última ubicación' : status(members[me]).replace('En ', '');
     S.events.push({ t: Date.now(), txt: `🚨 <b>${members[me].name}</b> activó SOS en ${where}` }); save();
     ov.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div><h2 id="sosTitle">Alerta SOS enviada</h2><p class="muted">${hhmm(Date.now())} · ${where}</p>
-      <div class="list">${members.filter(m => m.i !== me).map(m => `<div><span>${m.name}</span><b>Notificado en la app</b></div>`).join('')}
+      <div class="list">${members.filter(m => m.i !== me).map(m => `<div><span>${esc(m.name)}</span><b>${m.invited ? 'SMS con mapa' : 'Notificado en la app'}</b></div>`).join('')}
       ${S.contacts.map(c => `<div><span>${c.n} · ${fmtPhone(c.tel)}</span><b>SMS con mapa</b></div>`).join('')}</div>
       <p class="muted" style="margin-bottom:14px">Demostración: no se envían mensajes reales.</p>
       <div style="display:grid;gap:10px;justify-items:center"><a class="btn sos911" href="tel:911" style="background:#fff">📞 Llamar al 911</a><button class="btn btn-lime" id="sosOk">Estoy bien, terminar alerta</button></div></div>`;
@@ -416,7 +458,7 @@ if (user && !user.apps.includes('sos')) {
   }
 
   // ---------- MAPA ----------
-  let selM = members.length > 1 ? members.length - 1 : 0, live = false, liveT = null;
+  let selM = BASE > 1 ? BASE - 1 : 0, live = false, liveT = null;
   const posOf = m => {
     if (m.route) {
       const a = place(m.route[0]) || PLACES0[1], b = place(m.route[1]) || PLACES0[0];
@@ -441,18 +483,18 @@ if (user && !user.apps.includes('sos')) {
       g += `<path d="M${P.a.x} ${P.a.y}L${P.b.x} ${P.b.y}" stroke="#B4E32F" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round" opacity="${live ? 1 : .6}"/>`;
       if (live) g += `<g transform="translate(${P.x + 12} ${P.y - 30})"><rect width="128" height="22" rx="11" fill="#fff"/><text x="10" y="15" font-size="11" font-weight="800" fill="#06062E" font-family="DM Sans,sans-serif">${mv.name} → ${P.b.name} · ${Math.max(1, Math.round((1 - P.p) * 12))} min</text></g>`;
     }
-    members.forEach(m => {
-      const P = posOf(m), on = m.i === selM, paused = m.i === me && S.paused;
+    onMap().forEach(m => {
+      const P = posOf(m), on = m.i === selM, paused = m.i === me && S.paused, real = !!Photos.get(m.phone);
       g += `<g class="pin" data-m="${m.i}" transform="translate(${P.x} ${P.y})" opacity="${paused ? .5 : 1}">
         ${on ? '<circle r="24" fill="#B4E32F33"/>' : ''}<circle r="17" fill="#06062E"/><circle r="15" fill="${m.color}"/>
-        <clipPath id="c${m.i}"><circle r="15"/></clipPath><image href="assets/${m.img}.png" x="-15" y="-15" width="30" height="30" clip-path="url(#c${m.i})" preserveAspectRatio="xMidYMin slice"/>
-        ${m.bat <= 15 ? '<circle cx="12" cy="-12" r="6" fill="#FF5A5F"/>' : ''}</g>`;
+        <clipPath id="c${m.i}"><circle r="15"/></clipPath><image href="${pic(m)}" x="-15" y="-15" width="30" height="30" clip-path="url(#c${m.i})" preserveAspectRatio="${real ? 'xMidYMid slice' : 'xMidYMin slice'}"/>
+        ${lowBat(m) ? '<circle cx="12" cy="-12" r="6" fill="#FF5A5F"/>' : ''}</g>`;
     });
     $('map').innerHTML = g;
   }
   function renderMap() {
     drawMap();
-    $('chips').innerHTML = members.map(m => `<button data-m="${m.i}" aria-pressed="${m.i === selM}">${avatar(m, 30)}<span><b>${m.i === me ? 'Tú' : m.name}</b><small>${ago(m.seen)}</small></span></button>`).join('');
+    $('chips').innerHTML = onMap().map(m => `<button data-m="${m.i}" aria-pressed="${m.i === selM}">${avatar(m, 30)}<span><b>${m.i === me ? 'Tú' : m.name}</b><small>${ago(m.seen)}</small></span></button>`).join('');
     const m = members[selM], st = status(m), exp = S.expects[m.i];
     $('memberSheet').innerHTML = `<div class="row">${avatar(m, 48)}<div style="flex:1;min-width:0"><h2 style="margin:0">${m.i === me ? m.name + ' (Tú)' : m.name}</h2>
       <div class="muted">${st} · actualizado ${ago(m.seen)}</div></div><span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>
@@ -494,7 +536,7 @@ if (user && !user.apps.includes('sos')) {
     const items = [...S.chat.map(c => ({ ...c, k: 'msg' })), ...S.events.map(e => ({ ...e, k: 'ev' })),
       { k: 'ev', t: now - 30 * MIN, txt: `🏫 <b>${members[2]?.name || members[0].name}</b> llegó a Escuela` },
       ...(members[3] ? [{ k: 'ev', t: now - 8 * MIN, txt: `🚗 <b>${members[3].name}</b> salió de Escuela rumbo a Casa` }] : []),
-      ...(S.batt && members.some(m => m.bat <= 15) ? [{ k: 'ev', t: now - 5 * MIN, txt: `🔋 <b>${members.find(m => m.bat <= 15).name}</b> tiene batería baja (${members.find(m => m.bat <= 15).bat}%)` }] : []),
+      ...(S.batt && members.some(lowBat) ? [{ k: 'ev', t: now - 5 * MIN, txt: `🔋 <b>${members.find(lowBat).name}</b> tiene batería baja (${members.find(lowBat).bat}%)` }] : []),
     ].sort((a, b) => a.t - b.t);
     $('feed').innerHTML = items.map(it => it.k === 'ev'
       ? `<div class="event"><span>${it.txt} · ${hhmm(it.t)}</span></div>`
@@ -508,7 +550,7 @@ if (user && !user.apps.includes('sos')) {
   const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const week = i => { const r = rng(+members[i].phone.slice(-5) + 11); return DAYS.map((d, k) => k === 3 && i % 2 ? null : Math.round(66 + r() * 32)); };
   function renderAct() {
-    const who = actV === 'recorridos' ? members : adults;
+    const who = actV === 'recorridos' ? onMap() : adults;
     if (!who.some(m => m.i === actW)) actW = who[0]?.i ?? 0;
     document.querySelectorAll('#actSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === actV));
     $('whoSeg').innerHTML = who.map(m => `<button data-w="${m.i}" aria-pressed="${m.i === actW}">${m.i === me ? 'Tú' : m.name}</button>`).join('');
@@ -538,7 +580,7 @@ if (user && !user.apps.includes('sos')) {
     } else {
       const list = [
         ...S.events.slice().reverse().map(e => [e.txt, hhmm(e.t)]),
-        ...(S.batt ? members.filter(x => x.bat <= 15).map(x => [`🔋 <b>${x.name}</b> tiene batería baja (${x.bat}%)`, 'hoy']) : []),
+        ...(S.batt ? members.filter(lowBat).map(x => [`🔋 <b>${x.name}</b> tiene batería baja (${x.bat}%)`, 'hoy']) : []),
         [`🏫 <b>${members[Math.min(2, members.length - 1)].name}</b> llegó a Escuela`, hhmm(now - 30 * MIN)],
         ['🚗 Exceso de velocidad: 68 km/h en Av. Insurgentes', 'mar'],
       ];
@@ -550,14 +592,51 @@ if (user && !user.apps.includes('sos')) {
 
   // ---------- MI RED ----------
   function renderRed() {
+    // integrantes: cambiar personaje por foto real (opcional) y quitar invitados
+    $('people').innerHTML = members.map(m => `<div class="row person">
+      <button class="phbtn" data-ph="${m.i}" aria-label="Cambiar foto de ${esc(m.name)}">${avatar(m, 48)}<span class="cam">📷</span></button>
+      <div style="flex:1;min-width:0"><b>${m.i === me ? esc(m.name) + ' (Tú)' : esc(m.name)}</b>
+        <div class="muted">${m.invited ? `${esc(m.rel)} · ${fmtPhone(m.phone)} · Invitación enviada` : `Línea Navi · ${fmtPhone(m.phone)}`}</div>
+        <div class="row" style="gap:12px;margin-top:4px">
+          <button class="lnk" data-ph="${m.i}">${Photos.get(m.phone) ? 'Cambiar foto' : 'Poner foto real'}</button>
+          ${Photos.get(m.phone) ? `<button class="lnk" data-phdel="${m.i}">Volver al personaje</button>` : ''}
+          ${m.invited ? `<button class="lnk bad" data-rm="${m.i}">Quitar de la red</button>` : ''}
+        </div></div></div>`).join('');
     $('places').innerHTML = S.places.map(p => `<div class="card place" style="background:#ffffff08">
       <div class="hd"><div class="ico">${p.ico}</div><div style="flex:1"><b>${p.name}</b><div class="muted">Zona de aviso: <span data-rv="${p.id}">${p.r * 5} m</span></div></div>${p.custom ? `<button class="sw" data-del="${p.id}" aria-label="Borrar ${p.name}">✕</button>` : ''}</div>
       <input type="range" min="20" max="80" value="${p.r}" data-r="${p.id}" aria-label="Zona de aviso de ${p.name}">
-      <div class="who">${members.map(m => { const a = S.alerts[p.id]?.[m.i] || { arr: false, lev: false }; return `<div class="row">${avatar(m, 28)}<span>${m.i === me ? 'Tú' : m.name}</span>
+      <div class="who">${onMap().map(m => { const a = S.alerts[p.id]?.[m.i] || { arr: false, lev: false }; return `<div class="row">${avatar(m, 28)}<span>${m.i === me ? 'Tú' : m.name}</span>
         <div class="sw"><button data-p="${p.id}" data-mi="${m.i}" data-k="arr" aria-pressed="${a.arr}">Llega</button><button data-p="${p.id}" data-mi="${m.i}" data-k="lev" aria-pressed="${a.lev}">Sale</button></div></div>`; }).join('')}</div></div>`).join('');
     $('contacts').innerHTML = S.contacts.length ? S.contacts.map((c, k) => `<div class="row between"><div><b>${c.n.replace(/</g, '&lt;')}</b><div class="muted">${fmtPhone(c.tel)}</div></div><button class="sw" data-ct="${k}"><span style="font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;border:2px solid #ffffff26">Quitar</span></button></div>`).join('') : '<p class="muted">Aún no tienes contactos de emergencia.</p>';
     $('battSw').setAttribute('aria-checked', S.batt);
   }
+  let phTarget = null;
+  $('people').addEventListener('click', e => {
+    const ph = e.target.closest('[data-ph]'), del = e.target.closest('[data-phdel]'), rm = e.target.closest('[data-rm]');
+    if (ph) { phTarget = members[+ph.dataset.ph]; $('pplPhoto').click(); }
+    if (del) { Photos.set(members[+del.dataset.phdel].phone, null); renderRed(); toast('Volvió el personaje animado'); }
+    if (rm) { const k = +rm.dataset.rm - BASE; const n = S.extra[k].name; S.extra.splice(k, 1); save(); syncExtra(); renderRed(); toast(`${n} ya no está en tu red`); }
+  });
+  $('pplPhoto').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f || !phTarget) return;
+    try {
+      if (!Photos.set(phTarget.phone, await readPhoto(f))) throw new Error('No hay espacio para guardar la foto en este navegador.');
+      renderRed(); toast(`Foto de ${phTarget.name} actualizada`);
+    } catch (err) { toast(err.message); }
+  });
+  $('addPersonBtn').onclick = () => { $('addPerson').hidden = !$('addPerson').hidden; if (!$('addPerson').hidden) $('pName').focus(); };
+  $('addPerson').onsubmit = e => {
+    e.preventDefault();
+    const tel = $('pTel').value.replace(/\D/g, '').slice(-10);
+    if (tel.length !== 10) { toast('Escribe un celular de 10 dígitos'); return; }
+    if (members.some(m => m.phone === tel)) { toast('Ese número ya está en tu red'); return; }
+    const name = $('pName').value.trim();
+    S.extra = [...(S.extra || []), { name, phone: tel, rel: $('pRel').value }];
+    S.events.push({ t: Date.now(), txt: `✉️ Invitaste a <b>${esc(name)}</b> a la red` }); save(); syncExtra();
+    $('addPerson').reset(); $('addPerson').hidden = true; renderRed();
+    toast(`Le enviamos a ${name} una invitación por SMS (demostración)`);
+  };
   $('places').addEventListener('input', e => { const r = e.target.dataset.r; if (r) { const p = place(r); p.r = +e.target.value; document.querySelector(`[data-rv="${r}"]`).textContent = p.r * 5 + ' m'; save(); } });
   $('places').addEventListener('click', e => {
     const b = e.target.closest('[data-k]'), d = e.target.closest('[data-del]');

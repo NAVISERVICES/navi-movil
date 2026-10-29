@@ -167,7 +167,7 @@ if (user) {
     const L = lines[sel], extra = Topups.extra(L.phone), total = L.gb + extra;
     const used = L.gb * DEMO_USED[sel], left = total - used, p = used / total, low = p >= .8;
     $('lines').hidden = !fam;
-    $('lines').innerHTML = lines.map((l, i) => `<button data-i="${i}" aria-pressed="${i === sel}"><img src="assets/${l.img}.png" alt="">${l.name}${pct(i) >= .8 ? '<small>Pocos datos</small>' : ''}</button>`).join('');
+    $('lines').innerHTML = lines.map((l, i) => `<button data-i="${i}" aria-pressed="${i === sel}"><img src="${avatarSrc(l.phone, l.img)}" alt="">${l.name}${pct(i) >= .8 ? '<small>Pocos datos</small>' : ''}</button>`).join('');
     $('idcard').innerHTML = lineCard(user, L);
 
     $('status').classList.toggle('low', low);
