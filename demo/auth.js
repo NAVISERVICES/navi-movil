@@ -8,7 +8,7 @@ const NAVI_APPS = [
   { id: 'recargas', name: 'Recargas',          icon: '⚡', color: '#7EE0FF', desc: '¿Se te acaban los megas? Recarga tu línea en dos toques, sin escribir tu número.', href: 'recargas.html', wide: true },
   { id: 'movil', name: 'Navi Móvil',         icon: '📶', color: '#B4E32F', desc: 'Tu consumo de datos, llamadas y mensajes, recargas y tu equipo.', href: 'movil.html' },
   { id: 'shop',   name: 'Navi Shop',          icon: '🛍️', color: '#FFC22E', desc: 'Precios de miembro y meses sin intereses en equipos.',
-    href: 'https://www.figma.com/proto/gVPCzk4YxUzBBllPbeZhnj/Navi-Repair-Center-%E2%80%93-Sitio-web?node-id=15-474&starting-point-node-id=15-474' },
+    href: 'https://www.navirepaircenter.com/demo/shop/' },
   { id: 'repair', name: 'Navi Repair Center', icon: '🔧', color: '#4FD1C0', desc: 'Diagnóstico gratis y reparaciones con descuento.',
     href: 'https://www.navirepaircenter.com/demo/' },
   { id: 'juegos', name: 'Juegos',             icon: '🎮', color: '#A893FF', desc: 'Ruta Chilanga, Lotería, Trivia Mx y más. Se juegan en el navegador.', href: 'juegos.html' },
