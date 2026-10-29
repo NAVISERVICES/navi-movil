@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css">
-<link rel="stylesheet" href="suite.css">
-<script src="auth.js"></script>
+<link rel="stylesheet" href="navi.css?v=20261029b">
+<link rel="stylesheet" href="suite.css?v=20261029b">
+<script src="auth.js?v=20261029b"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=juegos.html');</script>
 <style>
 .hero{position:relative;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;padding:28px;border-radius:var(--radius);background:linear-gradient(120deg,#7B5CFA,#4B2FD6);overflow:hidden;margin-bottom:26px;box-shadow:10px 10px 0 var(--lime)}
@@ -73,7 +73,7 @@
   </section>
 </main>
 
-<script src="catalog.js"></script>
+<script src="catalog.js?v=20261029b"></script>
 <script>
 const $ = id => document.getElementById(id);
 const basic = NAVI_GAMES.filter(g => g.tier !== 'max'), premium = NAVI_GAMES.filter(g => g.tier === 'max');

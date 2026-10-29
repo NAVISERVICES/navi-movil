@@ -1,5 +1,5 @@
 // service worker: guarda la página para que abra rápido y funcione sin señal
-const CACHE = 'navi-v1';
+const CACHE = 'navi-v2';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'assets/navi-logo.png', 'assets/icon-192.png',
   'assets/sofi.png', 'assets/beto.png', 'assets/chayo.png', 'assets/mama.png', 'assets/tono.png'];
 
@@ -16,7 +16,8 @@ self.addEventListener('activate', e => {
 // red primero (siempre lo más nuevo); si no hay señal, usa la copia guardada
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(fetch(e.request)
+  // no-cache: siempre pregunta al servidor si hay versión nueva (evita mezclar páginas nuevas con archivos viejos)
+  e.respondWith(fetch(e.request, { cache: 'no-cache' })
     .then(r => {
       if (r.ok && new URL(e.request.url).origin === location.origin) {
         const copy = r.clone();
