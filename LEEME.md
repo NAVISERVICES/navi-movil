@@ -11,6 +11,10 @@ Sitio estático (HTML, CSS, JS e imágenes). Se publica tal cual en GitHub Pages
 4. Cuando GitHub verifique el dominio, activa **Enforce HTTPS**.
 
 ## Páginas
+La raíz (`index.html`) muestra "Muy pronto". El sitio completo vive en `demo/` → https://www.navimovil.com/demo/
+(oculto a buscadores con `robots.txt` y `noindex`, pero sin contraseña: quien tenga el enlace puede entrar).
+
+Dentro de `demo/`:
 - `index.html` — página principal (planes, Plan Familia, descarga de la app)
 - `login.html` — acceso Mi Navi con número y código SMS (demo)
 - `cuenta.html` — perfil, equipos y suite de apps
