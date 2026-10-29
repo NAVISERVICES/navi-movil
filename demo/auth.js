@@ -10,7 +10,7 @@ const NAVI_APPS = [
   { id: 'shop',   name: 'Navi Shop',          icon: '🛍️', color: '#FFC22E', desc: 'Precios de miembro y meses sin intereses en equipos.',
     href: 'https://www.figma.com/proto/gVPCzk4YxUzBBllPbeZhnj/Navi-Repair-Center-%E2%80%93-Sitio-web?node-id=15-474&starting-point-node-id=15-474' },
   { id: 'repair', name: 'Navi Repair Center', icon: '🔧', color: '#4FD1C0', desc: 'Diagnóstico gratis y reparaciones con descuento.',
-    href: 'https://www.figma.com/proto/gVPCzk4YxUzBBllPbeZhnj/Navi-Repair-Center-%E2%80%93-Sitio-web?node-id=1-131&starting-point-node-id=1-131' },
+    href: 'https://www.navirepaircenter.com/demo/' },
   { id: 'juegos', name: 'Juegos',             icon: '🎮', color: '#A893FF', desc: 'Ruta Chilanga, Lotería, Trivia Mx y más. Se juegan en el navegador.', href: 'juegos.html' },
   { id: 'videos', name: 'Videos',             icon: '▶️', color: '#FF9A6B', desc: 'Canales NAVI y cuentos animados para toda la familia.', href: 'videos.html' },
   { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
