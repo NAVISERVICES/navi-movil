@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navi Móvil · Plan Familia</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Navi">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B0B4F; --navy-2:#15156E; --navy-3:#1E1E8A; --ink:#06062E;
+  --lime:#B4E32F; --lime-2:#D4F56B;
+  --lav:#E9E5FF; --purple:#7B5CFA; --blue:#3B8FE8; --coral:#F2784B;
+  --teal:#1FA59A; --yellow:#FFC22E; --pink:#FF6FB1;
+  --text:#F4F3FF; --muted:#B9B7E6;
+  --radius:28px;
+  --display:"Bricolage Grotesque", system-ui, sans-serif;
+  --body:"DM Sans", system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--text);font-family:var(--body);line-height:1.5;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.wrap{width:min(1200px,100% - 32px);margin-inline:auto}
+h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.02em}
+
+/* ---------- top bars ---------- */
+.sections{background:var(--ink);font-size:12px;color:var(--muted)}
+.sections .wrap{display:flex;justify-content:space-between;align-items:center;height:34px;gap:12px}
+.sections nav{display:flex;gap:6px}
+.sections nav a{padding:4px 10px;border-radius:99px;white-space:nowrap}
+.sections nav a.on{background:var(--lime);color:var(--ink);font-weight:700}
+header.main{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--navy) 78%,transparent);border-bottom:1px solid #ffffff14}
+header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo img{height:42px;width:auto;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.logo:hover img{transform:rotate(-4deg) scale(1.06)}
+.logo small{font-size:11px;font-weight:700;letter-spacing:.18em;padding-left:12px;border-left:1px solid #ffffff40;color:#fff}
+.links{display:flex;gap:22px;font-size:14px;margin-left:auto;color:var(--muted)}
+.links a:hover{color:var(--lime)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:99px;font-weight:700;font-size:15px;transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s}
+.btn:hover{transform:translateY(-3px) rotate(-1.5deg)}
+.btn:active{transform:scale(.96)}
+.btn-lime{background:var(--lime);color:var(--ink);box-shadow:0 6px 0 #7FA312}
+.btn-lime:hover{box-shadow:0 9px 0 #7FA312}
+.btn-ghost{border:2px solid #ffffff50}
+.btn-ghost:hover{border-color:var(--lime);color:var(--lime)}
+.btn-ink{background:var(--ink);color:#fff;box-shadow:0 6px 0 #000}
+.btn.sm{padding:10px 18px;font-size:14px}
+.menu-btn{display:none}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;padding:72px 0 120px}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+.b1{width:520px;height:520px;background:var(--purple);top:-160px;left:-120px}
+.b2{width:420px;height:420px;background:var(--blue);bottom:-180px;left:35%;animation-delay:-6s}
+.b3{width:360px;height:360px;background:var(--pink);top:10%;right:-120px;opacity:.35;animation-delay:-12s}
+@keyframes drift{to{transform:translate(80px,60px) scale(1.15)}}
+.sparkle{position:absolute;color:var(--lime);font-size:22px;animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.6) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(90deg)}}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;background:#ffffff14;border:1px solid #ffffff22;font-size:13px;font-weight:500}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 0 var(--lime);animation:ping 1.8s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 10px #b4e32f00}100%{box-shadow:0 0 0 0 #b4e32f00}}
+.hero h1{font-size:clamp(44px,6.4vw,84px);margin:22px 0 22px}
+.rotator{display:inline-grid;color:var(--lime);position:relative}
+.rotator span{grid-area:1/1;opacity:0;transform:translateY(60%) rotate(4deg);transition:all .55s cubic-bezier(.3,1.4,.5,1)}
+.rotator span.on{opacity:1;transform:none}
+.rotator span.out{opacity:0;transform:translateY(-60%) rotate(-4deg)}
+.rotator{padding-bottom:.12em}
+.squiggle{position:absolute;left:0;bottom:-.1em;width:100%;height:14px}
+.links a{white-space:nowrap}
+@media (max-width:1180px){.links{display:none}.header-cta{margin-left:auto}}
+.squiggle path{stroke:var(--pink);stroke-width:5;fill:none;stroke-linecap:round;stroke-dasharray:400;stroke-dashoffset:400;animation:draw 1.4s .6s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:520px}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin:32px 0 26px}
+.checks{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:14px;color:var(--muted)}
+.checks span::before{content:"✓";color:var(--lime);font-weight:700;margin-right:6px}
+
+.stage{position:relative;aspect-ratio:1/1;max-width:560px;justify-self:center;width:100%}
+.sun{position:absolute;inset:14% 8% 0;border-radius:50% 50% 0 0;background:radial-gradient(circle at 50% 35%,var(--lime-2),var(--lime) 60%);overflow:hidden}
+.sun::before{content:"";position:absolute;inset:-50%;background:repeating-conic-gradient(#ffffff26 0 8deg,transparent 8deg 20deg);animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+.orbit{position:absolute;inset:4%;border:2px dashed #ffffff30;border-radius:50%;animation:spin 60s linear infinite}
+.family{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end}
+.family img{min-width:0;margin:0 -6%;cursor:pointer;transform-origin:bottom center;animation:bob 3.2s ease-in-out infinite;transition:filter .2s}
+.family img:nth-child(1){animation-delay:-.4s;width:28%}
+.family img:nth-child(2){animation-delay:-1.1s;width:25%;z-index:2}
+.family img:nth-child(3){animation-delay:-1.8s;width:34%;z-index:1}
+.family img:nth-child(4){animation-delay:-2.4s;width:28%;z-index:2}
+.family img:nth-child(5){animation-delay:-.8s;width:31%}
+.family img:hover,.family img.hop{animation:hop .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bob{50%{transform:translateY(-8px) rotate(1deg)}}
+@keyframes hop{30%{transform:translateY(-40px) scale(1.05,0.95) rotate(-4deg)}60%{transform:translateY(0) scale(.95,1.05)}}
+.float-card{position:absolute;background:#fff;color:var(--ink);border-radius:18px;padding:14px 16px;box-shadow:0 20px 40px #0006;animation:floaty 5s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-12px) rotate(-1deg)}}
+.gb-card{top:2%;left:-4%;width:230px}
+.gb-card small{font-size:10px;letter-spacing:.12em;font-weight:700;color:#5b5b8a}
+.gb-card strong{display:block;font-family:var(--display);font-size:22px;margin:2px 0 10px}
+.share{display:flex;gap:4px;height:8px}
+.share i{border-radius:9px;transition:flex .8s cubic-bezier(.3,1.4,.5,1)}
+.mini-stairs{display:flex;align-items:flex-end;gap:4px;height:30px}
+.mini-stairs i{flex:1;border-radius:4px;background:#e4e2f5;transition:background .4s}
+.mini-stairs i:nth-child(1){height:40%}.mini-stairs i:nth-child(2){height:70%}.mini-stairs i:nth-child(3){height:100%}
+.mini-stairs i.on{background:var(--lime)}
+.who{display:flex;justify-content:space-between;font-size:10px;color:#6c6c99;margin-top:6px}
+.toast{top:30%;right:-6%;display:flex;gap:10px;align-items:center;font-size:13px;min-width:210px;animation-delay:-2s}
+.toast .ic{width:32px;height:32px;border-radius:10px;background:#e8f8c6;display:grid;place-items:center;font-size:16px}
+.toast b{display:block;font-size:13px}
+.toast em{font-style:normal;font-size:11px;color:#6c6c99}
+.toast .msg{transition:opacity .3s,transform .3s}
+.toast .msg.swap{opacity:0;transform:translateY(6px)}
+
+/* ---------- marquee ---------- */
+.marquee{background:var(--lime);color:var(--ink);transform:rotate(-2deg);margin:-40px -20px 0;position:relative;z-index:3;overflow:hidden;box-shadow:0 10px 0 var(--purple)}
+.marquee .track{display:flex;gap:40px;padding:18px 0;width:max-content;animation:slide 28s linear infinite;font-family:var(--display);font-weight:800;font-size:26px;white-space:nowrap}
+.marquee .track span::after{content:"✦";margin-left:40px;color:var(--purple)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* ---------- sections ---------- */
+section{position:relative}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+.sec-head{max-width:640px;margin-bottom:48px}
+.sec-head h2{font-size:clamp(34px,4.6vw,58px);margin:10px 0 14px}
+.sec-head p{color:var(--muted);font-size:17px}
+
+.stages{padding:140px 0 120px;background:linear-gradient(180deg,var(--navy) 0%,#221470 100%)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.card{border-radius:var(--radius);padding:18px;color:var(--ink);transform-style:preserve-3d;transition:transform .2s ease-out;position:relative;overflow:hidden}
+.card .art{border-radius:20px;height:210px;display:flex;justify-content:center;align-items:flex-end;position:relative;overflow:hidden}
+.card .art::before{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:#ffffff55;bottom:-30px;transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+.card:hover .art::before{transform:scale(1.5)}
+.card .art img{height:180px;width:auto;position:relative;transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+.card .art img+img{margin-left:-40px}
+.card:hover .art img{transform:translateY(-10px) rotate(-3deg)}
+.card:hover .art img+img{transform:translateY(-14px) rotate(4deg)}
+.card .tag{display:inline-block;margin:18px 0 8px;font-size:11px;font-weight:700;letter-spacing:.14em;padding:4px 10px;border-radius:99px;background:#ffffff80}
+.card h3{font-size:22px;margin-bottom:8px}
+.card p{font-size:14px;opacity:.8}
+.c-yellow{background:var(--yellow)} .c-yellow .art{background:#FFE08A}
+.c-purple{background:#A893FF} .c-purple .art{background:#CBBEFF}
+.c-teal{background:#4FD1C0} .c-teal .art{background:#A6EDE3}
+.c-coral{background:#FF9E7A} .c-coral .art{background:#FFCDB8}
+
+/* ---------- planes individuales ---------- */
+.solo{padding:110px 0 130px;background:linear-gradient(180deg,#221470 0%,var(--navy) 100%);overflow:hidden}
+.solo .top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;margin-bottom:44px}
+.solo .sec-head{margin-bottom:0}
+.periods{position:relative;display:flex;background:#ffffff12;border:1px solid #ffffff22;border-radius:99px;padding:6px}
+.periods button{position:relative;z-index:1;padding:12px 22px;border-radius:99px;font-weight:700;font-size:15px;color:var(--muted);transition:color .25s}
+.periods button.on{color:var(--ink)}
+.periods .ind{position:absolute;top:6px;bottom:6px;border-radius:99px;background:var(--lime);box-shadow:0 4px 0 #7FA312;transition:left .45s cubic-bezier(.3,1.4,.5,1),width .45s cubic-bezier(.3,1.4,.5,1)}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.pcard{position:relative;border-radius:var(--radius);padding:26px 24px 24px;color:var(--ink);display:flex;flex-direction:column;min-height:400px;transition:transform .3s cubic-bezier(.3,1.6,.5,1),filter .3s,opacity .3s;overflow:hidden}
+.pcard:hover{transform:translateY(-8px) rotate(-1deg)}
+.pcard::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:#ffffff40;right:-80px;top:-80px;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.pcard:hover::after{transform:scale(1.3)}
+.pcard .gb{font-family:var(--display);font-weight:800;font-size:76px;line-height:.9;letter-spacing:-.04em;position:relative;z-index:1}
+.pcard .gb small{font-size:28px;margin-left:4px}
+.pcard .kind{font-size:12px;font-weight:700;letter-spacing:.14em;margin:10px 0 22px;opacity:.75}
+.pcard .price{font-family:var(--display);font-weight:800;font-size:40px;line-height:1}
+.pcard .price sup{font-size:16px;vertical-align:top;margin-right:2px;position:relative;top:6px}
+.pcard .per{font-size:14px;font-weight:500;opacity:.75;margin-top:6px}
+.pcard .eq{margin-top:14px;font-size:13px;line-height:1.4;background:#ffffff70;border-radius:14px;padding:10px 12px}
+.pcard .eq b{display:block}
+.pcard ul{list-style:none;margin:18px 0 22px;display:grid;gap:6px;font-size:14px}
+.pcard li::before{content:"✓";font-weight:800;margin-right:8px}
+.pcard .go{margin-top:auto;justify-content:center;width:100%}
+.pcard .badge-save{position:absolute;top:18px;right:18px;z-index:2;background:var(--ink);color:var(--lime);font-size:12px;font-weight:700;padding:6px 10px;border-radius:99px;transform:rotate(6deg);animation:wiggle 2.4s ease-in-out infinite}
+@keyframes wiggle{50%{transform:rotate(-4deg) scale(1.06)}}
+.pcard.off{filter:saturate(.25);opacity:.55}
+.pcard.off:hover{transform:none}
+.pcard .na{margin-top:auto;font-size:14px}
+.pcard .na button{display:block;margin-top:10px;text-decoration:underline;font-weight:700}
+.pcard.swap .price,.pcard.swap .per,.pcard.swap .eq{animation:pricePop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pricePop{from{opacity:0;transform:translateY(14px) scale(.9)}}
+.p-yellow{background:var(--yellow)} .p-teal{background:#4FD1C0} .p-purple{background:#A893FF} .p-coral{background:#FF9E7A}
+.solo .note{margin-top:22px;font-size:13px;color:var(--muted)}
+
+/* ---------- builder ---------- */
+.family-plan{padding:120px 0;background:var(--purple);overflow:hidden}
+.family-plan::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff30 2px,transparent 2px);background-size:28px 28px;mask-image:linear-gradient(90deg,#000,transparent 60%)}
+.family-plan .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;position:relative}
+.family-plan .eyebrow{color:var(--lime-2)}
+.family-plan h2{font-size:clamp(32px,4vw,52px);margin:10px 0 26px}
+/* familia unida */
+.hug{position:relative;height:230px;margin:0 0 30px;border-radius:28px;background:linear-gradient(180deg,#ffffff14,#ffffff05);border:2px solid #ffffff22;overflow:hidden}
+.hug::before{content:"";position:absolute;left:50%;bottom:-150px;width:360px;height:300px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 50% 30%,var(--lime-2),var(--lime) 65%)}
+.hug .heart{position:absolute;left:50%;top:14px;transform:translateX(-50%);font-size:30px;animation:beat 1.4s ease-in-out infinite;z-index:2}
+@keyframes beat{0%,100%{transform:translateX(-50%) scale(1)}15%{transform:translateX(-50%) scale(1.25)}30%{transform:translateX(-50%) scale(1)}45%{transform:translateX(-50%) scale(1.15)}}
+.hug .row{position:absolute;inset:auto 0 0;display:flex;justify-content:center;align-items:flex-end}
+.hug .who{position:relative;margin:0 -16px;cursor:pointer;transition:transform .5s cubic-bezier(.3,1.6,.5,1),filter .5s,opacity .5s;transform-origin:50% 100%}
+.hug .who img{display:block;height:170px;width:auto}
+.hug .who:nth-child(2) img{height:186px}
+.hug .who span{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;z-index:2}
+.hug .who.out{filter:grayscale(1) brightness(.6);opacity:.35;transform:translateY(24px) scale(.88)}
+.hug .who.out span{background:#ffffff30}
+.hug .who.out span::before{content:"+ "}
+.hug .who.in:hover{transform:translateY(-8px) rotate(-3deg)}
+.hug .who.join{animation:join .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes join{0%{transform:translateY(30px) scale(.8)}60%{transform:translateY(-14px) scale(1.06)}100%{transform:none}}
+.hug .tag{position:absolute;top:16px;right:16px;background:var(--ink);color:var(--lime);font-weight:800;font-size:13px;padding:6px 12px;border-radius:99px;transform:rotate(5deg);z-index:2}
+.hug .tag.pop{animation:wiggle .6s}
+.ticks{list-style:none;display:grid;gap:14px}
+.ticks li{display:flex;gap:12px;align-items:flex-start;font-size:16px}
+.ticks li::before{content:"✓";flex:none;width:26px;height:26px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-weight:800;font-size:14px}
+.builder{background:var(--ink);border-radius:32px;padding:30px;box-shadow:16px 16px 0 var(--lime);transform:rotate(1.5deg);transition:transform .4s}
+.builder:hover{transform:rotate(0)}
+.builder h3{font-size:28px;margin-bottom:22px}
+.builder label{display:block;font-size:13px;color:var(--muted);margin:18px 0 10px}
+.opts{display:flex;gap:10px}
+.opts button{flex:1;height:52px;border-radius:16px;border:2px solid #ffffff25;font-weight:700;font-size:17px;transition:all .25s cubic-bezier(.3,1.6,.5,1)}
+.opts button:hover{border-color:var(--lime);transform:translateY(-3px)}
+.opts button.on{background:var(--lime);color:var(--ink);border-color:var(--lime);transform:scale(1.08)}
+.opts.sm button{height:42px;font-size:13px;border-radius:12px}
+.opts.sm button.on{transform:scale(1.04)}
+@keyframes pop{from{transform:scale(0) translateY(30px)}}
+.stairs{display:flex;align-items:flex-end;gap:10px;margin-top:36px;height:190px}
+.stairs button{flex:1;border-radius:16px 16px 6px 6px;background:#ffffff1f;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:10px 4px;transition:all .4s cubic-bezier(.3,1.6,.5,1)}
+.stairs button:nth-child(1){height:46%}.stairs button:nth-child(2){height:73%}.stairs button:nth-child(3){height:100%}
+.stairs b{font-family:var(--display);font-size:22px;line-height:1}
+.stairs span{font-size:11px;opacity:.8;margin-top:4px}
+.stairs button.lit{background:#ffffff40}
+.stairs button.on{background:var(--lime);color:var(--ink);transform:translateY(-8px);box-shadow:0 8px 0 #7FA312}
+.members{display:grid;gap:8px}
+.member{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;background:#ffffff0d;border-radius:16px;padding:8px 10px;animation:pop .45s cubic-bezier(.3,1.6,.5,1) both}
+.member .av{width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--lav)}
+.member .av img{width:100%;transform:scale(1.9);transform-origin:50% 22%}
+.member .av.add{display:grid;place-items:center;background:var(--lime);color:var(--ink);font-weight:800}
+.member .nm{font-size:14px;font-weight:700;line-height:1.2}
+.member .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.chips{display:flex;gap:4px}
+.chips button{padding:7px 9px;border-radius:10px;border:2px solid #ffffff25;font-size:12px;font-weight:700;transition:all .2s}
+.chips button:hover:not(:disabled){border-color:var(--lime)}
+.chips button.on{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.chips button:disabled{opacity:.25;cursor:not-allowed}
+.summary.fam{flex-wrap:wrap;gap:14px;align-items:flex-end}
+.summary.fam .rows{display:grid;gap:4px;font-size:13px;color:var(--muted);min-width:170px}
+.summary.fam .rows div{display:flex;justify-content:space-between;gap:16px}
+.summary.fam .disc{color:var(--lime);font-weight:700}
+.summary.fam .tot{text-align:right;margin-left:auto}
+.summary.fam .tot strong{display:block;margin:0;font-size:32px}
+.summary.fam .tot small{font-size:12px}
+.bump{animation:bump .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bump{40%{transform:scale(1.15)}}
+@keyframes pop{from{transform:scale(0) translateY(30px)}}
+.summary{display:flex;justify-content:space-between;align-items:center;background:#ffffff10;border-radius:18px;padding:16px 18px;margin:16px 0 18px}
+.summary small{color:var(--muted);font-size:12px;display:block}
+.summary strong{font-family:var(--display);font-size:26px;color:var(--lime);white-space:nowrap;margin-left:12px}
+.builder .btn{width:100%;justify-content:center}
+
+/* ---------- tranquility ---------- */
+.calm{padding:130px 0;background:radial-gradient(ellipse at 20% 50%,#26208f 0%,var(--navy) 60%)}
+.calm .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.map{position:relative;aspect-ratio:1/1;border-radius:36px;background:#12125f;overflow:hidden;border:1px solid #ffffff1a}
+.map::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(#ffffff0c 1px,transparent 1px) 0 0/40px 40px,
+  linear-gradient(90deg,#ffffff0c 1px,transparent 1px) 0 0/40px 40px}
+.road{position:absolute;background:#ffffff12;border-radius:20px}
+.radar{position:absolute;left:50%;top:50%;width:0;height:0}
+.radar i{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;border:2px solid var(--lime);transform:translate(-50%,-50%);animation:radar 3.6s ease-out infinite}
+.radar i:nth-child(2){animation-delay:1.2s}.radar i:nth-child(3){animation-delay:2.4s}
+@keyframes radar{from{width:12px;height:12px;opacity:1}to{width:640px;height:640px;opacity:0}}
+.zone{position:absolute;border-radius:50%;border:2px dashed;display:grid;place-items:center;font-size:11px;font-weight:700}
+.z-home{left:8%;top:12%;width:30%;aspect-ratio:1;border-color:var(--lime);color:var(--lime);background:#b4e32f14}
+.z-school{right:8%;bottom:10%;width:34%;aspect-ratio:1;border-color:var(--pink);color:var(--pink);background:#ff6fb114}
+.pin{position:absolute;width:62px;height:62px;border-radius:50%;background:#fff;border:4px solid var(--lime);overflow:hidden;box-shadow:0 8px 20px #0007;transition:left 2.2s cubic-bezier(.6,0,.3,1),top 2.2s cubic-bezier(.6,0,.3,1)}
+.pin img{width:100%;height:auto;margin-top:2px;transform:scale(1.5);transform-origin:top center}
+.pin.p2{border-color:var(--pink)}
+.notif{position:absolute;left:50%;top:6%;transform:translate(-50%,-20px);background:#fff;color:var(--ink);padding:10px 14px;border-radius:14px;font-size:13px;font-weight:700;opacity:0;transition:all .4s cubic-bezier(.3,1.6,.5,1);white-space:nowrap;box-shadow:0 10px 30px #0006}
+.notif.show{opacity:1;transform:translate(-50%,0)}
+.sos{position:absolute;right:6%;top:6%;width:64px;height:64px;border-radius:50%;background:#FF4D6D;color:#fff;font-weight:800;font-family:var(--display);display:grid;place-items:center;box-shadow:0 0 0 0 #ff4d6d;animation:sos 2s infinite}
+@keyframes sos{70%{box-shadow:0 0 0 18px #ff4d6d00}}
+.calm .badge{display:inline-block;background:#FF4D6D22;color:#FF8FA3;border:1px solid #FF4D6D55;padding:6px 12px;border-radius:99px;font-size:13px;font-weight:700}
+.calm h2{font-size:clamp(32px,4vw,52px);margin:16px 0 28px}
+.feat{display:flex;gap:16px;padding:16px;border-radius:20px;transition:background .25s;margin-bottom:6px}
+.feat:hover{background:#ffffff0d}
+.feat .ico{flex:none;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:22px}
+.feat b{display:block;font-size:17px}
+.feat span{color:var(--muted);font-size:14px}
+
+/* ---------- switch ---------- */
+.switch{padding:120px 0 140px;background:var(--lime);color:var(--ink);overflow:hidden}
+.switch .eyebrow{color:var(--purple)}
+.switch .sec-head p{color:#33334f}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
+.steps::before{content:"";position:absolute;top:58px;left:10%;right:10%;border-top:4px dashed var(--ink);opacity:.25}
+.step{background:#fff;border-radius:var(--radius);padding:30px;position:relative;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s}
+.step:hover{transform:translate(-4px,-4px) rotate(-1deg);box-shadow:12px 12px 0 var(--ink)}
+.step .num{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:30px;margin-bottom:20px;border:3px solid var(--ink)}
+.step h3{font-size:24px;margin-bottom:8px}
+.step p{color:#45455f}
+.switch .peek{position:absolute;right:4%;bottom:-20px;width:170px;animation:peek 4s ease-in-out infinite}
+@keyframes peek{0%,100%{transform:translateY(60%)}40%,70%{transform:translateY(0) rotate(-6deg)}}
+
+/* ---------- final cta + footer ---------- */
+.final{padding:110px 0;text-align:center;background:var(--navy);overflow:hidden}
+.final h2{font-size:clamp(36px,5.5vw,72px);max-width:900px;margin:0 auto 30px}
+.final h2 em{font-style:normal;color:var(--lime)}
+.final .faces{display:flex;justify-content:center;margin-bottom:24px}
+.final .faces img{width:84px;margin:0 -10px;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.final .faces img:hover{transform:translateY(-14px) scale(1.15)}
+/* botones de tienda */
+.stores{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.store{display:inline-flex;align-items:center;gap:10px;padding:10px 18px 10px 14px;border-radius:14px;background:#000;color:#fff;border:2px solid #ffffff40;text-align:left;transition:transform .25s cubic-bezier(.3,1.6,.5,1),border-color .25s}
+.store:hover{transform:translateY(-4px) rotate(-1deg);border-color:var(--lime)}
+.store svg{width:26px;height:26px;flex:none}
+.store small{display:block;font-size:11px;opacity:.8;line-height:1.1}
+.store b{display:block;font-family:var(--display);font-size:19px;line-height:1.1}
+.store.soon{opacity:.55;cursor:default;position:relative}
+.store.soon:hover{transform:none;border-color:#ffffff40}
+.store.soon::after{content:"Próximamente";position:absolute;top:-9px;right:-8px;background:var(--lime);color:var(--ink);font-size:10px;font-weight:800;padding:3px 7px;border-radius:99px;transform:rotate(6deg)}
+.store.install{background:var(--lime);color:var(--ink);border-color:var(--lime);box-shadow:0 5px 0 #7FA312}
+.store.install .ico{font-size:24px;line-height:1}
+/* hoja con instrucciones para instalar */
+.sheet{position:fixed;inset:0;z-index:120;display:grid;place-items:end center;background:#06062ecc;opacity:0;pointer-events:none;transition:opacity .3s}
+.sheet.open{opacity:1;pointer-events:auto}
+.sheet .box{width:min(440px,100%);background:#fff;color:var(--ink);border-radius:28px 28px 0 0;padding:28px 24px 34px;transform:translateY(40px);transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+.sheet.open .box{transform:none}
+@media (min-width:700px){.sheet{place-items:center}.sheet .box{border-radius:28px}}
+.sheet .box img{width:64px;height:64px;border-radius:16px;margin-bottom:12px}
+.sheet h3{font-family:var(--display);font-size:24px;margin-bottom:6px}
+.sheet p{color:#555;font-size:14px}
+.sheet ol{margin:18px 0 22px;padding-left:22px;display:grid;gap:10px;font-size:15px}
+.sheet ol b{background:#eef0ff;padding:2px 8px;border-radius:8px}
+.sheet .btn{width:100%;justify-content:center}
+.final .stores{margin-top:26px}
+.final .app-note{margin-top:12px;font-size:13px;color:var(--muted)}
+.calm .stores{justify-content:flex-start;margin-top:14px}
+footer{background:var(--ink);padding:70px 0 30px;color:var(--muted);font-size:14px}
+footer .grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+footer h4{color:#fff;font-size:14px;margin-bottom:14px}
+footer ul{list-style:none;display:grid;gap:8px}
+footer a:hover{color:var(--lime)}
+footer .copy{border-top:1px solid #ffffff15;margin-top:50px;padding-top:24px;font-size:12px}
+
+html,body{overflow-x:clip} /* la cinta inclinada no debe crear scroll lateral */
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s cubic-bezier(.2,1,.3,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  .links,.header-cta .long{display:none}
+  .hero .wrap,.family-plan .wrap,.calm .wrap{grid-template-columns:1fr}
+  .cards,.pgrid{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:1fr}
+  .steps::before{display:none}
+  footer .grid{grid-template-columns:1fr 1fr}
+  .toast{right:0}.gb-card{left:0}
+  .header-cta{margin-left:auto}
+}
+@media (max-width:560px){
+  .sections nav a:not(.on){display:none}
+  .cards,.pgrid{grid-template-columns:1fr}
+  .pcard{min-height:0}
+  .periods{width:100%}.periods button{flex:1;padding:11px 4px;font-size:13px}
+  .opts{gap:6px}.opts button{height:46px;font-size:15px}
+  .gb-card{width:190px;padding:10px 12px}.gb-card strong{font-size:18px}
+  .toast{min-width:0;top:22%}
+  .builder{padding:22px;box-shadow:8px 8px 0 var(--lime)}
+  .member{grid-template-columns:40px 1fr;row-gap:8px}
+  .member .chips{grid-column:1/-1}
+  .chips button{flex:1}
+  .stairs{height:150px;gap:6px}.stairs b{font-size:17px}
+  .header-cta{gap:6px!important}.header-cta .btn{padding:9px 12px;font-size:13px;white-space:nowrap}
+  .hug{height:190px}.hug .who{margin:0 -20px}.hug .who img{height:130px}.hug .who:nth-child(2) img{height:142px}
+  .switch .peek{display:none}
+  .marquee .track{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+  .rotator span.on{opacity:1}
+}
+</style>
+</head>
+<body>
+
+<div class="sections">
+  <div class="wrap">
+    <span>Todo Navi</span>
+    <nav><a class="on" href="#">Navi Móvil · estás aquí</a><a href="https://www.figma.com/proto/gVPCzk4YxUzBBllPbeZhnj/Navi-Repair-Center-%E2%80%93-Sitio-web?node-id=1-131&amp;starting-point-node-id=1-131" target="_blank" rel="noopener">Navi Repair Center →</a><a href="https://www.figma.com/proto/gVPCzk4YxUzBBllPbeZhnj/Navi-Repair-Center-%E2%80%93-Sitio-web?node-id=15-474&amp;starting-point-node-id=15-474" target="_blank" rel="noopener">Navi Shop →</a><a href="https://navi-store.netlify.app/" target="_blank" rel="noopener">NAVI Store →</a></nav>
+  </div>
+</div>
+
+<header class="main">
+  <div class="wrap">
+    <a class="logo" href="#"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <nav class="links">
+      <a href="#plan">Plan Familia</a><a href="#individuales">Planes individuales</a><a href="#tranquilidad">Tranquilidad</a><a href="recargas.html">Recargas</a><a href="#">Cobertura</a><a href="#">Ayuda</a>
+    </nav>
+    <div class="header-cta" style="display:flex;gap:10px">
+      <a class="btn btn-ghost sm" href="login.html" id="account">👤 <span class="long">Mi Navi</span></a>
+      <a class="btn btn-ghost sm" href="#app" id="getApp">📲 <span class="long">Descarga la </span>App</a>
+      <a class="btn btn-lime sm" href="#plan">Compra tu SIM</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <span class="sparkle" style="top:12%;left:46%">✦</span>
+  <span class="sparkle" style="top:70%;left:4%;animation-delay:-1s">✦</span>
+  <span class="sparkle" style="top:84%;left:52%;animation-delay:-2s;color:var(--pink)">✦</span>
+  <div class="wrap">
+    <div>
+      <span class="pill"><i></i>Operador móvil para familias</span>
+      <h1>Toda tu familia,<br>
+        <span class="rotator" id="rotator"><span class="on">conectada</span><span>cerca</span><span>tranquila</span><span>feliz</span><svg class="squiggle" viewBox="0 0 300 14" preserveAspectRatio="none"><path d="M3 8 Q 25 0 50 8 T 100 8 T 150 8 T 200 8 T 250 8 T 297 8"/></svg></span><br>
+        y sin contratos.
+      </h1>
+      <p class="lead">Un plan para cada quien en casa, una sola cuenta y la tranquilidad de saber que todos están bien. Te cambias con tu mismo número.</p>
+      <div class="cta-row">
+        <a class="btn btn-lime" href="#plan">Arma tu Plan Familia →</a>
+        <a class="btn btn-ghost" href="#cambiate">Cámbiate con tu número</a>
+      </div>
+      <div class="checks"><span>Hasta 15% de descuento familiar</span><span>Una sola recarga</span><span>Ubicación y botón SOS</span></div>
+    </div>
+
+    <div class="stage">
+      <div class="orbit"></div>
+      <div class="sun"></div>
+      <div class="family" id="family">
+        <img src="assets/chayo.png" alt="Abuela Chayo">
+        <img src="assets/tono.png" alt="Toño">
+        <img src="assets/beto.png" alt="Papá Beto">
+        <img src="assets/sofi.png" alt="Sofi">
+        <img src="assets/mama.png" alt="Mamá">
+      </div>
+      <div class="float-card gb-card">
+        <small>PLAN FAMILIA · 4 LÍNEAS</small>
+        <strong id="heroDisc">-15% de descuento</strong>
+        <div class="mini-stairs" id="heroStairs"><i></i><i></i><i></i></div>
+        <div class="who"><span>2 líneas</span><span>3 líneas</span><span>4 líneas</span></div>
+      </div>
+      <div class="float-card toast">
+        <div class="ic" id="toastIc">🏫</div>
+        <div class="msg" id="toastMsg"><b>Sofi llegó a la escuela</b><em>Hace 2 min</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Conserva tu número</span>
+    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Conserva tu número</span>
+  </div>
+</div>
+
+<!-- ETAPAS -->
+<section class="stages" id="etapas">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Para cada quien en casa</span>
+      <h2>Un plan para cada etapa de tu familia</h2>
+      <p>Cada línea con lo que necesita, todas en una sola cuenta que administras desde la app.</p>
+    </div>
+    <div class="cards">
+      <article class="card c-yellow reveal tilt">
+        <div class="art"><img src="assets/tono.png" alt=""></div>
+        <span class="tag">NIÑOS</span>
+        <h3>Su primer celular, seguro</h3>
+        <p>Control de apps y horarios, llamadas solo a contactos de la familia y ubicación en tiempo real.</p>
+      </article>
+      <article class="card c-purple reveal tilt" style="transition-delay:.08s">
+        <div class="art"><img src="assets/sofi.png" alt=""></div>
+        <span class="tag">ADOLESCENTES</span>
+        <h3>Redes sin gastar sus datos</h3>
+        <p>WhatsApp, TikTok e Instagram ilimitados, y avisos cuando llegan a casa o a la escuela.</p>
+      </article>
+      <article class="card c-teal reveal tilt" style="transition-delay:.16s">
+        <div class="art"><img src="assets/mama.png" alt=""><img src="assets/beto.png" alt=""></div>
+        <span class="tag">MAMÁ Y PAPÁ</span>
+        <h3>Trabajo y casa sin cortes</h3>
+        <p>Más datos, internet para compartir y una sola recarga para todas las líneas.</p>
+      </article>
+      <article class="card c-coral reveal tilt" style="transition-delay:.24s">
+        <div class="art"><img src="assets/chayo.png" alt=""></div>
+        <span class="tag">ABUELOS</span>
+        <h3>Fácil y siempre cerca</h3>
+        <p>Llamadas ilimitadas a México, EE. UU. y Canadá, y un botón SOS que avisa a toda la familia.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PLANES INDIVIDUALES -->
+<section class="solo" id="individuales">
+  <div class="wrap">
+    <div class="top">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Planes individuales</span>
+        <h2>Elige tus GB y cada cuánto pagas</h2>
+        <p>Paga mes a mes o adelanta varios meses y ahorra. Sin contratos.</p>
+      </div>
+      <div class="periods reveal" id="periods" role="tablist">
+        <span class="ind" id="periodInd"></span>
+        <button role="tab" data-p="m" class="on">Mensual</button>
+        <button role="tab" data-p="t">Trimestral</button>
+        <button role="tab" data-p="s">Semestral</button>
+        <button role="tab" data-p="a">Anual</button>
+      </div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+    <p class="note">Precios en pesos mexicanos (MXN).</p>
+  </div>
+</section>
+
+<!-- PLAN FAMILIA -->
+<section class="family-plan" id="plan">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow">Plan Familia</span>
+      <h2>Entre más son, menos pagan</h2>
+      <div class="hug" id="hug" aria-label="La familia junta en un solo plan">
+        <span class="heart">💚</span>
+        <span class="tag" id="hugTag">-15% juntos</span>
+        <div class="row">
+          <div class="who" data-i="1"><img src="assets/mama.png" alt="Mamá"><span>Mamá</span></div>
+          <div class="who" data-i="0"><img src="assets/beto.png" alt="Papá"><span>Papá</span></div>
+          <div class="who" data-i="2"><img src="assets/sofi.png" alt="Sofi"><span>Sofi</span></div>
+          <div class="who" data-i="3"><img src="assets/tono.png" alt="Toño"><span>Toño</span></div>
+        </div>
+      </div>
+      <ul class="ticks">
+        <li>5% de descuento por cada línea que agregues a tu nombre</li>
+        <li>Cada quien elige el plan que necesita</li>
+        <li>Todas las líneas en una sola cuenta y una sola recarga</li>
+        <li>Hasta 4 líneas; agrega o quita cuando quieras, sin contratos</li>
+      </ul>
+      <div class="stairs" id="stairs" aria-label="Niveles de descuento">
+        <button data-l="2"><b>-5%</b><span>2 líneas</span></button>
+        <button data-l="3"><b>-10%</b><span>3 líneas</span></button>
+        <button data-l="4"><b>-15%</b><span>4 líneas</span></button>
+      </div>
+    </div>
+    <div class="builder reveal">
+      <h3>Arma tu Plan Familia</h3>
+      <label>¿Cuántas líneas a tu nombre?</label>
+      <div class="opts" id="lines">
+        <button>2</button><button>3</button><button class="on">4</button>
+      </div>
+      <label>¿Cada cuánto pagas?</label>
+      <div class="opts sm" id="fperiod">
+        <button data-p="m" class="on">Mensual</button><button data-p="t">Trimestral</button><button data-p="s">Semestral</button><button data-p="a">Anual</button>
+      </div>
+      <label>Elige el plan de cada línea</label>
+      <div class="members" id="members"></div>
+      <div class="summary fam">
+        <div class="rows">
+          <div><span>Subtotal</span><s id="fSub"></s></div>
+          <div class="disc"><span id="fDiscTxt"></span><span id="fDisc"></span></div>
+        </div>
+        <div class="tot"><small id="fPer"></small><strong id="fTotal"></strong><small id="fEq"></small></div>
+      </div>
+      <button class="btn btn-lime" id="hire">Contratar Plan Familia 🎉</button>
+    </div>
+  </div>
+</section>
+
+<!-- TRANQUILIDAD -->
+<section class="calm" id="tranquilidad">
+  <div class="wrap">
+    <div class="map reveal" id="map">
+      <div class="road" style="left:0;right:0;top:46%;height:34px"></div>
+      <div class="road" style="top:0;bottom:0;left:44%;width:34px"></div>
+      <div class="zone z-home">CASA</div>
+      <div class="zone z-school">ESCUELA</div>
+      <div class="radar"><i></i><i></i><i></i></div>
+      <div class="pin p1" id="pin1" style="left:16%;top:20%"><img src="assets/sofi.png" alt=""></div>
+      <div class="pin p2" id="pin2" style="left:70%;top:70%"><img src="assets/tono.png" alt=""></div>
+      <div class="sos">SOS</div>
+      <div class="notif" id="notif">📍 Sofi llegó a la escuela</div>
+    </div>
+    <div class="reveal">
+      <span class="badge">♥ Incluido con NAVI SOS Family</span>
+      <h2>Más que llamadas: la tranquilidad de saber que están bien</h2>
+      <div class="feat"><div class="ico" style="background:#b4e32f22;color:var(--lime)">📍</div><div><b>Ubicación en tiempo real</b><span>Ve dónde está cada integrante en el mapa de la familia.</span></div></div>
+      <div class="feat"><div class="ico" style="background:#ff6fb122">🏠</div><div><b>Zonas seguras</b><span>Recibe un aviso cuando llegan o salen de casa, la escuela o el trabajo.</span></div></div>
+      <div class="feat"><div class="ico" style="background:#ff4d6d22">🚨</div><div><b>Botón SOS</b><span>Con un toque avisa a toda la familia o llama al 911.</span></div></div>
+      <p style="margin-top:22px;font-weight:700">Todo esto vive en la app Navi:</p>
+      <div class="stores" data-stores></div>
+    </div>
+  </div>
+</section>
+
+<!-- CAMBIATE -->
+<section class="switch" id="cambiate">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Portabilidad</span>
+      <h2>Cámbiate en familia, con sus mismos números</h2>
+      <p>Tres pasos y listo. Nosotros nos encargamos del resto.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="num" style="background:var(--yellow)">1</div><h3>Elige tu Plan Familia</h3><p>Cuántas líneas y qué plan lleva cada quien.</p></div>
+      <div class="step reveal" style="transition-delay:.1s"><div class="num" style="background:#A893FF">2</div><h3>Pide tu SIM o eSIM</h3><p>Te las enviamos a casa sin costo o activas eSIM al momento.</p></div>
+      <div class="step reveal" style="transition-delay:.2s"><div class="num" style="background:#4FD1C0">3</div><h3>Conserva sus números</h3><p>Hacemos la portabilidad de todas las líneas en un solo trámite.</p></div>
+    </div>
+  </div>
+  <img class="peek" src="assets/beto.png" alt="">
+</section>
+
+<!-- FINAL -->
+<section class="final" id="app">
+  <div class="wrap reveal">
+    <div class="faces"><img src="assets/chayo.png" alt=""><img src="assets/beto.png" alt=""><img src="assets/mama.png" alt=""><img src="assets/sofi.png" alt=""><img src="assets/tono.png" alt=""></div>
+    <h2>¿Listos para estar <em>más cerca</em>?</h2>
+    <a class="btn btn-lime" href="#plan" id="finalCta">Arma tu Plan Familia →</a>
+    <div class="stores" data-stores></div>
+    <p class="app-note">Descarga la app Navi: recargas, ubicación y botón SOS en tu celular.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="grid">
+      <div><a class="logo" href="#"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a><p style="margin-top:16px">Telefonía móvil para toda la familia.</p></div>
+      <div><h4>Navi Móvil</h4><ul><li><a href="#">Planes</a></li><li><a href="#">Recargas</a></li><li><a href="#">eSIM</a></li><li><a href="#">Cobertura</a></li></ul></div>
+      <div><h4>Ayuda</h4><ul><li><a href="#">Preguntas frecuentes</a></li><li><a href="#">Portabilidad</a></li><li><a href="#">Contacto</a></li></ul></div>
+      <div><h4>Legal</h4><ul><li><a href="#">Aviso de privacidad</a></li><li><a href="#">Términos y condiciones</a></li><li><a href="#">Carta de derechos</a></li></ul></div>
+    </div>
+    <div class="copy">© 2026 Navi Móvil. Todos los derechos reservados.</div>
+  </div>
+</footer>
+
+<div class="sheet" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="box">
+    <img src="assets/icon-192.png" alt="">
+    <h3 id="sheetTitle">Lleva Navi en tu celular</h3>
+    <p>Queda en tu pantalla de inicio como cualquier app, sin pasar por la tienda.</p>
+    <ol id="sheetSteps"></ol>
+    <button class="btn btn-ink" id="sheetClose">Entendido</button>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script src="auth.js"></script>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// con sesión iniciada, el botón de cuenta saluda y lleva a la suite
+(() => {
+  const user = NaviAuth.current();
+  if (!user) return;
+  const a = document.getElementById('account');
+  a.href = 'cuenta.html';
+  a.innerHTML = `<img src="assets/${user.img}.png" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)"><span class="long">${user.name.split(' ')[0]}</span>`;
+})();
+
+// enlaces de la app en las tiendas: mientras estén en null, el botón sale como "Próximamente"
+const APP_LINKS = {
+  ios: null,     // p. ej. 'https://apps.apple.com/mx/app/navi-movil/id0000000000'
+  android: null, // p. ej. 'https://play.google.com/store/apps/details?id=mx.navi.movil'
+};
+(() => {
+  const apple = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M16.37 1.43c0 1.14-.42 2.2-1.25 3.03-.9.9-1.98 1.42-3.15 1.33-.15-1.1.4-2.26 1.2-3.08.88-.9 2.12-1.37 3.2-1.28zM20.5 17.2c-.56 1.3-.83 1.88-1.55 3.03-1 1.6-2.42 3.6-4.18 3.62-1.56.01-1.96-1.02-4.08-1-2.12.01-2.56 1.02-4.12 1-1.76-.02-3.1-1.82-4.1-3.42C-.33 15.97-.63 10.8 1.18 8.05c1.28-1.96 3.3-3.1 5.2-3.1 1.94 0 3.15 1.06 4.75 1.06 1.55 0 2.5-1.06 4.74-1.06 1.69 0 3.48.92 4.76 2.5-4.18 2.3-3.5 8.27.87 9.75z"/></svg>';
+  const play = '<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M3.6 1.8 13.5 12 3.6 22.2c-.4-.2-.6-.6-.6-1.1V2.9c0-.5.2-.9.6-1.1z"/><path fill="#34A853" d="M16.8 8.7 13.5 12 3.6 1.8c.3-.1.7-.1 1 .1l12.2 6.8z"/><path fill="#EA4335" d="M16.8 15.3 4.6 22.1c-.3.2-.7.2-1 .1L13.5 12l3.3 3.3z"/><path fill="#FBBC04" d="M20.4 12c0 .5-.3.9-.7 1.1l-2.9 1.6-3.3-3.3 3.3-3.3 2.9 1.6c.4.2.7.7.7 1.3z"/></svg>';
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(ua);
+  const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+  const store = (url, icon, top, name) => url
+    ? `<a class="store" href="${url}" target="_blank" rel="noopener">${icon}<span><small>${top}</small><b>${name}</b></span></a>`
+    : `<span class="store soon" aria-label="${name}: próximamente">${icon}<span><small>${top}</small><b>${name}</b></span></span>`;
+  const html = (installed ? '' : '<button class="store install" data-install><span class="ico">📲</span><span><small>Acceso directo</small><b>Instalar en mi celular</b></span></button>')
+    + store(APP_LINKS.ios, apple, 'Descárgala en el', 'App Store')
+    + store(APP_LINKS.android, play, 'Disponible en', 'Google Play');
+  document.querySelectorAll('[data-stores]').forEach(el => el.innerHTML = html);
+
+  // app web instalable (PWA): funciona hoy, mientras la app nativa llega a las tiendas
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  let prompt = null;
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); prompt = e; });
+  addEventListener('appinstalled', () => document.querySelectorAll('[data-install]').forEach(b => b.remove()));
+
+  const sheet = document.getElementById('installSheet');
+  const steps = document.getElementById('sheetSteps');
+  const openSheet = () => {
+    steps.innerHTML = isIOS
+      ? '<li>Abre esta página en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadro con la flecha ⬆).</li><li>Elige <b>Agregar a inicio</b> y luego <b>Agregar</b>.</li>'
+      : isAndroid
+      ? '<li>Abre esta página en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> arriba a la derecha.</li><li>Elige <b>Instalar app</b> o <b>Agregar a pantalla principal</b>.</li>'
+      : '<li>Abre esta página en tu celular.</li><li><b>iPhone:</b> Safari → Compartir ⬆ → Agregar a inicio.</li><li><b>Android:</b> Chrome → menú ⋮ → Instalar app.</li>';
+    sheet.classList.add('open');
+  };
+  const close = () => sheet.classList.remove('open');
+  document.getElementById('sheetClose').addEventListener('click', close);
+  sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  const install = async () => {
+    if (!prompt) return openSheet();
+    prompt.prompt();
+    await prompt.userChoice;
+    prompt = null;
+  };
+  document.addEventListener('click', e => { if (e.target.closest('[data-install]')) install(); });
+
+  // el botón del header: tienda si ya hay enlace para ese celular; si no, instalar la app web
+  const getApp = document.getElementById('getApp');
+  const link = isIOS ? APP_LINKS.ios : isAndroid ? APP_LINKS.android : null;
+  if (link) Object.assign(getApp, { href: link, target: '_blank', rel: 'noopener' });
+  else if (isIOS || isAndroid) getApp.addEventListener('click', e => { e.preventDefault(); install(); });
+  if (installed) getApp.remove();
+})();
+
+// precios (MXN), compartidos por planes individuales y Plan Familia
+const PERIODS = {
+  m: { label: 'Mensual', per: 'al mes', months: 1 },
+  t: { label: 'Trimestral', per: 'cada 3 meses', months: 3 },
+  s: { label: 'Semestral', per: 'cada 6 meses', months: 6 },
+  a: { label: 'Anual', per: 'al año', months: 12 },
+};
+const PLANS = [
+  { gb: 2,  color: 'p-yellow', prices: { m: 129.99 } },
+  { gb: 4,  color: 'p-teal',   prices: { m: 169.99, t: 459.99 } },
+  { gb: 12, color: 'p-purple', prices: { m: 239.99, t: 629.99, s: 1199, a: 2299 } },
+  { gb: 24, color: 'p-coral',  prices: { m: 289.99, t: 779.99, s: 1499, a: 2899 } },
+];
+const FAMILY_STEP = 0.05; // 5% por cada línea agregada después de la primera
+const MAX_LINES = 4;
+const familyDiscount = lines => FAMILY_STEP * (lines - 1);
+const round2 = n => Math.round(n * 100) / 100;
+const money = n => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+
+// rotating hero word
+(() => {
+  const spans = [...document.querySelectorAll('#rotator span')];
+  let i = 0;
+  if (reduce) return;
+  setInterval(() => {
+    const cur = spans[i];
+    cur.classList.remove('on'); cur.classList.add('out');
+    setTimeout(() => cur.classList.remove('out'), 600);
+    i = (i + 1) % spans.length;
+    spans[i].classList.add('on');
+  }, 2200);
+})();
+
+// family hop on click
+document.querySelectorAll('#family img').forEach(img => {
+  img.addEventListener('click', () => {
+    img.classList.remove('hop'); void img.offsetWidth; img.classList.add('hop');
+    burst(img.getBoundingClientRect(), 24);
+  });
+});
+
+// hero toast + data bar cycling
+(() => {
+  const msgs = [
+    ['🏫','Sofi llegó a la escuela','Hace 2 min'],
+    ['🏠','Toño llegó a casa','Zona segura · hace 1 min'],
+    ['🎉','Agregaste a Toño','Ahora pagan 15% menos'],
+    ['💚','Recarga familiar lista','4 líneas activas'],
+  ];
+  const box = document.getElementById('toastMsg'), ic = document.getElementById('toastIc');
+  const bars = [...document.querySelectorAll('#heroStairs i')];
+  const card = document.querySelector('.gb-card small'), disc = document.getElementById('heroDisc');
+  let k = 0, hl = 4;
+  const showLines = () => {
+    card.textContent = `PLAN FAMILIA · ${hl} LÍNEAS`;
+    disc.textContent = `-${Math.round(familyDiscount(hl) * 100)}% de descuento`;
+    bars.forEach((b, i) => b.classList.toggle('on', i + 2 <= hl));
+  };
+  showLines();
+  if (reduce) return;
+  setInterval(() => {
+    k = (k + 1) % msgs.length;
+    box.classList.add('swap');
+    setTimeout(() => {
+      ic.textContent = msgs[k][0];
+      box.innerHTML = `<b>${msgs[k][1]}</b><em>${msgs[k][2]}</em>`;
+      box.classList.remove('swap');
+    }, 300);
+    hl = hl >= MAX_LINES ? 2 : hl + 1; showLines();
+  }, 3200);
+})();
+
+// tilt cards
+document.querySelectorAll('.tilt').forEach(c => {
+  c.addEventListener('mousemove', e => {
+    const r = c.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    c.style.transform = `perspective(700px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateY(-6px)`;
+  });
+  c.addEventListener('mouseleave', () => c.style.transform = '');
+});
+
+// planes individuales
+(() => {
+  const grid = document.getElementById('pgrid');
+  const tabs = [...document.querySelectorAll('#periods button')];
+  const ind = document.getElementById('periodInd');
+  let period = 'm';
+
+  const moveInd = () => {
+    const b = tabs.find(t => t.dataset.p === period);
+    ind.style.left = b.offsetLeft + 'px'; ind.style.width = b.offsetWidth + 'px';
+  };
+
+  const render = () => {
+    const P = PERIODS[period];
+    // ahorro vs. pagar mes a mes; el badge va al mayor porcentaje
+    const saves = PLANS.map(p => p.prices[period] && period !== 'm' ? p.prices.m * P.months - p.prices[period] : 0);
+    const pcts = PLANS.map((p, i) => saves[i] ? Math.round(saves[i] / (p.prices.m * P.months) * 100) : 0);
+    const best = Math.max(...pcts);
+    grid.innerHTML = PLANS.map((p, i) => {
+      const price = p.prices[period];
+      const head = `<div class="gb">${p.gb}<small>GB</small></div><div class="kind">PLAN ${P.label.toUpperCase()}</div>`;
+      if (!price) {
+        const avail = Object.keys(p.prices).map(k => PERIODS[k].label).join(', ');
+        return `<article class="pcard ${p.color} off">${head}
+          <div class="na">Disponible solo en: <b>${avail}</b><button data-goto="m">Ver plan mensual →</button></div></article>`;
+      }
+      const [int, dec] = money(price).slice(1).split('.');
+      const eq = period === 'm' ? '' :
+        `<div class="eq"><b>Equivale a ${money(Math.round(price / P.months * 100) / 100)} al mes</b>Ahorras ${money(Math.round(saves[i] * 100) / 100)} (${pcts[i]}%) vs. pagar mes a mes</div>`;
+      const badge = pcts[i] > 0 && pcts[i] === best ? `<span class="badge-save">-${pcts[i]}% · Mayor ahorro</span>` : '';
+      return `<article class="pcard ${p.color} swap">${badge}${head}
+        <div class="price"><sup>$</sup>${int}${dec ? `<span style="font-size:22px">.${dec}</span>` : ''}</div>
+        <div class="per">MXN ${P.per}</div>${eq}
+        <ul><li>Sin contratos</li><li>Conserva tu número</li></ul>
+        <button class="btn btn-ink go">Lo quiero</button></article>`;
+    }).join('');
+  };
+
+  tabs.forEach(t => t.addEventListener('click', () => {
+    period = t.dataset.p;
+    tabs.forEach(x => x.classList.toggle('on', x === t));
+    moveInd(); render();
+  }));
+  grid.addEventListener('click', e => {
+    const g = e.target.closest('[data-goto]');
+    if (g) return tabs.find(t => t.dataset.p === g.dataset.goto).click();
+    const go = e.target.closest('.go');
+    if (go) burst(go.getBoundingClientRect(), 90);
+  });
+  addEventListener('resize', moveInd);
+  document.fonts.ready.then(moveInd);
+  moveInd(); render();
+})();
+
+// plan builder
+(() => {
+  const members = [
+    { name: 'Tú', role: 'Titular', img: 'beto', gb: 24 },
+    { name: 'Mamá', role: 'Línea 2', img: 'mama', gb: 12 },
+    { name: 'Sofi', role: 'Línea 3', img: 'sofi', gb: 12 },
+    { name: 'Toño', role: 'Línea 4', img: 'tono', gb: 4 },
+  ];
+  const $ = id => document.getElementById(id);
+  const lineBtns = [...document.querySelectorAll('#lines button')];
+  const perBtns = [...document.querySelectorAll('#fperiod button')];
+  const stairs = [...document.querySelectorAll('#stairs button')];
+  let lines = 4, period = 'm', prevLines = 0;
+
+  // si el plan elegido no existe en el periodo, pasa al más cercano que sí
+  // (sin perder la elección original al volver a otro periodo)
+  const fit = gb => PLANS.find(p => p.gb === gb).prices[period] ? gb
+    : PLANS.filter(p => p.prices[period]).sort((a, b) => Math.abs(a.gb - gb) - Math.abs(b.gb - gb))[0].gb;
+
+  const render = () => {
+    const P = PERIODS[period];
+    const active = members.slice(0, lines).map(m => ({ ...m, gb: fit(m.gb) }));
+    $('members').innerHTML = active.map((m, i) => `
+      <div class="member" style="animation-delay:${i >= prevLines ? (i - prevLines) * .06 : 0}s;${i < prevLines ? 'animation:none' : ''}">
+        <div class="av${m.img ? '' : ' add'}">${m.img ? `<img src="assets/${m.img}.png" alt="">` : '+'}</div>
+        <div class="nm">${m.name}<small>${m.role}</small></div>
+        <div class="chips" data-i="${i}">${PLANS.map(p =>
+          `<button data-gb="${p.gb}" ${p.prices[period] ? '' : 'disabled title="No disponible ' + P.label.toLowerCase() + '"'} class="${p.gb === m.gb ? 'on' : ''}">${p.gb} GB</button>`).join('')}</div>
+      </div>`).join('');
+    prevLines = lines;
+
+    // tarifas familiares en pesos cerrados (sin centavos)
+    const exact = active.reduce((s, m) => s + PLANS.find(p => p.gb === m.gb).prices[period], 0);
+    const d = familyDiscount(lines);
+    const sub = Math.round(exact);
+    const total = Math.round(exact * (1 - d));
+    const off = sub - total;
+    $('fSub').textContent = money(sub);
+    $('fDiscTxt').textContent = `Descuento ${lines} líneas (-${Math.round(d * 100)}%)`;
+    $('fDisc').textContent = '-' + money(off);
+    $('fPer').textContent = `Total ${P.label.toLowerCase()} · MXN`;
+    $('fTotal').textContent = money(total);
+    $('fEq').textContent = period === 'm' ? `${money(Math.round(total / lines))} por línea` : `Equivale a ${money(Math.round(total / P.months))} al mes`;
+    const t = $('fTotal'); t.classList.remove('bump'); void t.offsetWidth; t.classList.add('bump');
+
+    lineBtns.forEach(b => b.classList.toggle('on', +b.textContent === lines));
+    perBtns.forEach(b => b.classList.toggle('on', b.dataset.p === period));
+    stairs.forEach(b => { b.classList.toggle('on', +b.dataset.l === lines); b.classList.toggle('lit', +b.dataset.l < lines); });
+
+    // familia unida: los que están en el plan se juntan, los demás esperan en gris
+    hug.forEach(w => {
+      const inPlan = +w.dataset.i < lines, was = w.classList.contains('in');
+      w.classList.toggle('in', inPlan);
+      w.classList.toggle('out', !inPlan);
+      w.title = inPlan ? '' : 'Agregar al plan';
+      if (inPlan && !was && hugReady) { w.classList.remove('join'); void w.offsetWidth; w.classList.add('join'); }
+    });
+    const tag = $('hugTag');
+    tag.textContent = `-${Math.round(d * 100)}% juntos`;
+    tag.classList.remove('pop'); void tag.offsetWidth; tag.classList.add('pop');
+    hugReady = true;
+  };
+
+  // tocar a alguien en gris lo suma al plan
+  const hug = [...document.querySelectorAll('#hug .who')];
+  let hugReady = false;
+  hug.forEach(w => w.addEventListener('click', () => {
+    const i = +w.dataset.i;
+    if (i < lines) return;
+    lines = Math.max(2, i + 1);
+    render();
+    burst(w.getBoundingClientRect(), 30);
+  }));
+
+  lineBtns.forEach(b => b.addEventListener('click', () => { lines = +b.textContent; render(); }));
+  stairs.forEach(b => b.addEventListener('click', () => { lines = +b.dataset.l; render(); }));
+  perBtns.forEach(b => b.addEventListener('click', () => { period = b.dataset.p; prevLines = lines; render(); }));
+  $('members').addEventListener('click', e => {
+    const b = e.target.closest('.chips button');
+    if (!b || b.disabled) return;
+    members[+b.parentElement.dataset.i].gb = +b.dataset.gb;
+    render();
+  });
+  render();
+  document.getElementById('hire').addEventListener('click', e => burst(e.currentTarget.getBoundingClientRect(), 140));
+  document.getElementById('finalCta').addEventListener('click', e => burst(e.currentTarget.getBoundingClientRect(), 100));
+})();
+
+// map animation
+(() => {
+  const p1 = document.getElementById('pin1'), p2 = document.getElementById('pin2'), n = document.getElementById('notif');
+  const seq = [
+    () => { p1.style.left = '68%'; p1.style.top = '66%'; p2.style.left = '18%'; p2.style.top = '22%'; },
+    () => { n.textContent = '📍 Sofi llegó a la escuela'; n.classList.add('show'); },
+    () => n.classList.remove('show'),
+    () => { p1.style.left = '16%'; p1.style.top = '20%'; p2.style.left = '70%'; p2.style.top = '70%'; },
+    () => { n.textContent = '🏠 Sofi llegó a casa'; n.classList.add('show'); },
+    () => n.classList.remove('show'),
+  ];
+  let s = 0;
+  if (reduce) return;
+  setInterval(() => { seq[s](); s = (s + 1) % seq.length; }, 1500);
+})();
+
+// scroll reveal
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// confetti
+const cv = document.getElementById('confetti'), cx = cv.getContext('2d');
+let parts = [], running = false;
+const colors = ['#B4E32F','#7B5CFA','#3B8FE8','#F2784B','#FFC22E','#FF6FB1','#1FA59A'];
+function size() { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; cx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+size(); addEventListener('resize', size);
+function burst(r, n) {
+  if (reduce) return;
+  const ox = r.left + r.width / 2, oy = r.top + r.height / 2;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = 4 + Math.random() * 9;
+    parts.push({ x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 6, s: 5 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: colors[i % colors.length], life: 90 + Math.random() * 40 });
+  }
+  if (!running) { running = true; requestAnimationFrame(tick); }
+}
+function tick() {
+  cx.clearRect(0, 0, innerWidth, innerHeight);
+  parts = parts.filter(p => p.life-- > 0);
+  for (const p of parts) {
+    p.vy += .3; p.vx *= .98; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.globalAlpha = Math.min(1, p.life / 30);
+    cx.fillStyle = p.c; cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); cx.restore();
+  }
+  if (parts.length) requestAnimationFrame(tick); else { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); }
+}
+</script>
+</body>
+</html>

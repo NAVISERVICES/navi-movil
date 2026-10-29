@@ -1,0 +1,25 @@
+/* páginas internas de la suite (Juegos, Videos): encabezado y piezas comunes */
+header.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--navy) 80%,transparent);border-bottom:1px solid #ffffff14}
+header.top .wrap{display:flex;align-items:center;gap:14px;height:68px}
+header.top .back{margin-left:auto}
+main{padding:30px 0 80px}
+.title{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.title .ico{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:32px;box-shadow:0 6px 0 #0003}
+.title h1{font-size:clamp(32px,4.5vw,48px)}
+.title p{color:var(--muted)}
+.search{display:flex;align-items:center;gap:10px;background:#ffffff12;border:2px solid #ffffff20;border-radius:99px;padding:0 18px;margin-bottom:18px;transition:border-color .2s}
+.search:focus-within{border-color:var(--lime)}
+.search input{flex:1;border:0;outline:0;background:none;padding:13px 0;font-size:15px;min-width:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chips button{padding:8px 14px;border-radius:99px;border:2px solid #ffffff25;font-weight:700;font-size:13px;transition:all .2s}
+.chips button:hover{border-color:var(--lime)}
+.chips button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.blk-h{display:flex;justify-content:space-between;align-items:baseline;margin:30px 0 14px}
+.blk-h h2{font-size:24px}
+.blk-h span{color:var(--muted);font-size:14px}
+.empty{padding:30px;text-align:center;color:var(--muted);border:2px dashed #ffffff25;border-radius:var(--radius)}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badges i{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:#ffffff18}
+.badges i.new{background:var(--pink);color:#fff}
+.badges i.gold{background:#FFC23A;color:var(--ink)}
+@media (max-width:560px){ header.top .back span{display:none} }
