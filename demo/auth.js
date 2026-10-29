@@ -109,10 +109,10 @@ const NAVI_ACCOUNTS = {
   '5500000003': { name: 'Carla Ruiz',    img: 'mama', plan: { type: 'individual', gb: 24, period: 'a' },
     device: dev('256 GB', 'Azul náutico', 'SIM física', '356104230918475') },
   '5500000004': { name: 'Familia García', img: 'beto', plan: { type: 'familia', period: 'm', lines: [
-    { name: 'Papá', img: 'beto', gb: 24, phone: '5500000004', device: dev('256 GB', 'Titanio natural', 'eSIM', '357221340556193') },
+    { name: 'Papá', img: 'beto', gb: 12, phone: '5500000004', device: dev('256 GB', 'Titanio natural', 'eSIM', '357221340556193') },
     { name: 'Mamá', img: 'mama', gb: 12, phone: '5500000005', device: dev('512 GB', 'Lavanda', 'SIM física', '350918221764038') },
     { name: 'Sofi', img: 'sofi', gb: 12, phone: '5500000006', device: dev('128 GB', 'Gris', 'SIM física', '861537040298114') },
-    { name: 'Toño', img: 'tono', gb: 4,  phone: '5500000007', device: dev('128 GB', 'Gris', 'SIM física', '359482170633521') },
+    { name: 'Toño', img: 'tono', gb: 12, phone: '5500000007', device: dev('128 GB', 'Gris', 'SIM física', '359482170633521') },
   ] } },
 };
 

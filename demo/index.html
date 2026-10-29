@@ -241,6 +241,10 @@ section{position:relative}
 .member .av.add{display:grid;place-items:center;background:var(--lime);color:var(--ink);font-weight:800}
 .member .nm{font-size:14px;font-weight:700;line-height:1.2}
 .member .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.member .gbpill{justify-self:end;background:var(--lime);color:var(--ink);font-weight:800;font-size:13px;padding:6px 12px;border-radius:99px;white-space:nowrap}
+.topup-note{font-size:13px;color:var(--muted);margin:12px 0 4px}
+.topup-note a{color:var(--lime);font-weight:700;text-decoration:underline}
+.opts.sm button:disabled{opacity:.3;cursor:not-allowed;transform:none}
 .chips{display:flex;gap:4px}
 .chips button{padding:7px 9px;border-radius:10px;border:2px solid #ffffff25;font-size:12px;font-weight:700;transition:all .2s}
 .chips button:hover:not(:disabled){border-color:var(--lime)}
@@ -373,7 +377,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
   .gb-card{width:190px;padding:10px 12px}.gb-card strong{font-size:18px}
   .toast{min-width:0;top:22%}
   .builder{padding:22px;box-shadow:8px 8px 0 var(--lime)}
-  .member{grid-template-columns:40px 1fr;row-gap:8px}
+  .member{grid-template-columns:40px 1fr auto;row-gap:8px}
   .member .chips{grid-column:1/-1}
   .chips button{flex:1}
   .stairs{height:150px;gap:6px}.stairs b{font-size:17px}
@@ -425,7 +429,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
         <span class="rotator" id="rotator"><span class="on">conectada</span><span>cerca</span><span>tranquila</span><span>feliz</span><svg class="squiggle" viewBox="0 0 300 14" preserveAspectRatio="none"><path d="M3 8 Q 25 0 50 8 T 100 8 T 150 8 T 200 8 T 250 8 T 297 8"/></svg></span><br>
         y sin contratos.
       </h1>
-      <p class="lead">Un plan para cada quien en casa, una sola cuenta y la tranquilidad de saber que todos están bien. Te cambias con tu mismo número.</p>
+      <p class="lead">Un mismo plan para toda la familia, una sola cuenta y la tranquilidad de saber que todos están bien. Te cambias con tu mismo número.</p>
       <div class="cta-row">
         <a class="btn btn-lime" href="#plan">Arma tu Plan Familia →</a>
         <a class="btn btn-ghost" href="#cambiate">Cámbiate con tu número</a>
@@ -470,7 +474,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     <div class="sec-head reveal">
       <span class="eyebrow">Para cada quien en casa</span>
       <h2>Un plan para cada etapa de tu familia</h2>
-      <p>Cada línea con lo que necesita, todas en una sola cuenta que administras desde la app.</p>
+      <p>Todas las líneas con el mismo plan de datos en una sola cuenta. Si alguien necesita más, recarga solo su línea desde la app.</p>
     </div>
     <div class="cards">
       <article class="card c-yellow reveal tilt">
@@ -541,7 +545,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       </div>
       <ul class="ticks">
         <li>5% de descuento por cada línea que agregues a tu nombre</li>
-        <li>Cada quien elige el plan que necesita</li>
+        <li>Toda la familia con el mismo plan de datos; si alguien necesita más, recarga solo su línea</li>
         <li>Todas las líneas en una sola cuenta y una sola recarga</li>
         <li>Hasta 4 líneas; agrega o quita cuando quieras, sin contratos</li>
       </ul>
@@ -561,8 +565,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <div class="opts sm" id="fperiod">
         <button data-p="m" class="on">Mensual</button><button data-p="t">Trimestral</button><button data-p="s">Semestral</button><button data-p="a">Anual</button>
       </div>
-      <label>Elige el plan de cada línea</label>
+      <label>Plan de datos para toda la familia</label>
+      <div class="opts sm" id="fplan"></div>
+      <label>Todas las líneas con el mismo plan</label>
       <div class="members" id="members"></div>
+      <p class="topup-note">¿Alguien se queda sin datos? Recarga solo su línea con un paquete adicional desde <a href="recargas.html">Recargas</a>.</p>
       <div class="summary fam">
         <div class="rows">
           <div><span>Subtotal</span><s id="fSub"></s></div>
@@ -610,7 +617,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <p>Tres pasos y listo. Nosotros nos encargamos del resto.</p>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="num" style="background:var(--yellow)">1</div><h3>Elige tu Plan Familia</h3><p>Cuántas líneas y qué plan lleva cada quien.</p></div>
+      <div class="step reveal"><div class="num" style="background:var(--yellow)">1</div><h3>Elige tu Plan Familia</h3><p>Cuántas líneas y qué plan de datos comparten todos.</p></div>
       <div class="step reveal" style="transition-delay:.1s"><div class="num" style="background:#A893FF">2</div><h3>Pide tu SIM o eSIM</h3><p>Te las enviamos a casa sin costo o activas eSIM al momento.</p></div>
       <div class="step reveal" style="transition-delay:.2s"><div class="num" style="background:#4FD1C0">3</div><h3>Conserva sus números</h3><p>Hacemos la portabilidad de todas las líneas en un solo trámite.</p></div>
     </div>
@@ -653,7 +660,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261029d"></script>
+<script src="auth.js?v=20261029e"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -863,36 +870,37 @@ document.querySelectorAll('.tilt').forEach(c => {
 // plan builder
 (() => {
   const members = [
-    { name: 'Tú', role: 'Titular', img: 'beto', gb: 24 },
-    { name: 'Mamá', role: 'Línea 2', img: 'mama', gb: 12 },
-    { name: 'Sofi', role: 'Línea 3', img: 'sofi', gb: 12 },
-    { name: 'Toño', role: 'Línea 4', img: 'tono', gb: 4 },
+    { name: 'Tú', role: 'Titular', img: 'beto' },
+    { name: 'Mamá', role: 'Línea 2', img: 'mama' },
+    { name: 'Sofi', role: 'Línea 3', img: 'sofi' },
+    { name: 'Toño', role: 'Línea 4', img: 'tono' },
   ];
   const $ = id => document.getElementById(id);
   const lineBtns = [...document.querySelectorAll('#lines button')];
   const perBtns = [...document.querySelectorAll('#fperiod button')];
   const stairs = [...document.querySelectorAll('#stairs button')];
-  let lines = 4, period = 'm', prevLines = 0;
+  // un solo plan de datos para todas las líneas de la familia
+  let lines = 4, period = 'm', prevLines = 0, gb = 12;
 
   // si el plan elegido no existe en el periodo, pasa al más cercano que sí
   // (sin perder la elección original al volver a otro periodo)
-  const fit = gb => PLANS.find(p => p.gb === gb).prices[period] ? gb
-    : PLANS.filter(p => p.prices[period]).sort((a, b) => Math.abs(a.gb - gb) - Math.abs(b.gb - gb))[0].gb;
+  const fit = g => PLANS.find(p => p.gb === g).prices[period] ? g
+    : PLANS.filter(p => p.prices[period]).sort((a, b) => Math.abs(a.gb - g) - Math.abs(b.gb - g))[0].gb;
 
   const render = () => {
-    const P = PERIODS[period];
-    const active = members.slice(0, lines).map(m => ({ ...m, gb: fit(m.gb) }));
+    const P = PERIODS[period], plan = fit(gb);
+    $('fplan').innerHTML = PLANS.map(p => `<button data-gb="${p.gb}" class="${p.gb === plan ? 'on' : ''}" ${p.prices[period] ? '' : `disabled title="No disponible ${P.label.toLowerCase()}"`}>${p.gb} GB</button>`).join('');
+    const active = members.slice(0, lines);
     $('members').innerHTML = active.map((m, i) => `
       <div class="member" style="animation-delay:${i >= prevLines ? (i - prevLines) * .06 : 0}s;${i < prevLines ? 'animation:none' : ''}">
-        <div class="av${m.img ? '' : ' add'}">${m.img ? `<img src="assets/${m.img}.png" alt="">` : '+'}</div>
+        <div class="av"><img src="assets/${m.img}.png" alt=""></div>
         <div class="nm">${m.name}<small>${m.role}</small></div>
-        <div class="chips" data-i="${i}">${PLANS.map(p =>
-          `<button data-gb="${p.gb}" ${p.prices[period] ? '' : 'disabled title="No disponible ' + P.label.toLowerCase() + '"'} class="${p.gb === m.gb ? 'on' : ''}">${p.gb} GB</button>`).join('')}</div>
+        <span class="gbpill">${plan} GB</span>
       </div>`).join('');
     prevLines = lines;
 
     // tarifas familiares en pesos cerrados (sin centavos)
-    const exact = active.reduce((s, m) => s + PLANS.find(p => p.gb === m.gb).prices[period], 0);
+    const exact = PLANS.find(p => p.gb === plan).prices[period] * lines;
     const d = familyDiscount(lines);
     const sub = Math.round(exact);
     const total = Math.round(exact * (1 - d));
@@ -937,10 +945,10 @@ document.querySelectorAll('.tilt').forEach(c => {
   lineBtns.forEach(b => b.addEventListener('click', () => { lines = +b.textContent; render(); }));
   stairs.forEach(b => b.addEventListener('click', () => { lines = +b.dataset.l; render(); }));
   perBtns.forEach(b => b.addEventListener('click', () => { period = b.dataset.p; prevLines = lines; render(); }));
-  $('members').addEventListener('click', e => {
-    const b = e.target.closest('.chips button');
+  $('fplan').addEventListener('click', e => {
+    const b = e.target.closest('button[data-gb]');
     if (!b || b.disabled) return;
-    members[+b.parentElement.dataset.i].gb = +b.dataset.gb;
+    gb = +b.dataset.gb; prevLines = lines;
     render();
   });
   render();
