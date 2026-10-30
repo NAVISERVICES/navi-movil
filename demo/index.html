@@ -343,6 +343,19 @@ section{position:relative}
 .store.soon::after{content:"Próximamente";position:absolute;top:-9px;right:-8px;background:var(--lime);color:var(--ink);font-size:10px;font-weight:800;padding:3px 7px;border-radius:99px;transform:rotate(6deg)}
 .store.install{background:var(--lime);color:var(--ink);border-color:var(--lime);box-shadow:0 5px 0 #7FA312}
 .store.install .ico{font-size:24px;line-height:1}
+/* en la PC: código QR para instalar desde el celular */
+.store.qr{background:var(--lime);color:var(--ink);border-color:var(--lime);box-shadow:0 5px 0 #7FA312;padding:10px 18px 10px 10px;gap:14px}
+.qrbox{position:relative;background:#fff;border-radius:12px;padding:6px;flex:none;line-height:0}
+.qrbox svg{display:block}
+.qrbox img{position:absolute;left:50%;top:50%;width:22%;height:22%;transform:translate(-50%,-50%);border-radius:6px;border:3px solid #fff;background:#fff}
+.store.qr .qrbox svg{width:84px;height:84px}
+.store.qr b{font-size:18px}
+.store.qr em{display:block;font-style:normal;font-size:12px;opacity:.75;margin-top:3px}
+.sheet .qrbig{display:flex;justify-content:center;margin:16px 0 4px}
+.sheet .qrbig .qrbox{padding:10px;border:2px solid #e6e6f5;border-radius:20px}
+.sheet .qrbig svg{width:220px;height:220px}
+.sheet .qrbig + p{text-align:center;font-size:13px}
+#sheetInstall[hidden]{display:none}
 /* hoja con instrucciones para instalar */
 .sheet{position:fixed;inset:0;z-index:120;display:grid;place-items:end center;background:#06062ecc;opacity:0;pointer-events:none;transition:opacity .3s}
 .sheet.open{opacity:1;pointer-events:auto}
@@ -670,7 +683,9 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     <img src="assets/icon-192.png" alt="">
     <h3 id="sheetTitle">Lleva Navi en tu celular</h3>
     <p>Queda en tu pantalla de inicio como cualquier app, sin pasar por la tienda.</p>
+    <div id="sheetQr"></div>
     <ol id="sheetSteps"></ol>
+    <button class="btn btn-lime" id="sheetInstall" hidden style="margin-bottom:10px">📲 Instalar ahora</button>
     <button class="btn btn-ink" id="sheetClose">Entendido</button>
   </div>
 </div>
@@ -679,6 +694,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <script src="auth.js?v=20261029g"></script>
 <script src="planes.js?v=20261029g"></script>
+<script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -707,7 +723,22 @@ const APP_LINKS = {
   const store = (url, icon, top, name) => url
     ? `<a class="store" href="${url}" target="_blank" rel="noopener">${icon}<span><small>${top}</small><b>${name}</b></span></a>`
     : `<span class="store soon" aria-label="${name}: próximamente">${icon}<span><small>${top}</small><b>${name}</b></span></span>`;
-  const html = (installed ? '' : '<button class="store install" data-install><span class="ico">📲</span><span><small>Acceso directo</small><b>Instalar en mi celular</b></span></button>')
+  const isPhone = isIOS || isAndroid;
+
+  // en la PC el acceso directo se muestra como QR: al escanearlo, el celular abre Navi listo para instalar
+  const INSTALL_URL = 'https://www.navimovil.com/demo/?instalar=1';
+  const qrSvg = () => {
+    if (typeof qrcode !== 'function') return '';
+    const q = qrcode(0, 'H'); q.addData(INSTALL_URL); q.make();
+    const n = q.getModuleCount(); let d = '';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+    return `<span class="qrbox"><svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" role="img" aria-label="Código QR para instalar Navi"><path d="${d}" fill="#0B0B4F"/></svg><img src="assets/icon-192.png" alt=""></span>`;
+  };
+  const qr = isPhone ? '' : qrSvg();
+  const installBtn = installed ? ''
+    : qr ? `<button class="store qr" data-install>${qr}<span><small>Acceso directo</small><b>Escanéalo con tu celular</b><em>Abre la cámara y apunta al código</em></span></button>`
+    : '<button class="store install" data-install><span class="ico">📲</span><span><small>Acceso directo</small><b>Instalar en mi celular</b></span></button>';
+  const html = installBtn
     + store(APP_LINKS.ios, apple, 'Descárgala en el', 'App Store')
     + store(APP_LINKS.android, play, 'Disponible en', 'Google Play');
   document.querySelectorAll('[data-stores]').forEach(el => el.innerHTML = html);
@@ -715,7 +746,7 @@ const APP_LINKS = {
   // app web instalable (PWA): funciona hoy, mientras la app nativa llega a las tiendas
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   let prompt = null;
-  addEventListener('beforeinstallprompt', e => { e.preventDefault(); prompt = e; });
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); prompt = e; document.getElementById('sheetInstall').hidden = false; });
   addEventListener('appinstalled', () => document.querySelectorAll('[data-install]').forEach(b => b.remove()));
 
   const sheet = document.getElementById('installSheet');
@@ -725,7 +756,9 @@ const APP_LINKS = {
       ? '<li>Abre esta página en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadro con la flecha ⬆).</li><li>Elige <b>Agregar a inicio</b> y luego <b>Agregar</b>.</li>'
       : isAndroid
       ? '<li>Abre esta página en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> arriba a la derecha.</li><li>Elige <b>Instalar app</b> o <b>Agregar a pantalla principal</b>.</li>'
-      : '<li>Abre esta página en tu celular.</li><li><b>iPhone:</b> Safari → Compartir ⬆ → Agregar a inicio.</li><li><b>Android:</b> Chrome → menú ⋮ → Instalar app.</li>';
+      : '<li>Escanea el código con la cámara de tu celular y abre el enlace.</li><li><b>iPhone:</b> Safari → Compartir ⬆ → Agregar a inicio.</li><li><b>Android:</b> Chrome → menú ⋮ → Instalar app.</li>';
+    document.getElementById('sheetQr').innerHTML = qr ? `<div class="qrbig">${qr}</div><p>navimovil.com/demo</p>` : '';
+    document.getElementById('sheetInstall').hidden = !prompt;
     sheet.classList.add('open');
   };
   const close = () => sheet.classList.remove('open');
@@ -739,7 +772,14 @@ const APP_LINKS = {
     await prompt.userChoice;
     prompt = null;
   };
-  document.addEventListener('click', e => { if (e.target.closest('[data-install]')) install(); });
+  document.addEventListener('click', e => { const b = e.target.closest('[data-install]'); if (b) b.classList.contains('qr') ? openSheet() : install(); });
+  document.getElementById('sheetInstall').addEventListener('click', async () => { close(); await install(); });
+
+  // llegó desde el QR (?instalar=1): en el celular se abren de una vez los pasos para instalar
+  if (new URLSearchParams(location.search).has('instalar') && !installed) {
+    document.getElementById('app').scrollIntoView();
+    setTimeout(openSheet, 600);
+  }
 
   // el botón del header: tienda si ya hay enlace para ese celular; si no, instalar la app web
   const getApp = document.getElementById('getApp');
