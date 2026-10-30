@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261029f">
-<link rel="stylesheet" href="suite.css?v=20261029f">
+<link rel="stylesheet" href="navi.css?v=20261029g">
+<link rel="stylesheet" href="suite.css?v=20261029g">
 <style>
 main{padding:10px 0 120px}
 .steps-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0 28px}
@@ -69,7 +69,8 @@ main{padding:10px 0 120px}
 .imei-count{margin-top:14px;font-size:13px;font-weight:700;color:var(--muted)}
 .imei-count.done{color:var(--lime)}
 .res{margin-top:10px;font-size:14px;padding:10px 12px;border-radius:12px}
-.res.ok{background:#b4e32f1c;color:var(--lime)}.res.bad{background:#FF6F8E22;color:#FF9DB0}
+.res.ok{background:#b4e32f1c;color:var(--lime)}.res.bad{background:#FF6F8E22;color:#FF9DB0}.res.warn{background:#FFC22E1a;color:#FFD66B}
+.res .lnk{color:inherit;font-weight:700;text-decoration:underline}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
 .imei input,.field input,.field select,.field textarea{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%}
@@ -180,7 +181,7 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
           <p class="muted" id="imeiHelp"></p>
           <div id="imeis"></div>
           <p class="imei-count" id="imeiCount"></p>
-          <p class="hint" style="margin-top:8px">No guardamos tu IMEI. Demostración: la comprobación real se hace contra el registro de equipos de la red.</p>
+          <p class="hint" style="margin-top:8px"><a href="equipo.html" target="_blank" style="text-decoration:underline">¿Qué revisamos de tu equipo?</a> No guardamos tu IMEI. Demostración: la comprobación real se hace contra el registro de equipos de la red.</p>
         </div>
       </section>
 
@@ -247,8 +248,8 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
 </main>
 <div class="bar" id="bar"><div><small>Total</small><b id="barTot"></b></div><button class="btn btn-lime" id="barGo">Continuar</button></div>
 
-<script src="auth.js?v=20261029f"></script>
-<script src="planes.js?v=20261029f"></script>
+<script src="auth.js?v=20261029g"></script>
+<script src="planes.js?v=20261029g"></script>
 <script>
 const $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
@@ -361,7 +362,7 @@ function renderImeis() {
       <div class="imei"><input inputmode="numeric" maxlength="15" placeholder="Ej. 490154203237518" aria-label="IMEI de la línea ${i + 1}" value="${x.v}"><button class="btn btn-lime" type="button">Comprobar</button></div>
       <div class="res-box"></div></div>`).join('');
     // si cambió el formato, el mensaje de eSIM se vuelve a calcular
-    O.imeis.slice(0, n).forEach((x, i) => { if (x.ok) checkImei(i); });
+    O.imeis.slice(0, n).forEach((x, i) => { if (x.msg) checkImei(i); });
   }
   O.imeis.slice(0, n).forEach((x, i) => {
     const row = $('imeis').children[i];
@@ -379,8 +380,14 @@ function checkImei(i) {
   else if (!luhn(v)) bad('Ese IMEI no es válido. Revisa que lo copiaste completo.');
   else if (dup >= 0) bad(`Ese equipo ya está en la línea ${dup + 1}. Cada línea necesita su propio teléfono.`);
   else {
-    const d = identifyDevice(v), known = d.brand !== 'Equipo';
-    Object.assign(x, { ok: true, msg: `<p class="res ok">✓ ${known ? `${d.brand} ${d.model}: ` : ''}compatible con la red Navi (4.5G LTE y VoLTE)${lineType(i) === 'eSIM' ? ' y acepta eSIM' : ''}.</p>` });
+    // misma revisión que la página "Tu equipo"
+    const c = compatOf(v), who = c.name ? `${c.name}: ` : '', esim = lineType(i) === 'eSIM';
+    const val = `<a class="lnk" href="${ALTAN_VALIDATOR}" target="_blank" rel="noopener">validador de Altán Redes</a>`;
+    if (c.status === 'lock') bad(`${who}este IMEI tiene reporte de robo o extravío y no puede activarse en ninguna red.`);
+    else if (c.status === 'nob28') bad(`${who}no es compatible con la Banda 28 de la Red Compartida. Usa otro teléfono para esta línea.`);
+    else if (esim && c.status === 'ok' && !c.esim) bad(`${who}es compatible, pero no acepta eSIM. Cambia esta línea a chip físico.`);
+    else if (c.status === 'noreg') Object.assign(x, { ok: true, msg: `<p class="res warn">⚠ No encontramos este equipo en el registro. Puede que sí conecte: confírmalo en el ${val} antes de pagar.</p>` });
+    else Object.assign(x, { ok: true, msg: `<p class="res ok">✓ ${who}compatible con la red Navi (Banda 28 y VoLTE)${esim ? ' y acepta eSIM' : ''}.</p>` });
   }
 }
 $('imeis').addEventListener('input', e => {

@@ -54,6 +54,29 @@ const TAC_DB = {
 // identifica el equipo con su IMEI; si el TAC no está en el catálogo queda como "equipo no identificado"
 const identifyDevice = imei => TAC_DB[imei.slice(0, 8)] || { brand: 'Equipo', model: 'no identificado', os: '—', red: '—' };
 
+// DEMO: compatibilidad con la Red Compartida de Altán Redes por TAC. En producción se consulta su registro de equipos.
+//   b28: homologado en Banda 28 · volte · esim · lock: 'robo' si el IMEI tiene reporte
+const COMPAT = {
+  '35291411': { b28: true, volte: true, esim: false },
+  '35382711': { b28: true, volte: true, esim: true },
+  '35610423': { b28: true, volte: true, esim: true },
+  '35722134': { b28: true, volte: true, esim: true },
+  '35091822': { b28: true, volte: true, esim: true },
+  '86153704': { b28: true, volte: true, esim: false },
+  '35948217': { b28: true, volte: true, esim: false },
+  '35727579': { b28: true, volte: true, esim: true, brand: 'Apple', model: 'iPhone 15 Pro Max', os: 'iOS 18' },
+  '49015420': { b28: false, volte: false, esim: false, brand: 'Nokia', model: '3110', os: 'Básico' },
+  '35332509': { b28: true, volte: true, esim: false, lock: 'robo', brand: 'Samsung', model: 'Galaxy A10', os: 'Android 11' },
+};
+const ALTAN_VALIDATOR = 'https://checkimei.altanredes.com/';
+const imeiValid = s => /^\d{15}$/.test(s) && [...s].reverse().reduce((sum, ch, i) => { let d = +ch; if (i % 2) { d *= 2; if (d > 9) d -= 9; } return sum + d; }, 0) % 10 === 0;
+// status: 'ok' | 'noreg' (no está en el registro) | 'nob28' (no compatible) | 'lock' (reporte de robo o extravío)
+const compatOf = imei => {
+  const tac = imei.slice(0, 8), c = COMPAT[tac], D = { ...(TAC_DB[tac] || {}), ...(c || {}) };
+  const status = !c ? 'noreg' : c.lock ? 'lock' : !c.b28 ? 'nob28' : 'ok';
+  return { ...D, status, name: D.brand ? `${D.brand} ${D.model}` : '' };
+};
+
 // color del cuerpo según el acabado que reporta el equipo
 const FINISH = { 'Azul oscuro': '#2F3A52', 'Medianoche': '#232A35', 'Azul náutico': '#2D4479', 'Titanio natural': '#BDB6A9',
   'Lavanda': '#CDBEE3', 'Gris': '#5B6168' };
