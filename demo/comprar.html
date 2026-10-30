@@ -59,14 +59,21 @@ main{padding:10px 0 120px}
 .ctr button{width:40px;height:40px;border-radius:50%;border:2px solid #ffffff40;font-size:20px;font-weight:800}
 .ctr button:disabled{opacity:.3}
 .ctr b{font-family:var(--display);font-size:24px;min-width:24px;text-align:center}
-.imei{display:flex;gap:10px;margin-top:10px}
+.imei-row{margin-top:14px}
+.imei-row + .imei-row{padding-top:14px;border-top:1px dashed #ffffff22}
+.imei{display:flex;gap:10px}
 .imei input{flex:1;min-width:0}
+.imei-row .lbl{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin-bottom:6px}
+.imei-row .lbl em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.08em;padding:3px 8px;border-radius:99px;background:#ffffff18;color:var(--muted)}
+.imei-row .lbl .ok{color:var(--lime);margin-left:auto;font-size:13px}
+.imei-count{margin-top:14px;font-size:13px;font-weight:700;color:var(--muted)}
+.imei-count.done{color:var(--lime)}
 .res{margin-top:10px;font-size:14px;padding:10px 12px;border-radius:12px}
 .res.ok{background:#b4e32f1c;color:var(--lime)}.res.bad{background:#FF6F8E22;color:#FF9DB0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
-.field input,.field select,.field textarea{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--lime)}
+.imei input,.field input,.field select,.field textarea{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%}
+.imei input:focus,.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--lime)}
 .field select option{color:#000}
 .field.err input{border-color:#FF6F8E}
 .hint{font-size:12px;color:var(--muted)}
@@ -169,10 +176,10 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
           </div>
         </div>
         <div class="card">
-          <h2>Tu equipo, antes de pagar</h2>
-          <p class="muted">Marca <b>*#06#</b> en tu teléfono y copia el IMEI de 15 dígitos. Revisamos que sea compatible con la red Navi (4.5G LTE y VoLTE) para que no pagues de más.</p>
-          <div class="imei"><label class="field" style="flex:1">IMEI (15 dígitos)<input id="imei" inputmode="numeric" maxlength="15" placeholder="Ej. 35 291411 047382 6"></label><button class="btn btn-lime" id="chk" style="align-self:end">Comprobar</button></div>
-          <div id="imeiRes"></div>
+          <h2 id="imeiTitle">Tu equipo, antes de pagar</h2>
+          <p class="muted" id="imeiHelp"></p>
+          <div id="imeis"></div>
+          <p class="imei-count" id="imeiCount"></p>
           <p class="hint" style="margin-top:8px">No guardamos tu IMEI. Demostración: la comprobación real se hace contra el registro de equipos de la red.</p>
         </div>
       </section>
@@ -251,7 +258,7 @@ const SHIP = { std: 99, exp: 149 };
 const O = {
   kind: qs.get('fam') ? 'fam' : 'ind', lines: Math.min(MAX_LINES, Math.max(2, +qs.get('fam') || 4)),
   gb: +qs.get('gb') || 12, per: PERIODS[qs.get('per')] ? qs.get('per') : 'm',
-  mode: qs.get('porta') ? 'porta' : '', chip: 0, esim: 0, imeiOk: false, ship: 'std',
+  mode: qs.get('porta') ? 'porta' : '', chip: 0, esim: 0, imeis: [], ship: 'std',
 };
 let step = 'plan';
 const nLines = () => O.kind === 'fam' ? O.lines : 1;
@@ -263,7 +270,7 @@ const shipCost = () => O.chip ? SHIP[O.ship] : 0;
 // lo que falta para avanzar en cada paso (se muestra junto al botón)
 const missing = () => {
   if (step === 'plan') return !avail() ? 'Ese plan no está disponible en este periodo.' : !O.mode ? 'Elige línea nueva o traer tu número.' : '';
-  if (step === 'formato') return O.chip + O.esim !== nLines() ? `Elige ${nLines() === 1 ? 'chip o eSIM' : `cómo quieres tus ${nLines()} líneas`}.` : !O.imeiOk ? 'Comprueba el IMEI de tu equipo.' : '';
+  if (step === 'formato') return O.chip + O.esim !== nLines() ? `Elige ${nLines() === 1 ? 'chip o eSIM' : `cómo quieres tus ${nLines()} líneas`}.` : imeisOk() < nLines() ? (nLines() === 1 ? 'Comprueba el IMEI de tu equipo.' : `Comprueba el IMEI de los ${nLines()} equipos (${imeisOk()} de ${nLines()} listos).`) : '';
   if (step === 'datos') return datosErr();
   return '';
 };
@@ -314,7 +321,7 @@ function renderSum() {
 }
 function render() {
   document.querySelectorAll('section.step').forEach(s => s.classList.toggle('on', s.dataset.s === step));
-  renderNav(); renderPlan(); renderFormato(); $('shipCard').hidden = !O.chip; renderSum();
+  renderNav(); renderPlan(); renderFormato(); renderImeis(); $('shipCard').hidden = !O.chip; renderSum();
 }
 function go(s) { step = s; render(); scrollTo({ top: 0, behavior: 'smooth' }); try { history.replaceState(null, '', '#' + s); } catch {} }
 function next() {
@@ -337,16 +344,56 @@ document.querySelectorAll('[name=mode]').forEach(r => r.onchange = () => { O.mod
 // paso 2
 document.querySelector('.route').onclick = e => { const b = e.target.closest('[data-c]'); if (!b || b.disabled) return; O[b.dataset.c] += +b.dataset.d; render(); };
 const luhn = s => { let sum = 0; for (let i = 0; i < 15; i++) { let d = +s[14 - i]; if (i % 2) { d *= 2; if (d > 9) d -= 9; } sum += d; } return sum % 10 === 0; };
-$('imei').oninput = () => { $('imei').value = $('imei').value.replace(/\D/g, '').slice(0, 15); O.imeiOk = false; $('imeiRes').innerHTML = ''; renderSum(); };
-$('chk').onclick = () => {
-  const v = $('imei').value;
-  if (v.length !== 15) { $('imeiRes').innerHTML = '<p class="res bad">El IMEI tiene 15 dígitos. Márcalo con *#06#.</p>'; return; }
-  if (!luhn(v)) { $('imeiRes').innerHTML = '<p class="res bad">Ese IMEI no es válido. Revisa que lo copiaste completo.</p>'; return; }
-  const d = identifyDevice(v), known = d.brand !== 'Equipo';
-  O.imeiOk = true;
-  $('imeiRes').innerHTML = `<p class="res ok">✓ ${known ? `${d.brand} ${d.model}: ` : ''}compatible con la red Navi (4.5G LTE y VoLTE)${O.esim ? ' y acepta eSIM' : ''}.</p>`;
-  renderSum();
-};
+// un IMEI por línea: cada integrante del Plan Familia comprueba su propio equipo
+const imeisOk = () => O.imeis.slice(0, nLines()).filter(x => x.ok).length;
+const lineType = i => O.chip + O.esim !== nLines() ? '' : i < O.chip ? 'Chip' : 'eSIM';
+let imeiSig = '';
+function renderImeis() {
+  const n = nLines();
+  while (O.imeis.length < n) O.imeis.push({ v: '', ok: false, msg: '' });
+  const sig = n + ':' + O.chip + ':' + O.esim;
+  if (sig !== imeiSig) {
+    imeiSig = sig;
+    $('imeiTitle').textContent = n === 1 ? 'Tu equipo, antes de pagar' : `Los ${n} equipos, antes de pagar`;
+    $('imeiHelp').innerHTML = `${n === 1 ? 'Marca' : 'En cada teléfono, marca'} <b>*#06#</b> y copia el IMEI de 15 dígitos. Revisamos que ${n === 1 ? 'sea compatible' : 'cada equipo sea compatible'} con la red Navi (4.5G LTE y VoLTE) para que no pagues de más.`;
+    $('imeis').innerHTML = O.imeis.slice(0, n).map((x, i) => `<div class="imei-row" data-i="${i}">
+      <div class="lbl">${n === 1 ? 'IMEI (15 dígitos)' : `Línea ${i + 1}`}${lineType(i) ? `<em>${lineType(i).toUpperCase()}</em>` : ''}<span class="ok"></span></div>
+      <div class="imei"><input inputmode="numeric" maxlength="15" placeholder="Ej. 490154203237518" aria-label="IMEI de la línea ${i + 1}" value="${x.v}"><button class="btn btn-lime" type="button">Comprobar</button></div>
+      <div class="res-box"></div></div>`).join('');
+    // si cambió el formato, el mensaje de eSIM se vuelve a calcular
+    O.imeis.slice(0, n).forEach((x, i) => { if (x.ok) checkImei(i); });
+  }
+  O.imeis.slice(0, n).forEach((x, i) => {
+    const row = $('imeis').children[i];
+    row.querySelector('.res-box').innerHTML = x.msg;
+    row.querySelector('.ok').textContent = x.ok ? '✓ Comprobado' : '';
+  });
+  const ok = imeisOk();
+  $('imeiCount').textContent = n === 1 ? '' : ok === n ? `✓ Los ${n} equipos están listos.` : `${ok} de ${n} equipos comprobados`;
+  $('imeiCount').className = 'imei-count' + (ok === n ? ' done' : '');
+}
+function checkImei(i) {
+  const x = O.imeis[i], v = x.v, bad = m => Object.assign(x, { ok: false, msg: `<p class="res bad">${m}</p>` });
+  const dup = O.imeis.slice(0, nLines()).findIndex((y, k) => k !== i && y.ok && y.v === v);
+  if (v.length !== 15) bad('El IMEI tiene 15 dígitos. Márcalo con *#06#.');
+  else if (!luhn(v)) bad('Ese IMEI no es válido. Revisa que lo copiaste completo.');
+  else if (dup >= 0) bad(`Ese equipo ya está en la línea ${dup + 1}. Cada línea necesita su propio teléfono.`);
+  else {
+    const d = identifyDevice(v), known = d.brand !== 'Equipo';
+    Object.assign(x, { ok: true, msg: `<p class="res ok">✓ ${known ? `${d.brand} ${d.model}: ` : ''}compatible con la red Navi (4.5G LTE y VoLTE)${lineType(i) === 'eSIM' ? ' y acepta eSIM' : ''}.</p>` });
+  }
+}
+$('imeis').addEventListener('input', e => {
+  const row = e.target.closest('.imei-row'); if (!row) return;
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 15);
+  Object.assign(O.imeis[+row.dataset.i], { v: e.target.value, ok: false, msg: '' });
+  renderImeis(); renderSum();
+});
+$('imeis').addEventListener('click', e => {
+  const b = e.target.closest('button'), row = e.target.closest('.imei-row'); if (!b || !row) return;
+  checkImei(+row.dataset.i); renderImeis(); renderSum();
+});
+$('imeis').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) { e.preventDefault(); e.target.nextElementSibling.click(); } });
 
 // paso 3: validación de datos
 const CPS = { '08200': ['Ciudad de México', 'Iztacalco', ['Viaducto Piedad', 'Granjas México']], '06700': ['Ciudad de México', 'Cuauhtémoc', ['Roma Norte']], '44100': ['Jalisco', 'Guadalajara', ['Centro']], '64000': ['Nuevo León', 'Monterrey', ['Centro']] };
