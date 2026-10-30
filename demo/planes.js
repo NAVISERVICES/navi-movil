@@ -17,6 +17,13 @@ const familyDiscount = lines => FAMILY_STEP * (lines - 1);
 const round2 = n => Math.round(n * 100) / 100;
 const money = n => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
 
+// promo de portabilidad: GB multiplicados durante 12 meses si traes tu número desde estas compañías
+const PORTA_BONUS = { 2: 2, 4: 3, 12: 3, 24: 3 };
+const PORTA_FROM = ['Telcel', 'AT&T', 'Movistar', 'Unefon', 'Virgin Mobile'];
+const PORTA_MONTHS = 12;
+const portaGb = gb => gb * (PORTA_BONUS[gb] || 1);
+const portaWord = gb => PORTA_BONUS[gb] === 2 ? 'el doble' : PORTA_BONUS[gb] === 3 ? 'el triple' : '';
+
 // precio de un pedido: plan individual o Plan Familia (mismo plan para todas las líneas, pesos cerrados)
 const quote = ({ gb, per, lines = 1 }) => {
   const price = PLANS.find(p => p.gb === gb)?.prices[per];

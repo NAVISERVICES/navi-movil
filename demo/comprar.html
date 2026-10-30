@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261029g">
-<link rel="stylesheet" href="suite.css?v=20261029g">
+<link rel="stylesheet" href="navi.css?v=20261030a">
+<link rel="stylesheet" href="suite.css?v=20261030a">
 <style>
 main{padding:10px 0 120px}
 .steps-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0 28px}
@@ -39,6 +39,9 @@ main{padding:10px 0 120px}
 .plan b{display:block;font-family:var(--display);font-size:30px;line-height:1}
 .plan span{display:block;font-size:13px;opacity:.8;margin-top:4px}
 .plan .pr{font-family:var(--display);font-weight:800;font-size:18px;opacity:1;margin-top:10px}
+.plan .xb{display:inline-block;margin-top:8px;background:var(--ink);color:#FFE36E;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:800;opacity:1}
+.bonus-ok{margin-top:12px;background:linear-gradient(90deg,#FF3D7F33,#FFC22E2e);border:1px solid #FFC22E77;border-radius:14px;padding:12px 14px;font-size:14px}
+.sum .r.promo{color:#FFE36E}.sum .r.promo b{color:#FFE36E}
 .p-yellow{background:#FFC22E}.p-teal{background:#4FD1C0}.p-purple{background:#A893FF}.p-coral{background:#FF8A65}
 .opts{display:flex;gap:10px;flex-wrap:wrap}
 .opts button{min-width:64px;padding:12px 18px;border-radius:16px;border:2px solid #ffffff25;font-weight:800;font-size:16px}
@@ -161,6 +164,10 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
             <label><input type="radio" name="mode" value="porta" id="mPorta"><b>🔁 Traer mi número</b><small>Conservas tu número de siempre. El trámite es gratis.</small></label>
           </div>
           <p class="note" id="portaNote" hidden>Tu línea funciona desde el primer día con un número provisional. El número que traes y tu NIP se capturan después, en <a href="portabilidad.html" style="text-decoration:underline">Portabilidad</a>, cuando cada línea ya esté activa.</p>
+          <div id="fromBox" hidden style="margin-top:14px">
+            <label class="field">¿De qué compañía vienes?<select id="from"><option value="">Elige tu compañía actual</option></select></label>
+            <div id="bonus"></div>
+          </div>
         </div>
       </section>
 
@@ -250,8 +257,8 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
 </main>
 <div class="bar" id="bar"><div><small>Total</small><b id="barTot"></b></div><button class="btn btn-lime" id="barGo">Continuar</button></div>
 
-<script src="auth.js?v=20261029g"></script>
-<script src="planes.js?v=20261029g"></script>
+<script src="auth.js?v=20261030a"></script>
+<script src="planes.js?v=20261030a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
@@ -261,10 +268,12 @@ const SHIP = { std: 99, exp: 149 };
 const O = {
   kind: qs.get('fam') ? 'fam' : 'ind', lines: Math.min(MAX_LINES, Math.max(2, +qs.get('fam') || 4)),
   gb: +qs.get('gb') || 12, per: PERIODS[qs.get('per')] ? qs.get('per') : 'm',
-  mode: qs.get('porta') ? 'porta' : '', chip: 0, esim: 0, imeis: [], ship: 'std',
+  mode: qs.get('porta') ? 'porta' : '', from: '', chip: 0, esim: 0, imeis: [], ship: 'std',
 };
 let step = 'plan';
 const nLines = () => O.kind === 'fam' ? O.lines : 1;
+// promo de portabilidad (planes.js): solo si traes tu número desde una de las compañías participantes
+const bonusOk = () => O.mode === 'porta' && PORTA_FROM.includes(O.from) && !!PORTA_BONUS[O.gb];
 const plan = () => PLANS.find(p => p.gb === O.gb);
 const avail = () => !!plan().prices[O.per];
 const q = () => quote({ gb: O.gb, per: O.per, lines: nLines() });
@@ -272,7 +281,7 @@ const shipCost = () => O.chip ? SHIP[O.ship] : 0;
 
 // lo que falta para avanzar en cada paso (se muestra junto al botón)
 const missing = () => {
-  if (step === 'plan') return !avail() ? 'Ese plan no está disponible en este periodo.' : !O.mode ? 'Elige línea nueva o traer tu número.' : '';
+  if (step === 'plan') return !avail() ? 'Ese plan no está disponible en este periodo.' : !O.mode ? 'Elige línea nueva o traer tu número.' : O.mode === 'porta' && !O.from ? 'Dinos de qué compañía vienes.' : '';
   if (step === 'formato') return O.chip + O.esim !== nLines() ? `Elige ${nLines() === 1 ? 'chip o eSIM' : `cómo quieres tus ${nLines()} líneas`}.` : imeisOk() < nLines() ? (nLines() === 1 ? 'Comprueba el IMEI de tu equipo.' : `Comprueba el IMEI de los ${nLines()} equipos (${imeisOk()} de ${nLines()} listos).`) : '';
   if (step === 'datos') return datosErr();
   return '';
@@ -289,10 +298,14 @@ function renderPlan() {
   document.querySelectorAll('#per button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === O.per));
   $('plans').innerHTML = PLANS.map(p => {
     const pr = p.prices[O.per];
-    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}</button>`;
+    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb">x${PORTA_BONUS[p.gb]} → ${portaGb(p.gb)} GB</span>` : ''}</button>`;
   }).join('');
   $('mNew').checked = O.mode === 'nuevo'; $('mPorta').checked = O.mode === 'porta';
   $('portaNote').hidden = O.mode !== 'porta';
+  $('fromBox').hidden = O.mode !== 'porta';
+  $('bonus').innerHTML = !O.from ? ''
+    : bonusOk() ? `<p class="bonus-ok">🎉 <b>¡Te toca la promo!</b> Por venir de ${O.from} recibes <b>${portaWord(O.gb)} de GB</b>: tu plan de ${O.gb} GB te da <b>${portaGb(O.gb)} GB al mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`
+    : `<p class="hint" style="margin-top:8px">La promo de GB extra aplica si vienes de ${PORTA_FROM.join(', ')}. Igual puedes traer tu número sin costo.</p>`;
 }
 function renderFormato() {
   const n = nLines();
@@ -309,6 +322,7 @@ function renderSum() {
     <div class="r"><span>Plan</span><b>${O.kind === 'fam' ? `Plan Familia · ${n} líneas de ${O.gb} GB` : `${O.gb} GB`}</b></div>
     <div class="r"><span>Pago</span><b>${P.label}</b></div>
     ${O.mode ? `<div class="r"><span>Número</span><b>${O.mode === 'porta' ? 'Traes tu número' : 'Línea nueva'}</b></div>` : ''}
+    ${bonusOk() ? `<div class="r promo"><span>🎉 Promo portabilidad</span><b>${portaGb(O.gb)} GB al mes por ${PORTA_MONTHS} meses</b></div>` : ''}
     ${O.chip + O.esim ? `<div class="r"><span>Formato</span><b>${[O.chip && `${O.chip} chip${O.chip > 1 ? 's' : ''}`, O.esim && `${O.esim} eSIM`].filter(Boolean).join(' + ')}</b></div>` : ''}
     ${Q ? `<div class="r"><span>Subtotal</span><b>${money(Q.sub)}</b></div>` : ''}
     ${Q && Q.off ? `<div class="r"><span>Descuento familiar (-${Math.round(familyDiscount(n) * 100)}%)</span><b>-${money(Q.off)}</b></div>` : ''}
@@ -343,6 +357,8 @@ $('per').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return
   if (!avail()) O.gb = PLANS.filter(p => p.prices[O.per]).sort((a, c) => Math.abs(a.gb - O.gb) - Math.abs(c.gb - O.gb))[0].gb; render(); };
 $('plans').onclick = e => { const b = e.target.closest('[data-gb]'); if (b && !b.disabled) { O.gb = +b.dataset.gb; render(); } };
 document.querySelectorAll('[name=mode]').forEach(r => r.onchange = () => { O.mode = r.value; render(); });
+$('from').insertAdjacentHTML('beforeend', [...PORTA_FROM, 'Otra compañía'].map(c => `<option>${c}</option>`).join(''));
+$('from').onchange = () => { O.from = $('from').value; render(); };
 
 // paso 2
 document.querySelector('.route').onclick = e => { const b = e.target.closest('[data-c]'); if (!b || b.disabled) return; O[b.dataset.c] += +b.dataset.d; render(); };
@@ -435,13 +451,14 @@ function confirmOrder() {
   const Q = q(), total = Q.total + shipCost(), method = document.querySelector('[name=pay]:checked').value;
   const folio = 'NV-' + String(Date.now()).slice(-7);
   const paid = method === 'tarjeta';
-  const order = { folio, at: Date.now(), kind: O.kind, lines: nLines(), gb: O.gb, per: O.per, mode: O.mode, chip: O.chip, esim: O.esim, total, method, status: paid ? 'pagado' : 'pendiente', name: $('nom').value.trim(), mail: $('mail').value.trim() };
+  const order = { folio, at: Date.now(), kind: O.kind, lines: nLines(), gb: O.gb, per: O.per, mode: O.mode, from: O.from, promoGb: bonusOk() ? portaGb(O.gb) : null, chip: O.chip, esim: O.esim, total, method, status: paid ? 'pagado' : 'pendiente', name: $('nom').value.trim(), mail: $('mail').value.trim() };
   try { const l = JSON.parse(localStorage.getItem('navi.orders')) || []; localStorage.setItem('navi.orders', JSON.stringify([order, ...l])); } catch {}
   const steps = [
     O.chip && ['📦', 'Tu chip va en camino', `Te mandamos la guía de ${O.ship === 'exp' ? 'Express (1-2 días)' : 'Estándar (3-5 días)'} a ${order.mail}.`],
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
+    bonusOk() && ['🎉', `Tu promo: ${portaGb(O.gb)} GB al mes`, `Se activa cuando tu número de ${O.from} quede en Navi y dura ${PORTA_MONTHS} meses.`],
   ].filter(Boolean);
   $('payCard').innerHTML = `<div class="done ${paid ? '' : 'pend'}">
     <div class="ok">${paid ? '✓' : '⏳'}</div>

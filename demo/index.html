@@ -35,6 +35,16 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .wrap{width:min(1200px,100% - 32px);margin-inline:auto}
 h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.02em}
 
+/* ---------- cintillo de promo (se mueve solo; se pausa al pasar el mouse) ---------- */
+.promo-bar{display:block;position:relative;overflow:hidden;background:linear-gradient(90deg,#FF3D7F,#FF6FB1 45%,#FFC22E);color:var(--ink);font-weight:800;font-size:13.5px;height:36px}
+.promo-bar .run{display:flex;gap:34px;width:max-content;height:100%;align-items:center;animation:slide 32s linear infinite;white-space:nowrap}
+.promo-bar:hover .run{animation-play-state:paused}
+.promo-bar .run span{display:flex;align-items:center;gap:8px}
+.promo-bar .run b{background:var(--ink);color:#FFE36E;border-radius:99px;padding:2px 9px;font-family:var(--display);letter-spacing:.02em}
+.promo-bar .run s{opacity:.55}
+.promo-bar .run i{font-style:normal;opacity:.5}
+@media (prefers-reduced-motion:reduce){.promo-bar .run{animation:none}}
+
 /* ---------- top bars ---------- */
 .sections{background:var(--ink);font-size:12px;color:var(--muted)}
 .sections .wrap{display:flex;justify-content:space-between;align-items:center;height:34px;gap:12px}
@@ -179,6 +189,47 @@ section{position:relative}
 .periods button{position:relative;z-index:1;padding:12px 22px;border-radius:99px;font-weight:700;font-size:15px;color:var(--muted);transition:color .25s}
 .periods button.on{color:var(--ink)}
 .periods .ind{position:absolute;top:6px;bottom:6px;border-radius:99px;background:var(--lime);box-shadow:0 4px 0 #7FA312;transition:left .45s cubic-bezier(.3,1.4,.5,1),width .45s cubic-bezier(.3,1.4,.5,1)}
+/* ---------- promo de portabilidad ---------- */
+.porta{padding:110px 0 40px;position:relative}
+.porta .box{position:relative;border-radius:40px;padding:52px 48px;display:grid;grid-template-columns:1.05fr 1fr;gap:36px;align-items:center;
+  background:radial-gradient(circle at 85% 15%,#FF6FB1 0,transparent 42%),radial-gradient(circle at 10% 100%,#7B5CFA 0,transparent 50%),linear-gradient(135deg,#1E1E8A,#0B0B4F);
+  border:2px solid #ffffff1f;box-shadow:0 30px 70px #0007}
+.porta .box::before{content:"";position:absolute;inset:0;border-radius:inherit;background-image:radial-gradient(#ffffff1c 1.3px,transparent 1.3px);background-size:24px 24px;mask-image:linear-gradient(90deg,transparent,#000 60%)}
+.porta .box > *{position:relative;min-width:0}
+.porta .tag{display:inline-flex;gap:8px;align-items:center;background:#FFC22E;color:var(--ink);font-weight:800;font-size:12px;letter-spacing:.12em;padding:7px 14px;border-radius:99px;transform:rotate(-2deg)}
+.porta h2{font-size:clamp(40px,5.6vw,74px);line-height:.95;margin:18px 0 14px}
+.porta h2 em{font-style:normal;color:var(--lime);display:inline-block;animation:wiggle 2.6s ease-in-out infinite}
+.porta .lead{color:#dcdaf7;font-size:17px;max-width:480px}
+.porta .from{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 26px}
+.porta .from span{background:#ffffff16;border:1px solid #ffffff2e;border-radius:99px;padding:7px 14px;font-weight:700;font-size:14px}
+.porta .ctas{display:flex;gap:12px;flex-wrap:wrap}
+.porta .fine{font-size:12px;color:var(--muted);margin-top:18px;max-width:520px}
+.mult{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mult .m{border-radius:26px;padding:20px 20px 18px;color:var(--ink);position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.mult .m:hover{transform:translateY(-6px) rotate(-1.5deg)}
+.mult .m .x{position:absolute;top:12px;right:12px;width:54px;height:54px;border-radius:50%;background:var(--ink);color:#FFE36E;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:22px;transform:rotate(10deg)}
+.mult .m small{font-size:11px;font-weight:800;letter-spacing:.12em;opacity:.7}
+.mult .m .was{font-family:var(--display);font-weight:800;font-size:20px;opacity:.55;text-decoration:line-through;text-decoration-thickness:3px;margin-top:6px}
+.mult .m .now{font-family:var(--display);font-weight:800;font-size:54px;line-height:.9;letter-spacing:-.03em}
+.mult .m .now span{font-size:22px;margin-left:3px}
+.mult .m .mo{font-size:13px;font-weight:700;margin-top:6px}
+.mult .m.pop .now{animation:pricePop .5s cubic-bezier(.3,1.6,.5,1)}
+.porta .burst{position:absolute;right:-26px;top:-30px;width:150px;height:150px;z-index:2;display:grid;place-items:center;color:var(--ink);font-family:var(--display);font-weight:800;text-align:center;line-height:.95;transform:rotate(12deg);animation:spin 18s linear infinite}
+.porta .burst svg{position:absolute;inset:0;width:100%;height:100%}
+.porta .burst div{position:relative;font-size:15px;animation:spin 18s linear infinite reverse}
+.porta .burst b{display:block;font-size:34px}
+@keyframes spin{to{transform:rotate(372deg)}}
+@media (max-width:980px){.porta .box{grid-template-columns:1fr;padding:44px 28px 30px}}
+@media (max-width:560px){
+  .porta{padding:80px 0 20px}
+  .porta .box{padding:38px 18px 22px;border-radius:30px}
+  .porta .burst{width:96px;height:96px;right:-6px;top:-34px}.porta .burst b{font-size:24px}.porta .burst div{font-size:11px}
+  .mult{gap:10px}.mult .m{padding:16px 14px 14px;border-radius:22px}.mult .m .now{font-size:40px}.mult .m .x{width:42px;height:42px;font-size:17px;top:10px;right:10px}
+}
+/* insignia de la promo en las tarjetas de planes */
+.pcard .porta-chip{margin:0 0 14px;background:var(--ink);color:#fff;border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.3;position:relative;z-index:1}
+.pcard .porta-chip b{color:#FFE36E}
+
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .pcard{position:relative;border-radius:var(--radius);padding:26px 24px 24px;color:var(--ink);display:flex;flex-direction:column;min-height:400px;transition:transform .3s cubic-bezier(.3,1.6,.5,1),filter .3s,opacity .3s;overflow:hidden}
 .pcard:hover{transform:translateY(-8px) rotate(-1deg)}
@@ -432,6 +483,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 </head>
 <body>
 
+<a class="promo-bar" href="#promo" aria-label="Promoción: cámbiate a Navi y recibe el doble o el triple de GB durante 12 meses"><div class="run" id="promoRun"></div></a>
+
 <div class="sections">
   <div class="wrap">
     <span>Todo Navi</span>
@@ -500,10 +553,28 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <div class="marquee" aria-hidden="true">
   <div class="track">
-    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Conserva tu número</span>
-    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Conserva tu número</span>
+    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Triple de GB al cambiarte</span>
+    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Triple de GB al cambiarte</span>
   </div>
 </div>
+
+<!-- PROMO PORTABILIDAD -->
+<section class="porta" id="promo">
+  <div class="wrap">
+    <div class="box reveal">
+      <div class="burst" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon fill="#FFC22E" points="50,2 59,16 75,8 77,26 94,25 88,42 100,50 88,58 94,75 77,74 75,92 59,84 50,98 41,84 25,92 23,74 6,75 12,58 0,50 12,42 6,25 23,26 25,8 41,16"/></svg><div><b>12</b>MESES</div></div>
+      <div>
+        <span class="tag">🔁 PROMO PORTABILIDAD</span>
+        <h2>Cámbiate y te damos <em>el triple</em> de GB</h2>
+        <p class="lead">Trae tu número a Navi y durante <b>12 meses</b> recibes el <b>triple de GB</b> en los planes de 4, 12 y 24 GB, y el <b>doble</b> en el de 2 GB. Mismo precio, conservas tu número y el trámite es gratis.</p>
+        <div class="from" id="promoFrom"></div>
+        <div class="ctas"><a class="btn btn-lime" href="comprar.html?porta=1">Quiero cambiarme →</a><a class="btn btn-ghost" href="portabilidad.html">¿Cómo me cambio?</a></div>
+        <p class="fine">Válido al traer tu número desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile. Los GB adicionales se aplican durante 12 meses en el plan que contrates.</p>
+      </div>
+      <div class="mult" id="promoMult"></div>
+    </div>
+  </div>
+</section>
 
 <!-- ETAPAS -->
 <section class="stages" id="etapas">
@@ -701,8 +772,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261029g"></script>
-<script src="planes.js?v=20261029g"></script>
+<script src="auth.js?v=20261030a"></script>
+<script src="planes.js?v=20261030a"></script>
 <script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -863,6 +934,29 @@ document.querySelectorAll('.tilt').forEach(c => {
   c.addEventListener('mouseleave', () => c.style.transform = '');
 });
 
+// promo de portabilidad: cintillo, banner y comparativo de GB (datos en planes.js)
+(() => {
+  const from = PORTA_FROM.join(', ').replace(/, ([^,]*)$/, ' o $1');
+  const items = [
+    `🔥 <b>¡TRIPLE DE GB!</b> Cámbiate a Navi con tu número`,
+    ...PLANS.map(p => `${p.gb} GB <i>→</i> <b>${portaGb(p.gb)} GB</b> por ${PORTA_MONTHS} meses`),
+    `Si vienes de ${from}`,
+    `📲 Conserva tu número · trámite gratis`,
+  ];
+  const once = items.map(t => `<span>${t}</span>`).join('');
+  document.getElementById('promoRun').innerHTML = once + once; // dos veces para que el recorrido no tenga cortes
+  document.getElementById('promoFrom').innerHTML = PORTA_FROM.map(c => `<span>${c}</span>`).join('');
+  const colors = { 'p-yellow': '#FFC22E', 'p-teal': '#4FD1C0', 'p-purple': '#A893FF', 'p-coral': '#FF8A65' };
+  const mult = document.getElementById('promoMult');
+  mult.innerHTML = PLANS.map(p => `<div class="m" style="background:${colors[p.color]}"><span class="x">x${PORTA_BONUS[p.gb]}</span>
+    <small>PLAN ${p.gb} GB</small><div class="was">${p.gb} GB</div><div class="now">${portaGb(p.gb)}<span>GB</span></div><div class="mo">al mes, por ${PORTA_MONTHS} meses</div></div>`).join('');
+  // las cifras "brincan" una por una cuando el banner entra en pantalla
+  if (!reduce && 'IntersectionObserver' in window) new IntersectionObserver((es, io) => {
+    if (!es[0].isIntersecting) return; io.disconnect();
+    [...mult.children].forEach((m, i) => setTimeout(() => m.classList.add('pop'), 250 + i * 180));
+  }, { threshold: .4 }).observe(mult);
+})();
+
 // planes individuales
 (() => {
   const grid = document.getElementById('pgrid');
@@ -897,6 +991,7 @@ document.querySelectorAll('.tilt').forEach(c => {
         <div class="price"><sup>$</sup>${int}${dec ? `<span style="font-size:22px">.${dec}</span>` : ''}</div>
         <div class="per">MXN ${P.per}</div>${eq}
         <ul><li>Sin contratos</li><li>Conserva tu número</li></ul>
+        ${PORTA_BONUS[p.gb] ? `<a class="porta-chip" href="#promo">🔁 Cámbiate y recibe <b>${portaGb(p.gb)} GB</b> por ${PORTA_MONTHS} meses</a>` : ''}
         <button class="btn btn-ink go" data-gb="${p.gb}">Lo quiero</button></article>`;
     }).join('');
   };
