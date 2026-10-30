@@ -22,6 +22,7 @@ main{padding:10px 0 120px}
 .steps-nav li.ok{color:#fff}.steps-nav li.ok i{background:#ffffff26;border-color:transparent}
 .steps-nav hr{width:28px;border:0;border-top:2px solid #ffffff22}
 .lay{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+.lay > *{min-width:0} /* que la fila de periodos se desplace dentro de la tarjeta y no la ensanche */
 .card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:24px}
 .card + .card{margin-top:16px}
 .card h2{font-size:24px;margin-bottom:6px}
@@ -121,7 +122,8 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
   .bar b{font-family:var(--display);font-size:22px;color:var(--lime)}
   .bar small{display:block;color:var(--muted);font-size:11px}
 }
-@media (max-width:600px){.route,.choice,.grid2{grid-template-columns:1fr}.steps-nav hr{display:none}.steps-nav li span{display:none}.steps-nav li.on span{display:inline}}
+@media (max-width:600px){#per{width:100%}#per button{flex:1;padding:9px 4px;font-size:13px}
+  .route,.choice,.grid2{grid-template-columns:1fr}.steps-nav hr{display:none}.steps-nav li span{display:none}.steps-nav li.on span{display:inline}}
 </style>
 </head>
 <body>
