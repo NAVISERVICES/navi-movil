@@ -569,7 +569,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
         <p class="lead">Trae tu número a Navi y durante <b>12 meses</b> recibes el <b>triple de GB</b> en los planes de 4, 12 y 24 GB, y el <b>doble</b> en el de 2 GB. Mismo precio, conservas tu número y el trámite es gratis.</p>
         <div class="from" id="promoFrom"></div>
         <div class="ctas"><a class="btn btn-lime" href="comprar.html?porta=1">Quiero cambiarme →</a><a class="btn btn-ghost" href="portabilidad.html">¿Cómo me cambio?</a></div>
-        <p class="fine">Válido al traer tu número desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile. Los GB adicionales se aplican durante 12 meses en el plan que contrates.</p>
+        <p class="fine">Válido al traer tu número desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile. Los GB adicionales se aplican durante 12 meses en el plan que contrates. En Plan Familia aplica por cada línea que traigas.</p>
       </div>
       <div class="mult" id="promoMult"></div>
     </div>
@@ -678,6 +678,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <label>Todas las líneas con el mismo plan</label>
       <div class="members" id="members"></div>
       <p class="topup-note">¿Alguien se queda sin datos? Recarga solo su línea con un paquete adicional desde <a href="recargas.html">Recargas</a>.</p>
+      <p class="topup-note">🎉 <a href="#promo">Promo portabilidad</a>: cada línea que traigas de Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile recibe el triple de GB durante 12 meses (el doble en 2 GB).</p>
       <div class="summary fam">
         <div class="rows">
           <div><span>Subtotal</span><s id="fSub"></s></div>
@@ -941,6 +942,7 @@ document.querySelectorAll('.tilt').forEach(c => {
     `🔥 <b>¡TRIPLE DE GB!</b> Cámbiate a Navi con tu número`,
     ...PLANS.map(p => `${p.gb} GB <i>→</i> <b>${portaGb(p.gb)} GB</b> por ${PORTA_MONTHS} meses`),
     `Si vienes de ${from}`,
+    `👨‍👩‍👧‍👦 <b>PLAN FAMILIA</b> la promo aplica en cada línea que traigas`,
     `📲 Conserva tu número · trámite gratis`,
   ];
   const once = items.map(t => `<span>${t}</span>`).join('');

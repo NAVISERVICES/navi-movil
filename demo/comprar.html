@@ -304,7 +304,9 @@ function renderPlan() {
   $('portaNote').hidden = O.mode !== 'porta';
   $('fromBox').hidden = O.mode !== 'porta';
   $('bonus').innerHTML = !O.from ? ''
-    : bonusOk() ? `<p class="bonus-ok">🎉 <b>¡Te toca la promo!</b> Por venir de ${O.from} recibes <b>${portaWord(O.gb)} de GB</b>: tu plan de ${O.gb} GB te da <b>${portaGb(O.gb)} GB al mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`
+    : bonusOk() ? (O.kind === 'fam'
+      ? `<p class="bonus-ok">🎉 <b>¡Les toca la promo!</b> Cada línea que traigan de ${O.from} recibe <b>${portaWord(O.gb)} de GB</b>: pasa de ${O.gb} GB a <b>${portaGb(O.gb)} GB al mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`
+      : `<p class="bonus-ok">🎉 <b>¡Te toca la promo!</b> Por venir de ${O.from} recibes <b>${portaWord(O.gb)} de GB</b>: tu plan de ${O.gb} GB te da <b>${portaGb(O.gb)} GB al mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`)
     : `<p class="hint" style="margin-top:8px">La promo de GB extra aplica si vienes de ${PORTA_FROM.join(', ')}. Igual puedes traer tu número sin costo.</p>`;
 }
 function renderFormato() {
@@ -322,7 +324,7 @@ function renderSum() {
     <div class="r"><span>Plan</span><b>${O.kind === 'fam' ? `Plan Familia · ${n} líneas de ${O.gb} GB` : `${O.gb} GB`}</b></div>
     <div class="r"><span>Pago</span><b>${P.label}</b></div>
     ${O.mode ? `<div class="r"><span>Número</span><b>${O.mode === 'porta' ? 'Traes tu número' : 'Línea nueva'}</b></div>` : ''}
-    ${bonusOk() ? `<div class="r promo"><span>🎉 Promo portabilidad</span><b>${portaGb(O.gb)} GB al mes por ${PORTA_MONTHS} meses</b></div>` : ''}
+    ${bonusOk() ? `<div class="r promo"><span>🎉 Promo portabilidad</span><b>${portaGb(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea portada' : ''} · ${PORTA_MONTHS} meses</b></div>` : ''}
     ${O.chip + O.esim ? `<div class="r"><span>Formato</span><b>${[O.chip && `${O.chip} chip${O.chip > 1 ? 's' : ''}`, O.esim && `${O.esim} eSIM`].filter(Boolean).join(' + ')}</b></div>` : ''}
     ${Q ? `<div class="r"><span>Subtotal</span><b>${money(Q.sub)}</b></div>` : ''}
     ${Q && Q.off ? `<div class="r"><span>Descuento familiar (-${Math.round(familyDiscount(n) * 100)}%)</span><b>-${money(Q.off)}</b></div>` : ''}
@@ -458,7 +460,8 @@ function confirmOrder() {
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
-    bonusOk() && ['🎉', `Tu promo: ${portaGb(O.gb)} GB al mes`, `Se activa cuando tu número de ${O.from} quede en Navi y dura ${PORTA_MONTHS} meses.`],
+    bonusOk() && ['🎉', `${O.kind === 'fam' ? 'Su promo' : 'Tu promo'}: ${portaGb(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,
+      O.kind === 'fam' ? `Se activa en cada línea cuando su número de ${O.from} quede en Navi, y dura ${PORTA_MONTHS} meses.` : `Se activa cuando tu número de ${O.from} quede en Navi y dura ${PORTA_MONTHS} meses.`],
   ].filter(Boolean);
   $('payCard').innerHTML = `<div class="done ${paid ? '' : 'pend'}">
     <div class="ok">${paid ? '✓' : '⏳'}</div>
