@@ -144,10 +144,30 @@ const NAVI_ACCOUNTS = {
 
 const appsFor = plan => PLAN_ACCESS[plan.type === 'familia' ? 'familia' : plan.gb] || [];
 
-// todas las líneas de una cuenta con la misma forma (individual = una sola línea)
+// Perfil de cada persona, por número (DEMO: en este navegador; en producción, en el servidor).
+// Lo que cada quien edita aquí es lo que ve toda su familia: nombre, correo, cumpleaños y estado.
+const Profiles = (() => {
+  const KEY = 'navi.profiles';
+  const all = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  return {
+    get: phone => all()[phone] || {},
+    set: (phone, data) => {
+      const a = all(); a[phone] = { ...a[phone], ...data, at: Date.now() };
+      try { localStorage.setItem(KEY, JSON.stringify(a)); return true; } catch { return false; }
+    },
+  };
+})();
+// full: nombre real completo (para la ficha de la línea) · nick: cómo le dice su familia (mapa, chat, listas)
+const withProfile = l => {
+  const p = Profiles.get(l.phone);
+  return { ...l, name: p.nick || (p.full ? p.full.split(' ')[0] : l.name), fullName: p.full || null };
+};
+
+// todas las líneas de una cuenta con la misma forma (individual = una sola línea), con el nombre que cada quien eligió
 const accountLines = user => user.plan.type === 'familia'
-  ? user.plan.lines
-  : [{ name: user.name.split(' ')[0], img: user.img, gb: user.plan.gb, phone: user.phone, device: user.device, porta: user.porta }];
+  ? user.plan.lines.map(withProfile)
+  : [withProfile({ name: user.baseName.split(' ')[0], img: user.img, gb: user.plan.gb, phone: user.phone, device: user.device, porta: user.porta })]
+    .map(l => ({ ...l, fullName: l.fullName || user.baseName }));
 
 // consumo de demostración: fracción de datos usada por línea (misma en Mi Navi y en Navi Móvil)
 const DEMO_USED = [0.62, 0.35, 0.48, 0.81];
@@ -175,7 +195,7 @@ const mxn = n => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, max
 
 // ficha compacta de una línea: foto del equipo, titular, plan, modelo y número
 const lineHolder = (user, l) => user.plan.type === 'familia'
-  ? `${l.name} ${user.name.replace(/^Familia\s+/i, '')}` : user.name;
+  ? (l.fullName || `${l.name} ${user.familyName.replace(/^Familia\s+/i, '')}`) : (l.fullName || user.baseName);
 const linePlan = (user, l) => user.plan.type === 'familia' ? `Navi Plan Familia · ${l.gb} GB` : `Navi Plan ${l.gb} GB`;
 const lineCard = (user, l) => `<div class="idcard">
   <div class="idpic">${deviceArt(l.device)}</div>
@@ -218,15 +238,34 @@ const maskImei = i => '•• •••••• ••' + i.slice(10, 14) + ' '
 const NaviAuth = (() => {
   const KEY = 'navi.session';
   const read = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
+  // Cuenta vista por quien entra con su número. En Plan Familia cada integrante entra con su propia línea:
+  // comparte plan y red con su familia (owner = número del titular) y "me" es su propia línea.
+  //   name: nombre de la cuenta (en familia, "Familia García") · me.name: el nombre de la persona
+  const resolve = phone => {
+    const own = NAVI_ACCOUNTS[phone];
+    if (own && own.plan.type !== 'familia') {
+      const me = withProfile({ name: own.name.split(' ')[0], phone, img: own.img });
+      const full = me.fullName || own.name;
+      return { phone, ...own, baseName: own.name, name: full, familyName: full, owner: phone, role: 'titular', me, apps: appsFor(own.plan) };
+    }
+    const owner = own ? phone : Object.keys(NAVI_ACCOUNTS).find(k => NAVI_ACCOUNTS[k].plan.lines?.some(l => l.phone === phone));
+    if (!owner) return null;
+    const acc = NAVI_ACCOUNTS[owner], line = acc.plan.lines.find(l => l.phone === phone);
+    return { phone, name: acc.name, baseName: acc.name, familyName: acc.name, img: line.img, plan: acc.plan, device: line.device, porta: line.porta,
+      owner, role: owner === phone ? 'titular' : 'integrante', me: withProfile(line), apps: appsFor(acc.plan) };
+  };
   return {
-    find: phone => NAVI_ACCOUNTS[phone] || null,
+    find: resolve,
     login: phone => { try { localStorage.setItem(KEY, JSON.stringify({ phone, at: Date.now() })); } catch {} },
     logout: () => { try { localStorage.removeItem(KEY); } catch {} },
     // devuelve la cuenta con sesión activa, o null
-    current: () => {
-      const s = read();
-      const acc = s && NAVI_ACCOUNTS[s.phone];
-      return acc ? { phone: s.phone, ...acc, apps: appsFor(acc.plan) } : null;
-    },
+    current: () => { const s = read(); return s ? resolve(s.phone) : null; },
   };
 })();
+
+// lo que cambia un integrante (perfil o foto) se ve al momento en las demás pestañas abiertas de la familia
+addEventListener('storage', e => {
+  if (!['navi.profiles', 'navi.photos'].includes(e.key)) return;
+  if (document.activeElement?.matches('input,textarea,select')) return; // no interrumpir a quien está escribiendo
+  location.reload();
+});

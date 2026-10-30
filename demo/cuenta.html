@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261030b">
-<script src="auth.js?v=20261030b"></script>
+<link rel="stylesheet" href="navi.css?v=20261030c">
+<script src="auth.js?v=20261030c"></script>
 <script>
   // sin sesión no hay suite: de vuelta al login
   if (!NaviAuth.current()) location.replace('login.html?next=cuenta.html');
@@ -56,6 +56,30 @@ main{padding:36px 0 80px}
 .line b{font-size:14px}.line .meter{margin:4px 0 0;height:8px}
 .line em{font-style:normal;font-size:12px;color:var(--muted);white-space:nowrap}
 
+/* perfil y familia */
+.role{font-size:14px;font-weight:700;color:var(--lime)!important;margin-top:2px}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:46px;align-items:start}
+.people .muted{color:var(--muted);font-size:13px;margin:-6px 0 14px}
+.prof .field{display:grid;gap:6px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.prof .field small{opacity:.7}
+.prof input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%;color-scheme:dark}
+.prof input:focus{outline:none;border-color:var(--lime)}
+.prof .field.err input{border-color:#FF6F8E}
+.prof .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prof .acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px}
+.prof .ok{font-size:13px;font-weight:700;color:var(--lime)}
+.prof .ok.bad{color:#FF8A8D}
+.mem{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #ffffff12}
+.mem:first-child{border-top:0;padding-top:0}
+.mem img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.mem b{display:block;font-size:15px}
+.mem .sub{font-size:12.5px;color:var(--muted)}
+.mem .st{font-size:13px;margin-top:3px}
+.mem .tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;background:#ffffff14;white-space:nowrap}
+.mem .tag.me{background:var(--lime);color:var(--ink)}
+.mem .new{display:inline-block;font-size:10px;font-weight:800;color:var(--ink);background:#FFC22E;border-radius:99px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+@media (max-width:860px){.people{grid-template-columns:1fr}}
+@media (max-width:460px){.prof .two{grid-template-columns:1fr}}
 .box .more{display:inline-block;margin-top:14px;font-size:14px;font-weight:700;color:var(--lime)}
 /* equipos */
 .devs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
@@ -168,7 +192,7 @@ main{padding:36px 0 80px}
         <span class="cam" aria-hidden="true">📷</span>
       </label>
       <input type="file" id="photoIn" accept="image/*" hidden>
-      <div><p id="today"></p><h1>¡Hola, <em id="first"></em>!</h1>
+      <div><p id="today"></p><h1>¡Hola, <em id="first"></em>!</h1><p id="role" class="role"></p>
         <div class="picacts"><label for="photoIn" class="link">Cambiar foto</label><button class="link" id="photoDel" hidden>Quitar foto</button></div>
       </div>
     </div>
@@ -182,6 +206,26 @@ main{padding:36px 0 80px}
       <img class="peek" id="planImg" alt="">
     </div>
     <div class="box" id="usage"></div>
+  </section>
+
+  <section class="people">
+    <form class="box prof" id="prof" novalidate>
+      <h3>Mi perfil</h3>
+      <p class="muted">Lo que guardes aquí es lo que ve tu familia en Mi Navi, SOS Family y el Botón SOS.</p>
+      <label class="field">Nombre y apellidos<input id="pFull" maxlength="48" autocomplete="name" placeholder="Ej. María López García"></label>
+      <label class="field">Cómo te dice tu familia <small>(opcional)</small><input id="pNick" maxlength="20" placeholder="Ej. Mamá"></label>
+      <div class="two">
+        <label class="field">Correo<input id="pMail" type="email" maxlength="60" autocomplete="email" placeholder="tu@correo.com"></label>
+        <label class="field">Cumpleaños<input id="pBday" type="date"></label>
+      </div>
+      <label class="field">Mi estado <small>(lo ve tu familia)</small><input id="pStatus" maxlength="40" placeholder="Ej. En clases hasta las 2"></label>
+      <div class="acts"><button class="btn btn-lime">Guardar perfil</button><span id="pMsg" class="ok" role="status"></span></div>
+    </form>
+    <div class="box fam" id="famBox" hidden>
+      <h3>Tu familia</h3>
+      <p class="muted">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
+      <div id="famList"></div>
+    </div>
   </section>
 
   <section style="margin-bottom:46px">
@@ -238,8 +282,42 @@ if (user) {
   });
   $('photoDel').addEventListener('click', () => { Photos.set(user.phone, null); paintPhoto(); });
   const alertBox = msg => { const p = document.createElement('p'); p.className = 'link'; p.style.cssText = 'color:#FF8A8D;text-decoration:none'; p.textContent = msg; document.querySelector('.picacts').after(p); setTimeout(() => p.remove(), 4000); };
-  $('meName').textContent = user.name;
-  $('first').textContent = fam ? user.name : user.name.split(' ')[0];
+  const lines = accountLines(user);
+  $('meName').textContent = user.me.name;
+  $('first').textContent = user.me.name;
+  $('role').textContent = fam ? `${user.familyName} · ${user.role === 'titular' ? 'Titular del plan' : 'Integrante del plan'}` : '';
+
+  // mi perfil: lo que guardo aquí lo ve mi familia (Profiles, compartido por número)
+  const prof = Profiles.get(user.phone), myLine = lines.find(l => l.phone === user.phone);
+  // si aún no escribe su nombre real, el campo arranca vacío (no con "Mamá García")
+  $('pFull').value = prof.full || (fam ? '' : user.baseName);
+  $('pNick').value = prof.nick || ''; $('pNick').placeholder = `Ej. ${fam ? user.plan.lines.find(l => l.phone === user.phone).name : user.baseName.split(' ')[0]}`;
+  $('pMail').value = prof.mail || ''; $('pBday').value = prof.bday || ''; $('pStatus').value = prof.status || '';
+  $('prof').addEventListener('input', e => { e.target.closest('.field')?.classList.remove('err'); $('pMsg').textContent = ''; });
+  $('prof').addEventListener('submit', e => {
+    e.preventDefault();
+    const full = $('pFull').value.trim().replace(/\s+/g, ' '), mail = $('pMail').value.trim();
+    const bad = [['pFull', !full || full.split(' ').length >= 2], ['pMail', !mail || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)]];
+    bad.forEach(([id, ok]) => $(id).closest('.field').classList.toggle('err', !ok));
+    const m = $('pMsg');
+    if (bad.some(b => !b[1])) { m.className = 'ok bad'; m.textContent = !bad[0][1] ? 'Escribe tu nombre y al menos un apellido.' : 'Revisa tu correo.'; return; }
+    const saved = Profiles.set(user.phone, { full, nick: $('pNick').value.trim(), mail, bday: $('pBday').value, status: $('pStatus').value.trim() });
+    m.className = saved ? 'ok' : 'ok bad';
+    m.textContent = saved ? (fam ? '✓ Guardado. Tu familia ya lo ve.' : '✓ Guardado.') : 'No se pudo guardar en este navegador.';
+    if (saved) setTimeout(() => location.reload(), 900);
+  });
+
+  // mi familia: el perfil de cada integrante tal como lo dejó en su cuenta
+  const bdayTxt = d => d ? new Date(d + 'T12:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' }) : '';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  $('famBox').hidden = !fam;
+  if (fam) $('famList').innerHTML = lines.map(l => {
+    const pr = Profiles.get(l.phone), mine = l.phone === user.phone, recent = pr.at && Date.now() - pr.at < 864e5 && !mine;
+    return `<div class="mem"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt="">
+      <div><b>${esc(l.name)}${recent ? '<span class="new">Actualizó su perfil</span>' : ''}</b><div class="sub">${esc(lineHolder(user, l))} · ${fmtPhone(l.phone).replace('+52 ', '')}${pr.bday ? ` · 🎂 ${bdayTxt(pr.bday)}` : ''}</div>
+      ${pr.status ? `<div class="st">💬 ${esc(pr.status)}</div>` : ''}</div>
+      <span class="tag${mine ? ' me' : ''}">${mine ? 'Tú' : l.phone === user.owner ? 'Titular' : 'Integrante'}</span></div>`;
+  }).join('');
   $('today').textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   // plan
@@ -252,14 +330,13 @@ if (user) {
   // consumo de datos (valores de demostración)
   const used = DEMO_USED;
   $('usage').innerHTML = fam
-    ? '<h3>Datos por línea</h3>' + p.lines.map((l, i) => `
+    ? '<h3>Datos por línea</h3>' + lines.map((l, i) => `
         <div class="line"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt=""><div><b>${l.name}</b><div class="meter"><i data-w="${used[i] * 100}"></i></div></div><em>${(l.gb * (1 - used[i])).toFixed(1)} de ${l.gb} GB</em></div>`).join('')
     : `<h3>Tus datos</h3><div class="usage"><b style="font-family:var(--display);font-size:34px">${(p.gb * (1 - used[0])).toFixed(1)} GB</b> <small>disponibles de ${p.gb} GB</small>
         <div class="meter"><i data-w="${used[0] * 100}"></i></div><small>Llamadas y SMS ilimitados · Redes sociales incluidas</small></div>`;
   $('usage').insertAdjacentHTML('beforeend', '<a class="more" href="movil.html">Ver consumo detallado →</a>');
 
   // equipos registrados (uno por línea)
-  const lines = accountLines(user);
   $('devTitle').textContent = lines.length > 1 ? 'Equipos de la familia' : 'Tu equipo';
   $('devs').innerHTML = lines.map((l, i) => { const D = l.device; return `
     <article class="dev">

@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261030b">
-<script src="auth.js?v=20261030b"></script>
+<link rel="stylesheet" href="navi.css?v=20261030c">
+<script src="auth.js?v=20261030c"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=sos.html');</script>
 <style>
 /* app de una columna, como en el teléfono; barra de pestañas fija abajo */
@@ -320,7 +320,8 @@ if (user && !user.apps.includes('sos')) {
   // ---------- red familiar: las líneas del plan, sin códigos de invitación ----------
   const lines = accountLines(user);
   const COLORS = ['#B4E32F', '#A893FF', '#FFC22E', '#7EE0FF'];
-  const me = 0;
+  // cada integrante entra con su número: "me" es su línea; la red y su historial son de toda la familia
+  const me = Math.max(0, lines.findIndex(l => l.phone === user.phone));
   const now = Date.now(), MIN = 6e4;
   const PLACES0 = [
     { id: 'casa', name: 'Casa', ico: '🏠', x: 95, y: 235, r: 34 },
@@ -341,7 +342,7 @@ if (user && !user.apps.includes('sos')) {
   const adults = members.slice(0, 2);
 
   // ---------- estado guardado (demo, en este navegador) ----------
-  const KEY = 'navi.sos.' + user.phone;
+  const KEY = 'navi.sos.' + user.owner;
   const def = () => ({
     places: PLACES0,
     alerts: Object.fromEntries(PLACES0.map(p => [p.id, members.map(() => ({ arr: true, lev: p.id !== 'trabajo' }))])),
@@ -376,7 +377,7 @@ if (user && !user.apps.includes('sos')) {
     if (m.route) return `En camino a ${place(m.route[1])?.name || 'Casa'} · ${m.kmh} km/h`;
     return `En ${place(m.at)?.name || 'un lugar'}`;
   };
-  $('netName').textContent = lines.length > 1 ? user.name : 'Familia Navi';
+  $('netName').textContent = lines.length > 1 ? user.familyName : 'Familia Navi';
 
   // ---------- tabs ----------
   const TABS = ['inicio', 'mapa', 'chat', 'actividad', 'red', 'share', 'acomp'];
@@ -406,7 +407,7 @@ if (user && !user.apps.includes('sos')) {
     $('netCount').textContent = `${members.length} ${members.length === 1 ? 'integrante' : 'integrantes'}`;
     $('netList').innerHTML = members.map(m => m.invited
       ? `<div class="row">${avatar(m)}<div style="flex:1;min-width:0"><b>${esc(m.name)}</b><div class="muted">${status(m)}</div></div><span class="pill off">Pendiente</span></div>`
-      : `<div class="row">${avatar(m)}<div style="flex:1;min-width:0"><b>${m.i === me ? m.name + ' (Tú)' : m.name}</b><div class="muted">${status(m)} · ${ago(m.seen)}</div></div>
+      : `<div class="row">${avatar(m)}<div style="flex:1;min-width:0"><b>${m.i === me ? m.name + ' (Tú)' : m.name}</b><div class="muted">${status(m)} · ${ago(m.seen)}</div>${Profiles.get(m.phone).status ? `<div class="muted" style="color:var(--text)">💬 ${esc(Profiles.get(m.phone).status)}</div>` : ''}</div>
       <span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>`).join('')
       + (BASE === 1 ? '<p class="muted">Con el Plan Familia, cada línea se suma sola a tu red.</p>' : '');
     renderWatch();

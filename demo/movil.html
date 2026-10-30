@@ -11,10 +11,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261030b">
-<link rel="stylesheet" href="suite.css?v=20261030b">
-<script src="auth.js?v=20261030b"></script>
-<script src="planes.js?v=20261030b"></script>
+<link rel="stylesheet" href="navi.css?v=20261030c">
+<link rel="stylesheet" href="suite.css?v=20261030c">
+<script src="auth.js?v=20261030c"></script>
+<script src="planes.js?v=20261030c"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=movil.html');</script>
 <style>
 .lines{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
@@ -172,7 +172,9 @@ if (user) {
   const $ = id => document.getElementById(id);
   const lines = accountLines(user);
   const fam = user.plan.type === 'familia';
-  let sel = Math.max(0, Math.min(lines.length - 1, +(location.hash.match(/^#l(\d)$/) || [, 1])[1] - 1)), tab = 'datos';
+  // sin #lN en la dirección, se abre la línea de quien entró
+  const mine = Math.max(0, lines.findIndex(l => l.phone === user.phone)) + 1;
+  let sel = Math.max(0, Math.min(lines.length - 1, +(location.hash.match(/^#l(\d)$/) || [, mine])[1] - 1)), tab = 'datos';
 
   // ciclo de facturación: del día 15 al 14 del mes siguiente
   const today = new Date(); today.setHours(0, 0, 0, 0);

@@ -791,8 +791,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261030b"></script>
-<script src="planes.js?v=20261030b"></script>
+<script src="auth.js?v=20261030c"></script>
+<script src="planes.js?v=20261030c"></script>
 <script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -803,7 +803,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!user) return;
   const a = document.getElementById('account');
   a.href = 'cuenta.html';
-  a.innerHTML = `<img src="${avatarSrc(user.phone, user.img)}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)"><span class="long">${user.name.split(' ')[0]}</span>`;
+  a.innerHTML = `<img src="${avatarSrc(user.phone, user.img)}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)"><span class="long">${user.me.name}</span>`;
 })();
 
 // enlaces de la app en las tiendas: mientras estén en null, el botón sale como "Próximamente"
