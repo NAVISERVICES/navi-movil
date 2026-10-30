@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Portabilidad · Navi Móvil</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261029f">
+<link rel="stylesheet" href="suite.css?v=20261029f">
+<style>
+main{padding:24px 0 100px}
+.hero{text-align:center;max-width:720px;margin:0 auto 30px}
+.hero .eyebrow{color:var(--lime);font-weight:800;letter-spacing:.14em;font-size:12px}
+.hero h1{font-size:clamp(34px,6vw,56px);line-height:1;margin:10px 0 12px}
+.hero p{color:var(--muted)}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:24px}
+.card h2{font-size:24px;margin-bottom:6px}
+.muted{color:var(--muted);font-size:14px}
+.lookup{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.lookup input{flex:1;min-width:200px}
+.field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+.field input,.lookup input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:12px;font-size:16px;color:var(--text);width:100%}
+.field input:focus,.lookup input:focus{outline:none;border-color:var(--lime)}
+.field.err input{border-color:#FF6F8E}
+.hint{font-size:12px;color:var(--muted)}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0}
+.how div{background:#ffffff0c;border-radius:22px;padding:20px}
+.how i{font-style:normal;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--lime);color:var(--ink);font-family:var(--display);font-weight:800;margin-bottom:10px}
+.how b{display:block;font-size:17px;margin-bottom:4px}
+.how p{font-size:14px;color:var(--muted)}
+.how .tel{display:inline-block;margin-top:8px;font-family:var(--display);font-weight:800;font-size:22px;color:var(--lime)}
+.lay{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start}
+.grid{display:grid;gap:14px;margin-top:14px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted)}
+.chk input{width:18px;height:18px;accent-color:var(--lime);margin-top:1px;flex:none}
+.why{font-size:13px;color:#FF9DB0;min-height:18px}
+.faq details{border-top:1px solid #ffffff18;padding:12px 0}
+.faq summary{cursor:pointer;font-weight:700}
+.faq p{font-size:14px;color:var(--muted);margin-top:6px}
+/* resultado / seguimiento */
+.status{margin-top:16px}
+.status .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.folio{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.06em;background:#fff;color:var(--ink);padding:6px 14px;border-radius:12px}
+.tl{list-style:none;margin-top:16px;display:grid;gap:0}
+.tl li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding-bottom:16px;position:relative}
+.tl li::before{content:"";position:absolute;left:13px;top:26px;bottom:0;width:2px;background:#ffffff22}
+.tl li:last-child::before{display:none}
+.tl i{width:28px;height:28px;border-radius:50%;border:2px solid #ffffff40;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:800}
+.tl li.ok i{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.tl li.now i{border-color:var(--lime);color:var(--lime)}
+.tl b{display:block}
+.tl small{color:var(--muted)}
+.bad{background:#FF6F8E22;color:#FF9DB0;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:12px}
+@media (max-width:860px){.lay,.how{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="index.html">← <span>Volver</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <span class="eyebrow">PORTABILIDAD</span>
+    <h1>Trae tu número a Navi</h1>
+    <p>Conservas tu número de siempre, sin costo. Primero activas tu línea Navi y después capturas aquí tu NIP.</p>
+  </div>
+
+  <div class="card">
+    <h2>¿Ya solicitaste tu portabilidad?</h2>
+    <p class="muted">Consulta en qué va con tu folio o con el número que estás trayendo.</p>
+    <form class="lookup" id="fLook"><input id="look" placeholder="Folio (PT-123456) o número a 10 dígitos" aria-label="Folio o número"><button class="btn btn-lime">Consultar</button></form>
+    <div id="lookRes"></div>
+  </div>
+
+  <div class="how">
+    <div><i>1</i><b>Activa tu línea Navi</b><p>Compra tu plan con chip o eSIM y actívalo. Funciona desde el primer día con un número provisional.</p><a class="hint" href="comprar.html?porta=1" style="text-decoration:underline">¿Aún no tienes tu línea? Cómprala aquí</a></div>
+    <div><i>2</i><b>Pide tu NIP</b><p>Desde el número que quieres traer, llama o manda un SMS con la palabra NIP al:</p><span class="tel">051</span><p class="hint">Tu NIP tiene 4 dígitos y vale 5 días naturales.</p></div>
+    <div><i>3</i><b>Captúralo aquí</b><p>Llena el formulario y nosotros hacemos el cambio. Tu número queda en Navi en 1 a 3 días hábiles.</p></div>
+  </div>
+
+  <div class="lay">
+    <form class="card" id="fPorta" novalidate>
+      <h2>Solicita tu portabilidad</h2>
+      <p class="muted">Tu línea Navi debe estar activa. Hazlo con calma: si el NIP vence, pides uno nuevo al 051.</p>
+      <div class="grid">
+        <label class="field">Número que quieres conservar (10 dígitos)<input id="num" inputmode="numeric" maxlength="10" placeholder="55 1234 5678"></label>
+        <label class="field">NIP de portabilidad (4 dígitos)<input id="nip" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"><span class="hint">El que te llegó por SMS al pedirlo al 051.</span></label>
+        <label class="field">Tu número provisional Navi (10 dígitos)<input id="prov" inputmode="numeric" maxlength="10" placeholder="El que te dimos al activar"><span class="hint">Lo ves en tu chip o eSIM activo, o en Mi Navi.</span></label>
+        <label class="field">Correo para avisarte<input id="mail" type="email" autocomplete="email"></label>
+        <label class="chk"><input type="checkbox" id="ok"><span>Soy titular o usuario de la línea y autorizo el cambio de compañía. Mi línea anterior se cancela cuando el número quede en Navi.</span></label>
+        <p class="why" id="why"></p>
+        <button class="btn btn-lime">Solicitar portabilidad</button>
+        <p class="hint">Demostración: no se envía ninguna solicitud real.</p>
+      </div>
+    </form>
+    <div class="card faq">
+      <h2>Antes de empezar</h2>
+      <details open><summary>¿Cuánto cuesta?</summary><p>Nada. La portabilidad es gratis, solo pagas tu plan Navi.</p></details>
+      <details><summary>¿Me quedo sin servicio?</summary><p>No. Mientras se hace el cambio sigues usando tu línea provisional. El día del cambio puede haber una pausa corta, normalmente de madrugada.</p></details>
+      <details><summary>¿Qué pasa con mi saldo anterior?</summary><p>Tu compañía anterior cancela la línea y el saldo no se transfiere. Úsalo antes de portar.</p></details>
+      <details><summary>¿Y mi número provisional?</summary><p>Cuando tu número llega a Navi, reemplaza al provisional en el mismo chip o eSIM. No tienes que cambiar nada.</p></details>
+      <details><summary>¿Puedo portar las líneas de mi Plan Familia?</summary><p>Sí. Haz una solicitud por cada línea, cada una con su propio NIP.</p></details>
+    </div>
+  </div>
+</main>
+
+<script src="auth.js?v=20261029f"></script>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = 'navi.portas';
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+const save = l => { try { localStorage.setItem(KEY, JSON.stringify(l)); } catch {} };
+const fmtTel = n => n.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+const fmtDate = t => new Date(t).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+// suma días hábiles (sin sábados ni domingos)
+const addBiz = (t, n) => { const d = new Date(t); while (n) { d.setDate(d.getDate() + 1); if (d.getDay() % 6) n--; } return d.getTime(); };
+const H = 3600e3;
+
+// DEMO: la solicitud avanza sola según el tiempo que pasó desde que se hizo
+function stage(p) {
+  const el = Date.now() - p.at;
+  return Date.now() >= p.date ? 4 : el > 2 * H ? 3 : el > 10 * 60e3 ? 2 : 1;
+}
+function statusHTML(p) {
+  const s = stage(p);
+  const items = [
+    ['Solicitud recibida', fmtDate(p.at)],
+    ['Validación con tu compañía anterior', 'Revisamos tu NIP y tu número'],
+    ['Cambio programado', `${fmtDate(p.date)}, de madrugada`],
+    ['¡Tu número ya está en Navi!', s === 4 ? 'Reinicia tu teléfono si aún ves el número provisional.' : 'Te avisamos por correo y SMS'],
+  ];
+  return `<div class="status card" style="background:#ffffff0a">
+    <div class="head"><span class="folio">${p.folio}</span><span class="muted">${fmtTel(p.num)} → Navi</span></div>
+    <ol class="tl">${items.map(([t, d], i) => `<li class="${i < s ? 'ok' : i === s ? 'now' : ''}"><i>${i < s ? '✓' : i + 1}</i><div><b>${t}</b><small>${d}</small></div></li>`).join('')}</ol>
+  </div>`;
+}
+
+$('fLook').onsubmit = e => {
+  e.preventDefault();
+  const v = $('look').value.trim().toUpperCase().replace(/\s/g, '');
+  const p = load().find(x => x.folio === v || x.num === v);
+  $('lookRes').innerHTML = p ? statusHTML(p) : v ? '<p class="bad">No encontramos una solicitud con ese folio o número. Revisa que esté bien escrito.</p>' : '';
+};
+
+['num', 'nip', 'prov'].forEach(id => $(id).oninput = () => { $(id).value = $(id).value.replace(/\D/g, ''); $(id).closest('.field').classList.remove('err'); $('why').textContent = ''; });
+
+$('fPorta').onsubmit = e => {
+  e.preventDefault();
+  const num = $('num').value, nip = $('nip').value, prov = $('prov').value, mail = $('mail').value.trim();
+  const checks = [['num', num.length === 10], ['nip', nip.length === 4], ['prov', prov.length === 10], ['mail', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)]];
+  checks.forEach(([id, ok]) => $(id).closest('.field').classList.toggle('err', !ok));
+  if (checks.some(c => !c[1])) return $('why').textContent = 'Revisa los campos marcados.';
+  if (num === prov) return $('why').textContent = 'El número a conservar y el provisional no pueden ser el mismo.';
+  if (!$('ok').checked) return $('why').textContent = 'Necesitamos tu autorización para hacer el cambio.';
+  const l = load();
+  if (l.some(x => x.num === num && stage(x) < 4)) return $('why').textContent = 'Ese número ya tiene una portabilidad en proceso. Consúltala arriba.';
+  const at = Date.now();
+  const p = { folio: 'PT-' + String(at).slice(-6), num, prov, mail, at, date: addBiz(at, new Date(at).getHours() >= 17 ? 2 : 1) };
+  save([p, ...l]);
+  $('fPorta').innerHTML = `<h2>¡Solicitud enviada!</h2>
+    <p class="muted">Te mandamos el folio a ${mail}. Mientras tanto, sigue usando tu línea provisional ${fmtTel(prov)}.</p>
+    ${statusHTML(p)}
+    <p class="hint" style="margin-top:12px">Guarda tu folio para consultar el avance. Demostración: no se envió ninguna solicitud real.</p>
+    <a class="btn btn-ghost" href="index.html" style="margin-top:14px">Volver al inicio</a>`;
+  scrollTo({ top: $('fPorta').offsetTop - 90, behavior: 'smooth' });
+};
+</script>
+</body>
+</html>

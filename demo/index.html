@@ -301,6 +301,13 @@ section{position:relative}
 .switch .sec-head p{color:#33334f}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
 .steps::before{content:"";position:absolute;top:58px;left:10%;right:10%;border-top:4px dashed var(--ink);opacity:.25}
+.steps.steps4{grid-template-columns:repeat(4,1fr);gap:18px}
+.steps4 .step{padding:24px}
+.switch-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:32px;position:relative;z-index:1}
+.btn-ghost-ink{border:3px solid var(--ink);color:var(--ink)}
+.btn-ghost-ink:hover{background:var(--ink);color:var(--lime)}
+@media (max-width:1100px){.steps.steps4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.steps.steps4{grid-template-columns:1fr}}
 .step{background:#fff;border-radius:var(--radius);padding:30px;position:relative;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s}
 .step:hover{transform:translate(-4px,-4px) rotate(-1deg);box-shadow:12px 12px 0 var(--ink)}
 .step .num{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:30px;margin-bottom:20px;border:3px solid var(--ink)}
@@ -411,7 +418,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     <div class="header-cta" style="display:flex;gap:10px">
       <a class="btn btn-ghost sm" href="login.html" id="account">👤 <span class="long">Mi Navi</span></a>
       <a class="btn btn-ghost sm" href="#app" id="getApp">📲 <span class="long">Descarga la </span>App</a>
-      <a class="btn btn-lime sm" href="#plan">Compra tu SIM</a>
+      <a class="btn btn-lime sm" href="comprar.html">Compra tu SIM</a>
     </div>
   </div>
 </header>
@@ -432,7 +439,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <p class="lead">Un mismo plan para toda la familia, una sola cuenta y la tranquilidad de saber que todos están bien. Te cambias con tu mismo número.</p>
       <div class="cta-row">
         <a class="btn btn-lime" href="#plan">Arma tu Plan Familia →</a>
-        <a class="btn btn-ghost" href="#cambiate">Cámbiate con tu número</a>
+        <a class="btn btn-ghost" href="portabilidad.html">Cámbiate con tu número</a>
       </div>
       <div class="checks"><span>Hasta 15% de descuento familiar</span><span>Una sola recarga</span><span>Ubicación y botón SOS</span></div>
     </div>
@@ -614,13 +621,15 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     <div class="sec-head reveal">
       <span class="eyebrow">Portabilidad</span>
       <h2>Cámbiate en familia, con sus mismos números</h2>
-      <p>Tres pasos y listo. Nosotros nos encargamos del resto.</p>
+      <p>Cuatro pasos, sin costo. Nosotros hacemos el trámite con tu compañía actual y tu línea de hoy sigue funcionando hasta que el cambio se completa.</p>
     </div>
-    <div class="steps">
-      <div class="step reveal"><div class="num" style="background:var(--yellow)">1</div><h3>Elige tu Plan Familia</h3><p>Cuántas líneas y qué plan de datos comparten todos.</p></div>
-      <div class="step reveal" style="transition-delay:.1s"><div class="num" style="background:#A893FF">2</div><h3>Pide tu SIM o eSIM</h3><p>Te las enviamos a casa sin costo o activas eSIM al momento.</p></div>
-      <div class="step reveal" style="transition-delay:.2s"><div class="num" style="background:#4FD1C0">3</div><h3>Conserva sus números</h3><p>Hacemos la portabilidad de todas las líneas en un solo trámite.</p></div>
+    <div class="steps steps4">
+      <div class="step reveal"><div class="num" style="background:var(--yellow)">1</div><h3>Compra tu plan</h3><p>Elige plan y chip o eSIM. Tu línea Navi funciona desde el primer día con un número provisional.</p></div>
+      <div class="step reveal" style="transition-delay:.1s"><div class="num" style="background:#A893FF">2</div><h3>Pide tu NIP al 051</h3><p>Desde la línea que te traes, llama o manda «NIP» por SMS al 051. Pídelo cuando ya tengas tu chip: dura 5 días.</p></div>
+      <div class="step reveal" style="transition-delay:.2s"><div class="num" style="background:#4FD1C0">3</div><h3>Captura tu NIP</h3><p>Tu número, el NIP y tu número provisional Navi. Te damos folio y fecha estimada.</p></div>
+      <div class="step reveal" style="transition-delay:.3s"><div class="num" style="background:var(--pink)">4</div><h3>Tu número, en Navi</h3><p>El cambio se hace de madrugada en días hábiles. Conservas tus contactos y tu WhatsApp.</p></div>
     </div>
+    <div class="switch-cta reveal"><a class="btn btn-ink" href="comprar.html?porta=1">Comprar y traer mi número</a><a class="btn btn-ghost-ink" href="portabilidad.html">Ya tengo mi chip: capturar NIP</a></div>
   </div>
   <img class="peek" src="assets/beto.png" alt="">
 </section>
@@ -660,7 +669,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261029e"></script>
+<script src="auth.js?v=20261029f"></script>
+<script src="planes.js?v=20261029f"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -731,24 +741,7 @@ const APP_LINKS = {
   if (installed) getApp.remove();
 })();
 
-// precios (MXN), compartidos por planes individuales y Plan Familia
-const PERIODS = {
-  m: { label: 'Mensual', per: 'al mes', months: 1 },
-  t: { label: 'Trimestral', per: 'cada 3 meses', months: 3 },
-  s: { label: 'Semestral', per: 'cada 6 meses', months: 6 },
-  a: { label: 'Anual', per: 'al año', months: 12 },
-};
-const PLANS = [
-  { gb: 2,  color: 'p-yellow', prices: { m: 129.99 } },
-  { gb: 4,  color: 'p-teal',   prices: { m: 169.99, t: 459.99 } },
-  { gb: 12, color: 'p-purple', prices: { m: 239.99, t: 629.99, s: 1199, a: 2299 } },
-  { gb: 24, color: 'p-coral',  prices: { m: 289.99, t: 779.99, s: 1499, a: 2899 } },
-];
-const FAMILY_STEP = 0.05; // 5% por cada línea agregada después de la primera
-const MAX_LINES = 4;
-const familyDiscount = lines => FAMILY_STEP * (lines - 1);
-const round2 = n => Math.round(n * 100) / 100;
-const money = n => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+// precios (MXN): PERIODS, PLANS, familyDiscount y money vienen de planes.js
 
 // rotating hero word
 (() => {
@@ -847,7 +840,7 @@ document.querySelectorAll('.tilt').forEach(c => {
         <div class="price"><sup>$</sup>${int}${dec ? `<span style="font-size:22px">.${dec}</span>` : ''}</div>
         <div class="per">MXN ${P.per}</div>${eq}
         <ul><li>Sin contratos</li><li>Conserva tu número</li></ul>
-        <button class="btn btn-ink go">Lo quiero</button></article>`;
+        <button class="btn btn-ink go" data-gb="${p.gb}">Lo quiero</button></article>`;
     }).join('');
   };
 
@@ -860,7 +853,7 @@ document.querySelectorAll('.tilt').forEach(c => {
     const g = e.target.closest('[data-goto]');
     if (g) return tabs.find(t => t.dataset.p === g.dataset.goto).click();
     const go = e.target.closest('.go');
-    if (go) burst(go.getBoundingClientRect(), 90);
+    if (go) { burst(go.getBoundingClientRect(), 90); setTimeout(() => location.href = `comprar.html?gb=${go.dataset.gb}&per=${period}`, reduce ? 0 : 450); }
   });
   addEventListener('resize', moveInd);
   document.fonts.ready.then(moveInd);
@@ -952,7 +945,10 @@ document.querySelectorAll('.tilt').forEach(c => {
     render();
   });
   render();
-  document.getElementById('hire').addEventListener('click', e => burst(e.currentTarget.getBoundingClientRect(), 140));
+  document.getElementById('hire').addEventListener('click', e => {
+    burst(e.currentTarget.getBoundingClientRect(), 140);
+    setTimeout(() => location.href = `comprar.html?fam=${lines}&gb=${fit(gb)}&per=${period}`, reduce ? 0 : 450);
+  });
   document.getElementById('finalCta').addEventListener('click', e => burst(e.currentTarget.getBoundingClientRect(), 100));
 })();
 
