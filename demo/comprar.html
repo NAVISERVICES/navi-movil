@@ -41,6 +41,11 @@ main{padding:10px 0 120px}
 .plan .pr{font-family:var(--display);font-weight:800;font-size:18px;opacity:1;margin-top:10px}
 .plan .xb{display:inline-block;margin-top:8px;background:var(--ink);color:#FFE36E;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:800;opacity:1}
 .bonus-ok{margin-top:12px;background:linear-gradient(90deg,#FF3D7F33,#FFC22E2e);border:1px solid #FFC22E77;border-radius:14px;padding:12px 14px;font-size:14px}
+.porta-go{width:100%;justify-content:center;margin-top:14px}
+.porta-go[aria-disabled="true"]{background:#ffffff1c;color:#ffffff70;box-shadow:none;cursor:not-allowed;transform:none}
+#toPortaHint{margin-top:8px;text-align:center}
+#from.need{border-color:#FF6F8E;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .sum .r.promo{color:#FFE36E}.sum .r.promo b{color:#FFE36E}
 .p-yellow{background:#FFC22E}.p-teal{background:#4FD1C0}.p-purple{background:#A893FF}.p-coral{background:#FF8A65}
 .opts{display:flex;gap:10px;flex-wrap:wrap}
@@ -163,10 +168,12 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
             <label><input type="radio" name="mode" value="nuevo" id="mNew"><b>📱 Línea nueva</b><small>Te damos un número Navi nuevo.</small></label>
             <label><input type="radio" name="mode" value="porta" id="mPorta"><b>🔁 Traer mi número</b><small>Conservas tu número de siempre. El trámite es gratis.</small></label>
           </div>
-          <p class="note" id="portaNote" hidden>Tu línea funciona desde el primer día con un número provisional. El número que traes y tu NIP se capturan después, en <a href="portabilidad.html" style="text-decoration:underline">Portabilidad</a>, cuando cada línea ya esté activa.</p>
+          <p class="note" id="portaNote" hidden>Tu línea funciona desde el primer día con un número provisional. El número que traes y tu NIP se capturan en Portabilidad.</p>
           <div id="fromBox" hidden style="margin-top:14px">
             <label class="field">¿De qué compañía vienes?<select id="from"><option value="">Elige tu compañía actual</option></select></label>
             <div id="bonus"></div>
+            <button type="button" class="btn btn-lime porta-go" id="toPorta" aria-disabled="true">🔁 Ir a Portabilidad →</button>
+            <p class="hint" id="toPortaHint">Elige primero de qué compañía vienes para continuar a Portabilidad.</p>
           </div>
         </div>
       </section>
@@ -303,6 +310,8 @@ function renderPlan() {
   $('mNew').checked = O.mode === 'nuevo'; $('mPorta').checked = O.mode === 'porta';
   $('portaNote').hidden = O.mode !== 'porta';
   $('fromBox').hidden = O.mode !== 'porta';
+  $('toPorta').setAttribute('aria-disabled', !O.from);
+  $('toPortaHint').hidden = !!O.from;
   $('bonus').innerHTML = !O.from ? ''
     : bonusOk() ? (O.kind === 'fam'
       ? `<p class="bonus-ok">🎁 <b>¡Tienen regalo de bienvenida!</b> Cada línea que traigan de ${O.from} conserva su plan de ${O.gb} GB y además recibe <b>+${portaGift(O.gb)} GB de regalo cada mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`
@@ -360,7 +369,12 @@ $('per').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return
 $('plans').onclick = e => { const b = e.target.closest('[data-gb]'); if (b && !b.disabled) { O.gb = +b.dataset.gb; render(); } };
 document.querySelectorAll('[name=mode]').forEach(r => r.onchange = () => { O.mode = r.value; render(); });
 $('from').insertAdjacentHTML('beforeend', [...PORTA_FROM, 'Otra compañía'].map(c => `<option>${c}</option>`).join(''));
-$('from').onchange = () => { O.from = $('from').value; render(); };
+$('from').onchange = () => { O.from = $('from').value; $('from').classList.remove('need'); render(); };
+// Portabilidad solo se abre sabiendo de qué compañía viene (de eso depende el regalo de bienvenida)
+$('toPorta').onclick = () => {
+  if (!O.from) { $('from').classList.remove('need'); void $('from').offsetWidth; $('from').classList.add('need'); $('from').focus(); return; }
+  location.href = `portabilidad.html?${new URLSearchParams({ de: O.from, gb: O.gb })}`;
+};
 
 // paso 2
 document.querySelector('.route').onclick = e => { const b = e.target.closest('[data-c]'); if (!b || b.disabled) return; O[b.dataset.c] += +b.dataset.d; render(); };

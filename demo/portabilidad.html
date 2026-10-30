@@ -26,7 +26,11 @@ main{padding:24px 0 100px}
 .lookup{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 .lookup input{flex:1;min-width:200px}
 .field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
-.field input,.lookup input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:12px;font-size:16px;color:var(--text);width:100%}
+.field input,.field select,.lookup input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:12px;font-size:16px;color:var(--text);width:100%}
+.field select option{color:#000}
+#fPorta{scroll-margin-top:90px}
+.field.err select{border-color:#FF6F8E}
+.gift-ok{background:linear-gradient(90deg,#FF3D7F33,#FFC22E2e);border:1px solid #FFC22E77;border-radius:14px;padding:12px 14px;font-size:14px}
 .field input:focus,.lookup input:focus{outline:none;border-color:var(--lime)}
 .field.err input{border-color:#FF6F8E}
 .hint{font-size:12px;color:var(--muted)}
@@ -95,6 +99,8 @@ main{padding:24px 0 100px}
       <h2>Solicita tu portabilidad</h2>
       <p class="muted">Tu línea Navi debe estar activa. Hazlo con calma: si el NIP vence, pides uno nuevo al 051.</p>
       <div class="grid">
+        <label class="field">¿De qué compañía vienes?<select id="de"><option value="">Elige tu compañía actual</option></select></label>
+        <div id="deGift"></div>
         <label class="field">Número que quieres conservar (10 dígitos)<input id="num" inputmode="numeric" maxlength="10" placeholder="55 1234 5678"></label>
         <label class="field">NIP de portabilidad (4 dígitos)<input id="nip" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"><span class="hint">El que te llegó por SMS al pedirlo al 051.</span></label>
         <label class="field">Tu número provisional Navi (10 dígitos)<input id="prov" inputmode="numeric" maxlength="10" placeholder="El que te dimos al activar"><span class="hint">Lo ves en tu chip o eSIM activo, o en Mi Navi.</span></label>
@@ -117,6 +123,7 @@ main{padding:24px 0 100px}
 </main>
 
 <script src="auth.js?v=20261030b"></script>
+<script src="planes.js?v=20261030b"></script>
 <script>
 const $ = id => document.getElementById(id);
 const KEY = 'navi.portas';
@@ -154,20 +161,37 @@ $('fLook').onsubmit = e => {
   $('lookRes').innerHTML = p ? statusHTML(p) : v ? '<p class="bad">No encontramos una solicitud con ese folio o número. Revisa que esté bien escrito.</p>' : '';
 };
 
+// compañía de origen: indispensable (de ella depende el regalo de bienvenida); llega prellenada desde la compra
+const qs = new URLSearchParams(location.search), fromGb = +qs.get('gb');
+$('de').insertAdjacentHTML('beforeend', [...PORTA_FROM, 'Otra compañía'].map(c => `<option>${c}</option>`).join(''));
+const showGift = () => {
+  const de = $('de').value, ok = PORTA_FROM.includes(de);
+  $('deGift').innerHTML = !de ? '' : ok
+    ? `<p class="gift-ok">🎁 <b>Tienes regalo de bienvenida:</b> ${PORTA_BONUS[fromGb] ? `+${portaGift(fromGb)} GB` : 'GB extra'} cada mes durante ${PORTA_MONTHS} meses, aparte de los GB de tu plan.</p>`
+    : `<p class="hint">El regalo de bienvenida aplica si vienes de ${PORTA_FROM.join(', ')}. Igual puedes traer tu número sin costo.</p>`;
+};
+$('de').onchange = () => { $('de').closest('.field').classList.remove('err'); $('why').textContent = ''; showGift(); };
+if ([...PORTA_FROM, 'Otra compañía'].includes(qs.get('de'))) {
+  $('de').value = qs.get('de'); showGift();
+  setTimeout(() => { $('fPorta').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('num').focus({ preventScroll: true }); }, 300);
+}
+
 ['num', 'nip', 'prov'].forEach(id => $(id).oninput = () => { $(id).value = $(id).value.replace(/\D/g, ''); $(id).closest('.field').classList.remove('err'); $('why').textContent = ''; });
 
 $('fPorta').onsubmit = e => {
   e.preventDefault();
   const num = $('num').value, nip = $('nip').value, prov = $('prov').value, mail = $('mail').value.trim();
-  const checks = [['num', num.length === 10], ['nip', nip.length === 4], ['prov', prov.length === 10], ['mail', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)]];
+  const de = $('de').value;
+  const checks = [['de', !!de], ['num', num.length === 10], ['nip', nip.length === 4], ['prov', prov.length === 10], ['mail', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)]];
   checks.forEach(([id, ok]) => $(id).closest('.field').classList.toggle('err', !ok));
+  if (!de) return $('why').textContent = 'Dinos de qué compañía vienes para poder hacer tu portabilidad.';
   if (checks.some(c => !c[1])) return $('why').textContent = 'Revisa los campos marcados.';
   if (num === prov) return $('why').textContent = 'El número a conservar y el provisional no pueden ser el mismo.';
   if (!$('ok').checked) return $('why').textContent = 'Necesitamos tu autorización para hacer el cambio.';
   const l = load();
   if (l.some(x => x.num === num && stage(x) < 4)) return $('why').textContent = 'Ese número ya tiene una portabilidad en proceso. Consúltala arriba.';
   const at = Date.now();
-  const p = { folio: 'PT-' + String(at).slice(-6), num, prov, mail, at, date: addBiz(at, new Date(at).getHours() >= 17 ? 2 : 1) };
+  const p = { folio: 'PT-' + String(at).slice(-6), de, num, prov, mail, at, date: addBiz(at, new Date(at).getHours() >= 17 ? 2 : 1) };
   save([p, ...l]);
   $('fPorta').innerHTML = `<h2>¡Solicitud enviada!</h2>
     <p class="muted">Te mandamos el folio a ${mail}. Mientras tanto, sigue usando tu línea provisional ${fmtTel(prov)}.</p>
