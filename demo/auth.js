@@ -123,18 +123,21 @@ const deviceArt = D => {
   </svg>`;
 };
 
+// fecha en que un número portado quedó en Navi, relativa a hoy para que el demo siempre esté a mitad de sus 12 regalos
+const portedAgo = months => { const d = new Date(); d.setMonth(d.getMonth() - months); d.setDate(d.getDate() - 3); return d.toISOString().slice(0, 10); };
+
 // cuentas de demostración (números ficticios)
 const NAVI_ACCOUNTS = {
   '5500000001': { name: 'Sofía Ramírez', img: 'sofi', plan: { type: 'individual', gb: 2,  period: 'm' },
     device: dev('128 GB', 'Azul oscuro', 'SIM física', '352914110473826') },
   '5500000002': { name: 'Luis Pérez',    img: 'beto', plan: { type: 'individual', gb: 12, period: 't' },
-    device: dev('128 GB', 'Medianoche', 'eSIM', '353827119064512') },
+    device: dev('128 GB', 'Medianoche', 'eSIM', '353827119064512'), porta: { from: 'AT&T', since: portedAgo(4) } },
   '5500000003': { name: 'Carla Ruiz',    img: 'mama', plan: { type: 'individual', gb: 24, period: 'a' },
     device: dev('256 GB', 'Azul náutico', 'SIM física', '356104230918475') },
   '5500000004': { name: 'Familia García', img: 'beto', plan: { type: 'familia', period: 'm', lines: [
     { name: 'Papá', img: 'beto', gb: 12, phone: '5500000004', device: dev('256 GB', 'Titanio natural', 'eSIM', '357221340556193') },
-    { name: 'Mamá', img: 'mama', gb: 12, phone: '5500000005', device: dev('512 GB', 'Lavanda', 'SIM física', '350918221764038') },
-    { name: 'Sofi', img: 'sofi', gb: 12, phone: '5500000006', device: dev('128 GB', 'Gris', 'SIM física', '861537040298114') },
+    { name: 'Mamá', img: 'mama', gb: 12, phone: '5500000005', device: dev('512 GB', 'Lavanda', 'SIM física', '350918221764038'), porta: { from: 'Telcel', since: portedAgo(2) } },
+    { name: 'Sofi', img: 'sofi', gb: 12, phone: '5500000006', device: dev('128 GB', 'Gris', 'SIM física', '861537040298114'), porta: { from: 'Movistar', since: portedAgo(6) } },
     { name: 'Toño', img: 'tono', gb: 12, phone: '5500000007', device: dev('128 GB', 'Gris', 'SIM física', '359482170633521') },
   ] } },
 };
@@ -144,7 +147,7 @@ const appsFor = plan => PLAN_ACCESS[plan.type === 'familia' ? 'familia' : plan.g
 // todas las líneas de una cuenta con la misma forma (individual = una sola línea)
 const accountLines = user => user.plan.type === 'familia'
   ? user.plan.lines
-  : [{ name: user.name.split(' ')[0], img: user.img, gb: user.plan.gb, phone: user.phone, device: user.device }];
+  : [{ name: user.name.split(' ')[0], img: user.img, gb: user.plan.gb, phone: user.phone, device: user.device, porta: user.porta }];
 
 // consumo de demostración: fracción de datos usada por línea (misma en Mi Navi y en Navi Móvil)
 const DEMO_USED = [0.62, 0.35, 0.48, 0.81];

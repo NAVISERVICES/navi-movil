@@ -209,11 +209,24 @@ section{position:relative}
 .mult .m:hover{transform:translateY(-6px) rotate(-1.5deg)}
 .mult .m .x{position:absolute;top:12px;right:12px;width:54px;height:54px;border-radius:50%;background:var(--ink);color:#FFE36E;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:22px;transform:rotate(10deg)}
 .mult .m small{font-size:11px;font-weight:800;letter-spacing:.12em;opacity:.7}
-.mult .m .was{font-family:var(--display);font-weight:800;font-size:20px;opacity:.55;text-decoration:line-through;text-decoration-thickness:3px;margin-top:6px}
-.mult .m .now{font-family:var(--display);font-weight:800;font-size:54px;line-height:.9;letter-spacing:-.03em}
+.mult .m .now{font-family:var(--display);font-weight:800;font-size:54px;line-height:.9;letter-spacing:-.03em;margin-top:6px}
 .mult .m .now span{font-size:22px;margin-left:3px}
-.mult .m .mo{font-size:13px;font-weight:700;margin-top:6px}
-.mult .m.pop .now{animation:pricePop .5s cubic-bezier(.3,1.6,.5,1)}
+.mult .m .mo{font-size:12px;font-weight:700;opacity:.7;margin-top:2px}
+.mult .m .gift{display:block;margin-top:12px;background:var(--ink);color:#fff;border-radius:12px;padding:7px 10px;font-size:13px;line-height:1.2}
+.mult .m .gift b{color:#FFE36E;font-family:var(--display);font-size:16px}
+.mult .m.pop .gift{animation:pricePop .5s cubic-bezier(.3,1.6,.5,1)}
+/* calendario de 12 regalos */
+.cal{margin-top:16px;background:#ffffff10;border:1px solid #ffffff22;border-radius:22px;padding:14px 14px 12px}
+.cal .boxes{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
+.cal .b{position:relative;aspect-ratio:1;border-radius:9px;background:#FF6FB1;display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--ink);overflow:visible}
+.cal .b::before{content:"";position:absolute;left:-2px;right:-2px;top:-3px;height:34%;border-radius:6px;background:#FFC22E;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.cal .b::after{content:"";position:absolute;left:44%;width:12%;top:0;bottom:0;background:#FFC22E}
+.cal .b span{position:relative;z-index:1;opacity:0;transition:opacity .3s}
+.cal .b.open{background:var(--lime)}
+.cal .b.open::before{transform:translateY(-70%) rotate(-18deg)}
+.cal .b.open::after{opacity:0}
+.cal .b.open span{opacity:1}
+.cal p{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
 .porta .burst{position:absolute;right:-26px;top:-30px;width:150px;height:150px;z-index:2;display:grid;place-items:center;color:var(--ink);font-family:var(--display);font-weight:800;text-align:center;line-height:.95;transform:rotate(12deg);animation:spin 18s linear infinite}
 .porta .burst svg{position:absolute;inset:0;width:100%;height:100%}
 .porta .burst div{position:relative;font-size:15px;animation:spin 18s linear infinite reverse}
@@ -225,6 +238,8 @@ section{position:relative}
   .porta .box{padding:38px 18px 22px;border-radius:30px}
   .porta .burst{width:96px;height:96px;right:-6px;top:-34px}.porta .burst b{font-size:24px}.porta .burst div{font-size:11px}
   .mult{gap:10px}.mult .m{padding:16px 14px 14px;border-radius:22px}.mult .m .now{font-size:40px}.mult .m .x{width:42px;height:42px;font-size:17px;top:10px;right:10px}
+  .mult .m .gift{font-size:11.5px;padding:6px 8px}.mult .m .gift b{font-size:14px}
+  .cal .boxes{grid-template-columns:repeat(6,1fr)}
 }
 /* insignia de la promo en las tarjetas de planes */
 .pcard .porta-chip{margin:0 0 14px;background:var(--ink);color:#fff;border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.3;position:relative;z-index:1}
@@ -483,7 +498,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 </head>
 <body>
 
-<a class="promo-bar" href="#promo" aria-label="Promoción: cámbiate a Navi y recibe el doble o el triple de GB durante 12 meses"><div class="run" id="promoRun"></div></a>
+<a class="promo-bar" href="#promo" aria-label="Regalo de bienvenida: cámbiate a Navi con tu número y recibe GB de regalo cada mes durante 12 meses"><div class="run" id="promoRun"></div></a>
 
 <div class="sections">
   <div class="wrap">
@@ -553,8 +568,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <div class="marquee" aria-hidden="true">
   <div class="track">
-    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Triple de GB al cambiarte</span>
-    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>Triple de GB al cambiarte</span>
+    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>GB de regalo al cambiarte</span>
+    <span>Sin contratos</span><span>5% menos por cada línea</span><span>Botón SOS</span><span>eSIM al instante</span><span>Una sola recarga</span><span>GB de regalo al cambiarte</span>
   </div>
 </div>
 
@@ -562,16 +577,19 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 <section class="porta" id="promo">
   <div class="wrap">
     <div class="box reveal">
-      <div class="burst" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon fill="#FFC22E" points="50,2 59,16 75,8 77,26 94,25 88,42 100,50 88,58 94,75 77,74 75,92 59,84 50,98 41,84 25,92 23,74 6,75 12,58 0,50 12,42 6,25 23,26 25,8 41,16"/></svg><div><b>12</b>MESES</div></div>
+      <div class="burst" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon fill="#FFC22E" points="50,2 59,16 75,8 77,26 94,25 88,42 100,50 88,58 94,75 77,74 75,92 59,84 50,98 41,84 25,92 23,74 6,75 12,58 0,50 12,42 6,25 23,26 25,8 41,16"/></svg><div><b>12</b>REGALOS</div></div>
       <div>
-        <span class="tag">🔁 PROMO PORTABILIDAD</span>
-        <h2>Cámbiate y te damos <em>el triple</em> de GB</h2>
-        <p class="lead">Trae tu número a Navi y durante <b>12 meses</b> recibes el <b>triple de GB</b> en los planes de 4, 12 y 24 GB, y el <b>doble</b> en el de 2 GB. Mismo precio, conservas tu número y el trámite es gratis.</p>
+        <span class="tag">🎁 REGALO DE BIENVENIDA</span>
+        <h2>En Navi, el número grande <em>es el tuyo</em></h2>
+        <p class="lead">Tu plan es exactamente lo que dice: <b>12 GB son 12 GB</b>. Y si te cambias con tu número, además te <b>regalamos GB extra cada mes durante 12 meses</b>. Aparte, a la vista y sin letras chiquitas.</p>
         <div class="from" id="promoFrom"></div>
-        <div class="ctas"><a class="btn btn-lime" href="comprar.html?porta=1">Quiero cambiarme →</a><a class="btn btn-ghost" href="portabilidad.html">¿Cómo me cambio?</a></div>
-        <p class="fine">Válido al traer tu número desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile. Los GB adicionales se aplican durante 12 meses en el plan que contrates. En Plan Familia aplica por cada línea que traigas.</p>
+        <div class="ctas"><a class="btn btn-lime" href="comprar.html?porta=1">Quiero mi regalo →</a><a class="btn btn-ghost" href="portabilidad.html">¿Cómo me cambio?</a></div>
+        <p class="fine">El regalo de bienvenida aplica al traer tu número desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile, y en Plan Familia por cada línea que traigas. Se entrega cada mes durante 12 meses desde que tu número queda en Navi, al mismo precio de tu plan.</p>
       </div>
-      <div class="mult" id="promoMult"></div>
+      <div>
+        <div class="mult" id="promoMult"></div>
+        <div class="cal" aria-label="12 regalos, uno cada mes"><div class="boxes" id="giftCal"></div><p>Un regalo cada mes, durante 12 meses. Lo ves abrirse en tu app Mi Navi.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -678,7 +696,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <label>Todas las líneas con el mismo plan</label>
       <div class="members" id="members"></div>
       <p class="topup-note">¿Alguien se queda sin datos? Recarga solo su línea con un paquete adicional desde <a href="recargas.html">Recargas</a>.</p>
-      <p class="topup-note">🎉 <a href="#promo">Promo portabilidad</a>: cada línea que traigas de Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile recibe el triple de GB durante 12 meses (el doble en 2 GB).</p>
+      <p class="topup-note">🎁 <a href="#promo">Regalo de bienvenida</a>: cada línea que traigas de Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile recibe GB de regalo cada mes durante 12 meses.</p>
       <div class="summary fam">
         <div class="rows">
           <div><span>Subtotal</span><s id="fSub"></s></div>
@@ -773,8 +791,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261030a"></script>
-<script src="planes.js?v=20261030a"></script>
+<script src="auth.js?v=20261030b"></script>
+<script src="planes.js?v=20261030b"></script>
 <script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -939,24 +957,31 @@ document.querySelectorAll('.tilt').forEach(c => {
 (() => {
   const from = PORTA_FROM.join(', ').replace(/, ([^,]*)$/, ' o $1');
   const items = [
-    `🔥 <b>¡TRIPLE DE GB!</b> Cámbiate a Navi con tu número`,
-    ...PLANS.map(p => `${p.gb} GB <i>→</i> <b>${portaGb(p.gb)} GB</b> por ${PORTA_MONTHS} meses`),
+    `🎁 <b>REGALO DE BIENVENIDA</b> Cámbiate a Navi con tu número`,
+    ...PLANS.map(p => `Plan ${p.gb} GB <i>+</i> <b>${portaGift(p.gb)} GB de regalo</b> cada mes`),
+    `12 regalos, uno cada mes`,
     `Si vienes de ${from}`,
-    `👨‍👩‍👧‍👦 <b>PLAN FAMILIA</b> la promo aplica en cada línea que traigas`,
-    `📲 Conserva tu número · trámite gratis`,
+    `👨‍👩‍👧‍👦 <b>PLAN FAMILIA</b> un regalo por cada línea que traigas`,
+    `✅ Tu plan es lo que dice · cero letras chiquitas`,
   ];
   const once = items.map(t => `<span>${t}</span>`).join('');
   document.getElementById('promoRun').innerHTML = once + once; // dos veces para que el recorrido no tenga cortes
   document.getElementById('promoFrom').innerHTML = PORTA_FROM.map(c => `<span>${c}</span>`).join('');
   const colors = { 'p-yellow': '#FFC22E', 'p-teal': '#4FD1C0', 'p-purple': '#A893FF', 'p-coral': '#FF8A65' };
   const mult = document.getElementById('promoMult');
-  mult.innerHTML = PLANS.map(p => `<div class="m" style="background:${colors[p.color]}"><span class="x">x${PORTA_BONUS[p.gb]}</span>
-    <small>PLAN ${p.gb} GB</small><div class="was">${p.gb} GB</div><div class="now">${portaGb(p.gb)}<span>GB</span></div><div class="mo">al mes, por ${PORTA_MONTHS} meses</div></div>`).join('');
-  // las cifras "brincan" una por una cuando el banner entra en pantalla
-  if (!reduce && 'IntersectionObserver' in window) new IntersectionObserver((es, io) => {
-    if (!es[0].isIntersecting) return; io.disconnect();
+  // el número grande es el plan real; el regalo va aparte
+  mult.innerHTML = PLANS.map(p => `<div class="m" style="background:${colors[p.color]}"><span class="x">🎁</span>
+    <small>TU PLAN</small><div class="now">${p.gb}<span>GB</span></div><div class="mo">al mes · ${money(p.prices.m)}</div>
+    <div class="gift"><b>+${portaGift(p.gb)} GB</b> de regalo cada mes</div></div>`).join('');
+  const cal = document.getElementById('giftCal');
+  cal.innerHTML = Array.from({ length: PORTA_MONTHS }, (_, i) => `<div class="b"><span>${i + 1}</span></div>`).join('');
+  // al entrar en pantalla: los regalos "brincan" y el calendario se abre caja por caja
+  const play = () => {
     [...mult.children].forEach((m, i) => setTimeout(() => m.classList.add('pop'), 250 + i * 180));
-  }, { threshold: .4 }).observe(mult);
+    [...cal.children].forEach((b, i) => setTimeout(() => b.classList.add('open'), 900 + i * 140));
+  };
+  if (reduce || !('IntersectionObserver' in window)) [...cal.children].forEach(b => b.classList.add('open'));
+  else new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); play(); } }, { threshold: .4 }).observe(mult);
 })();
 
 // planes individuales
@@ -993,7 +1018,7 @@ document.querySelectorAll('.tilt').forEach(c => {
         <div class="price"><sup>$</sup>${int}${dec ? `<span style="font-size:22px">.${dec}</span>` : ''}</div>
         <div class="per">MXN ${P.per}</div>${eq}
         <ul><li>Sin contratos</li><li>Conserva tu número</li></ul>
-        ${PORTA_BONUS[p.gb] ? `<a class="porta-chip" href="#promo">🔁 Cámbiate y recibe <b>${portaGb(p.gb)} GB</b> por ${PORTA_MONTHS} meses</a>` : ''}
+        ${PORTA_BONUS[p.gb] ? `<a class="porta-chip" href="#promo">🎁 Cámbiate y te regalamos <b>+${portaGift(p.gb)} GB</b> cada mes por ${PORTA_MONTHS} meses</a>` : ''}
         <button class="btn btn-ink go" data-gb="${p.gb}">Lo quiero</button></article>`;
     }).join('');
   };

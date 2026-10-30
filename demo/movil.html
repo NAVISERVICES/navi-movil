@@ -11,9 +11,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261030a">
-<link rel="stylesheet" href="suite.css?v=20261030a">
-<script src="auth.js?v=20261030a"></script>
+<link rel="stylesheet" href="navi.css?v=20261030b">
+<link rel="stylesheet" href="suite.css?v=20261030b">
+<script src="auth.js?v=20261030b"></script>
+<script src="planes.js?v=20261030b"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=movil.html');</script>
 <style>
 .lines{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
@@ -25,6 +26,20 @@
 .card h2{font-size:18px;margin-bottom:4px}
 .muted{color:var(--muted);font-size:14px}
 /* ciclo */
+/* regalo de bienvenida: 12 cajas, una por mes */
+.gift{margin-bottom:16px;background:linear-gradient(120deg,#2a1a6e,#15156E 60%);border-color:#FF6FB155}
+.gift[hidden]{display:none}
+.gift .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.gift h2{font-size:20px}
+.gift .hd b.n{font-family:var(--display);font-size:26px;color:#FFE36E;white-space:nowrap}
+.gift .boxes{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;margin:16px 0 10px}
+.gift .bx{position:relative;aspect-ratio:1;border-radius:10px;background:#ffffff14;border:2px dashed #ffffff30;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--muted)}
+.gift .bx.open{background:var(--lime);border:0;color:var(--ink)}
+.gift .bx.now{background:#FF6FB1;border:0;color:var(--ink);box-shadow:0 0 0 4px #FF6FB144;animation:giftBob 1.6s ease-in-out infinite}
+.gift .bx.now::before{content:"🎁";position:absolute;top:-16px;font-size:16px}
+@keyframes giftBob{50%{transform:translateY(-3px)}}
+.gift p{font-size:13px;color:var(--muted)}
+@media (max-width:560px){.gift .boxes{grid-template-columns:repeat(6,1fr)}}
 .cycle{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
 .cycle .track{flex:1;min-width:200px;height:10px;border-radius:99px;background:#ffffff18;overflow:hidden}
 .cycle .track i{display:block;height:100%;border-radius:99px;background:#fff}
@@ -99,6 +114,8 @@
 
   <div class="lines" id="lines"></div>
   <div id="idcard" style="margin:4px 0 22px"></div>
+
+  <section class="card gift" id="gift" hidden></section>
 
   <section class="card cycle" style="margin-bottom:16px">
     <div><span class="muted">Ciclo actual</span><br><b id="cycleTxt"></b></div>
@@ -191,7 +208,14 @@ if (user) {
   const gb = n => n >= 1 ? n.toFixed(1) + ' GB' : Math.round(n * 1024) + ' MB';
 
   const render = () => {
-    const u = usage(sel), L = u.L, extra = Topups.extra(L.phone), totalGB = L.gb + extra;
+    const u = usage(sel), L = u.L, extra = Topups.extra(L.phone);
+    // regalo de bienvenida por portabilidad: se suma a lo disponible, pero se muestra aparte del plan
+    const gm = L.porta && PORTA_FROM.includes(L.porta.from) ? giftMonth(L.porta.since) : 0;
+    const gift = gm ? portaGift(L.gb) : 0, totalGB = L.gb + gift + extra;
+    $('gift').hidden = !gm;
+    if (gm) $('gift').innerHTML = `<div class="hd"><div><span class="muted">🎁 Regalo de bienvenida · vienes de ${L.porta.from}</span><h2>Regalo ${gm} de ${PORTA_MONTHS} abierto</h2></div><b class="n">+${gift} GB</b></div>
+      <div class="boxes">${Array.from({ length: PORTA_MONTHS }, (_, i) => `<div class="bx ${i + 1 < gm ? 'open' : i + 1 === gm ? 'now' : ''}" title="Mes ${i + 1}">${i + 1 <= gm ? '✓' : i + 1}</div>`).join('')}</div>
+      <p>Este mes tienes tu plan de ${L.gb} GB <b>más ${gift} GB de regalo</b>. ${gm < PORTA_MONTHS ? `Te quedan ${PORTA_MONTHS - gm} regalos; el siguiente se abre al renovar tu ciclo.` : 'Este es tu último regalo. ¡Gracias por estar en Navi!'}</p>`;
     const left = totalGB - u.usedGB, pct = u.usedGB / totalGB;
     $('topupBtn').href = `recargas.html#l${sel + 1}`;
     $('lines').hidden = !fam;
@@ -201,7 +225,7 @@ if (user) {
     $('dMeterWrap').setAttribute('aria-valuemax', totalGB); $('dMeterWrap').setAttribute('aria-valuenow', u.usedGB.toFixed(1));
     $('dMeter').style.width = '0'; requestAnimationFrame(() => setTimeout(() => $('dMeter').style.width = pct * 100 + '%', 30));
     $('dUsed').textContent = `${gb(u.usedGB)} usados`;
-    $('dPlan').textContent = extra ? `de ${totalGB} GB (+${extra} GB recarga)` : `de ${L.gb} GB`;
+    $('dPlan').textContent = `de ${totalGB} GB` + ((gift || extra) ? ` (plan ${L.gb}${gift ? ` + ${gift} regalo` : ''}${extra ? ` + ${extra} recarga` : ''})` : '');
     const perDay = left / Math.max(1, total - day);
     $('dNote').innerHTML = pct > .8
       ? `⚠️ Vas en ${Math.round(pct * 100)}%. Al terminar tus GB sigues navegando a velocidad reducida. <a href="recargas.html#l${sel + 1}" style="text-decoration:underline;font-weight:800">Recarga aquí →</a>`

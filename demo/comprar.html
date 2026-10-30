@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="navi.css?v=20261030a">
-<link rel="stylesheet" href="suite.css?v=20261030a">
+<link rel="stylesheet" href="navi.css?v=20261030b">
+<link rel="stylesheet" href="suite.css?v=20261030b">
 <style>
 main{padding:10px 0 120px}
 .steps-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0 28px}
@@ -257,8 +257,8 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
 </main>
 <div class="bar" id="bar"><div><small>Total</small><b id="barTot"></b></div><button class="btn btn-lime" id="barGo">Continuar</button></div>
 
-<script src="auth.js?v=20261030a"></script>
-<script src="planes.js?v=20261030a"></script>
+<script src="auth.js?v=20261030b"></script>
+<script src="planes.js?v=20261030b"></script>
 <script>
 const $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
@@ -298,16 +298,16 @@ function renderPlan() {
   document.querySelectorAll('#per button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === O.per));
   $('plans').innerHTML = PLANS.map(p => {
     const pr = p.prices[O.per];
-    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb">x${PORTA_BONUS[p.gb]} → ${portaGb(p.gb)} GB</span>` : ''}</button>`;
+    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb">🎁 +${portaGift(p.gb)} GB de regalo</span>` : ''}</button>`;
   }).join('');
   $('mNew').checked = O.mode === 'nuevo'; $('mPorta').checked = O.mode === 'porta';
   $('portaNote').hidden = O.mode !== 'porta';
   $('fromBox').hidden = O.mode !== 'porta';
   $('bonus').innerHTML = !O.from ? ''
     : bonusOk() ? (O.kind === 'fam'
-      ? `<p class="bonus-ok">🎉 <b>¡Les toca la promo!</b> Cada línea que traigan de ${O.from} recibe <b>${portaWord(O.gb)} de GB</b>: pasa de ${O.gb} GB a <b>${portaGb(O.gb)} GB al mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`
-      : `<p class="bonus-ok">🎉 <b>¡Te toca la promo!</b> Por venir de ${O.from} recibes <b>${portaWord(O.gb)} de GB</b>: tu plan de ${O.gb} GB te da <b>${portaGb(O.gb)} GB al mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`)
-    : `<p class="hint" style="margin-top:8px">La promo de GB extra aplica si vienes de ${PORTA_FROM.join(', ')}. Igual puedes traer tu número sin costo.</p>`;
+      ? `<p class="bonus-ok">🎁 <b>¡Tienen regalo de bienvenida!</b> Cada línea que traigan de ${O.from} conserva su plan de ${O.gb} GB y además recibe <b>+${portaGift(O.gb)} GB de regalo cada mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`
+      : `<p class="bonus-ok">🎁 <b>¡Tienes regalo de bienvenida!</b> Tu plan es de ${O.gb} GB y, por venir de ${O.from}, te regalamos <b>+${portaGift(O.gb)} GB cada mes durante ${PORTA_MONTHS} meses</b>, al mismo precio.</p>`)
+    : `<p class="hint" style="margin-top:8px">El regalo de bienvenida aplica si vienes de ${PORTA_FROM.join(', ')}. Igual puedes traer tu número sin costo.</p>`;
 }
 function renderFormato() {
   const n = nLines();
@@ -324,7 +324,7 @@ function renderSum() {
     <div class="r"><span>Plan</span><b>${O.kind === 'fam' ? `Plan Familia · ${n} líneas de ${O.gb} GB` : `${O.gb} GB`}</b></div>
     <div class="r"><span>Pago</span><b>${P.label}</b></div>
     ${O.mode ? `<div class="r"><span>Número</span><b>${O.mode === 'porta' ? 'Traes tu número' : 'Línea nueva'}</b></div>` : ''}
-    ${bonusOk() ? `<div class="r promo"><span>🎉 Promo portabilidad</span><b>${portaGb(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea portada' : ''} · ${PORTA_MONTHS} meses</b></div>` : ''}
+    ${bonusOk() ? `<div class="r promo"><span>🎁 Regalo de bienvenida</span><b>+${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea portada' : ''} · ${PORTA_MONTHS} meses</b></div>` : ''}
     ${O.chip + O.esim ? `<div class="r"><span>Formato</span><b>${[O.chip && `${O.chip} chip${O.chip > 1 ? 's' : ''}`, O.esim && `${O.esim} eSIM`].filter(Boolean).join(' + ')}</b></div>` : ''}
     ${Q ? `<div class="r"><span>Subtotal</span><b>${money(Q.sub)}</b></div>` : ''}
     ${Q && Q.off ? `<div class="r"><span>Descuento familiar (-${Math.round(familyDiscount(n) * 100)}%)</span><b>-${money(Q.off)}</b></div>` : ''}
@@ -460,8 +460,8 @@ function confirmOrder() {
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
-    bonusOk() && ['🎉', `${O.kind === 'fam' ? 'Su promo' : 'Tu promo'}: ${portaGb(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,
-      O.kind === 'fam' ? `Se activa en cada línea cuando su número de ${O.from} quede en Navi, y dura ${PORTA_MONTHS} meses.` : `Se activa cuando tu número de ${O.from} quede en Navi y dura ${PORTA_MONTHS} meses.`],
+    bonusOk() && ['🎁', `Regalo de bienvenida: +${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,
+      O.kind === 'fam' ? `Empieza en cada línea cuando su número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ven abrirse en Mi Navi.` : `Empieza cuando tu número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ves abrirse en Mi Navi.`],
   ].filter(Boolean);
   $('payCard').innerHTML = `<div class="done ${paid ? '' : 'pend'}">
     <div class="ok">${paid ? '✓' : '⏳'}</div>

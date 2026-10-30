@@ -23,6 +23,14 @@ const PORTA_FROM = ['Telcel', 'AT&T', 'Movistar', 'Unefon', 'Virgin Mobile'];
 const PORTA_MONTHS = 12;
 const portaGb = gb => gb * (PORTA_BONUS[gb] || 1);
 const portaWord = gb => PORTA_BONUS[gb] === 2 ? 'el doble' : PORTA_BONUS[gb] === 3 ? 'el triple' : '';
+// "regalo de bienvenida": los GB extra se muestran aparte de los GB del plan, nunca sumados en el número grande
+const portaGift = gb => portaGb(gb) - gb;
+// mes del regalo (1 a 12) desde que el número quedó en Navi; 0 si ya terminó o no ha empezado
+const giftMonth = since => {
+  const s = new Date(since), n = new Date();
+  const m = (n.getFullYear() - s.getFullYear()) * 12 + n.getMonth() - s.getMonth() + (n.getDate() >= s.getDate() ? 1 : 0);
+  return m >= 1 && m <= PORTA_MONTHS ? m : 0;
+};
 
 // precio de un pedido: plan individual o Plan Familia (mismo plan para todas las líneas, pesos cerrados)
 const quote = ({ gb, per, lines = 1 }) => {
