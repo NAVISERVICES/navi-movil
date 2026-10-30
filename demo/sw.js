@@ -9,7 +9,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    // solo borra versiones viejas de esta app (el botón SOS tiene su propia caché)
+    .then(keys => Promise.all(keys.filter(k => k.startsWith('navi-v') && k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
