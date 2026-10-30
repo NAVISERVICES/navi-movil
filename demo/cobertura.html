@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Cobertura · Navi Móvil</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261029f">
+<link rel="stylesheet" href="suite.css?v=20261029f">
+<style>
+main{padding:24px 0 100px}
+.hero{display:grid;grid-template-columns:1fr 1.05fr;gap:36px;align-items:center}
+.hero > *{min-width:0}
+.eyebrow{color:var(--lime);font-weight:800;letter-spacing:.14em;font-size:12px}
+.hero h1{font-size:clamp(38px,6vw,64px);line-height:.98;margin:10px 0 14px}
+.hero h1 em{font-style:normal;color:var(--lime)}
+.lead{color:var(--muted);font-size:17px;max-width:520px}
+.facts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.facts span{background:#ffffff12;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:700}
+.facts b{color:var(--lime)}
+
+/* consulta por código postal */
+.check{margin-top:26px;background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:22px}
+.check label{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.check form{display:flex;gap:10px}
+.check input{flex:1;min-width:0;background:#ffffff10;border:2px solid #ffffff22;border-radius:16px;padding:14px 16px;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.2em;color:var(--text)}
+.check input::placeholder{letter-spacing:normal;font-family:var(--body);font-weight:500;font-size:16px;color:#ffffff66}
+.check input:focus{outline:none;border-color:var(--lime)}
+.check .hint{font-size:12px;color:var(--muted);margin-top:10px}
+.res{margin-top:16px;border-radius:20px;padding:18px;display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:start;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.res .ic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:26px}
+.res h3{font-family:var(--display);font-size:22px;margin-bottom:4px}
+.res p{font-size:14px;color:var(--text);opacity:.9}
+.res small{display:block;margin-top:8px;font-size:12px;color:var(--muted)}
+.res .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.res.yes{background:#b4e32f1a;border:1px solid #b4e32f66}.res.yes .ic{background:var(--lime);color:var(--ink)}
+.res.maybe{background:#FFC22E14;border:1px solid #FFC22E66}.res.maybe .ic{background:var(--yellow);color:var(--ink)}
+.res.no{background:#FF6F8E18;border:1px solid #FF6F8E66}.res.no .ic{background:#FF6F8E;color:var(--ink)}
+.res.info{background:#ffffff0c;border:1px solid #ffffff2a}.res.info .ic{background:var(--purple);color:#fff}
+.lnk{color:var(--lime);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+/* mapa ilustrado con la familia */
+.map{position:relative;aspect-ratio:1/0.92;border-radius:36px;overflow:hidden;
+  background:radial-gradient(circle at 30% 30%,#2a2aa0 0,transparent 55%),radial-gradient(circle at 80% 75%,#5b2fc4 0,transparent 50%),var(--navy-2);
+  border:1px solid #ffffff1c}
+.map::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff26 1.2px,transparent 1.2px);background-size:22px 22px;mask-image:radial-gradient(circle at 50% 50%,#000 40%,transparent 80%)}
+.map svg.routes{position:absolute;inset:0;width:100%;height:100%}
+.routes path{fill:none;stroke:var(--lime);stroke-width:2.5;stroke-dasharray:6 8;opacity:.55;animation:dash 2.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-56}}
+.tower{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;background:var(--lime);display:grid;place-items:center;font-size:30px;box-shadow:0 0 0 10px #b4e32f33,0 0 0 22px #b4e32f18;z-index:2}
+.tower::after,.tower::before{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--lime);animation:ring 2.8s ease-out infinite}
+.tower::before{animation-delay:1.4s}
+@keyframes ring{to{transform:scale(3.2);opacity:0}}
+.pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;z-index:3;animation:bob 4s ease-in-out infinite}
+.pin:nth-child(odd){animation-delay:-2s}
+@keyframes bob{50%{transform:translate(-50%,calc(-100% - 6px))}}
+.pin .face{width:82px;height:82px;border-radius:50%;background:#fff;border:4px solid var(--lime);overflow:hidden;box-shadow:0 10px 24px #0006}
+.pin .face img{width:100%;height:100%;object-fit:cover;object-position:top}
+.pin .tag{margin-top:6px;background:#fff;color:var(--ink);border-radius:12px;padding:5px 10px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 6px 16px #0005;text-align:center;line-height:1.2}
+.pin .tag small{display:block;font-weight:700;color:#5a5a8a;font-size:10.5px}
+.pin .tag i{font-style:normal;color:#5d8a00}
+.map .legend{position:absolute;left:16px;bottom:14px;right:16px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:11px;font-weight:700;color:var(--muted);z-index:3}
+.legend span{display:flex;align-items:center;gap:6px;background:#06062Ecc;padding:5px 10px;border-radius:99px}
+.legend i{width:9px;height:9px;border-radius:50%}
+
+/* mapa oficial */
+.official{margin-top:70px;position:relative;background:linear-gradient(120deg,var(--lime),#d8f77a);color:var(--ink);border-radius:36px;padding:34px 36px;display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:end;overflow:hidden}
+.official h2{font-size:clamp(28px,4vw,40px);line-height:1}
+.official p{margin:10px 0 18px;max-width:480px;font-size:15px}
+.official .crew{display:flex;justify-content:center;align-items:flex-end;margin-bottom:-34px}
+.official .crew img{width:120px;height:auto;margin:0 -16px;filter:drop-shadow(0 8px 14px #0003);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.official .crew img:nth-child(2),.official .crew img:nth-child(4){width:136px}
+.official .crew img:nth-child(3){width:150px;z-index:1}
+.official .crew img:hover{transform:translateY(-10px) rotate(-3deg)}
+.official .brand{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;padding:8px 14px 8px 10px;border-radius:99px;font-size:12px;font-weight:800;margin-bottom:14px}
+.official .brand img{height:22px}
+.btn-navy{background:var(--ink);color:#fff;box-shadow:0 6px 0 #000}
+
+/* cómo funciona la red */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:60px}
+.cards div{background:var(--navy-2);border:1px solid #ffffff18;border-radius:24px;padding:22px}
+.cards .em{font-size:30px}
+.cards b{display:block;font-family:var(--display);font-size:19px;margin:8px 0 6px}
+.cards p{font-size:14px;color:var(--muted)}
+.cards a{display:inline-block;margin-top:10px}
+
+@media (max-width:980px){.hero,.official{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.official .crew{margin-bottom:-34px}}
+@media (max-width:560px){
+  .pin .face{width:58px;height:58px;border-width:3px}
+  .pin .tag{font-size:10.5px;padding:4px 7px}.pin .tag small{font-size:9.5px}
+  .tower{width:56px;height:56px;font-size:22px}
+  .map .legend{display:none}
+  .official{padding:26px 22px}
+  .official .crew img{width:78px;margin:0 -12px}
+  .official .crew img:nth-child(2),.official .crew img:nth-child(4){width:88px}
+  .official .crew img:nth-child(3){width:98px}
+  .check input{font-size:20px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="index.html">← <span>Volver</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">COBERTURA</span>
+      <h1>¿Llega Navi <em>a tu zona?</em></h1>
+      <p class="lead">Navi funciona sobre la Red Compartida de Altán Redes: 4.5G LTE en todo el país y Roaming Nacional Social donde no hay antena propia. Escribe tu código postal y te decimos qué hay donde vive cada quien.</p>
+      <div class="facts"><span><b>+94%</b> de la población</span><span><b>4.5G</b> LTE y VoLTE</span><span><b>Roaming</b> nacional incluido</span></div>
+
+      <div class="check">
+        <label for="cp">CÓDIGO POSTAL · 5 DÍGITOS</label>
+        <form id="fCp"><input id="cp" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Escribe tu CP"><button class="btn btn-lime" id="go" disabled>Consultar</button></form>
+        <p class="hint">Solo el código postal. No te pedimos tu dirección ni la guardamos.</p>
+        <div id="out" aria-live="polite"></div>
+        <p class="hint" style="margin-top:14px">¿Lo quieres ver calle por calle? <a class="lnk" href="https://altanredes.com/cobertura/" target="_blank" rel="noopener">Mapa oficial de Altán Redes</a>.</p>
+      </div>
+    </div>
+
+    <div class="map" aria-label="Ilustración: la familia Navi conectada desde distintos lugares">
+      <svg class="routes" viewBox="0 0 100 92" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M50 50 Q32 36 20 26"/><path d="M50 50 Q70 32 80 22"/><path d="M50 50 Q28 62 18 60"/><path d="M50 50 Q72 64 82 62"/><path d="M50 50 Q52 70 50 80"/>
+      </svg>
+      <div class="tower" style="top:54%">📶</div>
+      <div class="pin" style="left:20%;top:40%"><div class="face"><img src="assets/chayo.png" alt="Abuela Chayo"></div><div class="tag">Abuela Chayo<small>Oaxaca · <i>4.5G</i></small></div></div>
+      <div class="pin" style="left:80%;top:36%"><div class="face"><img src="assets/beto.png" alt="Papá Beto"></div><div class="tag">Papá Beto<small>Monterrey · <i>4.5G</i></small></div></div>
+      <div class="pin" style="left:18%;top:76%"><div class="face"><img src="assets/sofi.png" alt="Sofi"></div><div class="tag">Sofi<small>En la escuela · <i>4.5G</i></small></div></div>
+      <div class="pin" style="left:82%;top:78%"><div class="face"><img src="assets/tono.png" alt="Toño"></div><div class="tag">Toño<small>De viaje · <i>Roaming</i></small></div></div>
+      <div class="pin" style="left:50%;top:97%"><div class="face"><img src="assets/mama.png" alt="Mamá"></div><div class="tag">Mamá<small>CDMX · <i>4.5G</i></small></div></div>
+      <div class="legend" style="top:14px;bottom:auto"><span><i style="background:var(--lime)"></i>Red Compartida 4.5G</span><span><i style="background:var(--yellow)"></i>Roaming Nacional Social</span></div>
+    </div>
+  </section>
+
+  <section class="official">
+    <div>
+      <span class="brand"><img src="assets/navi-logo.png" alt="Navi">+ Red Compartida de Altán Redes</span>
+      <h2>Revisa tu calle en el mapa oficial</h2>
+      <p>La casa de la abuela, la escuela de Sofi, la oficina de papá: busca cada dirección en el mapa de cobertura de Altán Redes, la red sobre la que funciona Navi.</p>
+      <a class="btn btn-navy" href="https://altanredes.com/cobertura/" target="_blank" rel="noopener">Abrir el mapa oficial de Altán Redes ↗</a>
+    </div>
+    <div class="crew" aria-hidden="true">
+      <img src="assets/chayo.png" alt=""><img src="assets/beto.png" alt=""><img src="assets/mama.png" alt=""><img src="assets/sofi.png" alt=""><img src="assets/tono.png" alt="">
+    </div>
+  </section>
+
+  <section class="cards">
+    <div><span class="em">📡</span><b>Cobertura garantizada</b><p>Es la zona donde Altán Redes se compromete ante el regulador a cumplir parámetros de calidad. Ahí tu señal 4.5G es la más estable.</p></div>
+    <div><span class="em">🛣️</span><b>Roaming Nacional Social</b><p>Donde la Red Compartida no tiene antena, tu línea se conecta a otra red sin costo extra, para que sigas con llamadas y datos.</p></div>
+    <div><span class="em">📱</span><b>Tu equipo también cuenta</b><p>Para usar la red tu teléfono necesita la Banda 28. Lo revisamos con tu IMEI antes de que pagues.</p><a class="lnk" href="comprar.html">Comprar y comprobar mi equipo</a></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const MAP = 'https://altanredes.com/cobertura/';
+// estado por los dos primeros dígitos del CP (rangos de SEPOMEX)
+const STATES = [[1, 16, 'Ciudad de México'], [20, 20, 'Aguascalientes'], [21, 22, 'Baja California'], [23, 23, 'Baja California Sur'], [24, 24, 'Campeche'], [25, 27, 'Coahuila'], [28, 28, 'Colima'], [29, 30, 'Chiapas'], [31, 33, 'Chihuahua'], [34, 35, 'Durango'], [36, 38, 'Guanajuato'], [39, 41, 'Guerrero'], [42, 43, 'Hidalgo'], [44, 49, 'Jalisco'], [50, 57, 'Estado de México'], [58, 61, 'Michoacán'], [62, 62, 'Morelos'], [63, 63, 'Nayarit'], [64, 67, 'Nuevo León'], [68, 71, 'Oaxaca'], [72, 75, 'Puebla'], [76, 76, 'Querétaro'], [77, 77, 'Quintana Roo'], [78, 79, 'San Luis Potosí'], [80, 82, 'Sinaloa'], [83, 85, 'Sonora'], [86, 86, 'Tabasco'], [87, 89, 'Tamaulipas'], [90, 90, 'Tlaxcala'], [91, 96, 'Veracruz'], [97, 97, 'Yucatán'], [98, 99, 'Zacatecas']];
+const stateOf = cp => { const p = +cp.slice(0, 2); return (STATES.find(([a, b]) => p >= a && p <= b) || [])[2]; };
+// DEMO: algunos códigos postales con su resultado; el resto se manda al mapa oficial
+const ZONES = {
+  '06700': ['Roma Norte', 'Cuauhtémoc', 'g'], '06600': ['Juárez', 'Cuauhtémoc', 'g'], '03100': ['Del Valle Centro', 'Benito Juárez', 'g'],
+  '08200': ['Viaducto Piedad', 'Iztacalco', 'g'], '44100': ['Centro', 'Guadalajara', 'g'], '64000': ['Centro', 'Monterrey', 'g'],
+  '72000': ['Centro', 'Puebla', 'g'], '76000': ['Centro', 'Querétaro', 'g'], '23000': ['Zona Central', 'La Paz', 'g'],
+  '97000': ['Centro', 'Mérida', 'g'], '77500': ['Centro', 'Cancún (Benito Juárez)', 'g'], '22000': ['Zona Centro', 'Tijuana', 'g'],
+  '68000': ['Centro', 'Oaxaca de Juárez', 'g'], '30990': ['Loma Bonita', 'Honduras de la Sierra', 'r'],
+};
+const mapLink = t => `<a class="btn btn-ghost sm" href="${MAP}" target="_blank" rel="noopener">${t} ↗</a>`;
+function result(cp) {
+  const st = stateOf(cp), z = ZONES[cp];
+  if (!st) return ['no', '✕', 'Ese CP no existe', `El código postal ${cp} no aparece en el catálogo de SEPOMEX. Revisa que esté bien escrito.`, ''];
+  if (z && z[2] === 'g') return ['yes', '✓', '¡Sí llegamos ahí!', `${z[0]}, ${z[1]}, ${st} (CP ${cp}) está dentro de la cobertura 4.5G garantizada de la Red Compartida.`,
+    `<a class="btn btn-lime sm" href="comprar.html">Elegir mi plan</a>${mapLink('Ver mi calle')}`];
+  if (z) return ['maybe', '!', 'Ahí no está garantizada', `${z[0]}, ${z[1]}, ${st} (CP ${cp}) queda fuera de la zona de calidad garantizada. Eso no quiere decir que no haya señal: puede funcionar bien o conectarse por Roaming Nacional Social. Confírmalo en el mapa oficial antes de comprar.`,
+    mapLink('Revisar en el mapa oficial')];
+  return ['info', '📍', `Tu CP está en ${st}`, `Navi tiene cobertura 4.5G en ${st}, pero en esta demostración no tenemos el detalle del CP ${cp}. Revisa tu calle en el mapa oficial de Altán Redes.`,
+    mapLink('Abrir el mapa oficial')];
+}
+$('cp').oninput = () => { $('cp').value = $('cp').value.replace(/\D/g, '').slice(0, 5); $('go').disabled = $('cp').value.length !== 5; $('out').innerHTML = ''; };
+$('fCp').onsubmit = e => {
+  e.preventDefault();
+  const cp = $('cp').value; if (cp.length !== 5) return;
+  const [cls, ic, title, text, acts] = result(cp);
+  $('out').innerHTML = `<div class="res ${cls}"><div class="ic">${ic}</div><div><h3>${title}</h3><p>${text}</p>${acts ? `<div class="acts">${acts}</div>` : ''}<small>Demostración: resultado de ejemplo. La cobertura real se consulta en el mapa oficial de Altán Redes.</small></div></div>`;
+};
+</script>
+</body>
+</html>
