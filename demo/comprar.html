@@ -39,7 +39,8 @@ main{padding:10px 0 120px}
 .plan b{display:block;font-family:var(--display);font-size:30px;line-height:1}
 .plan span{display:block;font-size:13px;opacity:.8;margin-top:4px}
 .plan .pr{font-family:var(--display);font-weight:800;font-size:18px;opacity:1;margin-top:10px}
-.plan .xb{display:inline-block;margin-top:8px;background:var(--ink);color:#FFE36E;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:800;opacity:1}
+.plan .xb{display:block;margin-top:10px;background:var(--ink);color:#FFE36E;border-radius:14px;padding:6px 6px 7px;font-size:12px;font-weight:800;opacity:1;text-align:center;white-space:nowrap;line-height:1.2}
+.plan .xb i{display:block;font-style:normal;font-size:18px;line-height:1;margin-bottom:3px}
 .bonus-ok{margin-top:12px;background:linear-gradient(90deg,#FF3D7F33,#FFC22E2e);border:1px solid #FFC22E77;border-radius:14px;padding:12px 14px;font-size:14px}
 .porta-go{width:100%;justify-content:center;margin-top:14px}
 .porta-go[aria-disabled="true"]{background:#ffffff1c;color:#ffffff70;box-shadow:none;cursor:not-allowed;transform:none}
@@ -305,7 +306,7 @@ function renderPlan() {
   document.querySelectorAll('#per button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === O.per));
   $('plans').innerHTML = PLANS.map(p => {
     const pr = p.prices[O.per];
-    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb">🎁 +${portaGift(p.gb)} GB de regalo</span>` : ''}</button>`;
+    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb"><i>🎁</i>+${portaGift(p.gb)} GB de regalo</span>` : ''}</button>`;
   }).join('');
   $('mNew').checked = O.mode === 'nuevo'; $('mPorta').checked = O.mode === 'porta';
   $('portaNote').hidden = O.mode !== 'porta';
