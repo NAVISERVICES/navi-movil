@@ -355,9 +355,12 @@ section{position:relative}
 .calm{padding:130px 0;background:radial-gradient(ellipse at 20% 50%,#26208f 0%,var(--navy) 60%)}
 .calm .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .map{position:relative;aspect-ratio:1/1;border-radius:36px;background:#12125f;overflow:hidden;border:1px solid #ffffff1a}
-.map::before{content:"";position:absolute;inset:0;background:
-  linear-gradient(#ffffff0c 1px,transparent 1px) 0 0/40px 40px,
-  linear-gradient(90deg,#ffffff0c 1px,transparent 1px) 0 0/40px 40px}
+/* mapa real de CDMX (Roma, Condesa, Chapultepec) en modo oscuro con el azul de Navi */
+.map .city{position:absolute;inset:0;background:url(assets/mapa-cdmx.jpg) center/cover;filter:invert(1) hue-rotate(195deg) saturate(.9) brightness(1.05) contrast(1.05)}
+.map::after{content:"";position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 50%,#1E1E8A1a,#0B0B4F80 90%);pointer-events:none}
+.map > :not(.city){z-index:1}
+.map .osm{position:absolute;left:12px;bottom:10px;z-index:2;font-size:10px;color:#ffffffa0;background:#06062Eb0;padding:2px 8px;border-radius:99px}
+.map .osm a{text-decoration:underline}
 .road{position:absolute;background:#ffffff12;border-radius:20px}
 .radar{position:absolute;left:50%;top:50%;width:0;height:0}
 .radar i{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;border:2px solid var(--lime);transform:translate(-50%,-50%);animation:radar 3.6s ease-out infinite}
@@ -718,8 +721,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 <section class="calm" id="tranquilidad">
   <div class="wrap">
     <div class="map reveal" id="map">
-      <div class="road" style="left:0;right:0;top:46%;height:34px"></div>
-      <div class="road" style="top:0;bottom:0;left:44%;width:34px"></div>
+      <div class="city" role="img" aria-label="Mapa de la Colonia Roma y la Condesa, Ciudad de México"></div>
       <div class="zone z-home">CASA</div>
       <div class="zone z-school">ESCUELA</div>
       <div class="radar"><i></i><i></i><i></i></div>
@@ -727,6 +729,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <div class="pin p2" id="pin2" style="left:70%;top:70%"><img src="assets/tono.png" alt=""></div>
       <div class="sos">SOS</div>
       <div class="notif" id="notif">📍 Sofi llegó a la escuela</div>
+      <span class="osm">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">colaboradores de OpenStreetMap</a></span>
     </div>
     <div class="reveal">
       <span class="badge">♥ Incluido con NAVI SOS Family</span>
