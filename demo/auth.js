@@ -13,6 +13,7 @@ const NAVI_APPS = [
     href: 'https://www.navirepaircenter.com/demo/' },
   { id: 'juegos', name: 'Juegos',             icon: '🎮', color: '#A893FF', desc: 'Ruta Chilanga, Lotería, Trivia Mx y más. Se juegan en el navegador.', href: 'juegos.html' },
   { id: 'videos', name: 'Videos',             icon: '▶️', color: '#FF9A6B', desc: 'Canales NAVI y cuentos animados para toda la familia.', href: 'videos.html' },
+  { id: 'agenda', name: 'Agenda',             icon: '📅', color: '#7EE0FF', desc: 'Organiza visitas y actividades en un calendario; al terminarlas se quitan solas.', href: 'agenda.html' },
   { id: 'referidos', name: 'Referidos',       icon: '🤝', color: '#2BD67B', desc: 'Comparte tu código: por cada 5 amigos que contraten, tú tienes un mes gratis.', href: 'referidos.html' },
   { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
     // app funcional dentro de la suite: usa la sesión de Mi Navi, sin volver a iniciar sesión
@@ -21,7 +22,7 @@ const NAVI_APPS = [
 ];
 
 // gratis para todo cliente Navi Móvil (Shop y Repair traen tráfico para vender en esas plataformas)
-const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'referidos'];
+const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos'];
 // qué apps incluye cada plan: lo gratis + NAVI SOS en 24 GB y Plan Familia
 const PLAN_ACCESS = {
   2:  [...FREE_APPS],

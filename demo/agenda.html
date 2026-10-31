@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Agenda · Mi Navi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261031d"></script>
+<script>if (!NaviAuth.current()) location.replace('login.html?next=agenda.html');</script>
+<style>
+.layout{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:22px}
+.muted{color:var(--muted);font-size:14px}
+/* calendario */
+.cal-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.cal-h h2{font-size:24px;text-transform:capitalize}
+.cal-h .nav{display:flex;gap:6px}
+.cal-h button{width:40px;height:40px;border-radius:50%;border:2px solid #ffffff30;font-weight:800;font-size:16px}
+.cal-h button:hover{border-color:var(--lime)}
+.cal-h .today{width:auto;padding:0 14px;border-radius:99px;font-size:13px}
+.wd,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd span{text-align:center;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);padding-bottom:4px}
+.day{position:relative;aspect-ratio:1;border-radius:14px;background:#ffffff08;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:15px;transition:background .15s,transform .15s}
+.day:hover{background:#ffffff14}
+.day.out{opacity:.3}
+.day.today{border-color:var(--lime)}
+.day.sel{background:var(--lime);color:var(--ink);transform:scale(1.05)}
+.day .dots{display:flex;gap:3px;height:6px}
+.day .dots i{width:6px;height:6px;border-radius:50%}
+.day.late::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#FF6F8E}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:50%}
+/* lista del día */
+.day-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.day-h h2{font-size:22px;text-transform:capitalize}
+.add{white-space:nowrap}
+.chips{display:flex;gap:6px;margin-bottom:12px}
+.chips button{padding:6px 12px;border-radius:99px;border:2px solid #ffffff25;font-weight:700;font-size:12.5px}
+.chips button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.acts{display:grid;gap:10px}
+.act{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px;border-radius:18px;background:#ffffff0a;border-left:5px solid var(--c);transition:transform .35s ease,opacity .35s ease,max-height .35s ease;max-height:220px}
+.act.going{transform:translateX(40px);opacity:0;max-height:0;padding-block:0;margin-top:-10px}
+.act .time{font-family:var(--display);font-weight:800;font-size:16px;min-width:52px}
+.act .time small{display:block;font-family:var(--body);font-weight:600;font-size:11px;color:var(--muted)}
+.act b{display:block;font-size:15px}
+.act .meta{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px}
+.act .note{font-size:12.5px;margin-top:5px;opacity:.85}
+.act .tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;background:#FF6F8E26;color:#FF9DB0;margin-left:6px;vertical-align:middle}
+.done-btn{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:2px solid #ffffff40;font-size:16px;font-weight:800;transition:all .2s}
+.done-btn:hover{border-color:var(--lime);background:#B4E32F22;color:var(--lime)}
+.who{display:inline-flex;align-items:center;gap:4px}
+.who img{width:18px;height:18px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.empty2{padding:26px 14px;text-align:center;color:var(--muted);border:2px dashed #ffffff22;border-radius:18px}
+.sec{margin-top:18px}
+.sec h3{font-size:16px;margin-bottom:10px;display:flex;justify-content:space-between}
+.sec h3 span{font-size:12px;color:var(--muted);font-weight:600;font-family:var(--body)}
+/* formulario */
+.sheet{position:fixed;inset:0;z-index:40;background:#06062ecc;display:grid;place-items:center;padding:16px}
+.sheet[hidden]{display:none}
+.sheet form{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--navy-2);border:1px solid #ffffff22;border-radius:26px;padding:22px;display:grid;gap:12px;animation:up .3s cubic-bezier(.3,1.4,.5,1)}
+@keyframes up{from{transform:translateY(20px);opacity:0}}
+.sheet h2{font-size:22px}
+.field{display:grid;gap:6px;font-size:13px;color:var(--muted);font-weight:700}
+.field input,.field select,.field textarea{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%;color-scheme:dark;font-weight:400}
+.field select option{color:#000}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--lime)}
+.field.err input{border-color:#FF6F8E}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.types{display:flex;flex-wrap:wrap;gap:6px}
+.types label{cursor:pointer}
+.types input{position:absolute;opacity:0}
+.types span{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:99px;border:2px solid #ffffff25;font-size:13px;font-weight:700;color:var(--text)}
+.types input:checked + span{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}
+.sheet .row{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,30px);opacity:0;z-index:50;background:#fff;color:var(--ink);border-radius:16px;padding:12px 14px 12px 18px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:14px;box-shadow:0 14px 34px #0008;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{background:var(--ink);color:var(--lime);border-radius:99px;padding:7px 12px;font-weight:800;font-size:13px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+@media (max-width:420px){.day{font-size:13px;border-radius:10px}.wd,.days{gap:4px}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div class="ico" style="background:#7EE0FF">📅</div>
+    <div><h1>Agenda</h1><p id="sub">Tus visitas y actividades. Cuando termines una, márcala y se quita sola.</p></div>
+  </div>
+
+  <div class="layout">
+    <section class="card">
+      <div class="cal-h">
+        <h2 id="month"></h2>
+        <div class="nav"><button id="prev" aria-label="Mes anterior">‹</button><button class="today" id="todayBtn">Hoy</button><button id="next" aria-label="Mes siguiente">›</button></div>
+      </div>
+      <div class="wd"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div class="days" id="days"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="card">
+      <div class="day-h"><div><h2 id="dayTitle"></h2><p class="muted" id="dayCount"></p></div><button class="btn btn-lime sm add" id="addBtn">＋ Agregar</button></div>
+      <div class="chips" id="who" hidden><button data-f="all" aria-pressed="true">De toda la familia</button><button data-f="me" aria-pressed="false">Solo mías</button></div>
+      <div class="acts" id="list"></div>
+      <div class="sec" id="lateSec" hidden><h3>⚠️ Atrasadas <span>Ya pasaron y no se marcaron</span></h3><div class="acts" id="late"></div></div>
+      <div class="sec"><h3>Próximas <span id="nextCount"></span></h3><div class="acts" id="upcoming"></div></div>
+    </section>
+  </div>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <form id="form" novalidate>
+    <h2 id="formTitle">Nueva actividad</h2>
+    <label class="field">¿Qué vas a hacer?<input id="fTitle" maxlength="60" placeholder="Ej. Visita a la abuela Chayo" autocomplete="off"></label>
+    <div class="types" id="fTypes"></div>
+    <div class="two">
+      <label class="field">Fecha<input id="fDate" type="date"></label>
+      <label class="field">Hora<input id="fTime" type="time"></label>
+    </div>
+    <label class="field">Lugar <small style="font-weight:500">(opcional)</small><input id="fPlace" maxlength="60" placeholder="Ej. Casa de la abuela, Coyoacán"></label>
+    <label class="field" id="fWhoBox" hidden>¿Para quién?<select id="fWho"></select></label>
+    <label class="field">Notas <small style="font-weight:500">(opcional)</small><textarea id="fNote" rows="2" maxlength="140" placeholder="Ej. Llevar pan de dulce"></textarea></label>
+    <div class="row"><button type="button" class="btn btn-ghost sm" id="cancel">Cancelar</button><button class="btn btn-lime sm">Guardar</button></div>
+  </form>
+</div>
+<div class="toast" id="toast" role="status"><span id="toastTxt"></span><button id="undo">Deshacer</button></div>
+
+<script>
+const user = NaviAuth.current();
+if (user) {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fam = user.plan.type === 'familia', lines = accountLines(user);
+  const TYPES = [
+    { id: 'visita', name: 'Visita', e: '🏠', c: '#B4E32F' },
+    { id: 'medico', name: 'Cita médica', e: '🩺', c: '#FF6F8E' },
+    { id: 'escuela', name: 'Escuela', e: '🎒', c: '#FFC22E' },
+    { id: 'trabajo', name: 'Trabajo', e: '💼', c: '#7EE0FF' },
+    { id: 'personal', name: 'Personal', e: '⭐', c: '#A893FF' },
+    { id: 'otro', name: 'Otro', e: '📌', c: '#FF9A6B' },
+  ];
+  const type = id => TYPES.find(t => t.id === id) || TYPES[5];
+
+  // la agenda es de la cuenta: en Plan Familia la comparten todos (cada actividad dice para quién es)
+  const KEY = 'navi.agenda.' + user.owner;
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return iso(d); };
+  const seed = () => {
+    const p = i => (lines[i] || lines[0]).phone;
+    return [
+      { title: 'Visita a la abuela Chayo', type: 'visita', date: addDays(0), time: '18:00', place: 'Coyoacán', note: 'Llevar pan de dulce', who: p(0) },
+      { title: 'Junta de padres', type: 'escuela', date: addDays(1), time: '08:30', place: 'Escuela Benito Juárez', who: p(1) },
+      { title: 'Dentista', type: 'medico', date: addDays(3), time: '17:00', place: 'Consultorio Dra. Ruiz', who: p(2) },
+      { title: 'Partido de fútbol', type: 'personal', date: addDays(5), time: '10:00', place: 'Deportivo Plan Sexenal', who: p(3) },
+      { title: 'Pagar el predial', type: 'otro', date: addDays(-2), time: '12:00', place: 'Tesorería', who: p(0) },
+      { title: 'Entrega del proyecto', type: 'trabajo', date: addDays(8), time: '11:00', who: p(0) },
+    ].map((a, i) => ({ id: 'a' + i + Date.now().toString(36), ...a }));
+  };
+  let items; try { items = JSON.parse(localStorage.getItem(KEY)); } catch {} if (!Array.isArray(items)) items = seed();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch {} };
+  save();
+
+  const today = iso(new Date());
+  let view = new Date(); view.setDate(1); let sel = today, filter = 'all', editing = null;
+  const mine = a => a.who === user.phone;
+  const visible = () => items.filter(a => filter === 'all' || mine(a));
+  const byTime = (a, b) => (a.date + (a.time || '99')).localeCompare(b.date + (b.time || '99'));
+  const fdate = (s, o = { weekday: 'long', day: 'numeric', month: 'long' }) => new Date(s + 'T12:00').toLocaleDateString('es-MX', o);
+  const fhour = t => t ? new Date('2000-01-01T' + t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }) : 'Todo el día';
+  const person = phone => lines.find(l => l.phone === phone);
+
+  if (fam) { $('who').hidden = false; $('sub').textContent = `Agenda de la ${user.familyName}: todos ven las actividades. Cuando terminen una, márquenla y se quita sola.`; }
+  $('legend').innerHTML = TYPES.map(t => `<span><i style="background:${t.c}"></i>${t.name}</span>`).join('') + '<span><i style="background:#FF6F8E;border-radius:2px"></i>Atrasada (punto arriba)</span>';
+
+  // calendario del mes: lunes primero; puntos de color por actividad, punto rosa si hay atrasadas
+  function drawCal() {
+    $('month').textContent = `${view.toLocaleDateString('es-MX', { month: 'long' })} ${view.getFullYear()}`;
+    const first = new Date(view), start = new Date(first); start.setDate(1 - ((first.getDay() + 6) % 7));
+    const vis = visible();
+    $('days').innerHTML = Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start); d.setDate(start.getDate() + i); const k = iso(d);
+      const acts = vis.filter(a => a.date === k);
+      const cls = ['day', d.getMonth() !== view.getMonth() && 'out', k === today && 'today', k === sel && 'sel', acts.length && k < today && 'late'].filter(Boolean).join(' ');
+      return `<button class="${cls}" data-d="${k}" aria-label="${fdate(k)}${acts.length ? `, ${acts.length} actividades` : ''}">${d.getDate()}<span class="dots">${acts.slice(0, 3).map(a => `<i style="background:${type(a.type).c}"></i>`).join('')}</span></button>`;
+    }).join('');
+  }
+  const card = a => {
+    const t = type(a.type), p = fam && person(a.who), late = a.date < today;
+    return `<div class="act" style="--c:${t.c}" data-id="${a.id}">
+      <div class="time">${a.time ? fhour(a.time).replace(/\s?[ap]\.?\s?m\.?/i, '') : '—'}<small>${a.time ? (fhour(a.time).match(/[ap]\.?\s?m\.?/i) || [''])[0] : 'Todo el día'}</small></div>
+      <div><b>${t.e} ${esc(a.title)}${late ? '<span class="tag">Atrasada</span>' : ''}</b>
+        <div class="meta">${a.date !== sel ? `<span>📆 ${fdate(a.date, { weekday: 'short', day: 'numeric', month: 'short' })}</span>` : ''}${a.place ? `<span>📍 ${esc(a.place)}</span>` : ''}${p ? `<span class="who"><img src="${avatarSrc(p.phone, p.img)}" alt="">${esc(p.name)}</span>` : ''}</div>
+        ${a.note ? `<div class="note">📝 ${esc(a.note)}</div>` : ''}</div>
+      <button class="done-btn" data-done="${a.id}" title="Marcar como terminada" aria-label="Marcar ${esc(a.title)} como terminada">✓</button></div>`;
+  };
+  function drawLists() {
+    const vis = visible().sort(byTime);
+    const day = vis.filter(a => a.date === sel);
+    $('dayTitle').textContent = sel === today ? 'Hoy' : fdate(sel);
+    $('dayCount').textContent = day.length ? `${day.length} ${day.length === 1 ? 'actividad' : 'actividades'} · ${fdate(sel, { day: 'numeric', month: 'long' })}` : fdate(sel, { day: 'numeric', month: 'long', year: 'numeric' });
+    $('list').innerHTML = day.length ? day.map(card).join('') : `<div class="empty2">Nada para este día. ¿Agregamos algo? 🙌</div>`;
+    const late = vis.filter(a => a.date < today && a.date !== sel);
+    $('lateSec').hidden = !late.length; $('late').innerHTML = late.map(card).join('');
+    const up = vis.filter(a => a.date >= today && a.date !== sel).slice(0, 5);
+    $('nextCount').textContent = up.length ? `${up.length} en los próximos días` : '';
+    $('upcoming').innerHTML = up.length ? up.map(card).join('') : '<div class="empty2">No hay más actividades por ahora.</div>';
+  }
+  const draw = () => { drawCal(); drawLists(); };
+
+  $('days').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; sel = b.dataset.d; const d = new Date(sel + 'T12:00'); if (d.getMonth() !== view.getMonth()) { view = new Date(d.getFullYear(), d.getMonth(), 1); } draw(); };
+  $('prev').onclick = () => { view.setMonth(view.getMonth() - 1); drawCal(); };
+  $('next').onclick = () => { view.setMonth(view.getMonth() + 1); drawCal(); };
+  $('todayBtn').onclick = () => { view = new Date(); view.setDate(1); sel = today; draw(); };
+  $('who').onclick = e => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; document.querySelectorAll('#who button').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); };
+
+  // terminar: se anima, se quita de la agenda y queda unos segundos para deshacer
+  let undoItem = null, undoT = 0;
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-done]'); if (!b) return;
+    const a = items.find(x => x.id === b.dataset.done); if (!a) return;
+    b.closest('.act').classList.add('going');
+    setTimeout(() => {
+      items = items.filter(x => x.id !== a.id); save(); undoItem = a; draw();
+      $('toastTxt').textContent = `✓ "${a.title}" terminada`; $('toast').classList.add('show');
+      clearTimeout(undoT); undoT = setTimeout(() => { $('toast').classList.remove('show'); undoItem = null; }, 5000);
+    }, 320);
+  });
+  $('undo').onclick = () => { if (!undoItem) return; items.push(undoItem); save(); undoItem = null; $('toast').classList.remove('show'); draw(); };
+
+  // formulario
+  $('fTypes').innerHTML = TYPES.map((t, i) => `<label style="--c:${t.c}"><input type="radio" name="ftype" value="${t.id}" ${i === 0 ? 'checked' : ''}><span>${t.e} ${t.name}</span></label>`).join('');
+  if (fam) { $('fWhoBox').hidden = false; $('fWho').innerHTML = lines.map(l => `<option value="${l.phone}">${esc(l.name)}${l.phone === user.phone ? ' (yo)' : ''}</option>`).join(''); }
+  const openForm = () => {
+    $('form').reset(); $('fDate').value = sel; $('fWho').value = user.phone;
+    document.querySelector('[name=ftype]').checked = true; $('fTitle').closest('.field').classList.remove('err');
+    $('sheet').hidden = false; setTimeout(() => $('fTitle').focus(), 50);
+  };
+  $('addBtn').onclick = openForm;
+  $('cancel').onclick = () => $('sheet').hidden = true;
+  $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) $('sheet').hidden = true; });
+  addEventListener('keydown', e => { if (e.key === 'Escape') $('sheet').hidden = true; });
+  $('form').onsubmit = e => {
+    e.preventDefault();
+    const title = $('fTitle').value.trim(), date = $('fDate').value;
+    $('fTitle').closest('.field').classList.toggle('err', !title); $('fDate').closest('.field').classList.toggle('err', !date);
+    if (!title || !date) return;
+    items.push({ id: 'a' + Date.now().toString(36), title, type: document.querySelector('[name=ftype]:checked').value, date, time: $('fTime').value, place: $('fPlace').value.trim(), note: $('fNote').value.trim(), who: fam ? $('fWho').value : user.phone });
+    save(); $('sheet').hidden = true;
+    sel = date; const d = new Date(date + 'T12:00'); view = new Date(d.getFullYear(), d.getMonth(), 1); draw();
+  };
+  // si otro integrante cambia la agenda en otra pestaña, se actualiza aquí
+  addEventListener('storage', e => { if (e.key === KEY) { try { items = JSON.parse(e.newValue) || []; } catch {} draw(); } });
+  draw();
+}
+</script>
+</body>
+</html>
