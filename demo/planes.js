@@ -32,6 +32,12 @@ const giftMonth = since => {
   return m >= 1 && m <= PORTA_MONTHS ? m : 0;
 };
 
+// roaming internacional en Estados Unidos y Canadá (uso justo): GB para usar allá, hasta 15 días
+const ROAMING = { 12: 4, 24: 8 };
+const ROAMING_DAYS = 15;
+const roamingTxt = gb => ROAMING[gb] ? `${ROAMING[gb]} GB en EE. UU. y Canadá, hasta ${ROAMING_DAYS} días` : '';
+const ROAMING_POLICY = `Uso justo: el roaming internacional funciona en Estados Unidos y Canadá hasta ${ROAMING_DAYS} días, con ${ROAMING[12]} GB en el plan de 12 GB y ${ROAMING[24]} GB en el de 24 GB. Tu línea debe estar activa en México.`;
+
 // precio de un pedido: plan individual o Plan Familia (mismo plan para todas las líneas, pesos cerrados)
 const quote = ({ gb, per, lines = 1 }) => {
   const price = PLANS.find(p => p.gb === gb)?.prices[per];

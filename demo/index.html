@@ -244,6 +244,9 @@ section{position:relative}
 /* insignia de la promo en las tarjetas de planes */
 .pcard .porta-chip{margin:0 0 14px;background:var(--ink);color:#fff;border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.3;position:relative;z-index:1}
 .pcard .porta-chip b{color:#FFE36E}
+.pcard .roam-chip{margin:0 0 10px;background:#ffffffb3;color:var(--ink);border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.3;position:relative;z-index:1}
+.roam-note{font-size:13px;color:var(--muted);margin-top:6px}
+.roam-note b{color:var(--text)}
 
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .pcard{position:relative;border-radius:var(--radius);padding:26px 24px 24px;color:var(--ink);display:flex;flex-direction:column;min-height:400px;transition:transform .3s cubic-bezier(.3,1.6,.5,1),filter .3s,opacity .3s;overflow:hidden}
@@ -650,6 +653,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     </div>
     <div class="pgrid" id="pgrid"></div>
     <p class="note">Precios en pesos mexicanos (MXN).</p>
+    <p class="roam-note" id="roamPolicy"></p>
   </div>
 </section>
 
@@ -696,6 +700,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <label>Todas las líneas con el mismo plan</label>
       <div class="members" id="members"></div>
       <p class="topup-note">¿Alguien se queda sin datos? Recarga solo su línea con un paquete adicional desde <a href="recargas.html">Recargas</a>.</p>
+      <p class="topup-note" id="famRoam"></p>
       <p class="topup-note">🎁 <a href="#promo">Regalo de bienvenida</a>: cada línea que traigas de Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile recibe GB de regalo cada mes durante 12 meses.</p>
       <div class="summary fam">
         <div class="rows">
@@ -791,8 +796,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261030c"></script>
-<script src="planes.js?v=20261030c"></script>
+<script src="auth.js?v=20261030d"></script>
+<script src="planes.js?v=20261030d"></script>
 <script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -963,7 +968,9 @@ document.querySelectorAll('.tilt').forEach(c => {
     `Si vienes de ${from}`,
     `👨‍👩‍👧‍👦 <b>PLAN FAMILIA</b> un regalo por cada línea que traigas`,
     `✅ Tu plan es lo que dice · cero letras chiquitas`,
+    `🌎 <b>ROAMING</b> 12 GB y 24 GB incluyen datos en EE. UU. y Canadá`,
   ];
+  document.getElementById('roamPolicy').innerHTML = `🌎 <b>Roaming internacional.</b> ${ROAMING_POLICY}`;
   const once = items.map(t => `<span>${t}</span>`).join('');
   document.getElementById('promoRun').innerHTML = once + once; // dos veces para que el recorrido no tenga cortes
   document.getElementById('promoFrom').innerHTML = PORTA_FROM.map(c => `<span>${c}</span>`).join('');
@@ -1018,6 +1025,7 @@ document.querySelectorAll('.tilt').forEach(c => {
         <div class="price"><sup>$</sup>${int}${dec ? `<span style="font-size:22px">.${dec}</span>` : ''}</div>
         <div class="per">MXN ${P.per}</div>${eq}
         <ul><li>Sin contratos</li><li>Conserva tu número</li></ul>
+        ${ROAMING[p.gb] ? `<div class="roam-chip">🌎 <b>Roaming incluido</b> · ${roamingTxt(p.gb)}</div>` : ''}
         ${PORTA_BONUS[p.gb] ? `<a class="porta-chip" href="#promo">🎁 Cámbiate y te regalamos <b>+${portaGift(p.gb)} GB</b> cada mes por ${PORTA_MONTHS} meses</a>` : ''}
         <button class="btn btn-ink go" data-gb="${p.gb}">Lo quiero</button></article>`;
     }).join('');
@@ -1070,6 +1078,10 @@ document.querySelectorAll('.tilt').forEach(c => {
         <span class="gbpill">${plan} GB</span>
       </div>`).join('');
     prevLines = lines;
+    // roaming en EE. UU. y Canadá: cada línea del plan lo tiene si el plan es de 12 o 24 GB
+    $('famRoam').innerHTML = ROAMING[plan]
+      ? `🌎 <b>Roaming incluido en cada línea:</b> ${roamingTxt(plan)} (uso justo).`
+      : `🌎 Con 12 o 24 GB cada línea trae roaming en EE. UU. y Canadá.`;
 
     // tarifas familiares en pesos cerrados (sin centavos)
     const exact = PLANS.find(p => p.gb === plan).prices[period] * lines;
