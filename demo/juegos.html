@@ -73,11 +73,11 @@
   </section>
 </main>
 
-<script src="catalog.js?v=20261030d"></script>
+<script src="catalog.js?v=20261030e"></script>
 <script>
 const $ = id => document.getElementById(id);
 const basic = NAVI_GAMES.filter(g => g.tier !== 'max'), premium = NAVI_GAMES.filter(g => g.tier === 'max');
-const play = g => `<a class="btn btn-lime" href="${gameUrl(g)}" target="_blank" rel="noopener">Jugar ▶</a>`;
+const play = g => `<a class="btn btn-lime" href="${gameUrl(g)}">Jugar ▶</a>`;
 const card = (g, i) => `<article class="game" style="animation-delay:${i * .05}s">
   <img src="${g.icon}" alt=""><div><span class="cat">${g.cat}</span><b>${g.name}</b></div>
   <p>${g.desc}</p>

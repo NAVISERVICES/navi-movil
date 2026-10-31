@@ -1,6 +1,5 @@
 // Catálogo de juegos y videos tomado de NAVI Store (navi-store.netlify.app), 28 oct 2026.
-// "Jugar" abre el juego en NAVI Store; si los archivos se copian a games/, cambia STORE_BASE por ''.
-const STORE_BASE = 'https://navi-store.netlify.app';
+// Los juegos están copiados en juegos/ (30 oct 2026) y se abren aquí con la sesión de Mi Navi.
 
 const svgIcon = body => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`);
 
@@ -45,4 +44,5 @@ const NAVI_CHANNELS = [
 // videos destacados: { title, channel, yt: 'ID de YouTube' } (NAVI Store aún no tiene)
 const NAVI_VIDEOS = [];
 
-const gameUrl = g => STORE_BASE + g.url;
+// /juegos/x.html y /max/x.html de NAVI Store viven en juegos/x.html
+const gameUrl = g => 'juegos/' + g.url.split('/').pop();
