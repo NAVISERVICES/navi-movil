@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+<script>/* Navi Movil: solo clientes con sesion en Mi Navi */try{if(!JSON.parse(localStorage.getItem('navi.session')))throw 0}catch(e){location.replace('../login.html?next=juegos/basta.html')}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E0F2E">
+<meta name="apple-mobile-web-app-title" content="Navi Juegos">
+<link rel="icon" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<title>¡Basta! NAVI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#0E0F2E; --panel:#181A45; --line:#2A2C66; --rosa:#E4007C; --cian:#2FD3E8; --oro:#FFC23A;
+  --ok:#2BD67B; --fg:#F3F1FF; --muted:#9C9BD0; --paper:#FFF4E0; --ink:#2A1B3D;
+  --display:"Bungee","Impact",system-ui,sans-serif; --body:"Rubik",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:520px;margin:0 auto;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--display);font-size:1.15rem}
+.brand b{color:var(--rosa);font-weight:400}
+.hbtns{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 .78rem var(--body);background:var(--panel);border:1px solid var(--cian);border-radius:999px;padding:4px 11px 4px 4px}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--cian);color:var(--bg);font:800 .85rem var(--body);font-style:normal;display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-variant-numeric:tabular-nums}
+.stat{background:var(--panel);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.stat small{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stat b{font-size:1.15rem}
+.top{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--panel);border-radius:18px;padding:14px}
+.letter{width:86px;height:86px;border-radius:22px;background:var(--rosa);display:grid;place-items:center;font:400 3.2rem var(--display);box-shadow:0 6px 0 #8E004D;transition:transform .2s}
+.letter.spin{animation:spin .09s linear infinite}
+@keyframes spin{50%{transform:scale(.92) rotate(-4deg)}}
+.time small{font-size:.7rem;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.time b{display:block;font:400 1.9rem var(--display);font-variant-numeric:tabular-nums}
+.time b.low{color:var(--rosa);animation:beat .5s infinite}
+@keyframes beat{50%{transform:scale(1.08)}}
+.bar{height:8px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--oro);width:100%;transition:width .25s linear}
+form{display:grid;gap:10px}
+label{display:grid;grid-template-columns:118px 1fr;align-items:center;gap:10px;background:var(--panel);border-radius:14px;padding:8px 10px 8px 14px;font-weight:700;font-size:.9rem}
+label small{display:block;font-weight:500;color:var(--muted);font-size:.72rem}
+input{width:100%;min-width:0;background:#0E0F2E;border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:1rem;text-transform:capitalize}
+input:focus{outline:none;border-color:var(--cian)}
+input.bad{border-color:var(--rosa)}
+input.ok{border-color:var(--ok)}
+.basta{border:0;border-radius:16px;padding:16px;background:var(--rosa);color:#fff;font:400 1.4rem var(--display);box-shadow:0 6px 0 #8E004D}
+.basta:disabled{background:var(--line);box-shadow:none;color:var(--muted);cursor:not-allowed}
+.hint{text-align:center;font-size:.82rem;color:var(--muted)}
+/* resultados */
+.res{background:var(--panel);border-radius:18px;padding:14px;overflow-x:auto}
+.res h2{font:400 1.2rem var(--display);margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th,td{padding:7px 6px;text-align:left;border-top:1px solid var(--line);vertical-align:top}
+th{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:0}
+td b{display:block;text-transform:capitalize}
+td em{font-style:normal;font-size:.72rem;font-weight:800}
+.p100{color:var(--ok)}.p50{color:var(--oro)}.p0{color:var(--rosa)}
+tfoot td{font-weight:800;font-size:.95rem}
+.legend{font-size:.72rem;color:var(--muted);margin-top:8px;line-height:1.4}
+/* pantallas */
+.ov{position:fixed;inset:0;z-index:20;background:#0E0F2Ee8;display:grid;place-items:center;padding:20px}
+.card{width:min(420px,100%);background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:24px 22px;text-align:center}
+.card .logo{font-family:var(--display);font-size:2rem;line-height:1}
+.card .logo b{color:var(--rosa);font-weight:400}
+.card p{color:#d7d5f5;font-size:.92rem;line-height:1.45}
+.card ol{text-align:left;font-size:.88rem;line-height:1.5;padding-left:20px;color:#d7d5f5}
+.rivals{display:flex;justify-content:center;gap:10px;margin:10px 0}
+.rivals span{background:var(--line);border-radius:99px;padding:5px 12px;font-size:.8rem;font-weight:700}
+.rank{display:grid;gap:8px;margin:14px 0;text-align:left}
+.rank div{display:flex;justify-content:space-between;background:var(--bg);border-radius:12px;padding:10px 14px;font-weight:700}
+.rank div.me{outline:2px solid var(--oro)}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:14px;background:var(--rosa);color:#fff;font:400 1.05rem var(--display);box-shadow:0 5px 0 #8E004D;margin-top:14px}
+.ghost{display:block;width:100%;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:11px;background:none;color:var(--fg);font-weight:600;text-decoration:none;text-align:center}
+@media (max-width:380px){label{grid-template-columns:96px 1fr;font-size:.82rem}.letter{width:72px;height:72px;font-size:2.6rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud">
+    <div class="brand">¡<b>Basta</b>!</div>
+    <div class="hbtns"><button class="pill" id="homeBtn"><i>⌂</i>Inicio</button><button class="pill" id="helpBtn"><i>?</i>Instrucciones</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><small>Ronda</small><b id="stRound">1 de 3</b></div>
+    <div class="stat"><small>Tus puntos</small><b id="stPts">0</b></div>
+    <div class="stat"><small>Récord</small><b id="stBest">0</b></div>
+  </div>
+  <section id="play">
+    <div class="top">
+      <div class="letter" id="letter">?</div>
+      <div class="time"><small>TIEMPO</small><b id="time">60</b><div class="bar"><i id="bar"></i></div></div>
+    </div>
+    <form id="form" autocomplete="off" style="margin-top:12px"></form>
+    <p class="hint" id="hint">Llena las 5 y grita ¡Basta! para ganar puntos extra por el tiempo que sobre.</p>
+  </section>
+  <section class="res" id="res" hidden></section>
+  <a class="ghost" href="../juegos.html">← Volver a Juegos</a>
+</div>
+<div class="ov" id="ov"><div class="card" id="ovCard"></div></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const ROUNDS = 3, SECS = 60;
+const LETTERS = 'ABCDEFGHIJLMNOPRSTV'.split('');
+const CATS = [
+  { id: 'nombre', label: 'Nombre', hint: 'de persona' },
+  { id: 'apellido', label: 'Apellido', hint: '' },
+  { id: 'animal', label: 'Animal', hint: '' },
+  { id: 'fruta', label: 'Fruta o verdura', hint: '' },
+  { id: 'lugar', label: 'País o ciudad', hint: 'o estado' },
+];
+// diccionario para revisar respuestas (sin acentos); lo que no esté aquí cuenta como "sin verificar"
+const DICT = {
+  nombre: { A: 'ana alejandro andrea antonio alberto adriana arturo alicia armando araceli', B: 'beatriz benito bruno blanca bernardo brenda braulio', C: 'carlos carmen claudia cristina cesar camila carolina cecilia cristian', D: 'daniel diana david diego dolores daniela dulce damian', E: 'eduardo elena emilio esther enrique elisa ernesto estela emiliano', F: 'fernando fernanda francisco fabiola felipe fatima federico', G: 'gabriel gabriela guadalupe gerardo guillermo gloria gustavo', H: 'hector hugo hilda humberto hortensia homero', I: 'ivan isabel irma ignacio ines isaac itzel', J: 'jose juan jorge javier julia juana jimena joaquin jesus', L: 'luis laura lucia leonardo lorena lupita lizbeth lorenzo', M: 'maria miguel mario martha monica manuel mariana mateo marco', N: 'natalia nicolas norma noe nancy nestor nayeli', O: 'oscar olga octavio ofelia omar olivia', P: 'pedro pablo patricia paola paulina pilar porfirio', R: 'roberto rosa ricardo raul rocio ramon regina rodrigo', S: 'sofia sergio santiago silvia sandra samuel saul susana', T: 'teresa tomas tania tadeo timoteo trinidad', V: 'veronica victor valeria vicente valentina victoria' },
+  apellido: { A: 'aguilar alvarez arias avila acosta alonso arellano', B: 'bautista benitez barrera bravo blanco beltran', C: 'castillo cruz castro contreras chavez cortes campos cervantes', D: 'diaz dominguez duran delgado davila', E: 'espinoza estrada escobar esquivel enriquez', F: 'flores fernandez fuentes franco figueroa', G: 'garcia gonzalez gomez guerrero gutierrez galindo', H: 'hernandez herrera huerta hidalgo haro', I: 'ibarra iglesias islas inzunza izquierdo', J: 'jimenez juarez jaramillo jasso', L: 'lopez lara luna leon lozano lugo', M: 'martinez morales mendoza medina moreno mejia miranda', N: 'navarro nunez nava nieto noriega', O: 'ortiz ortega ochoa olvera orozco osorio', P: 'perez pacheco padilla pena ponce peralta', R: 'rodriguez ramirez reyes rios rojas ruiz rosales', S: 'sanchez salazar santos silva soto sandoval suarez', T: 'torres trejo toledo tapia trujillo', V: 'vazquez vargas valdez vega villa velazquez' },
+  animal: { A: 'abeja aguila ajolote alacran armadillo ardilla arana avestruz atun', B: 'burro ballena buho borrego bisonte buitre', C: 'caballo cabra cocodrilo conejo cerdo camello coyote colibri cuervo canguro', D: 'delfin dromedario dingo', E: 'elefante erizo escorpion escarabajo', F: 'foca flamenco faisan', G: 'gato gallina gorila gusano gaviota ganso guajolote', H: 'hormiga hipopotamo halcon hiena hamster', I: 'iguana impala ibis', J: 'jaguar jirafa jabali jilguero', L: 'leon lobo loro lagartija lechuza liebre llama langosta', M: 'mono mariposa murcielago mapache mosca mosquito mula', N: 'nutria narval', O: 'oso oveja orca ocelote ornitorrinco ostra', P: 'perro pato pez puma pantera perico pinguino pulpo paloma', R: 'rata raton rana rinoceronte reno renacuajo', S: 'serpiente sapo salmon saltamontes suricata', T: 'tigre tortuga toro tiburon tucan tlacuache topo', V: 'vaca venado vibora vicuna' },
+  fruta: { A: 'aguacate arandano apio ajo acelga alcachofa anona', B: 'berenjena brocoli betabel banana', C: 'cereza coco ciruela calabaza cebolla chile chayote col camote', D: 'durazno datil', E: 'elote espinaca ejote esparrago epazote', F: 'fresa frambuesa frijol', G: 'guayaba granada guanabana garbanzo', H: 'higo haba habanero', I: 'icaco ilama', J: 'jitomate jicama jamaica jengibre', L: 'limon lima lechuga lenteja litchi', M: 'mango manzana melon mandarina mamey maracuya maiz', N: 'naranja nopal nuez nispero nectarina', O: 'oliva okra', P: 'papaya pera pina platano pepino papa pitaya pimiento perejil', R: 'rabano remolacha romeritos', S: 'sandia setas soya', T: 'toronja tomate tuna tamarindo tejocote', V: 'verdolaga vainilla' },
+  lugar: { A: 'aguascalientes acapulco argentina alemania australia austria', B: 'brasil bolivia belgica barcelona bogota berlin', C: 'cancun colombia chile canada china chihuahua campeche cuba colima cuernavaca', D: 'durango dinamarca dubai', E: 'ecuador espana egipto ensenada estados unidos el salvador', F: 'francia finlandia filipinas florencia', G: 'guadalajara guatemala guanajuato guerrero grecia', H: 'honduras hidalgo holanda hermosillo haiti', I: 'italia india irlanda inglaterra israel irapuato', J: 'japon jalisco jamaica juarez', L: 'leon lima londres la paz los cabos lisboa', M: 'mexico monterrey merida morelia madrid marruecos mazatlan', N: 'nicaragua noruega nayarit nuevo leon nueva york', O: 'oaxaca orizaba ottawa', P: 'puebla peru paris panama portugal paraguay pachuca', R: 'rusia roma rumania rio de janeiro reynosa', S: 'suecia suiza sonora sinaloa saltillo santiago', T: 'tijuana toluca tabasco tampico tokio tlaxcala torreon', V: 'veracruz venezuela valladolid vietnam viena' },
+};
+// los lugares de dos palabras se guardan con espacio: separa por palabras conocidas
+const MULTI = ['estados unidos', 'el salvador', 'la paz', 'los cabos', 'nuevo leon', 'nueva york', 'rio de janeiro'];
+const words = (cat, L) => { let s = DICT[cat][L] || ''; const m = MULTI.filter(w => s.includes(w)); m.forEach(w => s = s.replace(w, '')); return [...s.split(/\s+/).filter(Boolean), ...m]; };
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+const RIVALS = [{ name: 'Tía Rosa', skill: .78 }, { name: 'Primo Beto', skill: .55 }];
+
+const KEY = 'navi_basta_best';
+const best = () => +(localStorage.getItem(KEY) || 0);
+
+let round = 0, used = [], L = '', left = SECS, tick = 0, totals = [0, 0, 0], playing = false;
+
+$('form').innerHTML = CATS.map(c => `<label>${c.label}${c.hint ? `<small>${c.hint}</small>` : ''}<input id="in-${c.id}" maxlength="24" spellcheck="false" autocapitalize="words"></label>`).join('')
+  + '<button class="basta" id="basta" type="submit" disabled>¡BASTA!</button>';
+const inputs = CATS.map(c => $('in-' + c.id));
+
+let ac = null;
+const beep = (f, d = .1, type = 'square', v = .04) => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = v; o.connect(g).connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + d); o.stop(ac.currentTime + d); } catch {} };
+
+const valid = v => { const n = norm(v); return n.length >= 3 && n[0] === L.toLowerCase(); };
+const known = (cat, v) => words(cat, L).includes(norm(v));
+const paint = () => { $('stRound').textContent = `${Math.min(round + 1, ROUNDS)} de ${ROUNDS}`; $('stPts').textContent = totals[0]; $('stBest').textContent = best(); };
+
+function checkFilled() {
+  inputs.forEach(i => { i.classList.toggle('bad', !!i.value.trim() && !valid(i.value)); i.classList.toggle('ok', valid(i.value)); });
+  $('basta').disabled = !playing || !inputs.every(i => valid(i.value));
+}
+$('form').addEventListener('input', checkFilled);
+inputs.forEach((inp, k) => inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); (inputs[k + 1] || $('basta')).focus(); } }));
+
+function startRound() {
+  $('ov').hidden = true; $('res').hidden = true; $('play').hidden = false;
+  inputs.forEach(i => { i.value = ''; i.disabled = true; i.className = ''; });
+  $('basta').disabled = true; paint();
+  // la letra "gira" un momento antes de salir
+  const pool = LETTERS.filter(x => !used.includes(x));
+  L = pool[Math.floor(Math.random() * pool.length)]; used.push(L);
+  const el = $('letter'); el.classList.add('spin'); let n = 0;
+  const roll = setInterval(() => { el.textContent = LETTERS[Math.floor(Math.random() * LETTERS.length)]; beep(500 + Math.random() * 300, .03); if (++n > 14) { clearInterval(roll); el.textContent = L; el.classList.remove('spin'); go(); } }, 70);
+}
+function go() {
+  playing = true; left = SECS; beep(880, .2, 'triangle', .06);
+  inputs.forEach(i => i.disabled = false); inputs[0].focus();
+  $('hint').textContent = `Todo con ${L}. Llena las 5 y grita ¡Basta! para ganar puntos extra.`;
+  showTime(); clearInterval(tick);
+  tick = setInterval(() => { left--; showTime(); if (left <= 5 && left > 0) beep(660, .05); if (left <= 0) finish(false); }, 1000);
+}
+function showTime() { $('time').textContent = left; $('time').classList.toggle('low', left <= 10); $('bar').style.width = (left / SECS * 100) + '%'; }
+$('form').addEventListener('submit', e => { e.preventDefault(); if (!$('basta').disabled) finish(true); });
+
+// puntos: 100 si nadie más la puso, 50 si se repite; las que no están en el diccionario valen la mitad
+function finish(basta) {
+  if (!playing) return;
+  playing = false; clearInterval(tick); inputs.forEach(i => i.disabled = true);
+  beep(basta ? 1046 : 220, .35, basta ? 'triangle' : 'sawtooth', .06);
+  const players = [{ name: 'Tú', ans: inputs.map(i => i.value.trim()) },
+    ...RIVALS.map(r => ({ name: r.name, ans: CATS.map(c => { const w = words(c.id, L); return Math.random() < r.skill && w.length ? w[Math.floor(Math.random() * w.length)] : ''; }) }))];
+  const pts = players.map(() => Array(CATS.length).fill(0));
+  CATS.forEach((c, k) => {
+    players.forEach((p, i) => {
+      const v = p.ans[k];
+      if (!v || !valid(v)) return;
+      const rep = players.some((q, j) => j !== i && q.ans[k] && norm(q.ans[k]) === norm(v));
+      const full = known(c.id, v);
+      pts[i][k] = full ? (rep ? 50 : 100) : (rep ? 25 : 50);
+    });
+  });
+  const bonus = basta ? left * 2 : 0;
+  const sums = pts.map((r, i) => r.reduce((a, b) => a + b, 0) + (i === 0 ? bonus : 0));
+  sums.forEach((s, i) => totals[i] += s);
+  round++;
+  const cell = (p, k, i) => { const v = p.ans[k], n = pts[i][k], unk = v && valid(v) && !known(CATS[k].id, v);
+    return `<td><b>${v || '—'}</b><em class="${n >= 100 ? 'p100' : n > 0 ? 'p50' : 'p0'}">${n} pts${unk ? ' · sin verificar' : ''}</em></td>`; };
+  $('res').innerHTML = `<h2>Letra ${L} · ronda ${round} de ${ROUNDS}</h2>
+    <table><thead><tr><th></th>${players.map(p => `<th>${p.name}</th>`).join('')}</tr></thead>
+    <tbody>${CATS.map((c, k) => `<tr><th style="border-top:1px solid var(--line)">${c.label}</th>${players.map((p, i) => cell(p, k, i)).join('')}</tr>`).join('')}</tbody>
+    <tfoot><tr><td>Ronda</td>${sums.map((s, i) => `<td>${s}${i === 0 && bonus ? ` <span class="p100">(+${bonus} ¡Basta!)</span>` : ''}</td>`).join('')}</tr></tfoot></table>
+    <p class="legend">100: nadie más la puso · 50: repetida o no está en nuestro diccionario · 0: vacía o no empieza con ${L}.</p>
+    <button class="big" id="nextBtn">${round < ROUNDS ? 'Siguiente letra' : 'Ver resultados'}</button>`;
+  $('play').hidden = true; $('res').hidden = false; paint();
+  $('nextBtn').onclick = round < ROUNDS ? startRound : results;
+  $('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function results() {
+  const names = ['Tú', ...RIVALS.map(r => r.name)];
+  const order = names.map((n, i) => ({ n, s: totals[i], me: i === 0 })).sort((a, b) => b.s - a.s);
+  const won = order[0].me, rec = totals[0] > best();
+  if (rec) try { localStorage.setItem(KEY, totals[0]); } catch {}
+  show(`<div class="logo">${won ? '¡Ganaste!' : 'Buen juego'}</div>
+    <div class="rank">${order.map((o, i) => `<div class="${o.me ? 'me' : ''}"><span>${['🥇', '🥈', '🥉'][i]} ${o.n}</span><span>${o.s} pts</span></div>`).join('')}</div>
+    <p>${rec ? '🎉 ¡Nuevo récord personal!' : `Tu récord: ${best()} pts.`}</p>
+    <button class="big" id="go">Jugar otra vez</button><a class="ghost" href="../juegos.html">Volver a Juegos</a>`, newGame);
+  paint();
+}
+function newGame() { round = 0; used = []; totals = [0, 0, 0]; startRound(); }
+function show(html, onGo) { $('ovCard').innerHTML = html; $('ov').hidden = false; $('go').onclick = onGo; }
+function intro() {
+  playing = false; clearInterval(tick); round = 0; used = []; totals = [0, 0, 0]; paint();
+  $('letter').textContent = '?'; inputs.forEach(i => { i.value = ''; i.disabled = true; i.className = ''; }); $('time').textContent = SECS; $('bar').style.width = '100%';
+  $('play').hidden = false; $('res').hidden = true;
+  show(`<div class="logo">¡<b>Basta</b>!</div><p>El juego de papel y lápiz de toda la vida, ahora en tu celular.</p>
+    <div class="rivals">${RIVALS.map(r => `<span>vs ${r.name}</span>`).join('')}</div>
+    <ol><li>Sale una letra al azar.</li><li>Escribe un nombre, apellido, animal, fruta o verdura y país o ciudad que empiecen con esa letra.</li><li>Tienes 60 segundos. Si llenas todo, grita <b>¡Basta!</b> y ganas 2 puntos por cada segundo que sobre.</li><li>3 rondas: gana quien sume más.</li></ol>
+    <button class="big" id="go">¡Empezar!</button><a class="ghost" href="../juegos.html">Salir a Juegos</a>`, newGame);
+}
+$('homeBtn').onclick = intro;
+$('helpBtn').onclick = () => {
+  const wasOpen = !$('ov').hidden;
+  const card = $('ovCard').innerHTML;
+  show(`<div class="logo" style="font-size:1.4rem">¿Cómo se juega?</div><ol style="margin-top:14px"><li>Todas tus respuestas deben empezar con la letra y tener al menos 3 letras.</li><li><b>100 pts</b> si nadie más la puso; <b>50</b> si alguien la repitió.</li><li>Si tu palabra no está en nuestro diccionario cuenta como "sin verificar" y vale la mitad.</li><li>El reloj sigue corriendo mientras lees esto.</li></ol><button class="big" id="go">Entendido</button>`,
+    () => { if (wasOpen) { $('ovCard').innerHTML = card; const g = $('go'); if (g) g.onclick = playing ? null : newGame; } else $('ov').hidden = true; });
+};
+intro();
+})();
+</script>
+</body>
+</html>

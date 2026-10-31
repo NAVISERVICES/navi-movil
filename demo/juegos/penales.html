@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="es">
+<head>
+<script>/* Navi Movil: solo clientes con sesion en Mi Navi */try{if(!JSON.parse(localStorage.getItem('navi.session')))throw 0}catch(e){location.replace('../login.html?next=juegos/penales.html')}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E0F2E">
+<meta name="apple-mobile-web-app-title" content="Navi Juegos">
+<link rel="icon" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<title>Penales Mundialistas NAVI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#0E0F2E; --panel:#181A45; --line:#2A2C66; --rosa:#E4007C; --cian:#2FD3E8; --oro:#FFC23A;
+  --ok:#2BD67B; --fg:#F3F1FF; --muted:#9C9BD0; --paper:#FFF4E0; --ink:#2A1B3D;
+  --display:"Bungee","Impact",system-ui,sans-serif; --body:"Rubik",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{max-width:520px;margin:0 auto;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--display);font-size:1.02rem;line-height:1.1}
+.brand b{color:var(--rosa);font-weight:400}
+.hbtns{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 .78rem var(--body);background:var(--panel);border:1px solid var(--cian);border-radius:999px;padding:4px 11px 4px 4px}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--cian);color:var(--bg);font:800 .85rem var(--body);font-style:normal;display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;font-variant-numeric:tabular-nums}
+.stat{background:var(--panel);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.stat small{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat b{font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score b{font-family:var(--display);font-weight:400;letter-spacing:.04em}
+.kicks{display:grid;gap:4px;font-size:.78rem;color:var(--muted)}
+.kicks div{display:flex;align-items:center;gap:6px}
+.kicks span{width:58px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kicks i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);font-style:normal}
+.kicks i.g{background:var(--ok);border-color:var(--ok)}
+.kicks i.f{background:var(--rosa);border-color:var(--rosa)}
+/* cancha */
+.pitch{position:relative;aspect-ratio:4/3.3;border-radius:22px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  background:repeating-linear-gradient(180deg,#1f7a43 0 12%,#1b6d3b 12% 24%);box-shadow:inset 0 0 0 3px #ffffff14}
+.pitch::after{content:"";position:absolute;left:4%;right:4%;top:62%;height:2px;background:#ffffffb0}
+.crowd{position:absolute;inset:0 0 auto;height:14%;background:linear-gradient(#0E0F2E,#0E0F2E00);}
+.goal{position:absolute;left:10%;width:80%;top:16%;height:40%;border:5px solid #fff;border-bottom:0;border-radius:6px 6px 0 0;
+  background:repeating-linear-gradient(45deg,#ffffff22 0 2px,transparent 2px 12px),repeating-linear-gradient(-45deg,#ffffff22 0 2px,transparent 2px 12px),#0b3f22aa}
+.keeper{position:absolute;left:50%;bottom:0;width:15%;height:62%;transform:translateX(-50%);transition:transform .38s cubic-bezier(.25,.8,.3,1)}
+.keeper .body{position:absolute;inset:26% 18% 0;border-radius:40% 40% 10px 10px;background:var(--kc,#FFC23A)}
+.keeper .head{position:absolute;left:50%;top:0;width:44%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:#C98A5B;box-shadow:inset 0 -6px 0 #0002}
+.keeper .arm{position:absolute;top:30%;width:22%;height:46%;background:var(--kc,#FFC23A);border-radius:10px}
+.keeper .arm.l{left:-6%;transform:rotate(18deg)}.keeper .arm.r{right:-6%;transform:rotate(-18deg)}
+.keeper .glove{position:absolute;bottom:-12%;left:-10%;width:120%;aspect-ratio:1;border-radius:50%;background:#fff}
+.ball{position:absolute;left:50%;top:80%;width:9%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff 0 30%,#ddd 60%,#999);box-shadow:0 6px 10px #0006;transition:left .45s ease-out,top .45s ease-out,width .45s ease-out}
+.ball::before{content:"";position:absolute;inset:30%;background:#2A1B3D;clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)}
+.aim{position:absolute;pointer-events:none;background:var(--oro);box-shadow:0 0 10px var(--oro);border-radius:3px}
+.aim.x{top:14%;height:44%;width:4px;transform:translateX(-50%)}
+.aim.y{left:10%;width:80%;height:4px;transform:translateY(-50%)}
+.aim.locked{background:var(--rosa);box-shadow:0 0 10px var(--rosa)}
+.zones{position:absolute;left:10%;width:80%;top:16%;height:40%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:6px}
+.zones button{border:2px dashed #ffffffa0;background:#E4007C33;border-radius:12px;font:800 .8rem var(--body);color:#fff;text-shadow:0 1px 3px #000}
+.zones button:active{background:#E4007C88}
+.timer{position:absolute;left:10%;width:80%;top:58%;height:6px;border-radius:9px;background:#00000055;overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--oro);transform-origin:left}
+.msg{position:absolute;left:50%;top:66%;transform:translateX(-50%);font-family:var(--display);font-size:clamp(1.3rem,6vw,2rem);text-align:center;white-space:nowrap;text-shadow:0 3px 0 #0008;pointer-events:none}
+.msg small{display:block;font:600 .85rem var(--body);text-shadow:none;color:#ffffffd0;margin-top:4px}
+.msg.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:translateX(-50%) scale(.6);opacity:0}}
+.hint{text-align:center;font-size:.85rem;color:var(--muted);min-height:1.2em}
+/* pantallas */
+.ov{position:fixed;inset:0;z-index:20;background:#0E0F2Ee8;display:grid;place-items:center;padding:20px}
+.card{width:min(420px,100%);background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:24px 22px;text-align:center}
+.card .logo{font-family:var(--display);font-size:1.6rem;line-height:1.05}
+.card .logo b{color:var(--rosa);font-weight:400;display:block}
+.card p{color:#d7d5f5;font-size:.92rem;line-height:1.45}
+.card ol{text-align:left;font-size:.88rem;line-height:1.5;padding-left:20px;color:#d7d5f5}
+.bracket{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:12px 0}
+.bracket span{font-size:.72rem;font-weight:800;padding:4px 9px;border-radius:99px;background:var(--line);color:var(--muted)}
+.bracket span.done{background:var(--ok);color:var(--bg)}.bracket span.now{background:var(--rosa);color:#fff}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:14px;background:var(--rosa);color:#fff;font:400 1.05rem var(--display);box-shadow:0 5px 0 #8E004D;margin-top:14px}
+.ghost{display:block;width:100%;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:11px;background:none;color:var(--fg);font-weight:600;text-decoration:none}
+.trophy{font-size:3.4rem;line-height:1;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud">
+    <div class="brand">Penales <b>Mundialistas</b></div>
+    <div class="hbtns"><button class="pill" id="homeBtn"><i>⌂</i>Inicio</button><button class="pill" id="helpBtn"><i>?</i>Instrucciones</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><small>Ronda</small><b id="stRound">Octavos</b></div>
+    <div class="stat score"><small id="stVs">Tú vs Rival</small><b id="stScore">0 - 0</b></div>
+    <div class="stat"><small>Récord</small><b id="stBest">—</b></div>
+  </div>
+  <div class="kicks"><div><span>Tú</span><span id="kMe" style="display:flex;gap:4px;width:auto"></span></div><div><span id="kRivName">Rival</span><span id="kRiv" style="display:flex;gap:4px;width:auto"></span></div></div>
+  <div class="pitch" id="pitch" aria-label="Cancha">
+    <div class="crowd"></div>
+    <div class="goal"><div class="keeper" id="keeper"><div class="arm l"><div class="glove"></div></div><div class="arm r"><div class="glove"></div></div><div class="body"></div><div class="head"></div></div></div>
+    <div class="aim x" id="aimX" hidden></div>
+    <div class="aim y" id="aimY" hidden></div>
+    <div class="zones" id="zones" hidden><button data-z="-1">⬅ Izquierda</button><button data-z="0">Centro</button><button data-z="1">Derecha ➡</button></div>
+    <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
+    <div class="ball" id="ball"></div>
+    <div class="msg" id="msg"></div>
+  </div>
+  <div class="hint" id="hint"></div>
+  <a class="ghost" href="../juegos.html" style="text-align:center">← Volver a Juegos</a>
+</div>
+
+<div class="ov" id="ov"><div class="card" id="ovCard"></div></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const STAGES = [
+  { name: 'Octavos', rival: 'Tiburones del Golfo', color: '#2FD3E8' },
+  { name: 'Cuartos', rival: 'Jaguares del Sur', color: '#2BD67B' },
+  { name: 'Semifinal', rival: 'Águilas del Norte', color: '#FFC23A' },
+  { name: 'Final', rival: 'Halcones Dorados', color: '#FF6FB1' },
+];
+// dificultad por ronda: alcance del portero, cuánto "lee" tu tiro, velocidad de la mira, tiempo para lanzarte, falla del rival
+const DIFF = [
+  { reach: .34, read: .12, speed: 2.3, react: 1500, miss: .18 },
+  { reach: .39, read: .2, speed: 2.7, react: 1300, miss: .14 },
+  { reach: .44, read: .27, speed: 3.1, react: 1150, miss: .10 },
+  { reach: .49, read: .34, speed: 3.5, react: 1000, miss: .07 },
+];
+const KEY = 'navi_penales';
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || { best: -1, titles: 0 }; } catch { return { best: -1, titles: 0 }; } };
+const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} };
+const bestTxt = s => s.titles ? `🏆 x${s.titles}` : s.best >= 0 ? STAGES[s.best].name : '—';
+
+let stage = 0, me = [], riv = [], phase = 'idle', raf = 0, t0 = 0, aimX = 0, aimY = 0, timerT = 0, myTurn = true;
+const D = () => DIFF[stage];
+
+// --- sonido muy simple (se activa con el primer toque) ---
+let ac = null;
+const beep = (f, d = .12, type = 'square', v = .05) => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = v; o.connect(g).connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + d); o.stop(ac.currentTime + d); } catch {} };
+const cheer = () => { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, .16, 'triangle', .06), i * 90)); };
+
+// --- posiciones en la cancha (en % del área) ---
+const GOAL = { left: 10, width: 80, top: 16, height: 40 };
+const toLeft = x => GOAL.left + GOAL.width / 2 + x * GOAL.width / 2;     // x: -1 poste izq, 1 poste der
+const toTop = y => GOAL.top + GOAL.height - y * GOAL.height;           // y: 0 pasto, 1 travesaño
+const resetPieces = () => {
+  const b = $('ball'); b.style.transition = 'none'; b.style.left = '50%'; b.style.top = '80%'; b.style.width = '9%';
+  void b.offsetWidth; b.style.transition = '';
+  $('keeper').style.transform = 'translateX(-50%)';
+};
+const setMsg = (big, small = '', cls = '') => { const m = $('msg'); m.innerHTML = big + (small ? `<small>${small}</small>` : ''); m.className = 'msg'; void m.offsetWidth; if (big) m.classList.add('pop'); if (cls) m.style.color = cls; else m.style.color = ''; };
+
+function paint() {
+  const S = STAGES[stage], g = a => a.filter(Boolean).length;
+  $('stRound').textContent = S.name;
+  $('stVs').textContent = `Tú vs ${S.rival.split(' ')[0]}`;
+  $('stScore').textContent = `${g(me)} - ${g(riv)}`;
+  $('kRivName').textContent = S.rival.split(' ')[0];
+  const dots = arr => { const n = Math.max(5, me.length, riv.length); return Array.from({ length: n }, (_, i) => `<i class="${arr[i] === undefined ? '' : arr[i] ? 'g' : 'f'}"></i>`).join(''); };
+  $('kMe').innerHTML = dots(me); $('kRiv').innerHTML = dots(riv);
+  $('stBest').textContent = bestTxt(load());
+  $('keeper').style.setProperty('--kc', myTurn ? S.color : '#E4007C');
+}
+
+// ¿se acabó la tanda? 5 tiros cada quien, luego muerte súbita
+function decided() {
+  const a = me.filter(Boolean).length, b = riv.filter(Boolean).length, na = me.length, nb = riv.length;
+  if (na <= 5 && nb <= 5) {
+    if (a + (5 - na) < b) return 'lose';
+    if (b + (5 - nb) < a) return 'win';
+    if (na === 5 && nb === 5) return a > b ? 'win' : a < b ? 'lose' : null;
+    return null;
+  }
+  if (na === nb) return a > b ? 'win' : a < b ? 'lose' : null;
+  return null;
+}
+
+function next() {
+  const r = decided();
+  if (r) return endRound(r === 'win');
+  myTurn = me.length === riv.length;
+  paint(); resetPieces(); setMsg('');
+  myTurn ? startShot() : startDefense();
+}
+
+// ---------- TIRAR: fija lo ancho y luego lo alto ----------
+function startShot() {
+  phase = 'aimX'; t0 = performance.now();
+  $('aimX').hidden = false; $('aimY').hidden = true; $('aimX').classList.remove('locked'); $('aimY').classList.remove('locked');
+  $('hint').textContent = 'Toca para fijar hacia dónde tiras (izquierda ↔ derecha)';
+  loop();
+}
+function loop() {
+  cancelAnimationFrame(raf);
+  const tick = now => {
+    const t = (now - t0) / 1000, sp = D().speed;
+    if (phase === 'aimX') { aimX = Math.sin(t * sp) * 1.18; $('aimX').style.left = toLeft(aimX) + '%'; }
+    if (phase === 'aimY') { aimY = (1 - Math.cos(t * sp * 1.1)) / 2 * 1.2; $('aimY').style.top = toTop(aimY) + '%'; }
+    if (phase === 'aimX' || phase === 'aimY') raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+}
+function tapShot() {
+  if (phase === 'aimX') { phase = 'aimY'; t0 = performance.now(); $('aimX').classList.add('locked'); $('aimY').hidden = false; $('hint').textContent = 'Ahora la altura: toca para tirar'; beep(440, .06); loop(); return; }
+  if (phase !== 'aimY') return;
+  phase = 'shooting'; cancelAnimationFrame(raf); $('aimY').classList.add('locked'); $('hint').textContent = '';
+  // el portero elige: a veces "lee" el tiro, si no se lanza al azar
+  const d = D();
+  const kx = Math.random() < d.read ? Math.sign(aimX) * .62 : [-.62, 0, .62][Math.random() < .38 ? 0 : Math.random() < .39 ? 1 : 2];
+  shoot(aimX, aimY, kx, () => {
+    let res, why;
+    const dx = Math.abs(aimX - kx);
+    if (aimY > 1.03) { res = false; why = 'Por encima del travesaño'; }
+    else if (Math.abs(aimX) > 1.03) { res = false; why = 'Se fue afuera'; }
+    else if (Math.abs(aimX) > .95 || aimY > .97) { res = false; why = '¡Al poste!'; }
+    else if (dx < d.reach && (aimY < .78 || dx < d.reach * .55)) { res = false; why = '¡La atajó el portero!'; }
+    else { res = true; why = Math.abs(aimX) > .7 && aimY > .6 ? 'Al ángulo, ¡imposible!' : 'Directo a la red'; }
+    me.push(res); paint();
+    if (res) { setMsg('¡GOOOL!', why, '#2BD67B'); cheer(); } else { setMsg('¡Fallaste!', why, '#FF6FB1'); beep(160, .3, 'sawtooth', .04); }
+    setTimeout(next, 1400);
+  });
+}
+function shoot(x, y, kx, done) {
+  beep(220, .08, 'triangle', .07);
+  const b = $('ball');
+  b.style.left = toLeft(x) + '%'; b.style.top = toTop(Math.min(y, 1.15)) + '%'; b.style.width = '5.5%';
+  const k = $('keeper'); const lean = kx === 0 ? 0 : kx > 0 ? 18 : -18;
+  k.style.transform = `translateX(calc(-50% + ${kx * 333}%)) rotate(${lean * 2.4}deg) translateY(${y > .7 ? -14 : 0}%)`;
+  setTimeout(done, 480);
+}
+
+// ---------- ATAJAR: elige hacia dónde te lanzas antes de que se acabe el tiempo ----------
+function startDefense() {
+  phase = 'defend';
+  $('aimX').hidden = $('aimY').hidden = true;
+  $('zones').hidden = false; $('timer').hidden = false;
+  $('hint').textContent = `Tira ${STAGES[stage].rival.split(' ')[0]}: elige hacia dónde te lanzas (o usa ← ↓ →)`;
+  const bar = $('timerBar'); bar.style.transition = 'none'; bar.style.transform = 'scaleX(1)'; void bar.offsetWidth;
+  bar.style.transition = `transform ${D().react}ms linear`; bar.style.transform = 'scaleX(0)';
+  clearTimeout(timerT); timerT = setTimeout(() => dive(0, true), D().react);
+}
+function dive(z, late) {
+  if (phase !== 'defend') return;
+  phase = 'shooting'; clearTimeout(timerT);
+  $('zones').hidden = true; $('timer').hidden = true; $('hint').textContent = '';
+  const d = D(), shotZ = [-1, 0, 1][Math.random() < .4 ? 0 : Math.random() < .33 ? 1 : 2];
+  const missed = Math.random() < d.miss;
+  const x = missed ? shotZ * 1.12 + (shotZ === 0 ? .9 : 0) : shotZ * (.55 + Math.random() * .3) + (Math.random() - .5) * .15;
+  const y = missed ? 1.12 : Math.random() * .85;
+  shoot(x, y, z * .62, () => {
+    let goal;
+    if (missed) { goal = false; setMsg('¡La mandó afuera!', 'El rival falló', '#2FD3E8'); beep(330, .2, 'triangle'); }
+    else if (z === shotZ) { goal = false; setMsg('¡ATAJADA!', late ? 'Te quedaste en el centro… ¡y acertaste!' : 'Leíste el tiro', '#2BD67B'); cheer(); }
+    else { goal = true; setMsg('Gol del rival', late ? 'Te ganó el tiempo' : 'Te lanzaste al otro lado', '#FF6FB1'); beep(160, .3, 'sawtooth', .04); }
+    riv.push(goal); paint();
+    setTimeout(next, 1400);
+  });
+}
+$('zones').addEventListener('click', e => { const b = e.target.closest('[data-z]'); if (b) dive(+b.dataset.z); });
+$('pitch').addEventListener('pointerdown', e => { if (e.target.closest('.zones')) return; if (phase === 'aimX' || phase === 'aimY') tapShot(); });
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && (phase === 'aimX' || phase === 'aimY')) { e.preventDefault(); tapShot(); }
+  if (phase === 'defend') { const z = { ArrowLeft: -1, ArrowDown: 0, ArrowUp: 0, ArrowRight: 1 }[e.key]; if (z !== undefined) { e.preventDefault(); dive(z); } }
+});
+
+// ---------- rondas y pantallas ----------
+const bracket = (doneUpTo, now) => `<div class="bracket">${STAGES.map((s, i) => `<span class="${i < doneUpTo ? 'done' : i === now ? 'now' : ''}">${s.name}</span>`).join('')}</div>`;
+function startRound() {
+  me = []; riv = []; myTurn = true; $('ov').hidden = true; next();
+}
+function endRound(won) {
+  phase = 'idle'; cancelAnimationFrame(raf);
+  const s = load(), S = STAGES[stage], g = a => a.filter(Boolean).length, sc = `${g(me)} - ${g(riv)}`;
+  if (won) {
+    s.best = Math.max(s.best, stage);
+    if (stage === STAGES.length - 1) { s.titles++; save(s); return show(`<div class="trophy">🏆</div><div class="logo">¡Campeones!<b>Copa NAVI</b></div>${bracket(4, -1)}<p>Ganaste la final ${sc} contra ${S.rival}. ¡Eres leyenda!</p><button class="big" id="go">Jugar otro torneo</button><a class="ghost" href="../juegos.html">Volver a Juegos</a>`, () => { stage = 0; startRound(); }); }
+    save(s);
+    return show(`<div class="trophy">⚽</div><div class="logo">¡Pasas a ${STAGES[stage + 1].name}!</div>${bracket(stage + 1, stage + 1)}<p>Ganaste ${sc} a ${S.rival}. Ahora vas contra <b>${STAGES[stage + 1].rival}</b>: el portero es más listo y tienes menos tiempo para lanzarte.</p><button class="big" id="go">Seguir</button>`, () => { stage++; startRound(); });
+  }
+  save(s);
+  show(`<div class="trophy">😓</div><div class="logo">Eliminados<b>en ${S.name}</b></div>${bracket(stage, stage)}<p>${S.rival} ganó ${sc}. Tu mejor marca: <b>${bestTxt(s)}</b>.</p><button class="big" id="go">Intentar otra vez</button><a class="ghost" href="../juegos.html">Volver a Juegos</a>`, () => { stage = 0; startRound(); });
+}
+function show(html, onGo) { $('ovCard').innerHTML = html; $('ov').hidden = false; $('go').onclick = onGo; }
+function intro() {
+  phase = 'idle'; cancelAnimationFrame(raf); clearTimeout(timerT); stage = 0; me = []; riv = []; paint(); resetPieces(); setMsg('');
+  $('zones').hidden = $('timer').hidden = $('aimX').hidden = $('aimY').hidden = true; $('hint').textContent = '';
+  show(`<div class="logo">Penales<b>Mundialistas</b></div>${bracket(0, 0)}<p>Gana 4 tandas de penales y llévate la Copa NAVI. Cada ronda el rival es más difícil.</p>
+    <ol><li><b>Tiras:</b> una mira se mueve sobre la portería; toca para fijar a lo ancho y otra vez para la altura.</li><li><b>Atajas:</b> elige izquierda, centro o derecha antes de que se acabe la barra.</li><li>5 tiros por equipo; si empatan, muerte súbita.</li></ol>
+    <button class="big" id="go">¡A la cancha!</button><a class="ghost" href="../juegos.html">Salir a Juegos</a>`, startRound);
+}
+$('homeBtn').onclick = intro;
+$('helpBtn').onclick = () => { const wasPlaying = phase; show(`<div class="logo">¿Cómo se juega?</div><ol style="margin-top:14px"><li>Toca la cancha (o la barra espaciadora) cuando la mira amarilla esté donde quieres tirar; luego fija la altura.</li><li>Las esquinas altas son más difíciles de atajar, pero si te pasas pega en el poste o se va por encima.</li><li>Cuando tira el rival, toca un lado de la portería o usa las flechas ← ↓ →.</li></ol><button class="big" id="go">Entendido</button>`, () => { $('ov').hidden = true; if (wasPlaying === 'idle') intro(); }); };
+intro();
+})();
+</script>
+</body>
+</html>

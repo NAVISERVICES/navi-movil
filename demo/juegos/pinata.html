@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<script>/* Navi Movil: solo clientes con sesion en Mi Navi */try{if(!JSON.parse(localStorage.getItem('navi.session')))throw 0}catch(e){location.replace('../login.html?next=juegos/pinata.html')}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E0F2E">
+<meta name="apple-mobile-web-app-title" content="Navi Juegos">
+<link rel="icon" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<title>Piñata Pop NAVI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#0E0F2E; --panel:#181A45; --line:#2A2C66; --rosa:#E4007C; --cian:#2FD3E8; --oro:#FFC23A;
+  --ok:#2BD67B; --fg:#F3F1FF; --muted:#9C9BD0; --paper:#FFF4E0; --ink:#2A1B3D;
+  --display:"Bungee","Impact",system-ui,sans-serif; --body:"Rubik",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{max-width:520px;margin:0 auto;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--display);font-size:1.1rem}
+.brand b{color:var(--rosa);font-weight:400}
+.hbtns{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 .78rem var(--body);background:var(--panel);border:1px solid var(--cian);border-radius:999px;padding:4px 11px 4px 4px}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--cian);color:var(--bg);font:800 .85rem var(--body);font-style:normal;display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-variant-numeric:tabular-nums}
+.stat{background:var(--panel);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.stat small{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+.stat b{font-size:1.1rem;white-space:nowrap}
+.stat.lives b{letter-spacing:2px}
+/* escenario */
+.stage{position:relative;aspect-ratio:4/4.4;border-radius:22px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer;
+  background:radial-gradient(circle at 50% 0,#3b2a8f 0,transparent 60%),linear-gradient(#1E1E6E,#0E0F2E 75%)}
+.papel{position:absolute;inset:0 0 auto;height:12%;display:flex;justify-content:space-around;pointer-events:none}
+.papel i{width:9%;height:100%;clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%);opacity:.9}
+.rope{position:absolute;top:0;left:0;width:3px;background:#C9A26B;transform-origin:top center;pointer-events:none}
+.zone{position:absolute;left:50%;top:14%;bottom:20%;transform:translateX(-50%);border-left:2px dashed #ffffff40;border-right:2px dashed #ffffff40;background:#ffffff08;pointer-events:none;transition:width .3s}
+.zone.perfect{background:#2BD67B12}
+.pinata{position:absolute;width:34%;aspect-ratio:1;transform:translate(-50%,-10%);pointer-events:none;filter:drop-shadow(0 10px 14px #0007)}
+.pinata.hit{animation:hit .22s}
+@keyframes hit{40%{transform:translate(-50%,-10%) scale(.88) rotate(-8deg)}}
+.hp{position:absolute;left:50%;top:-14%;transform:translateX(-50%);display:flex;gap:3px}
+.hp i{width:10px;height:10px;border-radius:50%;background:#fff;opacity:.9}
+.hp i.off{opacity:.18}
+.palo{position:absolute;left:50%;bottom:6%;width:10px;height:34%;background:linear-gradient(90deg,#8a5a2b,#c99057);border-radius:6px;transform-origin:bottom center;transform:translateX(-50%) rotate(28deg);transition:transform .08s;pointer-events:none}
+.palo.swing{transform:translateX(-50%) rotate(-30deg)}
+.kid{position:absolute;left:50%;bottom:0;width:22%;transform:translateX(-38%);pointer-events:none}
+.pop{position:absolute;font:400 1.3rem var(--display);pointer-events:none;transform:translate(-50%,-50%);animation:up .8s ease-out forwards;text-shadow:0 2px 0 #0008;white-space:nowrap}
+@keyframes up{to{transform:translate(-50%,-160%);opacity:0}}
+.candy{position:absolute;font-size:1.5rem;pointer-events:none;will-change:transform}
+.msg{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);font:400 clamp(1.4rem,7vw,2.2rem) var(--display);text-align:center;pointer-events:none;text-shadow:0 3px 0 #0008}
+.hint{text-align:center;font-size:.85rem;color:var(--muted)}
+/* pantallas */
+.ov{position:fixed;inset:0;z-index:20;background:#0E0F2Ee8;display:grid;place-items:center;padding:20px}
+.card{width:min(420px,100%);background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:24px 22px;text-align:center}
+.card .logo{font-family:var(--display);font-size:2rem;line-height:1}
+.card .logo b{color:var(--rosa);font-weight:400}
+.card p{color:#d7d5f5;font-size:.92rem;line-height:1.45}
+.card ol{text-align:left;font-size:.88rem;line-height:1.5;padding-left:20px;color:#d7d5f5}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:14px;background:var(--rosa);color:#fff;font:400 1.05rem var(--display);box-shadow:0 5px 0 #8E004D;margin-top:14px}
+.ghost{display:block;width:100%;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:11px;background:none;color:var(--fg);font-weight:600;text-decoration:none;text-align:center}
+.final{font:400 2.6rem var(--display);color:var(--oro);margin:6px 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud">
+    <div class="brand">Piñata <b>Pop</b></div>
+    <div class="hbtns"><button class="pill" id="homeBtn"><i>⌂</i>Inicio</button><button class="pill" id="helpBtn"><i>?</i>Instrucciones</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><small>Dulces</small><b id="stPts">0</b></div>
+    <div class="stat"><small>Piñata</small><b id="stLvl">1</b></div>
+    <div class="stat lives"><small>Palos</small><b id="stLives">🪵🪵🪵</b></div>
+    <div class="stat"><small>Récord</small><b id="stBest">0</b></div>
+  </div>
+  <div class="stage" id="stage" aria-label="Toca para pegarle a la piñata">
+    <div class="papel" id="papel"></div>
+    <div class="zone" id="zone"></div>
+    <div class="rope" id="rope"></div>
+    <div class="pinata" id="pinata"><div class="hp" id="hp"></div><svg viewBox="0 0 100 100" id="pSvg"></svg></div>
+    <div class="palo" id="palo"></div>
+    <div class="msg" id="msg"></div>
+  </div>
+  <p class="hint" id="hint">Toca la pantalla (o la barra espaciadora) cuando la piñata pase por el centro.</p>
+  <a class="ghost" href="../juegos.html">← Volver a Juegos</a>
+</div>
+<div class="ov" id="ov"><div class="card" id="ovCard"></div></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const KEY = 'navi_pinata_best';
+const best = () => +(localStorage.getItem(KEY) || 0);
+const COLORS = [['#E4007C', '#FFC23A'], ['#2FD3E8', '#E4007C'], ['#FFC23A', '#2BD67B'], ['#7B5CFA', '#FFC23A'], ['#2BD67B', '#E4007C']];
+const CANDY = ['🍬', '🍭', '🍫', '🍡', '🥜', '🍊'];
+$('papel').innerHTML = Array.from({ length: 9 }, (_, i) => `<i style="background:${['#E4007C', '#FFC23A', '#2FD3E8', '#2BD67B', '#7B5CFA'][i % 5]}"></i>`).join('');
+
+// piñata de estrella (7 picos) con colores de NAVI; la dorada sale cada 5 piñatas y da el triple
+const star = (c1, c2, gold) => {
+  const cones = Array.from({ length: 7 }, (_, i) => { const a = (i / 7) * Math.PI * 2 - Math.PI / 2, x = 50 + Math.cos(a) * 44, y = 52 + Math.sin(a) * 44, bx = 50 + Math.cos(a - .34) * 22, by = 52 + Math.sin(a - .34) * 22, cx = 50 + Math.cos(a + .34) * 22, cy = 52 + Math.sin(a + .34) * 22;
+    return `<polygon points="${bx},${by} ${x},${y} ${cx},${cy}" fill="${i % 2 ? c2 : c1}"/><circle cx="${x}" cy="${y}" r="3.2" fill="${gold ? '#fff' : i % 2 ? c1 : c2}"/>`; }).join('');
+  return `${cones}<circle cx="50" cy="52" r="24" fill="${gold ? '#FFD84D' : '#FFF4E0'}"/><circle cx="50" cy="52" r="24" fill="none" stroke="${c1}" stroke-width="3" stroke-dasharray="4 3"/>
+    <text x="50" y="59" text-anchor="middle" font-family="Bungee,Impact,sans-serif" font-size="16" fill="${gold ? '#8E004D' : c1}">${gold ? '★' : 'N'}</text>`;
+};
+
+let lvl = 1, pts = 0, lives = 3, combo = 0, hp = 3, maxHp = 3, gold = false, t0 = 0, raf = 0, playing = false, lock = false, x = 0;
+// velocidad del columpio y ancho de la zona de golpe según la piñata
+const speed = () => 1.6 + lvl * .22;
+const zoneW = () => Math.max(13, 30 - lvl * 1.4);      // % del ancho
+const amp = () => Math.min(40, 30 + lvl * 1.2);        // qué tan lejos se columpia
+
+let ac = null;
+const beep = (f, d = .1, type = 'square', v = .05) => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = v; o.connect(g).connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + d); o.stop(ac.currentTime + d); } catch {} };
+
+const paint = () => {
+  $('stPts').textContent = pts; $('stLvl').textContent = lvl + (gold ? '★' : '');
+  $('stLives').textContent = '🪵'.repeat(lives) + '·'.repeat(3 - lives); $('stBest').textContent = best();
+  $('hp').innerHTML = Array.from({ length: maxHp }, (_, i) => `<i class="${i < hp ? '' : 'off'}"></i>`).join('');
+  $('zone').style.width = zoneW() + '%';
+};
+function newPinata() {
+  gold = lvl % 5 === 0; maxHp = hp = Math.min(3 + Math.floor((lvl - 1) / 2), 8);
+  const [c1, c2] = gold ? ['#FFC23A', '#E4007C'] : COLORS[(lvl - 1) % COLORS.length];
+  $('pSvg').innerHTML = star(c1, c2, gold);
+  t0 = performance.now() - Math.random() * 1000; paint();
+  msg(gold ? '¡Piñata dorada!' : `Piñata ${lvl}`, gold ? '#FFC23A' : '#fff', 900);
+}
+function frame(now) {
+  const t = (now - t0) / 1000, st = $('stage').getBoundingClientRect();
+  x = Math.sin(t * speed()) * amp();                         // -amp..amp, en % desde el centro
+  const px = 50 + x, py = 34 + Math.abs(Math.sin(t * speed())) * -6;
+  const p = $('pinata'); p.style.left = px + '%'; p.style.top = py + '%';
+  // cuerda del techo a la piñata
+  const r = $('rope'), ax = st.width / 2, bx = st.width * px / 100, by = st.height * py / 100 + 6;
+  r.style.left = ax + 'px'; r.style.height = Math.hypot(bx - ax, by) + 'px'; r.style.transform = `rotate(${-Math.atan2(bx - ax, by)}rad)`;
+  if (playing) raf = requestAnimationFrame(frame);
+}
+function swing() {
+  if (!playing || lock) return;
+  lock = true; setTimeout(() => lock = false, 220);
+  const palo = $('palo'); palo.classList.add('swing'); setTimeout(() => palo.classList.remove('swing'), 120);
+  const half = zoneW() / 2, d = Math.abs(x);
+  if (d <= half) {
+    const perfect = d <= half * .35;
+    combo++; hp--;
+    const mult = Math.min(1 + Math.floor(combo / 3), 5) * (gold ? 3 : 1);
+    const gain = (perfect ? 30 : 15) * mult; pts += gain;
+    float(`+${gain}${perfect ? ' ¡Perfecto!' : ''}`, perfect ? '#2BD67B' : '#fff');
+    if (mult > 1 && combo % 3 === 0) msg(`¡Racha x${Math.min(1 + Math.floor(combo / 3), 5)}!`, '#2FD3E8', 650);
+    const p = $('pinata'); p.classList.remove('hit'); void p.offsetWidth; p.classList.add('hit');
+    beep(perfect ? 880 : 620, .08, 'square', .06);
+    if (hp <= 0) return burst();
+  } else {
+    combo = 0; lives--;
+    float('¡Al aire!', '#FF6FB1'); beep(140, .25, 'sawtooth', .05);
+    if (lives <= 0) { paint(); return gameOver(); }
+  }
+  paint();
+}
+function burst() {
+  const bonus = (40 + lvl * 10) * (gold ? 3 : 1); pts += bonus;
+  [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => beep(f, .12, 'triangle', .06), i * 70));
+  const st = $('stage'), p = $('pinata').getBoundingClientRect(), s = st.getBoundingClientRect();
+  const cx = p.left - s.left + p.width / 2, cy = p.top - s.top + p.height / 2;
+  for (let i = 0; i < 26; i++) {
+    const c = document.createElement('span'); c.className = 'candy'; c.textContent = CANDY[i % CANDY.length];
+    c.style.left = cx + 'px'; c.style.top = cy + 'px'; st.appendChild(c);
+    const a = Math.random() * Math.PI * 2, v = 80 + Math.random() * 160;
+    c.animate([{ transform: 'translate(-50%,-50%)' }, { transform: `translate(calc(-50% + ${Math.cos(a) * v}px), calc(-50% + ${Math.sin(a) * v * .6 + 120}px)) rotate(${Math.random() * 540 - 270}deg)`, opacity: 0 }], { duration: 1100 + Math.random() * 500, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => c.remove();
+  }
+  msg(`¡Se rompió! +${bonus}`, '#FFC23A', 1000);
+  $('pinata').style.visibility = 'hidden';
+  if (lvl % 3 === 0 && lives < 3) { lives++; setTimeout(() => float('+1 palo', '#2BD67B'), 500); }
+  lock = true;
+  setTimeout(() => { lvl++; $('pinata').style.visibility = ''; newPinata(); lock = false; }, 1300);
+  paint();
+}
+function float(text, color) {
+  const st = $('stage'), p = $('pinata').getBoundingClientRect(), s = st.getBoundingClientRect();
+  const e = document.createElement('div'); e.className = 'pop'; e.textContent = text; e.style.color = color;
+  e.style.left = (p.left - s.left + p.width / 2) + 'px'; e.style.top = (p.top - s.top) + 'px'; st.appendChild(e); setTimeout(() => e.remove(), 800);
+}
+let msgT = 0;
+function msg(t, color, ms) { const m = $('msg'); m.textContent = t; m.style.color = color; clearTimeout(msgT); msgT = setTimeout(() => m.textContent = '', ms); }
+
+function start() {
+  $('ov').hidden = true; lvl = 1; pts = 0; lives = 3; combo = 0; playing = true; $('pinata').style.visibility = '';
+  newPinata(); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
+}
+function gameOver() {
+  playing = false; cancelAnimationFrame(raf);
+  const rec = pts > best(); if (rec) try { localStorage.setItem(KEY, pts); } catch {}
+  show(`<div class="logo">¡Se acabaron<br>los palos!</div><div class="final">${pts} 🍬</div>
+    <p>Llegaste a la piñata ${lvl}. ${rec ? '🎉 ¡Nuevo récord!' : `Tu récord: ${best()} dulces.`}</p>
+    <button class="big" id="go">Otra ronda</button><a class="ghost" href="../juegos.html">Volver a Juegos</a>`, start);
+  paint();
+}
+function show(html, onGo) { $('ovCard').innerHTML = html; $('ov').hidden = false; $('go').onclick = onGo; }
+function intro() {
+  playing = false; cancelAnimationFrame(raf); lvl = 1; pts = 0; lives = 3; combo = 0; newPinata(); requestAnimationFrame(frame); $('msg').textContent = '';
+  show(`<div class="logo">Piñata <b>Pop</b></div><p>¡Dale, dale, dale! No pierdas el tino.</p>
+    <ol><li>La piñata se columpia: toca la pantalla (o la barra espaciadora) cuando pase por la franja del centro.</li><li>Justo en medio es <b>¡Perfecto!</b> y vale el doble. Cada 3 aciertos seguidos sube tu racha.</li><li>Si le das al aire pierdes un palo; tienes 3. Cada 3 piñatas recuperas uno.</li><li>Cada 5 piñatas sale la <b>dorada</b>: todo vale el triple.</li></ol>
+    <button class="big" id="go">¡A pegarle!</button><a class="ghost" href="../juegos.html">Salir a Juegos</a>`, start);
+}
+$('stage').addEventListener('pointerdown', e => { e.preventDefault(); swing(); });
+addEventListener('keydown', e => { if (e.code === 'Space' && playing) { e.preventDefault(); swing(); } });
+$('homeBtn').onclick = intro;
+$('helpBtn').onclick = () => {
+  const was = playing; playing = false; cancelAnimationFrame(raf);
+  show(`<div class="logo" style="font-size:1.4rem">¿Cómo se juega?</div><ol style="margin-top:14px"><li>Pega cuando la piñata esté dentro de la franja punteada.</li><li>Entre más avanzas, la franja es más angosta y la piñata va más rápido.</li><li>Los puntos de la racha se multiplican hasta x5.</li></ol><button class="big" id="go">${was ? 'Seguir jugando' : 'Entendido'}</button>`,
+    () => { $('ov').hidden = true; if (was) { playing = true; raf = requestAnimationFrame(frame); } else intro(); });
+};
+intro();
+})();
+</script>
+</body>
+</html>
