@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261030d"></script>
+<script src="auth.js?v=20261031a"></script>
 <script>
   // sin sesión no hay suite: de vuelta al login
   if (!NaviAuth.current()) location.replace('login.html?next=cuenta.html');
@@ -199,6 +199,7 @@ main{padding:36px 0 80px}
     <div class="ptabs" role="tablist"><button role="tab" data-p="prof" aria-selected="true">Mi perfil</button><button role="tab" data-p="famBox" id="famTab" aria-selected="false">Tu familia</button></div>
     <form class="prof pane" id="prof" novalidate>
       <p class="muted">Lo que guardes aquí es lo que ve tu familia en Mi Navi, SOS Family y el Botón SOS.</p>
+      <label class="field fam-name" id="famNameBox" hidden>Nombre de la familia <small>(solo el titular puede cambiarlo)</small><input id="pFam" maxlength="40" placeholder="Ej. Familia Sánchez López"></label>
       <label class="field">Nombre y apellidos<input id="pFull" maxlength="48" autocomplete="name" placeholder="Ej. María López García"></label>
       <label class="field">Cómo te dice tu familia <small>(opcional)</small><input id="pNick" maxlength="20" placeholder="Ej. Mamá"></label>
       <div class="two">
@@ -304,6 +305,10 @@ if (user) {
   $('pFull').value = prof.full || (fam ? '' : user.baseName);
   $('pNick').value = prof.nick || ''; $('pNick').placeholder = `Ej. ${fam ? user.plan.lines.find(l => l.phone === user.phone).name : user.baseName.split(' ')[0]}`;
   $('pMail').value = prof.mail || ''; $('pBday').value = prof.bday || ''; $('pStatus').value = prof.status || '';
+  // nombre de la familia: solo lo ve y lo cambia el titular del Plan Familia
+  const isOwner = fam && user.role === 'titular';
+  $('famNameBox').hidden = !isOwner;
+  if (isOwner) $('pFam').value = user.familyName;
   $('prof').addEventListener('input', e => { e.target.closest('.field')?.classList.remove('err'); $('pMsg').textContent = ''; });
   $('prof').addEventListener('submit', e => {
     e.preventDefault();
@@ -312,7 +317,13 @@ if (user) {
     bad.forEach(([id, ok]) => $(id).closest('.field').classList.toggle('err', !ok));
     const m = $('pMsg');
     if (bad.some(b => !b[1])) { m.className = 'ok bad'; m.textContent = !bad[0][1] ? 'Escribe tu nombre y al menos un apellido.' : 'Revisa tu correo.'; return; }
-    const saved = Profiles.set(user.phone, { full, nick: $('pNick').value.trim(), mail, bday: $('pBday').value, status: $('pStatus').value.trim() });
+    let saved = Profiles.set(user.phone, { full, nick: $('pNick').value.trim(), mail, bday: $('pBday').value, status: $('pStatus').value.trim() });
+    if (isOwner && saved) {
+      // "Sánchez López" se guarda como "Familia Sánchez López"; vacío regresa al nombre original
+      let fn = $('pFam').value.trim().replace(/\s+/g, ' ');
+      if (fn && !/^familia\s/i.test(fn)) fn = 'Familia ' + fn;
+      saved = FamilyNames.set(user.owner, fn === user.baseName ? '' : fn);
+    }
     m.className = saved ? 'ok' : 'ok bad';
     m.textContent = saved ? (fam ? '✓ Guardado. Tu familia ya lo ve.' : '✓ Guardado.') : 'No se pudo guardar en este navegador.';
     if (saved) { try { sessionStorage.setItem('navi.menu', 'prof'); } catch {} setTimeout(() => location.reload(), 900); }

@@ -157,6 +157,16 @@ const Profiles = (() => {
     },
   };
 })();
+// Nombre de la familia del Plan Familia, por número del titular: solo el titular lo cambia
+const FamilyNames = (() => {
+  const KEY = 'navi.families';
+  const all = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  return {
+    get: owner => all()[owner] || '',
+    set: (owner, name) => { const a = all(); if (name) a[owner] = name; else delete a[owner]; try { localStorage.setItem(KEY, JSON.stringify(a)); return true; } catch { return false; } },
+  };
+})();
+
 // full: nombre real completo (para la ficha de la línea) · nick: cómo le dice su familia (mapa, chat, listas)
 const withProfile = l => {
   const p = Profiles.get(l.phone);
@@ -251,7 +261,8 @@ const NaviAuth = (() => {
     const owner = own ? phone : Object.keys(NAVI_ACCOUNTS).find(k => NAVI_ACCOUNTS[k].plan.lines?.some(l => l.phone === phone));
     if (!owner) return null;
     const acc = NAVI_ACCOUNTS[owner], line = acc.plan.lines.find(l => l.phone === phone);
-    return { phone, name: acc.name, baseName: acc.name, familyName: acc.name, img: line.img, plan: acc.plan, device: line.device, porta: line.porta,
+    const fname = FamilyNames.get(owner) || acc.name;
+    return { phone, name: fname, baseName: acc.name, familyName: fname, img: line.img, plan: acc.plan, device: line.device, porta: line.porta,
       owner, role: owner === phone ? 'titular' : 'integrante', me: withProfile(line), apps: appsFor(acc.plan) };
   };
   return {
@@ -265,7 +276,7 @@ const NaviAuth = (() => {
 
 // lo que cambia un integrante (perfil o foto) se ve al momento en las demás pestañas abiertas de la familia
 addEventListener('storage', e => {
-  if (!['navi.profiles', 'navi.photos'].includes(e.key)) return;
+  if (!['navi.profiles', 'navi.photos', 'navi.families'].includes(e.key)) return;
   if (document.activeElement?.matches('input,textarea,select')) return; // no interrumpir a quien está escribiendo
   location.reload();
 });
