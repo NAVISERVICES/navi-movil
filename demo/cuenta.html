@@ -21,7 +21,13 @@
 <style>
 header{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--navy) 80%,transparent);border-bottom:1px solid #ffffff14}
 header .wrap{display:flex;align-items:center;gap:14px;height:68px}
-header .me{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+header{position:sticky}
+header .me{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;background:none;border:2px solid transparent;border-radius:99px;padding:3px 10px 3px 3px;color:var(--text);cursor:pointer;font-family:inherit}
+header .me:hover,header .me[aria-expanded="true"]{border-color:#ffffff30;background:#ffffff0d}
+header .me .caret{font-style:normal;font-size:11px;opacity:.7;transition:transform .2s}
+header .me[aria-expanded="true"] .caret{transform:rotate(180deg)}
+header .me{position:relative}
+header .me .dot{position:absolute;left:28px;top:0;width:12px;height:12px;border-radius:50%;background:#FFC22E;border:2px solid var(--navy)}
 header .me img{width:38px;height:38px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav);border:2px solid var(--lime)}
 
 main{padding:36px 0 80px}
@@ -58,8 +64,14 @@ main{padding:36px 0 80px}
 
 /* perfil y familia */
 .role{font-size:14px;font-weight:700;color:var(--lime)!important;margin-top:2px}
-.people{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:46px;align-items:start}
-.people .muted{color:var(--muted);font-size:13px;margin:-6px 0 14px}
+/* menú desplegable del usuario */
+.people{position:absolute;right:max(16px,calc((100vw - 1100px)/2));top:calc(100% + 8px);width:min(440px,calc(100vw - 32px));max-height:calc(100vh - 100px);overflow:auto;
+  background:var(--navy-2);border:1px solid #ffffff22;border-radius:22px;box-shadow:0 24px 60px #0009;padding:16px 18px 18px;animation:menuIn .22s cubic-bezier(.3,1.4,.5,1)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-8px)}}
+.ptabs{display:flex;gap:6px;background:#ffffff10;padding:4px;border-radius:99px;margin-bottom:14px}
+.ptabs button{flex:1;border:0;background:none;color:var(--text);font:700 14px var(--body);padding:9px;border-radius:99px;cursor:pointer}
+.ptabs button[aria-selected="true"]{background:var(--lime);color:var(--ink)}
+.people .muted{color:var(--muted);font-size:13px;margin:0 0 14px}
 .prof .field{display:grid;gap:6px;font-size:13px;color:var(--muted);margin-bottom:12px}
 .prof .field small{opacity:.7}
 .prof input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%;color-scheme:dark}
@@ -78,7 +90,7 @@ main{padding:36px 0 80px}
 .mem .tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;background:#ffffff14;white-space:nowrap}
 .mem .tag.me{background:var(--lime);color:var(--ink)}
 .mem .new{display:inline-block;font-size:10px;font-weight:800;color:var(--ink);background:#FFC22E;border-radius:99px;padding:1px 7px;margin-left:6px;vertical-align:middle}
-@media (max-width:860px){.people{grid-template-columns:1fr}}
+@media (max-width:560px){.people{right:16px}}
 @media (max-width:460px){.prof .two{grid-template-columns:1fr}}
 .box .more{display:inline-block;margin-top:14px;font-size:14px;font-weight:700;color:var(--lime)}
 /* equipos */
@@ -179,8 +191,27 @@ main{padding:36px 0 80px}
 <header>
   <div class="wrap">
     <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
-    <div class="me"><img id="meImg" alt=""><span id="meName"></span></div>
+    <button class="me" id="meBtn" aria-haspopup="true" aria-expanded="false" aria-controls="meMenu"><img id="meImg" alt=""><span id="meName"></span><i class="caret" aria-hidden="true">▾</i></button>
     <button class="btn btn-ghost sm" id="logout">Salir</button>
+  </div>
+  <!-- menú del usuario: su perfil y el de su familia -->
+  <div class="people" id="meMenu" hidden>
+    <div class="ptabs" role="tablist"><button role="tab" data-p="prof" aria-selected="true">Mi perfil</button><button role="tab" data-p="famBox" id="famTab" aria-selected="false">Tu familia</button></div>
+    <form class="prof pane" id="prof" novalidate>
+      <p class="muted">Lo que guardes aquí es lo que ve tu familia en Mi Navi, SOS Family y el Botón SOS.</p>
+      <label class="field">Nombre y apellidos<input id="pFull" maxlength="48" autocomplete="name" placeholder="Ej. María López García"></label>
+      <label class="field">Cómo te dice tu familia <small>(opcional)</small><input id="pNick" maxlength="20" placeholder="Ej. Mamá"></label>
+      <div class="two">
+        <label class="field">Correo<input id="pMail" type="email" maxlength="60" autocomplete="email" placeholder="tu@correo.com"></label>
+        <label class="field">Cumpleaños<input id="pBday" type="date"></label>
+      </div>
+      <label class="field">Mi estado <small>(lo ve tu familia)</small><input id="pStatus" maxlength="40" placeholder="Ej. En clases hasta las 2"></label>
+      <div class="acts"><button class="btn btn-lime">Guardar perfil</button><span id="pMsg" class="ok" role="status"></span></div>
+    </form>
+    <div class="fam pane" id="famBox" hidden>
+      <p class="muted">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
+      <div id="famList"></div>
+    </div>
   </div>
 </header>
 
@@ -206,26 +237,6 @@ main{padding:36px 0 80px}
       <img class="peek" id="planImg" alt="">
     </div>
     <div class="box" id="usage"></div>
-  </section>
-
-  <section class="people">
-    <form class="box prof" id="prof" novalidate>
-      <h3>Mi perfil</h3>
-      <p class="muted">Lo que guardes aquí es lo que ve tu familia en Mi Navi, SOS Family y el Botón SOS.</p>
-      <label class="field">Nombre y apellidos<input id="pFull" maxlength="48" autocomplete="name" placeholder="Ej. María López García"></label>
-      <label class="field">Cómo te dice tu familia <small>(opcional)</small><input id="pNick" maxlength="20" placeholder="Ej. Mamá"></label>
-      <div class="two">
-        <label class="field">Correo<input id="pMail" type="email" maxlength="60" autocomplete="email" placeholder="tu@correo.com"></label>
-        <label class="field">Cumpleaños<input id="pBday" type="date"></label>
-      </div>
-      <label class="field">Mi estado <small>(lo ve tu familia)</small><input id="pStatus" maxlength="40" placeholder="Ej. En clases hasta las 2"></label>
-      <div class="acts"><button class="btn btn-lime">Guardar perfil</button><span id="pMsg" class="ok" role="status"></span></div>
-    </form>
-    <div class="box fam" id="famBox" hidden>
-      <h3>Tu familia</h3>
-      <p class="muted">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
-      <div id="famList"></div>
-    </div>
   </section>
 
   <section style="margin-bottom:46px">
@@ -304,13 +315,29 @@ if (user) {
     const saved = Profiles.set(user.phone, { full, nick: $('pNick').value.trim(), mail, bday: $('pBday').value, status: $('pStatus').value.trim() });
     m.className = saved ? 'ok' : 'ok bad';
     m.textContent = saved ? (fam ? '✓ Guardado. Tu familia ya lo ve.' : '✓ Guardado.') : 'No se pudo guardar en este navegador.';
-    if (saved) setTimeout(() => location.reload(), 900);
+    if (saved) { try { sessionStorage.setItem('navi.menu', 'prof'); } catch {} setTimeout(() => location.reload(), 900); }
   });
 
   // mi familia: el perfil de cada integrante tal como lo dejó en su cuenta
   const bdayTxt = d => d ? new Date(d + 'T12:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' }) : '';
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  $('famBox').hidden = !fam;
+  $('famTab').hidden = !fam;
+
+  // menú del usuario: se abre desde la foto y el nombre; dos pestañas (Mi perfil / Tu familia)
+  const menu = $('meMenu'), meBtn = $('meBtn');
+  const openMenu = (open, tab) => {
+    menu.hidden = !open; meBtn.setAttribute('aria-expanded', open);
+    if (tab) document.querySelectorAll('.ptabs button').forEach(b => { const on = b.dataset.p === tab; b.setAttribute('aria-selected', on); $(b.dataset.p).hidden = !on; });
+  };
+  meBtn.addEventListener('click', e => { e.stopPropagation(); openMenu(menu.hidden); });
+  document.querySelector('.ptabs').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) openMenu(true, b.dataset.p); });
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target) && !meBtn.contains(e.target)) openMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { openMenu(false); meBtn.focus(); } });
+  // aviso en el botón cuando alguien de la familia actualizó su perfil en las últimas 24 h
+  const news = fam && lines.some(l => l.phone !== user.phone && Profiles.get(l.phone).at > Date.now() - 864e5);
+  if (news) meBtn.insertAdjacentHTML('beforeend', '<span class="dot" title="Alguien de tu familia actualizó su perfil"></span>');
+  // después de guardar, la página se recarga y el menú vuelve a abrirse donde estaba
+  try { const t = sessionStorage.getItem('navi.menu'); if (t) { sessionStorage.removeItem('navi.menu'); openMenu(true, t); } } catch {}
   if (fam) $('famList').innerHTML = lines.map(l => {
     const pr = Profiles.get(l.phone), mine = l.phone === user.phone, recent = pr.at && Date.now() - pr.at < 864e5 && !mine;
     return `<div class="mem"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt="">
