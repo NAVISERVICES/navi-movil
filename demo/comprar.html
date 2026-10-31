@@ -237,6 +237,15 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
               <label><span><input type="radio" name="ship" value="exp"> <b>Express</b> · 1 a 2 días hábiles</span><b>$149</b></label>
             </div>
           </div>
+          <div class="card" id="refCard">
+            <h2>¿Tienes un código de referido?</h2>
+            <p class="muted">Si alguien te recomendó Navi, escribe su código antes de pagar. A ti no te cuesta nada extra.</p>
+            <div class="choice" style="margin-top:14px">
+              <label><input type="radio" name="hasRef" value="no"><b>No tengo código</b><small>Sigo con mi compra.</small></label>
+              <label><input type="radio" name="hasRef" value="si"><b>Sí, tengo uno</b><small>Me lo pasó un amigo o familiar.</small></label>
+            </div>
+            <label class="field" id="refBox" hidden style="margin-top:12px">Código de referido<input id="refIn" maxlength="10" placeholder="Ej. NV-AB12CD" style="text-transform:uppercase" autocomplete="off"><span class="hint" id="refHint"></span></label>
+          </div>
           <div class="card">
             <label class="chk"><input type="checkbox" id="fac"><span>Quiero factura a mi RFC</span></label>
             <div class="grid2" id="facBox" hidden style="margin-top:12px">
@@ -268,7 +277,7 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
 </main>
 <div class="bar" id="bar"><div><small>Total</small><b id="barTot"></b></div><button class="btn btn-lime" id="barGo">Continuar</button></div>
 
-<script src="auth.js?v=20261030d"></script>
+<script src="auth.js?v=20261031b"></script>
 <script src="planes.js?v=20261030d"></script>
 <script>
 const $ = id => document.getElementById(id);
@@ -338,6 +347,7 @@ function renderSum() {
     <div class="r"><span>Pago</span><b>${P.label}</b></div>
     ${O.mode ? `<div class="r"><span>Número</span><b>${O.mode === 'porta' ? 'Traes tu número' : 'Línea nueva'}</b></div>` : ''}
     ${ROAMING[O.gb] ? `<div class="r"><span>🌎 Roaming EE. UU. y Canadá</span><b>${ROAMING[O.gb]} GB${O.kind === 'fam' ? ' por línea' : ''} · hasta ${ROAMING_DAYS} días</b></div>` : ''}
+    ${usingRef() ? `<div class="r"><span>🤝 Código de referido</span><b>${refNorm().replace(/^NV/, 'NV-')}</b></div>` : ''}
     ${bonusOk() ? `<div class="r promo"><span>🎁 Regalo de bienvenida</span><b>+${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea portada' : ''} · ${PORTA_MONTHS} meses</b></div>` : ''}
     ${O.chip + O.esim ? `<div class="r"><span>Formato</span><b>${[O.chip && `${O.chip} chip${O.chip > 1 ? 's' : ''}`, O.esim && `${O.esim} eSIM`].filter(Boolean).join(' + ')}</b></div>` : ''}
     ${Q ? `<div class="r"><span>Subtotal</span><b>${money(Q.sub)}</b></div>` : ''}
@@ -452,9 +462,32 @@ function datosErr(mark) {
   if ($('fac').checked) need.push(['rfc', /^[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}$/.test(v('rfc').toUpperCase())]);
   need.forEach(([id, ok]) => { if (!ok) bad.push(id); if (mark) $(id).closest('.field').classList.toggle('err', !ok); });
   if (bad.length) return 'Revisa los campos marcados.';
+  // el código de referido es obligatorio contestarlo (sí o no) antes de pagar
+  const has = document.querySelector('[name=hasRef]:checked');
+  if (!has) { if (mark) $('refCard').scrollIntoView({ behavior: 'smooth', block: 'center' }); return 'Dinos si tienes un código de referido.'; }
+  if (has.value === 'si' && !refOk()) { if (mark) $('refBox').classList.add('err'); return refProblem() || 'Revisa el código de referido.'; }
   if (!$('ok').checked) return 'Acepta el contrato y el aviso de privacidad.';
   return '';
 }
+// código de referido: debe existir y no puede ser el propio
+const refNorm = () => $('refIn').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+const refOwner = () => phoneByRef(refNorm());
+const refProblem = () => { const me = NaviAuth.current(); if (!refNorm()) return 'Escribe el código de referido.'; if (!refOwner()) return 'Ese código de referido no existe. Revísalo.'; if (me && refOwner() === me.phone) return 'No puedes usar tu propio código.'; return ''; };
+const refOk = () => !refProblem();
+const usingRef = () => document.querySelector('[name=hasRef]:checked')?.value === 'si' && refOk();
+function paintRef() {
+  const has = document.querySelector('[name=hasRef]:checked')?.value;
+  $('refBox').hidden = has !== 'si'; $('refBox').classList.remove('err');
+  const h = $('refHint');
+  if (has !== 'si' || !refNorm()) { h.textContent = ''; h.className = 'hint'; }
+  else if (refOk()) { const who = NaviAuth.find(refOwner()); h.textContent = `✓ Código válido: te recomendó ${who.me.name}.`; h.className = 'hint ok'; }
+  else { h.textContent = refProblem(); h.className = 'hint'; }
+  renderSum();
+}
+document.querySelectorAll('[name=hasRef]').forEach(r => r.onchange = paintRef);
+$('refIn').oninput = paintRef;
+// llega con ?ref=CÓDIGO desde el enlace que compartió el cliente
+if (qs.get('ref')) { document.querySelector('[name=hasRef][value=si]').checked = true; $('refIn').value = qs.get('ref').toUpperCase(); setTimeout(paintRef); }
 $('curp').oninput = () => { const c = $('curp').value.toUpperCase(); $('curpHint').textContent = c.length === 18 ? (CURP_RE.test(c) ? '✓ Tu CURP tiene el formato correcto.' : 'Revisa tu CURP: no tiene el formato correcto.') : 'Escribe tu nombre tal como aparece en tu CURP.'; $('curpHint').className = 'hint' + (CURP_RE.test(c) ? ' ok' : ''); };
 $('mail').oninput = () => $('mailHint').textContent = O.esim ? 'Aquí te llega el código QR de tu eSIM.' : 'Aquí te mandamos tu guía de envío y tu folio.';
 $('cp').oninput = () => {
@@ -474,11 +507,17 @@ function confirmOrder() {
   const folio = 'NV-' + String(Date.now()).slice(-7);
   const paid = method === 'tarjeta';
   const order = { folio, at: Date.now(), kind: O.kind, lines: nLines(), gb: O.gb, per: O.per, mode: O.mode, from: O.from, promoGb: bonusOk() ? portaGb(O.gb) : null, chip: O.chip, esim: O.esim, total, method, status: paid ? 'pagado' : 'pendiente', name: $('nom').value.trim(), mail: $('mail').value.trim() };
+  // el referido se suma a la app Referidos de quien compartió el código (cuenta cuando el pago se confirma)
+  if (usingRef()) {
+    order.ref = refNorm();
+    Referrals.add(order.ref, { name: `${order.name.split(' ')[0]} ${$('ape').value.trim()[0] || ''}.`.replace(' .', ''), plan: O.kind === 'fam' ? `Plan Familia · ${nLines()} líneas` : `Plan ${O.gb} GB`, folio, paid });
+  }
   try { const l = JSON.parse(localStorage.getItem('navi.orders')) || []; localStorage.setItem('navi.orders', JSON.stringify([order, ...l])); } catch {}
   const steps = [
     O.chip && ['📦', 'Tu chip va en camino', `Te mandamos la guía de ${O.ship === 'exp' ? 'Express (1-2 días)' : 'Estándar (3-5 días)'} a ${order.mail}.`],
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
+    order.ref && ['🤝', 'Código de referido aplicado', `Tu compra cuenta para ${NaviAuth.find(refOwner()).me.name}${paid ? '.' : ' en cuanto se confirme tu pago.'} ¡Gracias por llegar recomendado!`],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
     bonusOk() && ['🎁', `Regalo de bienvenida: +${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,
       O.kind === 'fam' ? `Empieza en cada línea cuando su número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ven abrirse en Mi Navi.` : `Empieza cuando tu número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ves abrirse en Mi Navi.`],

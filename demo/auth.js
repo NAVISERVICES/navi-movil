@@ -13,6 +13,7 @@ const NAVI_APPS = [
     href: 'https://www.navirepaircenter.com/demo/' },
   { id: 'juegos', name: 'Juegos',             icon: '🎮', color: '#A893FF', desc: 'Ruta Chilanga, Lotería, Trivia Mx y más. Se juegan en el navegador.', href: 'juegos.html' },
   { id: 'videos', name: 'Videos',             icon: '▶️', color: '#FF9A6B', desc: 'Canales NAVI y cuentos animados para toda la familia.', href: 'videos.html' },
+  { id: 'referidos', name: 'Referidos',       icon: '🤝', color: '#2BD67B', desc: 'Comparte tu código: por cada 5 amigos que contraten, tú tienes un mes gratis.', href: 'referidos.html' },
   { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
     // app funcional dentro de la suite: usa la sesión de Mi Navi, sin volver a iniciar sesión
     // (prototipo de diseño en Figma: NAVI-SOS-Family-–-App-Android, nodo 4-415)
@@ -20,7 +21,7 @@ const NAVI_APPS = [
 ];
 
 // gratis para todo cliente Navi Móvil (Shop y Repair traen tráfico para vender en esas plataformas)
-const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos'];
+const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'referidos'];
 // qué apps incluye cada plan: lo gratis + NAVI SOS en 24 GB y Plan Familia
 const PLAN_ACCESS = {
   2:  [...FREE_APPS],
@@ -126,15 +127,15 @@ const deviceArt = D => {
 // fecha en que un número portado quedó en Navi, relativa a hoy para que el demo siempre esté a mitad de sus 12 regalos
 const portedAgo = months => { const d = new Date(); d.setMonth(d.getMonth() - months); d.setDate(d.getDate() - 3); return d.toISOString().slice(0, 10); };
 
-// cuentas de demostración (números ficticios)
+// cuentas de demostración (números ficticios); plan.since = desde cuándo tienen su plan sin interrupción
 const NAVI_ACCOUNTS = {
-  '5500000001': { name: 'Sofía Ramírez', img: 'sofi', plan: { type: 'individual', gb: 2,  period: 'm' },
+  '5500000001': { name: 'Sofía Ramírez', img: 'sofi', plan: { type: 'individual', gb: 2,  period: 'm', since: portedAgo(1) },
     device: dev('128 GB', 'Azul oscuro', 'SIM física', '352914110473826') },
-  '5500000002': { name: 'Luis Pérez',    img: 'beto', plan: { type: 'individual', gb: 12, period: 't' },
+  '5500000002': { name: 'Luis Pérez',    img: 'beto', plan: { type: 'individual', gb: 12, period: 't', since: portedAgo(5) },
     device: dev('128 GB', 'Medianoche', 'eSIM', '353827119064512'), porta: { from: 'AT&T', since: portedAgo(4) } },
-  '5500000003': { name: 'Carla Ruiz',    img: 'mama', plan: { type: 'individual', gb: 24, period: 'a' },
+  '5500000003': { name: 'Carla Ruiz',    img: 'mama', plan: { type: 'individual', gb: 24, period: 'a', since: portedAgo(14) },
     device: dev('256 GB', 'Azul náutico', 'SIM física', '356104230918475') },
-  '5500000004': { name: 'Familia García', img: 'beto', plan: { type: 'familia', period: 'm', lines: [
+  '5500000004': { name: 'Familia García', img: 'beto', plan: { type: 'familia', period: 'm', since: portedAgo(9), lines: [
     { name: 'Papá', img: 'beto', gb: 12, phone: '5500000004', device: dev('256 GB', 'Titanio natural', 'eSIM', '357221340556193') },
     { name: 'Mamá', img: 'mama', gb: 12, phone: '5500000005', device: dev('512 GB', 'Lavanda', 'SIM física', '350918221764038'), porta: { from: 'Telcel', since: portedAgo(2) } },
     { name: 'Sofi', img: 'sofi', gb: 12, phone: '5500000006', device: dev('128 GB', 'Gris', 'SIM física', '861537040298114'), porta: { from: 'Movistar', since: portedAgo(6) } },
@@ -143,6 +144,42 @@ const NAVI_ACCOUNTS = {
 };
 
 const appsFor = plan => PLAN_ACCESS[plan.type === 'familia' ? 'familia' : plan.gb] || [];
+
+// ---------- Referidos ----------
+// Cada número tiene un código que asigna el sistema (siempre el mismo para ese número).
+// DEMO: se calcula aquí; en producción lo guarda el servidor al dar de alta la línea.
+const REF_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0/O ni 1/I para que no se confundan
+const refCode = phone => {
+  let h = 2166136261;
+  for (const ch of 'navi-ref:' + phone) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  let s = ''; for (let i = 0; i < 6; i++) { s += REF_ABC[h % 32]; h = (Math.floor(h / 32) ^ Math.imul(h, 2654435761)) >>> 0; }
+  return 'NV' + s;
+};
+// todos los números de clientes (cuentas individuales y cada línea del Plan Familia)
+const allPhones = () => Object.entries(NAVI_ACCOUNTS).flatMap(([n, a]) => a.plan.type === 'familia' ? a.plan.lines.map(l => l.phone) : [n]);
+const phoneByRef = code => allPhones().find(p => refCode(p) === String(code).trim().toUpperCase().replace(/[^A-Z0-9]/g, '')) || null;
+const REF_GOAL = 5, REF_MIN_MONTHS = 2;
+// meses continuos con el plan
+const monthsWith = since => { if (!since) return 0; const s = new Date(since), n = new Date(); return (n.getFullYear() - s.getFullYear()) * 12 + n.getMonth() - s.getMonth() - (n.getDate() < s.getDate() ? 1 : 0); };
+// referidos registrados por código (DEMO: en este navegador)
+const Referrals = (() => {
+  const KEY = 'navi.referrals';
+  const all = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } };
+  // ejemplos para que la app no arranque vacía
+  const seed = () => {
+    const d = n => { const x = new Date(); x.setDate(x.getDate() - n); return x.toISOString(); };
+    const s = {};
+    s[refCode('5500000004')] = [['Laura G.', 'Plan 12 GB', 41], ['Ricardo M.', 'Plan Familia · 3 líneas', 28], ['Ana P.', 'Plan 4 GB', 9]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
+    s[refCode('5500000005')] = [['Diana R.', 'Plan 24 GB', 70], ['Óscar T.', 'Plan 12 GB', 61], ['Paty L.', 'Plan 2 GB', 50], ['Hugo S.', 'Plan 12 GB', 33], ['Elena V.', 'Plan 4 GB', 20], ['Memo C.', 'Plan 12 GB', 6]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
+    s[refCode('5500000001')] = [['Karla N.', 'Plan 2 GB', 12], ['Iván F.', 'Plan 4 GB', 7], ['Rocío B.', 'Plan 12 GB', 5], ['Toño H.', 'Plan 2 GB', 3], ['Luz M.', 'Plan 4 GB', 1]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
+    return s;
+  };
+  const get = () => all() || seed();
+  return {
+    forCode: code => get()[code] || [],
+    add: (code, r) => { const a = get(); (a[code] = a[code] || []).unshift({ ...r, at: new Date().toISOString() }); try { localStorage.setItem(KEY, JSON.stringify(a)); } catch {} },
+  };
+})();
 
 // Perfil de cada persona, por número (DEMO: en este navegador; en producción, en el servidor).
 // Lo que cada quien edita aquí es lo que ve toda su familia: nombre, correo, cumpleaños y estado.

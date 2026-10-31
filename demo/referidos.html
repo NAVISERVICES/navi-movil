@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Referidos · Mi Navi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261031b"></script>
+<script>if (!NaviAuth.current()) location.replace('login.html?next=referidos.html');</script>
+<style>
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:24px}
+.card h2{font-size:20px;margin-bottom:4px}
+.muted{color:var(--muted);font-size:14px}
+/* tu código */
+.code{background:linear-gradient(135deg,#2BD67B,#B4E32F);color:var(--ink);border:0;position:relative;overflow:hidden}
+.code::after{content:"🤝";position:absolute;right:-10px;bottom:-24px;font-size:120px;opacity:.18;transform:rotate(-12deg)}
+.code small{font-size:12px;font-weight:800;letter-spacing:.14em}
+.code .c{font-family:var(--display);font-weight:800;font-size:clamp(34px,7vw,48px);letter-spacing:.06em;margin:6px 0 4px}
+.code p{font-size:14px;max-width:360px}
+.code .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;position:relative;z-index:1}
+.code .acts .btn{padding:11px 16px;font-size:14px}
+.btn-ink{background:var(--ink);color:#fff;box-shadow:0 5px 0 #000}
+.btn-wa{background:#25D366;color:#06301A;box-shadow:0 5px 0 #128C7E}
+.copied{font-size:13px;font-weight:800;margin-top:10px;min-height:18px;position:relative;z-index:1}
+/* progreso */
+.prog .big{font-family:var(--display);font-weight:800;font-size:46px;line-height:1}
+.prog .big small{font-size:18px;color:var(--muted);font-weight:600}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0 12px}
+.slots i{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:18px;border:3px dashed #ffffff30;color:var(--muted)}
+.slots i.on{border:0;background:var(--lime);color:var(--ink);animation:pop .4s cubic-bezier(.3,1.6,.5,1) both}
+.slots i.gift{border-style:solid;border-color:#FFC22E;color:#FFC22E}
+@keyframes pop{from{transform:scale(.4)}}
+.meter{height:10px;border-radius:99px;background:#ffffff18;overflow:hidden}
+.meter b{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--lime),#2BD67B);transition:width 1s cubic-bezier(.2,1,.3,1)}
+.reward{margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:14px;border-radius:18px;background:#ffffff0c}
+.reward .n{font-family:var(--display);font-weight:800;font-size:34px;color:#FFC22E;line-height:1}
+.reward.lock{background:#FFC22E14;border:1px solid #FFC22E55}
+.pill{display:inline-block;font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px}
+.pill.ok{background:#2BD67B26;color:#2BD67B}.pill.wait{background:#FFC22E22;color:#FFD66B}
+/* lista */
+.list{display:grid;gap:8px;margin-top:12px}
+.ref{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:16px;background:#ffffff0a}
+.ref .av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--ink)}
+.ref b{display:block;font-size:15px}
+.ref small{color:var(--muted);font-size:12.5px}
+.ref .m{font-size:11px;font-weight:800;color:#FFC22E;text-align:right}
+.empty2{padding:24px;text-align:center;color:var(--muted);border:2px dashed #ffffff25;border-radius:18px;margin-top:12px}
+/* cómo funciona */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.how div{background:var(--navy-2);border:1px solid #ffffff18;border-radius:22px;padding:18px}
+.how .e{font-size:28px}
+.how b{display:block;margin:6px 0 4px;font-family:var(--display);font-size:17px}
+.how p{font-size:13.5px;color:var(--muted)}
+.rules{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.55}
+@media (max-width:860px){.grid2,.how{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div class="ico" style="background:#2BD67B">🤝</div>
+    <div><h1>Referidos</h1><p>Invita a tus amigos a Navi. Cada 5 que contraten, tú tienes un mes gratis.</p></div>
+  </div>
+
+  <div class="grid2">
+    <div style="display:grid;gap:18px">
+      <section class="card code">
+        <small>TU CÓDIGO DE REFERIDO</small>
+        <div class="c" id="code"></div>
+        <p id="codeFor"></p>
+        <div class="acts">
+          <button class="btn btn-ink" id="copy">📋 Copiar código</button>
+          <a class="btn btn-wa" id="wa" target="_blank" rel="noopener">💬 Enviar por WhatsApp</a>
+          <button class="btn btn-ghost" id="share" hidden style="border-color:#06062E55;color:var(--ink)">↗ Compartir</button>
+        </div>
+        <div class="copied" id="copied" role="status"></div>
+      </section>
+      <section class="card prog">
+        <h2>Tu avance</h2>
+        <p class="muted">Cada referido cuenta cuando paga su plan con tu código.</p>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;gap:10px;flex-wrap:wrap">
+          <div class="big" id="bigN"></div><span class="muted" id="toNext"></span>
+        </div>
+        <div class="slots" id="slots"></div>
+        <div class="meter"><b id="bar" style="width:0"></b></div>
+        <div class="reward" id="reward"></div>
+      </section>
+    </div>
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><h2>Tus referidos</h2><span class="muted" id="count"></span></div>
+      <div id="list"></div>
+    </section>
+  </div>
+
+  <div class="how">
+    <div><span class="e">📤</span><b>1. Comparte tu código</b><p>Mándalo por WhatsApp o dicta tu código. Con tu enlace, el código ya va escrito.</p></div>
+    <div><span class="e">🛒</span><b>2. Tu amigo contrata</b><p>Antes de pagar, en la compra, escribe tu código en "¿Tienes un código de referido?".</p></div>
+    <div><span class="e">🎁</span><b>3. Cada 5, un mes gratis</b><p>Al juntar 5 referidos te damos un mes de tu plan totalmente gratis, sea cual sea tu plan.</p></div>
+  </div>
+  <p class="rules">Reglas: cuenta cada persona que contrate y pague un plan (individual o Plan Familia) con tu código; si paga en tienda o por transferencia, cuenta cuando se confirme su pago. Para recibir el mes gratis tu plan debe tener al menos ${REF_MIN_MONTHS} meses continuos; si aún no los cumples, tu mes queda guardado y se aplica en cuanto los cumplas. El mes gratis se aplica en tu siguiente renovación. Demostración: los referidos se guardan en este navegador.</p>
+</main>
+
+<script>
+const user = NaviAuth.current();
+if (user) {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  document.querySelector('.rules').innerHTML = document.querySelector('.rules').innerHTML.replace('${REF_MIN_MONTHS}', REF_MIN_MONTHS);
+
+  // el código de quien entró (en Plan Familia, cada integrante tiene el suyo)
+  const code = refCode(user.phone);
+  const link = new URL(`comprar.html?ref=${code}`, location.href).href;
+  $('code').textContent = code.replace(/^NV/, 'NV-');
+  $('codeFor').textContent = `Es tuyo, ${user.me.name}: va ligado a tu número ${fmtPhone(user.phone)}.`;
+  const msg = `¡Cámbiate a Navi! Usa mi código ${code} al contratar tu plan: ${link}`;
+  $('wa').href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(code); $('copied').textContent = '✓ Código copiado'; }
+    catch { $('copied').textContent = `Tu código es ${code}`; }
+    setTimeout(() => $('copied').textContent = '', 2500);
+  };
+  if (navigator.share) { $('share').hidden = false; $('share').onclick = () => navigator.share({ title: 'Navi Móvil', text: msg, url: link }).catch(() => {}); }
+
+  // avance: cada 5 referidos = 1 mes gratis; se libera con al menos 2 meses continuos de plan
+  const refs = [...Referrals.forCode(code)].sort((a, b) => new Date(b.at) - new Date(a.at)); // el más reciente primero
+  // cuentan los referidos que ya pagaron; los de pago en tienda o transferencia esperan confirmación
+  const paidRefs = refs.filter(r => r.paid !== false);
+  const n = paidRefs.length, earned = Math.floor(n / REF_GOAL), inRound = n % REF_GOAL;
+  const months = monthsWith(user.plan.since), eligible = months >= REF_MIN_MONTHS;
+  $('bigN').innerHTML = `${n} <small>${n === 1 ? 'referido' : 'referidos'}</small>`;
+  $('toNext').textContent = inRound === 0 && n > 0 ? '¡Completaste una ronda!' : `Te ${REF_GOAL - inRound === 1 ? 'falta 1' : `faltan ${REF_GOAL - inRound}`} para tu próximo mes gratis`;
+  $('slots').innerHTML = Array.from({ length: REF_GOAL }, (_, i) => i < inRound ? `<i class="on" style="animation-delay:${i * .08}s">✓</i>` : i === REF_GOAL - 1 ? '<i class="gift">🎁</i>' : `<i>${i + 1}</i>`).join('');
+  requestAnimationFrame(() => setTimeout(() => $('bar').style.width = (inRound / REF_GOAL * 100) + '%', 50));
+  $('reward').className = 'reward' + (earned && !eligible ? ' lock' : '');
+  $('reward').innerHTML = earned
+    ? `<div class="n">${earned}</div><div><b>${earned === 1 ? 'Mes gratis ganado' : 'Meses gratis ganados'}</b><br>${eligible
+        ? `<span class="pill ok">✓ Listo</span> <span class="muted">Se aplica en tu siguiente renovación.</span>`
+        : `<span class="pill wait">Por liberar</span> <span class="muted">Llevas ${months} ${months === 1 ? 'mes' : 'meses'} con tu plan; se libera al cumplir ${REF_MIN_MONTHS} meses continuos.</span>`}</div>`
+    : `<div class="n">0</div><div><b>Meses gratis ganados</b><br><span class="muted">Junta ${REF_GOAL} referidos para ganar tu primer mes gratis${eligible ? '.' : `. Recuerda: tu plan necesita ${REF_MIN_MONTHS} meses continuos (llevas ${months}).`}</span></div>`;
+
+  // lista: el más reciente primero; cada 5 se marca qué referido completó un mes gratis
+  const colors = ['#B4E32F', '#A893FF', '#FFC22E', '#7EE0FF', '#FF9A6B', '#FF6FB1'];
+  const fdate = d => new Date(d).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+  const pending = refs.length - n;
+  $('count').textContent = refs.length ? `${n} ${n === 1 ? 'confirmado' : 'confirmados'}${pending ? ` · ${pending} por confirmar` : ''}` : '';
+  let pos = n + 1;
+  $('list').innerHTML = refs.length ? `<div class="list">${refs.map(r => { const ok = r.paid !== false; if (ok) pos--;
+    return `<div class="ref"><div class="av" style="background:${colors[pos % colors.length]}">${esc(r.name[0])}</div>
+      <div><b>${esc(r.name)}</b><small>${esc(r.plan)} · ${fdate(r.at)}</small></div>
+      <div class="m">${!ok ? '<span class="pill wait">Pago pendiente</span>' : pos % REF_GOAL === 0 ? `🎁 Mes gratis #${pos / REF_GOAL}` : `#${pos}`}</div></div>`; }).join('')}</div>`
+    : '<div class="empty2">Aún no tienes referidos. ¡Comparte tu código y empieza a juntar meses gratis!</div>';
+}
+</script>
+</body>
+</html>
