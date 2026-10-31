@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
 <link rel="stylesheet" href="suite.css?v=20261030d">
-<script src="auth.js?v=20261031b"></script>
+<script src="auth.js?v=20261031c"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=referidos.html');</script>
 <style>
 .grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
@@ -81,7 +81,7 @@
   <div class="grid2">
     <div style="display:grid;gap:18px">
       <section class="card code">
-        <small>TU CÓDIGO DE REFERIDO</small>
+        <small>TU NÚMERO DE CLIENTE · CÓDIGO DE REFERIDO</small>
         <div class="c" id="code"></div>
         <p id="codeFor"></p>
         <div class="acts">
@@ -124,10 +124,12 @@ if (user) {
   document.querySelector('.rules').innerHTML = document.querySelector('.rules').innerHTML.replace('${REF_MIN_MONTHS}', REF_MIN_MONTHS);
 
   // el código de quien entró (en Plan Familia, cada integrante tiene el suyo)
-  const code = refCode(user.phone);
+  const code = clientCode(user); // en Plan Familia, el mismo para toda la familia
   const link = new URL(`comprar.html?ref=${code}`, location.href).href;
   $('code').textContent = code.replace(/^NV/, 'NV-');
-  $('codeFor').textContent = `Es tuyo, ${user.me.name}: va ligado a tu número ${fmtPhone(user.phone)}.`;
+  $('codeFor').textContent = user.plan.type === 'familia'
+    ? `Es el número de cliente de la ${user.familyName}: lo comparten las ${user.plan.lines.length} líneas y todos los referidos suman juntos.`
+    : `Es tu número de cliente, ${user.me.name}: va ligado a tu línea ${fmtPhone(user.phone)}.`;
   const msg = `¡Cámbiate a Navi! Usa mi código ${code} al contratar tu plan: ${link}`;
   $('wa').href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
   $('copy').onclick = async () => {

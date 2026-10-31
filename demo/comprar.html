@@ -277,7 +277,7 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
 </main>
 <div class="bar" id="bar"><div><small>Total</small><b id="barTot"></b></div><button class="btn btn-lime" id="barGo">Continuar</button></div>
 
-<script src="auth.js?v=20261031b"></script>
+<script src="auth.js?v=20261031c"></script>
 <script src="planes.js?v=20261030d"></script>
 <script>
 const $ = id => document.getElementById(id);
@@ -472,7 +472,9 @@ function datosErr(mark) {
 // código de referido: debe existir y no puede ser el propio
 const refNorm = () => $('refIn').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
 const refOwner = () => phoneByRef(refNorm());
-const refProblem = () => { const me = NaviAuth.current(); if (!refNorm()) return 'Escribe el código de referido.'; if (!refOwner()) return 'Ese código de referido no existe. Revísalo.'; if (me && refOwner() === me.phone) return 'No puedes usar tu propio código.'; return ''; };
+const refProblem = () => { const me = NaviAuth.current(); if (!refNorm()) return 'Escribe el código de referido.'; if (!refOwner()) return 'Ese código de referido no existe. Revísalo.'; if (me && refOwner() === me.owner) return 'No puedes usar tu propio código.'; return ''; };
+// a quién pertenece el código: la familia completa o el cliente individual
+const refHolder = () => { const u = NaviAuth.find(refOwner()); return u.plan.type === 'familia' ? `la ${u.familyName}` : u.name; };
 const refOk = () => !refProblem();
 const usingRef = () => document.querySelector('[name=hasRef]:checked')?.value === 'si' && refOk();
 function paintRef() {
@@ -480,7 +482,7 @@ function paintRef() {
   $('refBox').hidden = has !== 'si'; $('refBox').classList.remove('err');
   const h = $('refHint');
   if (has !== 'si' || !refNorm()) { h.textContent = ''; h.className = 'hint'; }
-  else if (refOk()) { const who = NaviAuth.find(refOwner()); h.textContent = `✓ Código válido: te recomendó ${who.me.name}.`; h.className = 'hint ok'; }
+  else if (refOk()) { h.textContent = `✓ Código válido: te recomendó ${refHolder()}.`; h.className = 'hint ok'; }
   else { h.textContent = refProblem(); h.className = 'hint'; }
   renderSum();
 }
@@ -517,7 +519,7 @@ function confirmOrder() {
     O.chip && ['📦', 'Tu chip va en camino', `Te mandamos la guía de ${O.ship === 'exp' ? 'Express (1-2 días)' : 'Estándar (3-5 días)'} a ${order.mail}.`],
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
-    order.ref && ['🤝', 'Código de referido aplicado', `Tu compra cuenta para ${NaviAuth.find(refOwner()).me.name}${paid ? '.' : ' en cuanto se confirme tu pago.'} ¡Gracias por llegar recomendado!`],
+    order.ref && ['🤝', 'Código de referido aplicado', `Tu compra cuenta para ${refHolder()}${paid ? '.' : ' en cuanto se confirme tu pago.'} ¡Gracias por llegar recomendado!`],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
     bonusOk() && ['🎁', `Regalo de bienvenida: +${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,
       O.kind === 'fam' ? `Empieza en cada línea cuando su número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ven abrirse en Mi Navi.` : `Empieza cuando tu número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ves abrirse en Mi Navi.`],

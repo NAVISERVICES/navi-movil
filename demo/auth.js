@@ -145,8 +145,9 @@ const NAVI_ACCOUNTS = {
 
 const appsFor = plan => PLAN_ACCESS[plan.type === 'familia' ? 'familia' : plan.gb] || [];
 
-// ---------- Referidos ----------
-// Cada número tiene un código que asigna el sistema (siempre el mismo para ese número).
+// ---------- Número de cliente / Referidos ----------
+// Cada cuenta tiene un número de cliente que asigna el sistema; también es su código de referido.
+// En Plan Familia es uno solo para toda la familia (se calcula con el número del titular).
 // DEMO: se calcula aquí; en producción lo guarda el servidor al dar de alta la línea.
 const REF_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0/O ni 1/I para que no se confundan
 const refCode = phone => {
@@ -155,9 +156,10 @@ const refCode = phone => {
   let s = ''; for (let i = 0; i < 6; i++) { s += REF_ABC[h % 32]; h = (Math.floor(h / 32) ^ Math.imul(h, 2654435761)) >>> 0; }
   return 'NV' + s;
 };
-// todos los números de clientes (cuentas individuales y cada línea del Plan Familia)
-const allPhones = () => Object.entries(NAVI_ACCOUNTS).flatMap(([n, a]) => a.plan.type === 'familia' ? a.plan.lines.map(l => l.phone) : [n]);
-const phoneByRef = code => allPhones().find(p => refCode(p) === String(code).trim().toUpperCase().replace(/[^A-Z0-9]/g, '')) || null;
+// número de cliente de quien entró (en familia, el de la cuenta del titular)
+const clientCode = user => refCode(user.owner);
+// cuenta (número del titular) a la que pertenece un código
+const phoneByRef = code => Object.keys(NAVI_ACCOUNTS).find(p => refCode(p) === String(code).trim().toUpperCase().replace(/[^A-Z0-9]/g, '')) || null;
 const REF_GOAL = 5, REF_MIN_MONTHS = 2;
 // meses continuos con el plan
 const monthsWith = since => { if (!since) return 0; const s = new Date(since), n = new Date(); return (n.getFullYear() - s.getFullYear()) * 12 + n.getMonth() - s.getMonth() - (n.getDate() < s.getDate() ? 1 : 0); };
@@ -169,8 +171,8 @@ const Referrals = (() => {
   const seed = () => {
     const d = n => { const x = new Date(); x.setDate(x.getDate() - n); return x.toISOString(); };
     const s = {};
-    s[refCode('5500000004')] = [['Laura G.', 'Plan 12 GB', 41], ['Ricardo M.', 'Plan Familia · 3 líneas', 28], ['Ana P.', 'Plan 4 GB', 9]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
-    s[refCode('5500000005')] = [['Diana R.', 'Plan 24 GB', 70], ['Óscar T.', 'Plan 12 GB', 61], ['Paty L.', 'Plan 2 GB', 50], ['Hugo S.', 'Plan 12 GB', 33], ['Elena V.', 'Plan 4 GB', 20], ['Memo C.', 'Plan 12 GB', 6]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
+    s[refCode('5500000002')] = [['Laura G.', 'Plan 12 GB', 41], ['Ricardo M.', 'Plan Familia · 3 líneas', 28], ['Ana P.', 'Plan 4 GB', 9]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
+    s[refCode('5500000004')] = [['Diana R.', 'Plan 24 GB', 70], ['Óscar T.', 'Plan 12 GB', 61], ['Paty L.', 'Plan 2 GB', 50], ['Hugo S.', 'Plan 12 GB', 33], ['Elena V.', 'Plan 4 GB', 20], ['Memo C.', 'Plan 12 GB', 6]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
     s[refCode('5500000001')] = [['Karla N.', 'Plan 2 GB', 12], ['Iván F.', 'Plan 4 GB', 7], ['Rocío B.', 'Plan 12 GB', 5], ['Toño H.', 'Plan 2 GB', 3], ['Luz M.', 'Plan 4 GB', 1]].map(([name, plan, ago]) => ({ name, plan, at: d(ago) }));
     return s;
   };
