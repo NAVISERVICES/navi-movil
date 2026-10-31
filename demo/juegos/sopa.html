@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+<script>/* Navi Movil: solo clientes con sesion en Mi Navi */try{if(!JSON.parse(localStorage.getItem('navi.session')))throw 0}catch(e){location.replace('../login.html?next=juegos/sopa.html')}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E0F2E">
+<meta name="apple-mobile-web-app-title" content="Navi Juegos">
+<link rel="icon" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<title>Sopa de Letras NAVI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#0E0F2E; --panel:#181A45; --line:#2A2C66; --rosa:#E4007C; --cian:#2FD3E8; --oro:#FFC23A;
+  --ok:#2BD67B; --fg:#F3F1FF; --muted:#9C9BD0; --paper:#FFF4E0; --ink:#2A1B3D;
+  --display:"Bungee","Impact",system-ui,sans-serif; --body:"Rubik",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{max-width:520px;margin:0 auto;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--display);font-size:1.05rem}
+.brand b{color:var(--rosa);font-weight:400}
+.hbtns{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 .78rem var(--body);background:var(--panel);border:1px solid var(--cian);border-radius:999px;padding:4px 11px 4px 4px}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--cian);color:var(--bg);font:800 .85rem var(--body);font-style:normal;display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:8px;font-variant-numeric:tabular-nums}
+.stat{background:var(--panel);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.stat small{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+.stat b{font-size:1.02rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;gap:3px;background:var(--panel);padding:8px;border-radius:18px;touch-action:none;user-select:none;-webkit-user-select:none;position:relative}
+.c{aspect-ratio:1;display:grid;place-items:center;border-radius:8px;background:#0E0F2E;font:800 clamp(.8rem,4.2vw,1.15rem) var(--body);transition:background .12s,transform .12s;position:relative;z-index:1}
+.c.sel{background:var(--oro);color:var(--ink);transform:scale(1.06)}
+.c.found{color:var(--ink)}
+.words{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.words span{padding:6px 11px;border-radius:99px;background:var(--panel);border:2px solid var(--line);font-weight:800;font-size:.8rem;letter-spacing:.04em}
+.words span.ok{text-decoration:line-through;opacity:.75;border-color:transparent;color:var(--ink)}
+.hint{text-align:center;font-size:.8rem;color:var(--muted)}
+.tools{display:flex;gap:8px;justify-content:center}
+.tools button{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:8px 14px;font-weight:700;font-size:.82rem}
+/* pantallas */
+.ov{position:fixed;inset:0;z-index:20;background:#0E0F2Ee8;display:grid;place-items:center;padding:20px}
+.card{width:min(420px,100%);background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:24px 22px;text-align:center}
+.card .logo{font-family:var(--display);font-size:1.8rem;line-height:1}
+.card .logo b{color:var(--rosa);font-weight:400;display:block}
+.card p{color:#d7d5f5;font-size:.92rem;line-height:1.45}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.levels button{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:14px 10px;text-align:center}
+.levels button b{display:block;font:400 1.05rem var(--display);color:var(--oro)}
+.levels button small{color:var(--muted);font-size:.75rem}
+.levels button:hover{border-color:var(--rosa)}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:14px;background:var(--rosa);color:#fff;font:400 1.05rem var(--display);box-shadow:0 5px 0 #8E004D;margin-top:14px}
+.ghost{display:block;width:100%;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:11px;background:none;color:var(--fg);font-weight:600;text-decoration:none;text-align:center}
+.final{font:400 2.4rem var(--display);color:var(--oro);margin:6px 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud">
+    <div class="brand">Sopa de <b>Letras</b></div>
+    <div class="hbtns"><button class="pill" id="homeBtn"><i>⌂</i>Inicio</button><button class="pill" id="helpBtn"><i>?</i>Instrucciones</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><small>Tema</small><b id="stTheme">—</b></div>
+    <div class="stat"><small>Palabras</small><b id="stFound">0/0</b></div>
+    <div class="stat"><small>Tiempo</small><b id="stTime">0:00</b></div>
+    <div class="stat"><small>Récord</small><b id="stBest">—</b></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="words" id="words"></div>
+  <div class="tools"><button id="clue">💡 Pista</button><button id="newBtn">🔀 Otra sopa</button></div>
+  <p class="hint">Desliza el dedo (o el mouse) sobre las letras. También puedes tocar la primera y la última.</p>
+  <a class="ghost" href="../juegos.html">← Volver a Juegos</a>
+</div>
+<div class="ov" id="ov"><div class="card" id="ovCard"></div></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const THEMES = {
+  'Comida mexicana': ['TACO', 'MOLE', 'POZOLE', 'TAMAL', 'ELOTE', 'CHURRO', 'SALSA', 'SOPE', 'ATOLE', 'FLAUTA', 'GORDITA', 'TORTA', 'ESQUITE', 'HORCHATA'],
+  'Fiesta': ['PINATA', 'MARIACHI', 'CONFETI', 'DULCES', 'GUITARRA', 'PAPEL', 'BAILE', 'POSADA', 'COHETE', 'SERENATA', 'CANTO', 'GLOBOS'],
+  'Naturaleza': ['AJOLOTE', 'NOPAL', 'MAGUEY', 'JAGUAR', 'VOLCAN', 'CENOTE', 'SELVA', 'PLAYA', 'COLIBRI', 'TUNA', 'AGAVE', 'MONARCA'],
+  'Lugares de México': ['OAXACA', 'PUEBLA', 'CANCUN', 'MERIDA', 'TOLUCA', 'SONORA', 'COLIMA', 'TIJUANA', 'CHIAPAS', 'DURANGO', 'TAXCO', 'TEPIC'],
+  'Familia': ['MAMA', 'PAPA', 'ABUELA', 'ABUELO', 'PRIMO', 'TIA', 'TIO', 'HERMANA', 'BEBE', 'NIETO', 'MADRINA', 'COMPADRE'],
+};
+const LEVELS = {
+  facil: { name: 'Fácil', size: 9, words: 7, dirs: [[0, 1], [1, 0]] },
+  dificil: { name: 'Difícil', size: 11, words: 9, dirs: [[0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1]] },
+};
+const COLORS = ['#2BD67B', '#2FD3E8', '#FFC23A', '#FF6FB1', '#A893FF', '#FF8A65', '#7EE0FF', '#D4F56B', '#FFD84D'];
+const ABC = 'AAAABCDEEEEFGHIIIJLLMNNOOOOPQRRSSSTTUUVXYZ';
+const KEY = 'navi_sopa_best';
+const bests = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+let lv = 'facil', theme = '', N = 9, grid = [], words = [], found = [], startT = 0, clock = 0, sel = [], anchor = null, dragging = false, done = false;
+let ac = null;
+const beep = (f, d = .08, type = 'triangle', v = .05) => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = v; o.connect(g).connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + d); o.stop(ac.currentTime + d); } catch {} };
+
+// arma la sopa: coloca cada palabra en una dirección al azar y rellena con letras sueltas
+function build() {
+  const L = LEVELS[lv]; N = L.size;
+  const names = Object.keys(THEMES); theme = names[Math.floor(Math.random() * names.length)];
+  for (let tries = 0; tries < 30; tries++) {
+    grid = Array.from({ length: N }, () => Array(N).fill(''));
+    const pool = THEMES[theme].filter(w => w.length <= N).sort(() => Math.random() - .5);
+    words = [];
+    for (const w of pool) {
+      if (words.length >= L.words) break;
+      let ok = false;
+      for (let a = 0; a < 120 && !ok; a++) {
+        const [dr, dc] = L.dirs[Math.floor(Math.random() * L.dirs.length)];
+        const r0 = Math.floor(Math.random() * N), c0 = Math.floor(Math.random() * N), r1 = r0 + dr * (w.length - 1), c1 = c0 + dc * (w.length - 1);
+        if (r1 < 0 || r1 >= N || c1 < 0 || c1 >= N) continue;
+        if ([...w].every((ch, i) => { const g = grid[r0 + dr * i][c0 + dc * i]; return !g || g === ch; })) {
+          const cells = [...w].map((ch, i) => { grid[r0 + dr * i][c0 + dc * i] = ch; return [r0 + dr * i, c0 + dc * i]; });
+          words.push({ w, cells }); ok = true;
+        }
+      }
+    }
+    if (words.length >= L.words) break;
+  }
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!grid[r][c]) grid[r][c] = ABC[Math.floor(Math.random() * ABC.length)];
+  found = []; sel = []; anchor = null; done = false;
+}
+function draw() {
+  $('grid').style.gridTemplateColumns = `repeat(${N},1fr)`;
+  $('grid').innerHTML = grid.map((row, r) => row.map((ch, c) => `<div class="c" data-r="${r}" data-c="${c}">${ch}</div>`).join('')).join('');
+  paintFound(); paintWords();
+}
+function paintFound() {
+  document.querySelectorAll('.c').forEach(el => { el.classList.remove('found'); el.style.background = ''; });
+  found.forEach((k, n) => words[k].cells.forEach(([r, c]) => { const el = cell(r, c); el.classList.add('found'); el.style.background = COLORS[n % COLORS.length]; }));
+}
+function paintWords() {
+  $('words').innerHTML = words.map((x, k) => { const n = found.indexOf(k); return `<span class="${n >= 0 ? 'ok' : ''}" ${n >= 0 ? `style="background:${COLORS[n % COLORS.length]}"` : ''}>${x.w}</span>`; }).join('');
+  $('stFound').textContent = `${found.length}/${words.length}`; $('stTheme').textContent = theme;
+  const b = bests()[lv]; $('stBest').textContent = b ? fmt(b) : '—';
+}
+const cell = (r, c) => document.querySelector(`.c[data-r="${r}"][data-c="${c}"]`);
+// línea recta (horizontal, vertical o diagonal) entre dos celdas
+function line(a, b) {
+  const dr = Math.sign(b[0] - a[0]), dc = Math.sign(b[1] - a[1]), n = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+  if (!(a[0] === b[0] || a[1] === b[1] || Math.abs(b[0] - a[0]) === Math.abs(b[1] - a[1]))) return null;
+  return Array.from({ length: n + 1 }, (_, i) => [a[0] + dr * i, a[1] + dc * i]);
+}
+function showSel(cells) {
+  document.querySelectorAll('.c.sel').forEach(el => el.classList.remove('sel'));
+  (cells || []).forEach(([r, c]) => cell(r, c).classList.add('sel'));
+}
+function check(cells) {
+  showSel(null);
+  if (!cells || cells.length < 2) return false;
+  const s = cells.map(([r, c]) => grid[r][c]).join(''), rev = [...s].reverse().join('');
+  const k = words.findIndex((x, i) => !found.includes(i) && (x.w === s || x.w === rev) && x.cells.length === cells.length && (same(x.cells, cells) || same(x.cells, [...cells].reverse())));
+  if (k < 0) { beep(180, .12, 'square', .03); return false; }
+  found.push(k); paintFound(); paintWords();
+  [660, 880, 1100].forEach((f, i) => setTimeout(() => beep(f, .08), i * 60));
+  if (found.length === words.length) finish();
+  return true;
+}
+const same = (a, b) => a.every(([r, c], i) => b[i][0] === r && b[i][1] === c);
+const at = e => { const el = document.elementFromPoint(e.clientX, e.clientY)?.closest('.c'); return el ? [+el.dataset.r, +el.dataset.c] : null; };
+let start = null, moved = false;
+$('grid').addEventListener('pointerdown', e => {
+  if (done) return; const p = at(e); if (!p) return;
+  e.preventDefault(); dragging = true; moved = false; start = p; sel = [p]; showSel(sel);
+});
+$('grid').addEventListener('pointermove', e => {
+  if (!dragging) return; const p = at(e); if (!p) return;
+  if (p[0] !== start[0] || p[1] !== start[1]) moved = true;
+  const l = line(start, p); if (l) { sel = l; showSel(sel); }
+});
+addEventListener('pointerup', () => {
+  if (!dragging) return; dragging = false;
+  if (moved) { check(sel); anchor = null; return; }
+  // modo de dos toques: primera letra y última letra
+  if (anchor) { const l = line(anchor, start); anchor = null; check(l); }
+  else { anchor = start; showSel([start]); }
+});
+
+function tickClock() { if (done) return; $('stTime').textContent = fmt(Math.floor((Date.now() - startT) / 1000)); }
+function begin(level) {
+  lv = level; $('ov').hidden = true; build(); draw(); startT = Date.now(); clearInterval(clock); clock = setInterval(tickClock, 250); tickClock();
+}
+function finish() {
+  done = true; clearInterval(clock);
+  const secs = Math.floor((Date.now() - startT) / 1000), b = bests(), rec = !b[lv] || secs < b[lv];
+  if (rec) { b[lv] = secs; try { localStorage.setItem(KEY, JSON.stringify(b)); } catch {} }
+  setTimeout(() => show(`<div class="logo">¡Las encontraste<b>todas!</b></div><div class="final">${fmt(secs)}</div>
+    <p>Tema: ${theme} · ${LEVELS[lv].name}. ${rec ? '🎉 ¡Nuevo récord!' : `Tu récord: ${fmt(b[lv])}.`}</p>
+    <button class="big" id="go">Otra sopa</button><a class="ghost" href="../juegos.html">Volver a Juegos</a>`, () => begin(lv)), 500);
+  paintWords();
+}
+$('clue').onclick = () => {
+  if (done) return;
+  const k = words.findIndex((_, i) => !found.includes(i)); if (k < 0) return;
+  const [r, c] = words[k].cells[0], el = cell(r, c);
+  startT -= 15000; // la pista cuesta 15 segundos
+  el.animate([{ transform: 'scale(1)', background: '#E4007C' }, { transform: 'scale(1.3)', background: '#E4007C' }, { transform: 'scale(1)' }], { duration: 900, iterations: 2 });
+  tickClock();
+};
+$('newBtn').onclick = () => begin(lv);
+function show(html, onGo) { $('ovCard').innerHTML = html; $('ov').hidden = false; if (onGo) $('go').onclick = onGo; }
+function intro() {
+  done = true; clearInterval(clock); const b = bests();
+  if (!grid.length) { build(); draw(); }
+  show(`<div class="logo">Sopa de<b>Letras Mx</b></div><p>Encuentra las palabras escondidas: comida, fiesta, naturaleza, lugares y familia.</p>
+    <div class="levels"><button data-l="facil"><b>Fácil</b><small>9×9 · 7 palabras<br>→ y ↓${b.facil ? `<br>Récord ${fmt(b.facil)}` : ''}</small></button><button data-l="dificil"><b>Difícil</b><small>11×11 · 9 palabras<br>en todas direcciones${b.dificil ? `<br>Récord ${fmt(b.dificil)}` : ''}</small></button></div>
+    <a class="ghost" href="../juegos.html">Salir a Juegos</a>`);
+  document.querySelectorAll('.levels [data-l]').forEach(x => x.onclick = () => begin(x.dataset.l));
+}
+$('homeBtn').onclick = intro;
+$('helpBtn').onclick = () => {
+  if (!$('ov').hidden) return;
+  show(`<div class="logo" style="font-size:1.4rem">¿Cómo se juega?</div><p style="text-align:left">• Desliza sobre una palabra, en línea recta.<br>• O toca la primera letra y luego la última.<br>• En Difícil las palabras pueden ir en diagonal o al revés.<br>• 💡 Pista marca la primera letra de una palabra, pero suma 15 segundos.</p><button class="big" id="go">Entendido</button>`, () => { $('ov').hidden = true; });
+};
+intro();
+})();
+</script>
+</body>
+</html>

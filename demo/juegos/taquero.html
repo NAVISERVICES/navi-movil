@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+<script>/* Navi Movil: solo clientes con sesion en Mi Navi */try{if(!JSON.parse(localStorage.getItem('navi.session')))throw 0}catch(e){location.replace('../login.html?next=juegos/taquero.html')}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E0F2E">
+<meta name="apple-mobile-web-app-title" content="Navi Juegos">
+<link rel="icon" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<title>Taquero Express NAVI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#0E0F2E; --panel:#181A45; --line:#2A2C66; --rosa:#E4007C; --cian:#2FD3E8; --oro:#FFC23A;
+  --ok:#2BD67B; --fg:#F3F1FF; --muted:#9C9BD0; --paper:#FFF4E0; --ink:#2A1B3D;
+  --display:"Bungee","Impact",system-ui,sans-serif; --body:"Rubik",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{max-width:520px;margin:0 auto;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--display);font-size:1.05rem}
+.brand b{color:var(--rosa);font-weight:400}
+.hbtns{display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 .78rem var(--body);background:var(--panel);border:1px solid var(--cian);border-radius:999px;padding:4px 11px 4px 4px}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--cian);color:var(--bg);font:800 .85rem var(--body);font-style:normal;display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-variant-numeric:tabular-nums}
+.stat{background:var(--panel);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.stat small{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+.stat b{font-size:1.1rem;white-space:nowrap}
+.stat.low b{color:var(--rosa)}
+/* clientes */
+.line{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:176px}
+.cust{min-width:0;background:var(--panel);border-radius:16px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid var(--line);position:relative;animation:in .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes in{from{transform:translateY(-14px);opacity:0}}
+.cust.empty{background:none;border:2px dashed var(--line);animation:none;justify-content:center;color:var(--muted);font-size:.75rem}
+.cust .face{font-size:2rem;line-height:1}
+.cust .name{font-size:.7rem;font-weight:700;color:var(--muted)}
+.ticket{width:100%;background:var(--paper);color:var(--ink);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:3px;font-size:.68rem;font-weight:800}
+.ticket span{display:flex;align-items:flex-start;gap:5px;line-height:1.15}
+.ticket span i{margin-top:2px}
+.ticket i{width:9px;height:9px;border-radius:50%;flex:none;border:1px solid #0003}
+.pat{width:100%;height:7px;border-radius:9px;background:#00000055;overflow:hidden}
+.pat b{display:block;height:100%;border-radius:9px;background:var(--ok);transition:width .1s linear}
+.cust.mad{border-color:var(--rosa)}
+.cust.mad .face{animation:shake .4s infinite}
+@keyframes shake{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.cust.ok{border-color:var(--ok)}
+/* taco */
+.plate{position:relative;background:radial-gradient(circle at 50% 60%,#ffffff22,#ffffff08 70%);border-radius:20px;height:120px;display:grid;place-items:center;border:2px solid var(--line)}
+.plate svg{height:104px}
+.plate .lbl{position:absolute;left:12px;top:8px;font-size:.7rem;color:var(--muted);font-weight:700}
+.toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:400 1.3rem var(--display);white-space:nowrap;pointer-events:none;text-shadow:0 3px 0 #0008}
+.toast.go{animation:up .9s ease-out forwards}
+@keyframes up{to{transform:translate(-50%,-180%);opacity:0}}
+/* ingredientes */
+.ings{display:grid;gap:8px}
+.ings .row{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:8px}
+.ings .row > small{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ings .btns{display:flex;gap:6px;flex-wrap:wrap}
+.ing{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:9px 11px;font-weight:700;font-size:.85rem;touch-action:manipulation}
+.ing i{width:14px;height:14px;border-radius:50%;border:1px solid #0004}
+.ing.on{border-color:var(--oro);background:#FFC23A22}
+.acts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.trash{border:2px solid var(--line);background:none;border-radius:14px;padding:13px;font-weight:700}
+.serve{border:0;border-radius:14px;padding:13px;background:var(--rosa);color:#fff;font:400 1.15rem var(--display);box-shadow:0 5px 0 #8E004D}
+.hint{text-align:center;font-size:.8rem;color:var(--muted)}
+/* pantallas */
+.ov{position:fixed;inset:0;z-index:20;background:#0E0F2Ee8;display:grid;place-items:center;padding:20px}
+.card{width:min(420px,100%);background:var(--panel);border:2px solid var(--line);border-radius:22px;padding:24px 22px;text-align:center}
+.card .logo{font-family:var(--display);font-size:1.8rem;line-height:1}
+.card .logo b{color:var(--rosa);font-weight:400;display:block}
+.card p{color:#d7d5f5;font-size:.92rem;line-height:1.45}
+.card ol{text-align:left;font-size:.88rem;line-height:1.5;padding-left:20px;color:#d7d5f5}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:14px;background:var(--rosa);color:#fff;font:400 1.05rem var(--display);box-shadow:0 5px 0 #8E004D;margin-top:14px}
+.ghost{display:block;width:100%;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:11px;background:none;color:var(--fg);font-weight:600;text-decoration:none;text-align:center}
+.final{font:400 2.6rem var(--display);color:var(--oro);margin:6px 0}
+@media (max-width:370px){.ings .row{grid-template-columns:1fr}.ing{padding:8px 9px;font-size:.8rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud">
+    <div class="brand">Taquero <b>Express</b></div>
+    <div class="hbtns"><button class="pill" id="homeBtn"><i>⌂</i>Inicio</button><button class="pill" id="helpBtn"><i>?</i>Instrucciones</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><small>Caja</small><b id="stMoney">$0</b></div>
+    <div class="stat" id="stTimeBox"><small>Turno</small><b id="stTime">2:00</b></div>
+    <div class="stat"><small>Fama</small><b id="stStars">⭐⭐⭐</b></div>
+    <div class="stat"><small>Récord</small><b id="stBest">$0</b></div>
+  </div>
+  <div class="line" id="line"></div>
+  <div class="plate" id="plate"><span class="lbl">Tu taco</span><svg viewBox="0 0 200 110" id="taco"></svg></div>
+  <div class="ings" id="ings"></div>
+  <div class="acts"><button class="trash" id="trash">🗑 Tirar</button><button class="serve" id="serve">¡Servir!</button></div>
+  <p class="hint">Arma el taco que pide un cliente y dale Servir: se lo damos a quien lo pidió.</p>
+  <a class="ghost" href="../juegos.html">← Volver a Juegos</a>
+</div>
+<div class="ov" id="ov"><div class="card" id="ovCard"></div></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const ING = {
+  tortilla: { label: 'Tortilla', one: true, items: [{ id: 'maiz', name: 'Maíz', c: '#F2B544' }, { id: 'harina', name: 'Harina', c: '#FFF1D6' }] },
+  guisado: { label: 'Guisado', one: true, items: [{ id: 'pastor', name: 'Pastor', c: '#E4572E' }, { id: 'suadero', name: 'Suadero', c: '#A0522D' }, { id: 'bistec', name: 'Bistec', c: '#6B3A1E' }, { id: 'chorizo', name: 'Chorizo', c: '#B02E26' }] },
+  extra: { label: 'Extras', one: false, items: [{ id: 'cebolla', name: 'Cebolla', c: '#F3EAFF' }, { id: 'cilantro', name: 'Cilantro', c: '#2BB55B' }, { id: 'pina', name: 'Piña', c: '#FFD84D' }] },
+  salsa: { label: 'Salsa', one: true, items: [{ id: 'verde', name: 'Verde', c: '#3FA34D' }, { id: 'roja', name: 'Roja', c: '#D7263D' }] },
+};
+const find = (cat, id) => ING[cat].items.find(x => x.id === id);
+const FACES = ['👷', '👵', '🧑‍🎓', '👩‍💼', '👮', '🧔', '👩‍🔧', '🧑‍🍳', '👴', '👩‍🎤', '🧑‍💻', '👨‍🌾'];
+const NAMES = ['Don Pepe', 'Doña Lupe', 'Kevin', 'Licenciada', 'Oficial', 'El Güero', 'Marisol', 'Chef Toño', 'Don Chuy', 'Yaz', 'Iván', 'Tío Beto'];
+const SHIFT = 120, KEY = 'navi_taquero_best';
+const best = () => +(localStorage.getItem(KEY) || 0);
+
+let plate, custs, money, stars, left, playing, tickT, spawnT, lastSpawn, start, served;
+const empty = () => ({ tortilla: null, guisado: null, extra: new Set(), salsa: null });
+
+let ac = null;
+const beep = (f, d = .1, type = 'square', v = .05) => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = v; o.connect(g).connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + d); o.stop(ac.currentTime + d); } catch {} };
+
+// botones de ingredientes
+$('ings').innerHTML = Object.entries(ING).map(([cat, g]) => `<div class="row"><small>${g.label}</small><div class="btns">${g.items.map(it => `<button class="ing" data-cat="${cat}" data-id="${it.id}"><i style="background:${it.c}"></i>${it.name}</button>`).join('')}</div></div>`).join('');
+$('ings').addEventListener('click', e => {
+  const b = e.target.closest('.ing'); if (!b || !playing) return;
+  const { cat, id } = b.dataset;
+  if (ING[cat].one) plate[cat] = plate[cat] === id ? null : id;
+  else plate.extra.has(id) ? plate.extra.delete(id) : plate.extra.add(id);
+  beep(500 + Math.random() * 200, .04, 'triangle', .04); drawPlate();
+});
+
+// el taco se dibuja capa por capa: tortilla, guisado, extras y salsa
+function drawPlate() {
+  document.querySelectorAll('.ing').forEach(b => { const { cat, id } = b.dataset; b.classList.toggle('on', ING[cat].one ? plate[cat] === id : plate.extra.has(id)); });
+  const t = plate.tortilla && find('tortilla', plate.tortilla), g = plate.guisado && find('guisado', plate.guisado);
+  let s = '<ellipse cx="100" cy="98" rx="86" ry="9" fill="#0005"/>';
+  if (t) s += `<path d="M18 90 Q100 -10 182 90 Z" fill="${t.c}" stroke="#0002" stroke-width="2"/><path d="M30 86 Q100 6 170 86" fill="none" stroke="#fff6" stroke-width="2" stroke-dasharray="3 7"/>`;
+  else s += '<text x="100" y="62" text-anchor="middle" font-family="Rubik" font-weight="800" font-size="14" fill="#9C9BD0">Elige una tortilla</text>';
+  if (t && g) for (let i = 0; i < 9; i++) s += `<rect x="${42 + i * 13}" y="${56 + (i % 3) * 6}" width="16" height="12" rx="4" fill="${g.c}" transform="rotate(${(i * 37) % 30 - 15} ${50 + i * 13} ${62 + (i % 3) * 6})"/>`;
+  if (t) [...plate.extra].forEach((id, k) => { const x = find('extra', id); for (let i = 0; i < 8; i++) s += `<circle cx="${48 + ((i * 29 + k * 11) % 104)}" cy="${50 + ((i * 17 + k * 7) % 22)}" r="${id === 'pina' ? 5 : 3.5}" fill="${x.c}" stroke="#0003"/>`; });
+  if (t && plate.salsa) { const x = find('salsa', plate.salsa); s += `<path d="M44 58 Q62 46 78 58 T112 56 T150 58" fill="none" stroke="${x.c}" stroke-width="6" stroke-linecap="round" opacity=".9"/>`; }
+  $('taco').innerHTML = s;
+}
+
+// pedidos: entre más avanza el turno, más extras piden y menos paciencia tienen
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function newOrder() {
+  const el = SHIFT - left, maxX = el < 25 ? 1 : el < 70 ? 2 : 3;
+  const extras = new Set(); const n = Math.floor(Math.random() * (maxX + 1));
+  while (extras.size < n) extras.add(pick(ING.extra.items).id);
+  return { tortilla: pick(ING.tortilla.items).id, guisado: pick(ING.guisado.items).id, extra: extras, salsa: pick(ING.salsa.items).id };
+}
+const patience = () => Math.max(12, 24 - (SHIFT - left) * .09) * 1000;
+const same = (a, b) => a.tortilla === b.tortilla && a.guisado === b.guisado && a.salsa === b.salsa && a.extra.size === b.extra.size && [...a.extra].every(x => b.extra.has(x));
+function spawn() {
+  const i = custs.findIndex(c => !c); if (i < 0) return;
+  const k = Math.floor(Math.random() * FACES.length);
+  custs[i] = { order: newOrder(), face: FACES[k], name: NAMES[k], born: performance.now(), pat: patience() };
+  beep(700, .06, 'triangle'); drawLine();
+}
+function drawLine() {
+  $('line').innerHTML = custs.map((c, i) => !c ? '<div class="cust empty">Siguiente…</div>' : `<div class="cust" id="c${i}">
+    <div class="face">${c.face}</div><div class="name">${c.name}</div>
+    <div class="ticket">${['tortilla', 'guisado'].map(cat => { const x = find(cat, c.order[cat]); return `<span><i style="background:${x.c}"></i>${cat === 'tortilla' ? 'Tortilla de ' + x.name.toLowerCase() : x.name}</span>`; }).join('')}
+      ${[...c.order.extra].map(id => { const x = find('extra', id); return `<span><i style="background:${x.c}"></i>con ${x.name.toLowerCase()}</span>`; }).join('')}
+      <span><i style="background:${find('salsa', c.order.salsa).c}"></i>Salsa ${find('salsa', c.order.salsa).name.toLowerCase()}</span></div>
+    <div class="pat"><b id="p${i}"></b></div></div>`).join('');
+}
+function tick() {
+  if (!playing) return;
+  const now = performance.now();
+  left = Math.max(0, SHIFT - (now - start) / 1000);
+  custs.forEach((c, i) => {
+    if (!c) return;
+    const r = 1 - (now - c.born) / c.pat, bar = $('p' + i), card = $('c' + i);
+    if (bar) { bar.style.width = Math.max(0, r * 100) + '%'; bar.style.background = r > .5 ? 'var(--ok)' : r > .25 ? 'var(--oro)' : 'var(--rosa)'; }
+    if (card) card.classList.toggle('mad', r < .25);
+    if (r <= 0) { custs[i] = null; stars--; toast('Se fue enojado 😤', '#FF6FB1'); beep(150, .3, 'sawtooth', .05); drawLine(); }
+  });
+  // llega un cliente nuevo cada vez más seguido
+  const every = Math.max(2600, 6000 - (SHIFT - left) * 30);
+  if (now - lastSpawn > every || custs.every(c => !c)) { lastSpawn = now; spawn(); }
+  paint();
+  if (stars <= 0 || left <= 0) return end();
+}
+function paint() {
+  $('stMoney').textContent = '$' + money;
+  const s = Math.ceil(left); $('stTime').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  $('stTimeBox').classList.toggle('low', left < 15);
+  $('stStars').textContent = '⭐'.repeat(Math.max(0, stars)) + '·'.repeat(3 - Math.max(0, stars));
+  $('stBest').textContent = '$' + best();
+}
+function toast(t, color) { const e = document.createElement('div'); e.className = 'toast go'; e.textContent = t; e.style.color = color; $('plate').appendChild(e); setTimeout(() => e.remove(), 900); }
+
+$('serve').onclick = () => {
+  if (!playing) return;
+  if (!plate.tortilla || !plate.guisado || !plate.salsa) { toast('Le falta algo', '#FFC23A'); beep(220, .12); return; }
+  const now = performance.now();
+  const i = custs.findIndex(c => c && same(c.order, plate));
+  if (i < 0) { money = Math.max(0, money - 5); toast('¡Nadie pidió ese! −$5', '#FF6FB1'); beep(160, .25, 'sawtooth', .05); }
+  else {
+    const c = custs[i], r = Math.max(0, 1 - (now - c.born) / c.pat);
+    const pay = 25 + c.order.extra.size * 5, tip = Math.round(r * 15);
+    money += pay + tip; served++;
+    toast(`+$${pay}${tip ? ` +$${tip} propina` : ''}`, '#2BD67B');
+    [660, 880, 1100].forEach((f, k) => setTimeout(() => beep(f, .08, 'triangle', .05), k * 60));
+    custs[i] = null; drawLine();
+  }
+  plate = empty(); drawPlate(); paint();
+};
+$('trash').onclick = () => { plate = empty(); drawPlate(); };
+
+function begin() {
+  $('ov').hidden = true; plate = empty(); custs = [null, null, null]; money = 0; stars = 3; left = SHIFT; served = 0;
+  playing = true; start = performance.now(); lastSpawn = start; spawn();
+  drawPlate(); drawLine(); paint(); clearInterval(tickT); tickT = setInterval(tick, 100);
+}
+function end() {
+  playing = false; clearInterval(tickT);
+  const rec = money > best(); if (rec) try { localStorage.setItem(KEY, money); } catch {}
+  show(`<div class="logo">${stars <= 0 ? 'Se acabó la fama' : '¡Cerramos la taquería!'}</div><div class="final">$${money}</div>
+    <p>Serviste ${served} ${served === 1 ? 'taco' : 'tacos'}. ${rec ? '🎉 ¡Nuevo récord de caja!' : `Tu récord: $${best()}.`}</p>
+    <button class="big" id="go">Otro turno</button><a class="ghost" href="../juegos.html">Volver a Juegos</a>`, begin);
+  paint();
+}
+function show(html, onGo) { $('ovCard').innerHTML = html; $('ov').hidden = false; $('go').onclick = onGo; }
+function intro() {
+  playing = false; clearInterval(tickT); plate = empty(); custs = [null, null, null]; money = 0; stars = 3; left = SHIFT;
+  drawPlate(); drawLine(); paint();
+  show(`<div class="logo">Taquero<b>Express</b></div><p>Hoy te toca la plancha. ¡Que no se te junten los clientes!</p>
+    <ol><li>Cada cliente trae su pedido: tortilla, guisado, extras y salsa.</li><li>Arma el taco tocando los ingredientes y dale <b>¡Servir!</b>; se lo damos a quien lo pidió.</li><li>Si lo sirves rápido te dejan propina. Si un cliente se desespera, se va y pierdes fama ⭐.</li><li>El turno dura 2 minutos. Si pierdes las 3 estrellas, cierras antes.</li></ol>
+    <button class="big" id="go">¡Abrir la taquería!</button><a class="ghost" href="../juegos.html">Salir a Juegos</a>`, begin);
+}
+$('homeBtn').onclick = intro;
+$('helpBtn').onclick = () => {
+  const was = playing, pausedAt = performance.now(); playing = false; clearInterval(tickT);
+  show(`<div class="logo" style="font-size:1.4rem">¿Cómo se juega?</div><ol style="margin-top:14px"><li>El taco debe tener exactamente lo que dice el ticket: ni más ni menos extras.</li><li>Puedes tocar un ingrediente otra vez para quitarlo, o 🗑 Tirar para empezar de nuevo.</li><li>Servir un taco que nadie pidió cuesta $5.</li></ol><button class="big" id="go">${was ? 'Seguir' : 'Entendido'}</button>`,
+    () => { $('ov').hidden = true; if (!was) return intro(); const pause = performance.now() - pausedAt; start += pause; lastSpawn += pause; custs.forEach(c => c && (c.born += pause)); playing = true; tickT = setInterval(tick, 100); });
+};
+intro();
+})();
+</script>
+</body>
+</html>
