@@ -47,7 +47,7 @@ h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.02;letter-spac
 
 /* ---------- top bars ---------- */
 .sections{background:var(--ink);font-size:12px;color:var(--muted)}
-.sections .wrap{display:flex;justify-content:space-between;align-items:center;height:34px;gap:12px}
+.sections .wrap{display:flex;justify-content:flex-end;align-items:center;height:34px;gap:12px}
 .sections nav{display:flex;gap:6px}
 .sections nav a{padding:4px 10px;border-radius:99px;white-space:nowrap}
 .sections nav a.on{background:var(--lime);color:var(--ink);font-weight:700}
@@ -504,12 +504,10 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 </head>
 <body>
 
-<a class="promo-bar" href="#promo" aria-label="Regalo de bienvenida: cámbiate a Navi con tu número y recibe GB de regalo cada mes durante 12 meses"><div class="run" id="promoRun"></div></a>
 
 <div class="sections">
   <div class="wrap">
-    <span>Todo Navi</span>
-    <nav><a class="on" href="#">Navi Móvil · estás aquí</a><a href="https://www.navirepaircenter.com/demo/" target="_blank" rel="noopener">Navi Repair Center →</a><a href="https://www.navirepaircenter.com/demo/shop/" target="_blank" rel="noopener">Navi Shop →</a><a href="https://navi-store.netlify.app/" target="_blank" rel="noopener">NAVI Store →</a></nav>
+    <nav><a class="on" href="#">Navi Móvil · estás aquí</a><a href="https://www.navirepaircenter.com/demo/" target="_blank" rel="noopener">Navi Repair Center →</a><a href="https://www.navirepaircenter.com/demo/shop/" target="_blank" rel="noopener">Navi Shop →</a></nav>
   </div>
 </div>
 
@@ -526,6 +524,9 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     </div>
   </div>
 </header>
+
+<!-- cintillo en movimiento, justo debajo del menú -->
+<a class="promo-bar" href="#promo" aria-label="Regalo de bienvenida: cámbiate a Navi con tu número y recibe GB de regalo cada mes durante 12 meses"><div class="run" id="promoRun"></div></a>
 
 <!-- HERO -->
 <section class="hero">
