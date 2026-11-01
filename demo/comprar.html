@@ -39,6 +39,9 @@ main{padding:10px 0 120px}
 .plan b{display:block;font-family:var(--display);font-size:30px;line-height:1}
 .plan span{display:block;font-size:13px;opacity:.8;margin-top:4px}
 .plan .pr{font-family:var(--display);font-weight:800;font-size:18px;opacity:1;margin-top:10px}
+.plan .fol{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin:0 0 8px}
+.plan .pd{font-size:11px;font-weight:700;opacity:.75;margin-top:2px}
+[data-only][hidden]{display:none}
 .plan .xb{display:block;margin-top:10px;background:var(--ink);color:#FFE36E;border-radius:14px;padding:6px 6px 7px;font-size:12px;font-weight:800;opacity:1;text-align:center;white-space:nowrap;line-height:1.2}
 .plan .rb{display:block;margin-top:8px;background:#ffffffb3;color:var(--ink);border-radius:10px;padding:4px 6px;font-size:12px;font-weight:800;opacity:1;text-align:center;white-space:nowrap}
 .roam-pol{font-size:12px;color:var(--muted);margin-top:12px}
@@ -119,6 +122,8 @@ main{padding:10px 0 120px}
 .done.pend .ok{background:#FFC22E}
 .folio{display:inline-flex;gap:10px;align-items:center;background:#fff;color:var(--ink);border-radius:14px;padding:10px 16px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.06em;margin:10px 0}
 .next{display:grid;gap:12px;text-align:left;margin:20px auto 0;max-width:520px}
+.slip{margin:14px auto 0;max-width:360px;text-align:left;background:#fff;color:var(--ink);border-radius:16px;padding:14px 16px;display:grid;gap:6px;font-size:14px}
+.slip div{display:flex;justify-content:space-between;gap:10px}.slip b{font-variant-numeric:tabular-nums;text-align:right}
 .next > div{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start;background:#ffffff0c;border-radius:16px;padding:12px}
 .next span{font-size:22px}
 .next b{display:block}
@@ -164,6 +169,7 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
           <h3>Plan de datos</h3>
           <div class="plans" id="plans"></div>
           <p class="roam-pol" id="roamPol"></p>
+          <p class="roam-pol">Precios en pesos mexicanos con IVA incluido. Tarifas registradas ante la Comisión Reguladora de Telecomunicaciones (CRT); cada plan publica su folio en cuanto el registro lo asigna. Llamadas y SMS ilimitados sujetos a la Política de Uso Justo. La contratación se rige por el contrato de adhesión registrado ante PROFECO.</p>
         </div>
         <div class="card">
           <h2>¿Qué quieres hacer?</h2>
@@ -209,32 +215,38 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
       <section class="step" data-s="datos">
         <form id="fDatos" novalidate>
           <div class="card">
-            <h2>Tus datos</h2>
-            <p class="muted">Tu línea y tu factura quedan a este nombre.</p>
+            <h2>Quién compra</h2>
+            <p class="muted">La factura y las líneas quedan a este nombre.</p>
+            <div class="seg" id="buyer"><button type="button" data-b="persona" aria-pressed="true">Como persona</button><button type="button" data-b="negocio" aria-pressed="false">Mi negocio</button></div>
             <div class="grid2" style="margin-top:14px">
-              <label class="field">Nombre(s)<input id="nom" autocomplete="given-name"></label>
-              <label class="field">Apellidos<input id="ape" autocomplete="family-name"></label>
-              <label class="field">CURP<input id="curp" maxlength="18" style="text-transform:uppercase" placeholder="18 caracteres"><span class="hint" id="curpHint">Escribe tu nombre tal como aparece en tu CURP.</span></label>
-              <label class="field">Correo electrónico<input id="mail" type="email" autocomplete="email"><span class="hint" id="mailHint"></span></label>
-              <label class="field">Teléfono de contacto (10 dígitos)<input id="tel" inputmode="tel" autocomplete="tel-national" placeholder="55 1234 5678"></label>
+              <label class="field" data-only="persona">Nombre(s)<input id="nom" autocomplete="given-name"></label>
+              <label class="field" data-only="persona">Apellidos<input id="ape" autocomplete="family-name" placeholder="Paterno y materno"></label>
+              <label class="field" data-only="negocio" hidden style="grid-column:1/-1">Razón social<input id="razon" autocomplete="organization" placeholder="Como aparece en tu constancia fiscal"></label>
+              <label class="field" data-only="persona">CURP<input id="curp" maxlength="18" style="text-transform:uppercase" placeholder="18 caracteres"><span class="hint" id="curpHint">Escribe tu nombre tal como aparece en tu CURP.</span><span class="hint">18 caracteres. No la guardamos en claro: solo sirve para contar tus líneas.</span></label>
+              <label class="field">Correo<input id="mail" type="email" autocomplete="email"><span class="hint" id="mailHint">Ahí llegan el pago, las eSIM y la factura.</span></label>
+              <label class="field">Teléfono (10 dígitos)<input id="tel" inputmode="tel" autocomplete="tel-national" placeholder="55 1234 5678"></label>
             </div>
           </div>
           <div class="card" id="shipCard">
-            <h2>Dirección de entrega</h2>
-            <p class="muted">Para tus chips físicos. La guía se imprime con estos datos.</p>
+            <h2>¿A dónde te mandamos el chip?</h2>
+            <p class="muted">La guía de paquetería se imprime con estos datos.</p>
             <div class="grid2" style="margin-top:14px">
+              <label class="field">Quién recibe · nombre<input id="rNom" autocomplete="shipping given-name"></label>
+              <label class="field">Apellidos<input id="rApe" autocomplete="shipping family-name"></label>
               <label class="field">Código postal<input id="cp" inputmode="numeric" maxlength="5" placeholder="5 dígitos"><span class="hint" id="cpHint"></span></label>
               <label class="field">Colonia<select id="col"><option value="">Escribe tu código postal</option></select></label>
               <label class="field">Estado<input id="edo"></label>
-              <label class="field">Municipio / Alcaldía<input id="mun"></label>
+              <label class="field">Municipio o alcaldía<input id="mun"></label>
               <label class="field">Calle<input id="calle"></label>
-              <div class="grid2"><label class="field">Núm. exterior<input id="next"></label><label class="field">Núm. interior<input id="nint" placeholder="Opcional"></label></div>
+              <div class="grid2"><label class="field">Número exterior<input id="next"></label><label class="field">Número interior<input id="nint" placeholder="Si tienes"></label></div>
             </div>
-            <label class="field" style="margin-top:12px">Referencias del domicilio<textarea id="ref" rows="2" placeholder="Color de la fachada, entre qué calles, algún negocio cercano"></textarea></label>
-            <h3>Paquetería</h3>
-            <div class="ship" id="ship">
-              <label><span><input type="radio" name="ship" value="std" checked> <b>Estándar</b> · 3 a 5 días hábiles</span><b>$99</b></label>
-              <label><span><input type="radio" name="ship" value="exp"> <b>Express</b> · 1 a 2 días hábiles</span><b>$149</b></label>
+            <label class="field" style="margin-top:12px">Señas del domicilio<textarea id="ref" rows="2" placeholder="Portón negro, frente a la tiendita, entre Morelos y Juárez"></textarea><span class="hint">Dinos cómo llegar: color del portón, entre qué calles, algún negocio de referencia.</span></label>
+            <div id="shipBox" hidden>
+              <h3>🚚 Escoge cómo te lo mandamos</h3>
+              <div class="ship" id="ship">
+                <label><span><input type="radio" name="ship" value="std" checked> <b>Estándar</b> · 3 a 5 días hábiles</span><b>$99</b></label>
+                <label><span><input type="radio" name="ship" value="exp"> <b>Express</b> · 1 a 2 días hábiles</span><b>$149</b></label>
+              </div>
             </div>
           </div>
           <div class="card" id="refCard">
@@ -247,28 +259,21 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
             <label class="field" id="refBox" hidden style="margin-top:12px">Código de referido<input id="refIn" maxlength="10" placeholder="Ej. NV-AB12CD" style="text-transform:uppercase" autocomplete="off"><span class="hint" id="refHint"></span></label>
           </div>
           <div class="card">
-            <label class="chk"><input type="checkbox" id="fac"><span>Quiero factura a mi RFC</span></label>
+            <label class="chk"><input type="checkbox" id="fac"><span id="facLbl">Quiero factura a mi RFC</span></label>
             <div class="grid2" id="facBox" hidden style="margin-top:12px">
-              <label class="field">RFC<input id="rfc" maxlength="13" style="text-transform:uppercase"></label>
-              <label class="field">Uso de la factura<select id="cfdi"><option>G03 · Gastos en general</option><option>S01 · Sin efectos fiscales</option></select></label>
+              <label class="field">RFC<input id="rfc" maxlength="13" style="text-transform:uppercase"><span class="hint">12 caracteres si es empresa, 13 si es persona física.</span></label>
+              <label class="field">Código postal fiscal<input id="cpf" inputmode="numeric" maxlength="5"><span class="hint">El de tu constancia fiscal.</span></label>
+              <label class="field">Régimen fiscal<select id="reg"><option value="">Elige el de tu constancia</option></select></label>
+              <label class="field">Uso de la factura<select id="cfdi"><option value="">Primero el régimen</option></select></label>
             </div>
             <label class="chk"><input type="checkbox" id="ok"><span>Acepto el contrato de adhesión y el aviso de privacidad. Planes prepago, sin plazo forzoso.</span></label>
           </div>
         </form>
       </section>
 
-      <!-- PAGO Y CONFIRMACIÓN -->
-      <section class="step" data-s="pago">
-        <div class="card" id="payCard">
-          <h2>Lo que vas a pagar</h2>
-          <p class="muted">Elige cómo pagar. Demostración: no se hace ningún cobro.</p>
-          <div class="pay">
-            <label><input type="radio" name="pay" value="tarjeta" checked><div><b>💳 Tarjeta de crédito o débito</b><small>Visa, Mastercard o American Express · se confirma al momento</small></div></label>
-            <label><input type="radio" name="pay" value="transferencia"><div><b>🏦 Transferencia</b><small>SPEI o CoDi · se confirma al recibir el pago</small></div></label>
-            <label><input type="radio" name="pay" value="efectivo"><div><b>💵 Efectivo</b><small>OXXO, 7-Eleven, Walmart y más · te damos un código de pago</small></div></label>
-          </div>
-          <p class="hint">Pago seguro. No guardamos los datos de tu tarjeta.</p>
-        </div>
+      <!-- PEDIDO: folio, pago en la pasarela y lo que sigue -->
+      <section class="step" data-s="pedido">
+        <div class="card" id="payCard"></div>
       </section>
     </div>
 
@@ -278,11 +283,13 @@ section.step{display:none}section.step.on{display:block;animation:in .3s ease}
 <div class="bar" id="bar"><div><small>Total</small><b id="barTot"></b></div><button class="btn btn-lime" id="barGo">Continuar</button></div>
 
 <script src="auth.js?v=20261101a"></script>
-<script src="planes.js?v=20261030d"></script>
+<script src="planes.js?v=20261101a"></script>
+<script src="pasarela.js?v=20261101a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
-const STEPS = [['plan', 'Tu plan'], ['formato', 'Chip o eSIM'], ['datos', 'Tus datos'], ['pago', 'Pago']];
+// mismos tres pasos que la plataforma del operador; el cobro se hace después, en la ventana segura de la pasarela
+const STEPS = [['plan', 'Tu plan'], ['formato', 'Chip o eSIM'], ['datos', 'Tus datos']];
 const SHIP = { std: 99, exp: 149 };
 // pedido: arranca con lo que eligieron en la página principal (?gb=12&per=m, ?fam=4..., ?porta=1)
 const O = {
@@ -308,7 +315,7 @@ const missing = () => {
 };
 
 function renderNav() {
-  const i = STEPS.findIndex(s => s[0] === step);
+  const i = step === 'pedido' ? STEPS.length : STEPS.findIndex(s => s[0] === step);
   $('nav').innerHTML = STEPS.map(([id, t], k) => `${k ? '<hr>' : ''}<li class="${k < i ? 'ok' : k === i ? 'on' : ''}"><i>${k < i ? '✓' : String(k + 1).padStart(2, '0')}</i><span>${t}</span></li>`).join('');
 }
 function renderPlan() {
@@ -318,7 +325,7 @@ function renderPlan() {
   document.querySelectorAll('#per button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === O.per));
   $('plans').innerHTML = PLANS.map(p => {
     const pr = p.prices[O.per];
-    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${pr && ROAMING[p.gb] ? `<span class="rb">🌎 Roaming ${ROAMING[p.gb]} GB</span>` : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb"><i>🎁</i>+${portaGift(p.gb)} GB de regalo</span>` : ''}</button>`;
+    return `<button class="plan ${p.color}" data-gb="${p.gb}" aria-pressed="${p.gb === O.gb}" ${pr ? '' : 'disabled'}><span class="fol">${VIGENCIA[O.per]} días · ${folioTxt(p.gb)}</span><b>${p.gb} GB</b><span>${PERIODS[O.per].label}</span><span class="pr">${pr ? money(pr) : 'No disponible'}</span>${O.kind === 'fam' && pr ? '<span>por línea</span>' : ''}${pr ? `<span class="pd">${money(round2(perGb(p.gb, O.per)))} por GB · ${money(round2(perDay(p.gb, O.per)))} al día</span>` : ''}${pr && ROAMING[p.gb] ? `<span class="rb">🌎 Roaming ${ROAMING[p.gb]} GB</span>` : ''}${O.mode === 'porta' && pr && PORTA_BONUS[p.gb] ? `<span class="xb"><i>🎁</i>+${portaGift(p.gb)} GB de regalo</span>` : ''}</button>`;
   }).join('');
   $('mNew').checked = O.mode === 'nuevo'; $('mPorta').checked = O.mode === 'porta';
   $('portaNote').hidden = O.mode !== 'porta';
@@ -352,14 +359,14 @@ function renderSum() {
     ${O.chip + O.esim ? `<div class="r"><span>Formato</span><b>${[O.chip && `${O.chip} chip${O.chip > 1 ? 's' : ''}`, O.esim && `${O.esim} eSIM`].filter(Boolean).join(' + ')}</b></div>` : ''}
     ${Q ? `<div class="r"><span>Subtotal</span><b>${money(Q.sub)}</b></div>` : ''}
     ${Q && Q.off ? `<div class="r"><span>Descuento familiar (-${Math.round(familyDiscount(n) * 100)}%)</span><b>-${money(Q.off)}</b></div>` : ''}
-    ${O.chip ? `<div class="r"><span>Envío ${O.ship === 'exp' ? 'express' : 'estándar'}</span><b>${step === 'plan' || step === 'formato' ? 'Por cotizar' : money(shipCost())}</b></div>` : ''}
-    <div class="r tot"><span>Total</span><b>${Q ? money(step === 'plan' || step === 'formato' ? Q.total : total) : '—'}</b></div>
-    <p class="hint">IVA incluido.${O.chip && (step === 'plan' || step === 'formato') ? ' El envío se suma al poner tu código postal.' : ''}</p>
-    <button class="btn btn-lime" id="go">${step === 'datos' ? 'Ir a pagar' : step === 'pago' ? `Confirmar y pagar ${money(total)}` : 'Continuar'}</button>
+    ${O.chip ? `<div class="r"><span>Envío a domicilio${O.cpOk ? (O.ship === 'exp' ? ' · express' : ' · estándar') : ''}</span><b>${O.cpOk ? money(shipCost()) : 'Por cotizar'}</b></div>` : ''}
+    <div class="r tot"><span>Total</span><b>${Q ? money(O.cpOk || !O.chip ? total : Q.total) : '—'}</b></div>
+    <p class="hint">IVA incluido.${O.chip && !O.cpOk ? ' El envío se suma al cotizar tu código postal.' : ''}</p>
+    <button class="btn btn-lime" id="go">${step === 'datos' ? `Ir a pagar ${Q ? money(total) : ''}` : 'Continuar'}</button>
     ${step !== 'plan' ? '<button class="btn btn-ghost" id="backBtn" style="margin-top:8px">← Paso anterior</button>' : ''}
     <p class="why" id="why"></p>`;
-  $('barTot').textContent = Q ? money(step === 'datos' || step === 'pago' ? total : Q.total) : '—';
-  $('barGo').textContent = step === 'datos' ? 'Ir a pagar' : step === 'pago' ? 'Confirmar y pagar' : 'Continuar';
+  $('barTot').textContent = Q ? money(step === 'datos' ? total : Q.total) : '—';
+  $('barGo').textContent = step === 'datos' ? 'Ir a pagar' : 'Continuar';
   $('go').onclick = next; if ($('backBtn')) $('backBtn').onclick = back;
 }
 function render() {
@@ -370,7 +377,7 @@ function go(s) { step = s; render(); scrollTo({ top: 0, behavior: 'smooth' }); t
 function next() {
   const m = missing();
   if (m) { $('why').textContent = m; if (step === 'datos') datosErr(true); return; }
-  if (step === 'pago') return confirmOrder();
+  if (step === 'datos') return startPay();
   go(STEPS[STEPS.findIndex(s => s[0] === step) + 1][0]);
 }
 function back() { go(STEPS[STEPS.findIndex(s => s[0] === step) - 1][0]); }
@@ -455,12 +462,67 @@ $('imeis').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.
 // paso 3: validación de datos
 const CPS = { '08200': ['Ciudad de México', 'Iztacalco', ['Viaducto Piedad', 'Granjas México']], '06700': ['Ciudad de México', 'Cuauhtémoc', ['Roma Norte']], '44100': ['Jalisco', 'Guadalajara', ['Centro']], '64000': ['Nuevo León', 'Monterrey', ['Centro']] };
 const CURP_RE = /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HMX](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
+// quién compra: como persona (nombre + CURP) o como negocio (razón social + RFC de 12, con factura)
+O.buyer = 'persona';
+const negocio = () => O.buyer === 'negocio';
+function paintBuyer() {
+  document.querySelectorAll('#buyer button').forEach(b => b.setAttribute('aria-pressed', b.dataset.b === O.buyer));
+  document.querySelectorAll('[data-only]').forEach(el => el.hidden = el.dataset.only !== O.buyer);
+  if (negocio()) { $('fac').checked = true; $('fac').disabled = true; $('facBox').hidden = false; $('facLbl').textContent = 'Factura a nombre de tu negocio (obligatoria)'; }
+  else { $('fac').disabled = false; $('facLbl').textContent = 'Quiero factura a mi RFC'; }
+  paintReg();
+}
+$('buyer').onclick = e => { const b = e.target.closest('[data-b]'); if (b) { O.buyer = b.dataset.b; paintBuyer(); } };
+
+// la CURP debe coincidir con el nombre: letras iniciales de apellidos y nombre
+// (DEMO: comprobación de formato; en producción la plataforma la valida contra RENAPO y cuenta las líneas por CURP)
+const plain = s => s.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/Ñ/g, 'X').replace(/[^A-Z ]/g, ' ');
+const PARTICLES = /^(DA|DAS|DE|DEL|DER|DI|DIE|DD|EL|LA|LOS|LAS|LE|LES|MAC|MC|VAN|VON|Y)$/;
+const words = s => plain(s).split(/\s+/).filter(w => w && !PARTICLES.test(w));
+function curpPrefix() {
+  const ap = words($('ape').value), nm = words($('nom').value);
+  if (!ap.length || !nm.length) return null;
+  const p1 = ap[0], v = (p1.slice(1).match(/[AEIOU]/) || ['X'])[0];
+  // José y María se brincan si hay un segundo nombre
+  const n = nm.length > 1 && /^(JOSE|J|MARIA|MA|M)$/.test(nm[0]) ? nm[1] : nm[0];
+  return p1[0] + v + (ap[1] ? ap[1][0] : 'X') + n[0];
+}
+const curpMatches = () => { const c = $('curp').value.toUpperCase(), p = curpPrefix(); return !p || c.slice(0, 4) === p; };
+function paintCurp() {
+  const c = $('curp').value.toUpperCase(), h = $('curpHint');
+  if (c.length < 18) { h.textContent = 'Escribe tu nombre tal como aparece en tu CURP.'; h.className = 'hint'; return; }
+  if (!CURP_RE.test(c)) { h.textContent = 'Revisa tu CURP: no tiene el formato correcto.'; h.className = 'hint'; return; }
+  if (!curpMatches()) { h.textContent = 'Tu CURP no coincide con el nombre que escribiste. Revisa los dos.'; h.className = 'hint'; return; }
+  h.textContent = '✓ Tu CURP coincide con tu nombre.'; h.className = 'hint ok';
+}
+
+// factura: régimen fiscal y el uso que permite cada uno (catálogo del SAT, CFDI 4.0)
+const REGIMENES = [['601', 'General de Ley Personas Morales', 'm'], ['603', 'Personas Morales con Fines no Lucrativos', 'm'], ['605', 'Sueldos y Salarios', 'f'], ['606', 'Arrendamiento', 'f'],
+  ['612', 'Personas Físicas con Actividades Empresariales y Profesionales', 'f'], ['616', 'Sin obligaciones fiscales', 'f'], ['621', 'Incorporación Fiscal', 'f'], ['626', 'Régimen Simplificado de Confianza', 'fm']];
+const USOS = { G01: 'Adquisición de mercancías', G03: 'Gastos en general', S01: 'Sin efectos fiscales' };
+const usosDe = r => r === '605' || r === '616' ? ['S01'] : ['G03', 'G01', 'S01'];
+function paintReg() {
+  const keep = $('reg').value, kind = negocio() ? 'm' : 'f';
+  $('reg').innerHTML = '<option value="">Elige el de tu constancia</option>' + REGIMENES.filter(r => r[2].includes(kind)).map(([k, n]) => `<option value="${k}">${k} · ${n}</option>`).join('');
+  if ([...$('reg').options].some(o => o.value === keep)) $('reg').value = keep;
+  paintUso();
+}
+function paintUso() {
+  const r = $('reg').value, keep = $('cfdi').value;
+  $('cfdi').innerHTML = r ? usosDe(r).map(u => `<option value="${u}">${u} · ${USOS[u]}</option>`).join('') : '<option value="">Primero el régimen</option>';
+  if ([...$('cfdi').options].some(o => o.value === keep)) $('cfdi').value = keep;
+}
+$('reg').onchange = paintUso;
+
 function datosErr(mark) {
   const v = id => $(id).value.trim(), bad = [];
-  const need = [['nom', v('nom')], ['ape', v('ape')], ['curp', CURP_RE.test(v('curp').toUpperCase())], ['mail', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('mail'))], ['tel', v('tel').replace(/\D/g, '').length === 10]];
-  if (O.chip) need.push(['cp', /^\d{5}$/.test(v('cp'))], ['edo', v('edo')], ['mun', v('mun')], ['calle', v('calle')], ['next', v('next')], ['ref', v('ref')]);
-  if ($('fac').checked) need.push(['rfc', /^[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}$/.test(v('rfc').toUpperCase())]);
+  const need = negocio() ? [['razon', v('razon').length > 2]] : [['nom', v('nom')], ['ape', v('ape')], ['curp', CURP_RE.test(v('curp').toUpperCase()) && curpMatches()]];
+  need.push(['mail', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('mail'))], ['tel', v('tel').replace(/\D/g, '').length === 10]);
+  if (O.chip) need.push(['rNom', v('rNom')], ['rApe', v('rApe')], ['cp', /^\d{5}$/.test(v('cp')) && !NO_SHIP.includes(v('cp')) && !!O.cpOk], ['edo', v('edo')], ['mun', v('mun')], ['calle', v('calle')], ['next', v('next')], ['ref', v('ref')]);
+  if ($('fac').checked) need.push(['rfc', (negocio() ? /^[A-ZÑ&]{3}\d{6}[A-Z\d]{3}$/ : /^[A-ZÑ&]{4}\d{6}[A-Z\d]{3}$/).test(v('rfc').toUpperCase())], ['cpf', /^\d{5}$/.test(v('cpf'))], ['reg', v('reg')], ['cfdi', v('cfdi')]);
   need.forEach(([id, ok]) => { if (!ok) bad.push(id); if (mark) $(id).closest('.field').classList.toggle('err', !ok); });
+  if (bad.includes('curp') && CURP_RE.test(v('curp').toUpperCase())) return 'Tu CURP no coincide con tu nombre. Revisa los dos.';
+  if (bad.includes('cp') && NO_SHIP.includes(v('cp'))) return 'La paquetería no llega a ese código postal. Prueba con otro o pide eSIM.';
   if (bad.length) return 'Revisa los campos marcados.';
   // el código de referido es obligatorio contestarlo (sí o no) antes de pagar
   const has = document.querySelector('[name=hasRef]:checked');
@@ -490,53 +552,110 @@ document.querySelectorAll('[name=hasRef]').forEach(r => r.onchange = paintRef);
 $('refIn').oninput = paintRef;
 // llega con ?ref=CÓDIGO desde el enlace que compartió el cliente
 if (qs.get('ref')) { document.querySelector('[name=hasRef][value=si]').checked = true; $('refIn').value = qs.get('ref').toUpperCase(); setTimeout(paintRef); }
-$('curp').oninput = () => { const c = $('curp').value.toUpperCase(); $('curpHint').textContent = c.length === 18 ? (CURP_RE.test(c) ? '✓ Tu CURP tiene el formato correcto.' : 'Revisa tu CURP: no tiene el formato correcto.') : 'Escribe tu nombre tal como aparece en tu CURP.'; $('curpHint').className = 'hint' + (CURP_RE.test(c) ? ' ok' : ''); };
-$('mail').oninput = () => $('mailHint').textContent = O.esim ? 'Aquí te llega el código QR de tu eSIM.' : 'Aquí te mandamos tu guía de envío y tu folio.';
+$('curp').oninput = paintCurp;
+// quien recibe: de entrada, la misma persona que compra (se puede cambiar)
+let rTouched = false;
+['rNom', 'rApe'].forEach(id => $(id).addEventListener('input', () => rTouched = true));
+['nom', 'ape'].forEach(id => $(id).addEventListener('input', () => { paintCurp(); if (!rTouched) { $('rNom').value = $('nom').value; $('rApe').value = $('ape').value; } }));
+// código postal: se cotiza el envío; hay zonas a las que no llega la paquetería
+const NO_SHIP = ['63950', '77580', '23880'];
+let cpT = null;
 $('cp').oninput = () => {
   const c = $('cp').value.replace(/\D/g, '').slice(0, 5); $('cp').value = c;
-  const hit = CPS[c];
-  if (hit) { $('edo').value = hit[0]; $('mun').value = hit[1]; $('col').innerHTML = hit[2].map(x => `<option>${x}</option>`).join(''); $('cpHint').textContent = '✓ Sí llegamos a tu zona.'; $('cpHint').className = 'hint ok'; }
-  else { $('col').innerHTML = c.length === 5 ? '<option>Otra colonia (escríbela en referencias)</option>' : '<option value="">Escribe tu código postal</option>'; $('cpHint').textContent = c.length === 5 ? 'Completa estado y municipio.' : ''; $('cpHint').className = 'hint'; }
-  renderSum();
+  clearTimeout(cpT); $('shipBox').hidden = true; O.cpOk = false;
+  if (c.length < 5) { $('col').innerHTML = '<option value="">Escribe tu código postal</option>'; $('cpHint').textContent = ''; $('cpHint').className = 'hint'; return renderSum(); }
+  $('cpHint').textContent = 'Cotizando…'; $('cpHint').className = 'hint';
+  cpT = setTimeout(() => {
+    if (NO_SHIP.includes(c)) { $('col').innerHTML = '<option value="">—</option>'; $('cpHint').innerHTML = '🚫 <b>No llega la paquetería a ese CP.</b> Prueba con otro código postal o pídelo en eSIM, que esa te llega al correo.'; return renderSum(); }
+    const hit = CPS[c];
+    if (hit) { $('edo').value = hit[0]; $('mun').value = hit[1]; $('col').innerHTML = '<option value="">Escoge tu colonia…</option>' + hit[2].map(x => `<option>${x}</option>`).join(''); }
+    else $('col').innerHTML = '<option>Otra colonia (escríbela en las señas)</option>';
+    $('cpHint').textContent = hit ? '✓ Sí llega la paquetería a tu zona.' : '✓ Sí llega la paquetería. Completa estado y municipio.'; $('cpHint').className = 'hint ok';
+    O.cpOk = true; $('shipBox').hidden = false; renderSum();
+  }, 600);
 };
 document.querySelectorAll('[name=ship]').forEach(r => r.onchange = () => { O.ship = r.value; renderSum(); });
 $('fac').onchange = () => $('facBox').hidden = !$('fac').checked;
+paintBuyer();
 $('fDatos').addEventListener('input', () => { $('why').textContent = ''; });
 
-// confirmar: folio y siguientes pasos (DEMO: el pedido queda en este navegador)
-function confirmOrder() {
-  const Q = q(), total = Q.total + shipCost(), method = document.querySelector('[name=pay]:checked').value;
-  const folio = 'NV-' + String(Date.now()).slice(-7);
-  const paid = method === 'tarjeta';
-  const order = { folio, at: Date.now(), kind: O.kind, lines: nLines(), gb: O.gb, per: O.per, mode: O.mode, from: O.from, promoGb: bonusOk() ? portaGb(O.gb) : null, chip: O.chip, esim: O.esim, total, method, status: paid ? 'pagado' : 'pendiente', name: $('nom').value.trim(), mail: $('mail').value.trim() };
-  // el referido se suma a la app Referidos de quien compartió el código (cuenta cuando el pago se confirma)
-  if (usingRef()) {
-    order.ref = refNorm();
-    Referrals.add(order.ref, { name: `${order.name.split(' ')[0]} ${$('ape').value.trim()[0] || ''}.`.replace(' .', ''), plan: O.kind === 'fam' ? `Plan Familia · ${nLines()} líneas` : `Plan ${O.gb} GB`, folio, paid });
+// pedido: se registra con su folio al ir a pagar; el cobro se hace en la pasarela y el folio se conserva si reintentas.
+// DEMO: el pedido queda en este navegador; en producción se envía a la plataforma del operador con estos mismos datos.
+let order = null;
+// la CURP no se guarda en claro: solo una huella para contar cuántas líneas tiene cada persona
+const curpId = c => { let h = 2166136261; for (const ch of c) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+const saveOrder = () => { try { const l = (JSON.parse(localStorage.getItem('navi.orders')) || []).filter(x => x.folio !== order.folio); localStorage.setItem('navi.orders', JSON.stringify([order, ...l])); } catch {} };
+function startPay() {
+  if (!order) {
+    const Q = q(), v = id => $(id).value.trim();
+    order = { folio: 'NV-' + String(Date.now()).slice(-7), at: Date.now(), kind: O.kind, lines: nLines(), gb: O.gb, per: O.per, mode: O.mode, from: O.from, promoGb: bonusOk() ? portaGb(O.gb) : null,
+      chip: O.chip, esim: O.esim, ship: O.chip ? O.ship : null, total: Q.total + shipCost(), status: 'por pagar', name: negocio() ? v('razon') : v('nom'), mail: v('mail'),
+      // alta en la plataforma del operador: los mismos datos que pide su formulario de venta
+      alta: {
+        tenant: OPERADOR.tenant, offer: offerOf(O.gb, O.per), vigencia: VIGENCIA[O.per], lineas: nLines(), formato: { chip: O.chip, esim: O.esim },
+        imeis: O.imeis.slice(0, nLines()).map(x => x.v),
+        comprador: negocio() ? { tipo: 'negocio', razonSocial: v('razon') } : { tipo: 'persona', nombre: v('nom'), apellidos: v('ape'), curpId: curpId(v('curp').toUpperCase()) },
+        correo: v('mail'), telefono: v('tel').replace(/\D/g, ''),
+        factura: $('fac').checked ? { rfc: v('rfc').toUpperCase(), cpFiscal: v('cpf'), regimen: v('reg'), uso: v('cfdi') } : null,
+        envio: O.chip ? { recibe: `${v('rNom')} ${v('rApe')}`, cp: v('cp'), estado: v('edo'), municipio: v('mun'), colonia: $('col').value, calle: v('calle'), numExt: v('next'), numInt: v('nint'), senas: v('ref'), paqueteria: O.ship } : null,
+        portabilidad: O.mode === 'porta' ? { de: O.from, nota: 'El número y el NIP se capturan cuando cada línea ya esté activa' } : null,
+        referido: usingRef() ? refNorm() : null,
+      } };
+    if (usingRef()) order.ref = refNorm();
+    saveOrder();
   }
-  try { const l = JSON.parse(localStorage.getItem('navi.orders')) || []; localStorage.setItem('navi.orders', JSON.stringify([order, ...l])); } catch {}
+  go('pedido'); paintOrder(); openPay();
+}
+function openPay() {
+  Pasarela.open({ concepto: O.kind === 'fam' ? `Plan Familia · ${nLines()} líneas de ${O.gb} GB` : `Plan ${O.gb} GB · ${PERIODS[O.per].label}`, monto: order.total, folio: order.folio, onResult: r => {
+    order.status = r.status; order.method = r.method; order.payRef = r.ref;
+    // el referido se suma a la app Referidos de quien compartió el código (cuenta cuando el pago se confirma)
+    if (order.alta.referido && !order.refAdded && r.status !== 'rechazado') {
+      order.refAdded = true;
+      Referrals.add(order.alta.referido, { name: negocio() ? order.name : `${order.name.split(' ')[0]} ${$('ape').value.trim()[0] || ''}.`.replace(' .', ''), plan: O.kind === 'fam' ? `Plan Familia · ${nLines()} líneas` : `Plan ${O.gb} GB`, folio: order.folio, paid: r.status === 'pagado' });
+    }
+    saveOrder(); paintOrder();
+  } });
+}
+function paintOrder() {
+  const st = order.status, paid = st === 'pagado', v = id => $(id).value.trim(), E = order.alta.envio;
+  const head = {
+    pagado: ['✅', 'Tu pago entró', 'Tu pedido ya está en proceso.'],
+    pendiente: ['⏳', 'Solo falta que pagues', order.method === 'efectivo' ? `Paga en caja con tu código de pago; tu pedido queda apartado con este folio. Te lo mandamos también a ${order.mail}.` : `Transfiere con estos datos; tu pedido queda apartado con este folio. Te los mandamos también a ${order.mail}.`],
+    rechazado: ['💳', 'El banco rechazó el pago', 'No se te hizo ningún cargo. Tu pedido sigue apartado con este mismo folio: puedes intentarlo otra vez con otra tarjeta.'],
+    'por pagar': ['⏳', 'Solo falta que pagues', 'Tu pedido está apartado con este folio. Si cerraste la ventana del pago, desde aquí la vuelves a abrir.'],
+  }[st];
+  const payInfo = st !== 'pendiente' ? '' : order.method === 'transferencia'
+    ? `<div class="slip"><div><span>Banco</span><b>STP</b></div><div><span>CLABE</span><b>646 180 1234 5678 9012</b></div><div><span>Concepto</span><b>${(order.payRef || '').replace(/ /g, '')}</b></div><div><span>Monto</span><b>${money(order.total)}</b></div></div>`
+    : `<div class="slip"><div><span>Código de pago</span><b>${order.payRef}</b></div><div><span>Monto</span><b>${money(order.total)}</b></div><div><span>Dónde</span><b>OXXO, 7-Eleven, Walmart y más</b></div></div>`;
   const steps = [
     O.chip && ['📦', 'Tu chip va en camino', `Te mandamos la guía de ${O.ship === 'exp' ? 'Express (1-2 días)' : 'Estándar (3-5 días)'} a ${order.mail}.`],
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
-    order.ref && ['🤝', 'Código de referido aplicado', `Tu compra cuenta para ${refHolder()}${paid ? '.' : ' en cuanto se confirme tu pago.'} ¡Gracias por llegar recomendado!`],
+    order.alta.referido && ['🤝', 'Código de referido aplicado', `Tu compra cuenta para ${refHolder()}${paid ? '.' : ' en cuanto se confirme tu pago.'} ¡Gracias por llegar recomendado!`],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
     bonusOk() && ['🎁', `Regalo de bienvenida: +${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,
       O.kind === 'fam' ? `Empieza en cada línea cuando su número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ven abrirse en Mi Navi.` : `Empieza cuando tu número de ${O.from} quede en Navi. Son 12 regalos, uno cada mes, y los ves abrirse en Mi Navi.`],
   ].filter(Boolean);
   $('payCard').innerHTML = `<div class="done ${paid ? '' : 'pend'}">
-    <div class="ok">${paid ? '✓' : '⏳'}</div>
-    <h2>${paid ? '¡Pago confirmado!' : 'Falta que completes el pago'}</h2>
-    <p class="muted">${paid ? 'Tu pedido ya está en proceso.' : method === 'efectivo' ? 'Te enviamos el código de pago por correo; tienes 48 horas para pagar en tienda.' : 'Te enviamos la CLABE y el concepto por correo.'}</p>
-    <div class="folio">${folio}</div>
+    <p class="muted">🧾 Ya quedó tu pedido · Tu folio</p>
+    <div class="folio">${order.folio}</div>
     <p class="hint">Guárdalo: con ese folio te atendemos cualquier aclaración.</p>
-    <div class="next">${steps.map(([i, t, d]) => `<div><span>${i}</span><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div>
+    <div class="ok" style="margin-top:18px">${head[0]}</div>
+    <h2>${head[1]}</h2>
+    <p class="muted">${head[2]}</p>${payInfo}
+    ${st === 'rechazado' ? '<button class="btn btn-lime" id="payAgain" style="margin-top:14px">Intentar el pago otra vez 💸</button>' : st === 'por pagar' ? '<button class="btn btn-lime" id="payAgain" style="margin-top:14px">Abrir la ventana de pago</button>' : ''}
+    <div class="next">
+      <div><span>📦</span><div><b>Lo que pediste</b><small>${O.kind === 'fam' ? `Plan Familia · ${nLines()} líneas de ${O.gb} GB` : `Plan ${O.gb} GB`} · ${PERIODS[O.per].label} · ${[O.chip && `${O.chip} chip${O.chip > 1 ? 's' : ''}`, O.esim && `${O.esim} eSIM`].filter(Boolean).join(' + ')}${O.chip ? ` · envío ${O.ship === 'exp' ? 'express' : 'estándar'} ${money(shipCost())}` : ''}<br>Total ${money(order.total)} · pesos mexicanos con IVA incluido</small></div></div>
+      ${E ? `<div><span>📍</span><div><b>A dónde te llega</b><small>A nombre de ${E.recibe} · celular ${fmtPhone(order.alta.telefono)}<br>${E.calle} ${E.numExt}${E.numInt ? ' int. ' + E.numInt : ''}, ${E.colonia ? E.colonia + ', ' : ''}${E.municipio}, ${E.estado}, CP ${E.cp}</small></div></div>` : ''}
+      ${paid || st === 'pendiente' ? steps.map(([i, t, d]) => `<div><span>${i}</span><div><b>${t}</b><small>${d}</small></div></div>`).join('') : ''}
+    </div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
-      ${O.mode === 'porta' ? `<a class="btn btn-lime" href="portabilidad.html">Ir a Portabilidad</a>` : ''}
+      ${O.mode === 'porta' && paid ? `<a class="btn btn-lime" href="portabilidad.html">Abrir el portal de portabilidad</a>` : ''}
       <a class="btn btn-ghost" href="index.html">Volver al inicio</a></div>
     <p class="hint" style="margin-top:14px">Demostración: no se hizo ningún cobro ni se enviará nada.</p></div>`;
+  if ($('payAgain')) $('payAgain').onclick = openPay;
   $('sum').hidden = true; $('bar').hidden = true;
-  $('nav').querySelectorAll('li').forEach(li => { li.className = 'ok'; li.querySelector('i').textContent = '✓'; });
 }
 
 render();

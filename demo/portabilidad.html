@@ -76,22 +76,22 @@ main{padding:24px 0 100px}
 <main class="wrap">
   <div class="hero">
     <span class="eyebrow">PORTABILIDAD</span>
-    <h1>Trae tu número a Navi</h1>
-    <p>Conservas tu número de siempre, sin costo. Primero activas tu línea Navi y después capturas aquí tu NIP.</p>
+    <h1>Conserva tu número</h1>
+    <p>Trae tu número de siempre a Navi, sin costo. Captura tus datos y nosotros hacemos el trámite; te decimos la fecha estimada en que quedará tu portabilidad.</p>
     <a class="promo" href="index.html#promo">🎁 <b>Regalo de bienvenida:</b> si vienes de Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile te regalamos <b>GB extra cada mes durante 12 meses</b>, aparte de los GB de tu plan →</a>
   </div>
 
   <div class="card">
     <h2>¿Ya solicitaste tu portabilidad?</h2>
-    <p class="muted">Consulta en qué va con tu folio o con el número que estás trayendo.</p>
-    <form class="lookup" id="fLook"><input id="look" placeholder="Folio (PT-123456) o número a 10 dígitos" aria-label="Folio o número"><button class="btn btn-lime">Consultar</button></form>
+    <p class="muted">Escribe el folio que te dimos y te decimos cómo va, sin llamar a nadie.</p>
+    <form class="lookup" id="fLook"><input id="look" placeholder="PORT-261101-K7M2QX" aria-label="Folio de portabilidad" style="text-transform:uppercase"><button class="btn btn-lime">Consultar</button></form>
     <div id="lookRes"></div>
   </div>
 
   <div class="how">
-    <div><i>1</i><b>Activa tu línea Navi</b><p>Compra tu plan con chip o eSIM y actívalo. Funciona desde el primer día con un número provisional.</p><a class="hint" href="comprar.html?porta=1" style="text-decoration:underline">¿Aún no tienes tu línea? Cómprala aquí</a></div>
-    <div><i>2</i><b>Pide tu NIP</b><p>Desde el número que quieres traer, llama o manda un SMS con la palabra NIP al:</p><span class="tel">051</span><p class="hint">Tu NIP tiene 4 dígitos y vale 5 días naturales.</p></div>
-    <div><i>3</i><b>Captúralo aquí</b><p>Llena el formulario y nosotros hacemos el cambio. Tu número queda en Navi en 1 a 3 días hábiles.</p></div>
+    <div><i>1</i><b>Activa tu chip o instala tu eSIM</b><p>Cuando te llegue tu chip por paquetería, actívalo (o instala tu eSIM). Tu línea nueva queda funcionando con un número provisional: ese es el que vas a necesitar para el trámite.</p><a class="hint" href="comprar.html?porta=1" style="text-decoration:underline">¿Aún no tienes tu línea? Cómprala aquí</a></div>
+    <div><i>2</i><b>Pide tu NIP al 051</b><p>Desde la línea que te traes, llama al 051 o manda «NIP» por SMS al:</p><span class="tel">051</span><p class="hint">Te llegan cuatro dígitos. Es gratis. Pídelo hasta ese momento: dura 5 días naturales.</p></div>
+    <div><i>3</i><b>Captúralo en el portal</b><p>Con tu número actual, el NIP y tu número provisional. Nosotros hacemos el trámite y te decimos la fecha estimada; tu línea de siempre sigue funcionando hasta que se complete.</p></div>
   </div>
 
   <div class="lay">
@@ -101,11 +101,11 @@ main{padding:24px 0 100px}
       <div class="grid">
         <label class="field">¿De qué compañía vienes?<select id="de"><option value="">Elige tu compañía actual</option></select></label>
         <div id="deGift"></div>
-        <label class="field">Número que quieres conservar (10 dígitos)<input id="num" inputmode="numeric" maxlength="10" placeholder="55 1234 5678"></label>
-        <label class="field">NIP de portabilidad (4 dígitos)<input id="nip" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"><span class="hint">El que te llegó por SMS al pedirlo al 051.</span></label>
-        <label class="field">Tu número provisional Navi (10 dígitos)<input id="prov" inputmode="numeric" maxlength="10" placeholder="El que te dimos al activar"><span class="hint">Lo ves en tu chip o eSIM activo, o en Mi Navi.</span></label>
-        <label class="field">Correo para avisarte<input id="mail" type="email" autocomplete="email"></label>
-        <label class="chk"><input type="checkbox" id="ok"><span>Soy titular o usuario de la línea y autorizo el cambio de compañía. Mi línea anterior se cancela cuando el número quede en Navi.</span></label>
+        <label class="field">Número a conservar<input id="num" inputmode="numeric" maxlength="10" placeholder="10 dígitos"></label>
+        <label class="field">NIP<input id="nip" inputmode="numeric" maxlength="4" placeholder="4 dígitos" autocomplete="one-time-code"><span class="hint">Solicita tu NIP enviando NIP por SMS al 051 desde la línea que vas a portar.</span></label>
+        <label class="field">Número Navi<input id="prov" inputmode="numeric" maxlength="10" placeholder="10 dígitos"><span class="hint" id="provHint">El de tu línea nueva de Navi: lo recibiste al activar tu chip o eSIM.</span></label>
+        <label class="field">Correo para avisarte (opcional)<input id="mail" type="email" autocomplete="email"><span class="hint">Si lo dejas, ahí te mandamos tu folio y la fecha estimada.</span></label>
+        <label class="chk"><input type="checkbox" id="ok"><span>Autorizo el trámite de portabilidad de mi número hacia Navi Móvil. Declaro que el número y el NIP de portabilidad son míos y que deseo conservar mi número al contratar el servicio. He leído el <a href="#" style="text-decoration:underline">Aviso de Privacidad</a> y acepto que mis datos se usen para gestionar este trámite.</span></label>
         <p class="why" id="why"></p>
         <button class="btn btn-lime">Solicitar portabilidad</button>
         <p class="hint">Demostración: no se envía ninguna solicitud real.</p>
@@ -123,7 +123,7 @@ main{padding:24px 0 100px}
 </main>
 
 <script src="auth.js?v=20261101a"></script>
-<script src="planes.js?v=20261030d"></script>
+<script src="planes.js?v=20261101a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const KEY = 'navi.portas';
@@ -158,8 +158,11 @@ $('fLook').onsubmit = e => {
   e.preventDefault();
   const v = $('look').value.trim().toUpperCase().replace(/\s/g, '');
   const p = load().find(x => x.folio === v || x.num === v);
-  $('lookRes').innerHTML = p ? statusHTML(p) : v ? '<p class="bad">No encontramos una solicitud con ese folio o número. Revisa que esté bien escrito.</p>' : '';
+  $('lookRes').innerHTML = p ? statusHTML(p) : v ? '<p class="bad">No encontramos una solicitud con ese folio. Revisa que esté bien escrito.</p>' : '';
 };
+// con sesión, el número Navi es el de la línea con la que entró
+const me = NaviAuth.current();
+if (me) { $('prov').value = me.phone; $('provHint').textContent = 'Es el número con el que entraste. Puedes cambiarlo.'; }
 
 // compañía de origen: indispensable (de ella depende el regalo de bienvenida); llega prellenada desde la compra
 const qs = new URLSearchParams(location.search), fromGb = +qs.get('gb');
@@ -182,7 +185,7 @@ $('fPorta').onsubmit = e => {
   e.preventDefault();
   const num = $('num').value, nip = $('nip').value, prov = $('prov').value, mail = $('mail').value.trim();
   const de = $('de').value;
-  const checks = [['de', !!de], ['num', num.length === 10], ['nip', nip.length === 4], ['prov', prov.length === 10], ['mail', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)]];
+  const checks = [['de', !!de], ['num', num.length === 10], ['nip', nip.length === 4], ['prov', prov.length === 10], ['mail', !mail || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)]];
   checks.forEach(([id, ok]) => $(id).closest('.field').classList.toggle('err', !ok));
   if (!de) return $('why').textContent = 'Dinos de qué compañía vienes para poder hacer tu portabilidad.';
   if (checks.some(c => !c[1])) return $('why').textContent = 'Revisa los campos marcados.';
@@ -191,10 +194,14 @@ $('fPorta').onsubmit = e => {
   const l = load();
   if (l.some(x => x.num === num && stage(x) < 4)) return $('why').textContent = 'Ese número ya tiene una portabilidad en proceso. Consúltala arriba.';
   const at = Date.now();
-  const p = { folio: 'PT-' + String(at).slice(-6), de, num, prov, mail, at, date: addBiz(at, new Date(at).getHours() >= 17 ? 2 : 1) };
+  // mismo folio que da la plataforma del operador: PORT-AAMMDD-XXXXXX
+  const d = new Date(at), ymd = String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  const folio = `PORT-${ymd}-${Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('')}`;
+  // solicitud para la plataforma del operador (el NIP se envía al trámite y no se guarda)
+  const p = { folio, de, num, prov, mail, at, date: addBiz(at, new Date(at).getHours() >= 17 ? 2 : 1), tenant: OPERADOR.tenant };
   save([p, ...l]);
   $('fPorta').innerHTML = `<h2>¡Solicitud enviada!</h2>
-    <p class="muted">Te mandamos el folio a ${mail}. Mientras tanto, sigue usando tu línea provisional ${fmtTel(prov)}.</p>
+    <p class="muted">${mail ? `Te mandamos el folio a ${mail}. ` : ''}Fecha estimada: <b>${fmtDate(p.date)}</b>. Mientras tanto, tu línea de siempre sigue funcionando y puedes usar tu número Navi ${fmtTel(prov)}.</p>
     ${statusHTML(p)}
     <p class="hint" style="margin-top:12px">Guarda tu folio para consultar el avance. Demostración: no se envió ninguna solicitud real.</p>
     <a class="btn btn-ghost" href="index.html" style="margin-top:14px">Volver al inicio</a>`;

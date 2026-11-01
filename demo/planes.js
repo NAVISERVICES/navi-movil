@@ -38,6 +38,24 @@ const ROAMING_DAYS = 15;
 const roamingTxt = gb => ROAMING[gb] ? `${ROAMING[gb]} GB en EE. UU. y Canadá, hasta ${ROAMING_DAYS} días` : '';
 const ROAMING_POLICY = `Uso justo: el roaming internacional funciona en Estados Unidos y Canadá hasta ${ROAMING_DAYS} días, con ${ROAMING[12]} GB en el plan de 12 GB y ${ROAMING[24]} GB en el de 24 GB. Tu línea debe estar activa en México.`;
 
+// Plataforma del operador: Navi vende como marca blanca de JR Móvil (Red Compartida de Altán Redes).
+// Las altas, recargas y portabilidades siguen los mismos pasos y datos que pide la plataforma del operador;
+// cada plan Navi se da de alta con la oferta equivalente del catálogo del operador (mismos GB y vigencia).
+const OPERADOR = { nombre: 'JR Móvil', tenant: 'navimovil', red: 'Red Compartida de Altán Redes' };
+const VIGENCIA = { m: 30, t: 90, s: 180, a: 365 };
+const OFFERS = {
+  2:  { m: '1709902085' },
+  4:  { m: '1709902086', t: '1609903749' },
+  12: { m: '1709902087', t: '1609903751', s: '1609903752', a: '1609903265' },
+  24: { m: '1709902088', t: '1609903753', s: '1609903754', a: '1609903267' },
+};
+const offerOf = (gb, per) => OFFERS[gb]?.[per] || null;
+// folio de la tarifa ante la CRT: cada plan Navi publica el suyo en cuanto el registro lo asigna
+const FOLIO_CRT = {};
+const folioTxt = gb => FOLIO_CRT[gb] ? `Folio CRT ${FOLIO_CRT[gb]}` : 'Folio CRT en registro';
+const perGb = (gb, per) => { const p = PLANS.find(x => x.gb === gb)?.prices[per]; return p ? p / gb : null; };
+const perDay = (gb, per) => { const p = PLANS.find(x => x.gb === gb)?.prices[per]; return p ? p / VIGENCIA[per] : null; };
+
 // precio de un pedido: plan individual o Plan Familia (mismo plan para todas las líneas, pesos cerrados)
 const quote = ({ gb, per, lines = 1 }) => {
   const price = PLANS.find(p => p.gb === gb)?.prices[per];
