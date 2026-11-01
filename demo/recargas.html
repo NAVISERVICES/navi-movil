@@ -14,6 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
 <link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261101a"></script>
+<!-- las recargas se hacen dentro de tu sesión de Navi (mismo flujo de la plataforma del operador) -->
+<script>if (!NaviAuth.current()) location.replace('login.html?next=recargas.html' + encodeURIComponent(location.hash));</script>
 <style>
 main{padding-bottom:80px}
 .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start}
@@ -113,24 +116,24 @@ main{padding-bottom:80px}
 <header class="top">
   <div class="wrap">
     <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
-    <a class="btn btn-ghost sm back" id="backLink" href="index.html">← <span>Volver</span></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
   </div>
 </header>
 
 <main class="wrap">
   <div class="title">
     <div class="ico" style="background:#7EE0FF">⚡</div>
-    <div><h1>Recarga tu línea</h1><p>Dos pasos. Sin registrarte y sin contraseñas.</p></div>
+    <div><h1>Recarga tu línea</h1><p>Dos pasos, desde tu cuenta Navi.</p></div>
   </div>
 
   <div class="grid2">
     <section class="card" id="flow">
       <!-- PASO 01 · número -->
       <div id="s1">
-        <label class="step-lbl" for="num">Paso 01 · Tu número Navi</label>
+        <label class="step-lbl" for="num">Paso 01 · La línea a recargar</label>
+        <div class="lines" id="lines" style="margin:0 0 12px"></div>
         <div class="num" id="numBox"><input id="num" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="12" placeholder="55 1234 5678"></div>
         <p class="hint" id="numHint">Diez dígitos, sin espacios ni guiones.</p>
-        <div class="lines" id="lines" hidden></div>
         <div id="verif"></div>
       </div>
       <!-- PASO 02 · paquete -->
@@ -159,13 +162,11 @@ main{padding-bottom:80px}
   </div>
 </main>
 
-<script src="auth.js?v=20261101a"></script>
 <script src="planes.js?v=20261101a"></script>
 <script src="pasarela.js?v=20261101a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const user = NaviAuth.current();
-if (user) { $('backLink').href = 'cuenta.html'; $('backLink').querySelector('span').textContent = 'Mi Navi'; }
 const myLines = user ? accountLines(user) : [];
 
 // estado de la recarga: línea verificada, paquete, folio (se crea al revisar y se conserva si reintentas el pago)
@@ -202,7 +203,6 @@ $('num').addEventListener('input', () => { const d = $('num').value.replace(/\D/
 
 // con sesión: el número con el que entró (y las líneas de su familia) a un toque
 function paintLines() {
-  $('lines').hidden = myLines.length < 2;
   $('lines').innerHTML = myLines.map((l, i) => `<button data-i="${i}" aria-pressed="${l.phone === R.phone}"><img src="${avatarSrc(l.phone, l.img)}" alt="">${l.name}${pct(i) >= .8 ? '<small>Pocos datos</small>' : ''}</button>`).join('');
 }
 $('lines').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) { setNum(myLines[+b.dataset.i].phone); R.gb = null; } });
@@ -329,9 +329,7 @@ const hm = location.hash.match(/^#l(\d)(?:-(\d+))?$/) || [];
 if (NAVI_TOPUPS.some(t => t.gb === +hm[2])) R.gb = +hm[2];
 const start = myLines[+hm[1] - 1] || (user ? myLines.find(l => l.phone === user.phone) : null);
 paintLines(); paintHist();
-if (start) { setNum(start.phone); $('numHint').textContent = 'Es el número con el que entraste. Puedes cambiarlo.'; }
-else if (/^\d{10}$/.test(new URLSearchParams(location.search).get('n') || '')) setNum(new URLSearchParams(location.search).get('n'));
-else $('num').focus();
+if (start) { setNum(start.phone); $('numHint').textContent = myLines.length > 1 ? 'Toca la línea de tu familia que quieres recargar, o escribe otro número Navi.' : 'Es el número con el que entraste. Puedes escribir otro número Navi.'; }
 </script>
 </body>
 </html>
