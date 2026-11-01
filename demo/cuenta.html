@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261101a"></script>
+<script src="auth.js?v=20261101b"></script>
 <script>
   // sin sesión no hay suite: de vuelta al login
   if (!NaviAuth.current()) location.replace('login.html?next=cuenta.html');
@@ -423,7 +423,7 @@ if (user) {
     return `<article class="app${open ? '' : ' locked'}" style="background:${a.color};animation-delay:${i * .08}s">
       ${open ? free(a) : ''}<div class="ico">${a.icon}</div><h3>${a.name}</h3><p>${a.desc}</p>${sosPlans}
       ${open ? (a.href ? `<a class="btn btn-ink" href="${a.href}"${/^https?:/.test(a.href) ? ' target="_blank" rel="noopener"' : ''}>Abrir</a>` : `<button class="btn btn-ink" data-open="${a.id}">Abrir</button>`)
-             : `<div class="need">${a.id === 'sos' ? 'Incluida en los planes de 12 GB, 24 GB y Plan Familia' : `Incluida en Plan ${unlockPlan(a.id)} o Plan Familia`}</div><a class="btn btn-ghost" href="index.html#individuales">Desbloquear</a>`}
+             : `<div class="need">${a.id === 'sos' ? 'Incluida en los planes de 12 GB, 24 GB y Plan Familia' : a.id === 'fit' ? 'Exclusiva del plan de 24 GB' : `Incluida en Plan ${unlockPlan(a.id)} o Plan Familia`}</div><a class="btn btn-ghost" href="index.html#individuales">Desbloquear</a>`}
     </article>`;
   }).join('');
   $('count').innerHTML = `<b>${user.apps.length}</b> de ${NAVI_APPS.length} apps activas`;
@@ -433,8 +433,11 @@ if (user) {
   if (missing.length) {
     $('upsell').hidden = false;
     $('upTitle').textContent = `Desbloquea ${missing.map(a => a.name).join(', ')}`;
-    $('upText').textContent = `Viene con los planes de 12 GB y 24 GB, o con el Plan Familia, que además te da 5% de descuento por cada línea.`;
-    $('upBtn').href = 'index.html#plan';
+    const onlyFit = missing.every(a => a.id === 'fit');
+    $('upText').textContent = onlyFit ? 'NAVI Fit es exclusiva del plan de 24 GB: reto de calistenia de 30 días con entrenamientos guiados.'
+      : missing.some(a => a.id === 'fit') ? 'NAVI SOS viene con los planes de 12 GB, 24 GB o el Plan Familia; NAVI Fit es exclusiva del plan de 24 GB.'
+      : 'Viene con los planes de 12 GB y 24 GB, o con el Plan Familia, que además te da 5% de descuento por cada línea.';
+    $('upBtn').href = onlyFit ? 'index.html#individuales' : 'index.html#plan';
   }
 
   // abrir app (demo)

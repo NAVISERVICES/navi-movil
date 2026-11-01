@@ -15,6 +15,7 @@ const NAVI_APPS = [
   { id: 'videos', name: 'Videos',             icon: '▶️', color: '#FF9A6B', desc: 'Canales NAVI y cuentos animados para toda la familia.', href: 'videos.html' },
   { id: 'agenda', name: 'Agenda',             icon: '📅', color: '#7EE0FF', desc: 'Organiza visitas y actividades en un calendario; al terminarlas se quitan solas.', href: 'agenda.html' },
   { id: 'referidos', name: 'Referidos',       icon: '🤝', color: '#2BD67B', desc: 'Comparte tu código: por cada 5 amigos que contraten, tú tienes un mes gratis.', href: 'referidos.html' },
+  { id: 'fit',    name: 'NAVI Fit',           icon: '💪', color: '#FF7A45', desc: 'Reto de calistenia de 30 días en casa, sin aparatos, con entrenamientos guiados.', href: 'fit.html' },
   { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
     // app funcional dentro de la suite: usa la sesión de Mi Navi, sin volver a iniciar sesión
     // (prototipo de diseño en Figma: NAVI-SOS-Family-–-App-Android, nodo 4-415)
@@ -28,9 +29,11 @@ const PLAN_ACCESS = {
   2:  [...FREE_APPS],
   4:  [...FREE_APPS],
   12: [...FREE_APPS, 'sos'],
-  24: [...FREE_APPS, 'sos'],
+  24: [...FREE_APPS, 'sos', 'fit'],
   familia: [...FREE_APPS, 'sos'],
 };
+// NAVI Fit es solo para clientes de 24 GB (en Plan Familia, si sus líneas son de 24 GB)
+const FIT_GB = 24;
 
 // plan mínimo que desbloquea cada app (para el mensaje de "Disponible desde…")
 const unlockPlan = appId => {
@@ -144,7 +147,9 @@ const NAVI_ACCOUNTS = {
   ] } },
 };
 
-const appsFor = plan => PLAN_ACCESS[plan.type === 'familia' ? 'familia' : plan.gb] || [];
+const appsFor = plan => plan.type === 'familia'
+  ? [...PLAN_ACCESS.familia, ...(plan.lines.every(l => l.gb >= FIT_GB) ? ['fit'] : [])]
+  : PLAN_ACCESS[plan.gb] || [];
 
 // ---------- Número de cliente / Referidos ----------
 // Cada cuenta tiene un número de cliente que asigna el sistema; también es su código de referido.
