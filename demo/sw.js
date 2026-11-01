@@ -14,6 +14,15 @@ self.addEventListener('activate', e => {
     .then(() => self.clients.claim()));
 });
 
+// al tocar un aviso de la Agenda se abre (o se trae al frente) la agenda
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(ws => {
+    const w = ws.find(c => c.url.includes('agenda.html'));
+    return w ? w.focus() : self.clients.openWindow('agenda.html');
+  }));
+});
+
 // red primero (siempre lo más nuevo); si no hay señal, usa la copia guardada
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;

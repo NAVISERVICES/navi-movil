@@ -81,6 +81,24 @@
 .types span{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:99px;border:2px solid #ffffff25;font-size:13px;font-weight:700;color:var(--text)}
 .types input:checked + span{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}
 .sheet .row{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.vis{display:flex;flex-wrap:wrap;gap:6px}
+.vis label{cursor:pointer}
+.vis input{position:absolute;opacity:0}
+.vis span{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;border-radius:99px;border:2px solid #ffffff25;font-size:13px;font-weight:700;color:var(--text)}
+.vis span img{width:24px;height:24px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.vis input:checked + span{border-color:var(--lime);background:#B4E32F22}
+.vis input:disabled + span{opacity:.6}
+.hint-r{color:var(--lime)}
+/* aviso en pantalla cuando llega la hora */
+.ring{position:fixed;inset:0;z-index:60;background:#06062ecc;display:grid;place-items:center;padding:16px}
+.ring[hidden]{display:none}
+.ring .box{width:min(380px,100%);background:#fff;color:var(--ink);border-radius:26px;padding:24px;text-align:center;animation:up .3s cubic-bezier(.3,1.4,.5,1)}
+.ring .bell{font-size:52px;display:inline-block;animation:shake .5s 3}
+@keyframes shake{25%{transform:rotate(-16deg)}75%{transform:rotate(16deg)}}
+.ring h3{font-family:var(--display);font-size:22px;margin:6px 0}
+.ring p{color:#4A4D72;font-size:14px}
+.notif-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#7EE0FF1f;border:1px solid #7EE0FF55;border-radius:16px;padding:10px 14px;font-size:13px;margin-bottom:14px}
+.notif-bar[hidden]{display:none}
 .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,30px);opacity:0;z-index:50;background:#fff;color:var(--ink);border-radius:16px;padding:12px 14px 12px 18px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:14px;box-shadow:0 14px 34px #0008;transition:all .3s;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{background:var(--ink);color:var(--lime);border-radius:99px;padding:7px 12px;font-weight:800;font-size:13px}
@@ -115,6 +133,7 @@
 
     <section class="card">
       <div class="day-h"><div><h2 id="dayTitle"></h2><p class="muted" id="dayCount"></p></div><button class="btn btn-lime sm add" id="addBtn">＋ Agregar</button></div>
+      <div class="notif-bar" id="notifBar" hidden><span>🔔 Activa las notificaciones para que te avisemos de tus actividades.</span><button class="btn btn-lime sm" id="notifBtn">Activar</button></div>
       <div class="chips" id="who" hidden><button data-f="all" aria-pressed="true">De toda la familia</button><button data-f="me" aria-pressed="false">Solo mías</button></div>
       <div class="acts" id="list"></div>
       <div class="sec" id="lateSec" hidden><h3>⚠️ Atrasadas <span>Ya pasaron y no se marcaron</span></h3><div class="acts" id="late"></div></div>
@@ -132,12 +151,21 @@
       <label class="field">Fecha<input id="fDate" type="date"></label>
       <label class="field">Hora<input id="fTime" type="time"></label>
     </div>
+    <label class="field">¿Cuándo te aviso?<select id="fRemind">
+      <option value="">Sin aviso</option><option value="0">A la hora de inicio</option><option value="5">5 minutos antes</option><option value="10">10 minutos antes</option>
+      <option value="15" selected>15 minutos antes</option><option value="30">30 minutos antes</option><option value="60">1 hora antes</option><option value="120">2 horas antes</option><option value="1440">1 día antes</option>
+    </select><small class="hint-r" id="remindHint" style="font-weight:500"></small></label>
     <label class="field">Lugar <small style="font-weight:500">(opcional)</small><input id="fPlace" maxlength="60" placeholder="Ej. Casa de la abuela, Coyoacán"></label>
     <label class="field" id="fWhoBox" hidden>¿Para quién?<select id="fWho"></select></label>
+    <div class="field" id="fVisBox" hidden>¿Quién de la familia la puede ver?
+      <div class="vis" id="fVis"></div>
+      <small style="font-weight:500">Solo tú como titular eliges esto. Quien la tenga asignada siempre la ve.</small>
+    </div>
     <label class="field">Notas <small style="font-weight:500">(opcional)</small><textarea id="fNote" rows="2" maxlength="140" placeholder="Ej. Llevar pan de dulce"></textarea></label>
     <div class="row"><button type="button" class="btn btn-ghost sm" id="cancel">Cancelar</button><button class="btn btn-lime sm">Guardar</button></div>
   </form>
 </div>
+<div class="ring" id="ring" hidden role="alertdialog" aria-labelledby="ringT"><div class="box"><span class="bell">🔔</span><h3 id="ringT"></h3><p id="ringP"></p><div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn btn-ghost sm" id="ringLater" style="color:var(--ink);border-color:#0003">Avisar en 5 min</button><button class="btn btn-lime sm" id="ringOk">Enterado</button></div></div></div>
 <div class="toast" id="toast" role="status"><span id="toastTxt"></span><button id="undo">Deshacer</button></div>
 
 <script>
@@ -178,7 +206,10 @@ if (user) {
   const today = iso(new Date());
   let view = new Date(); view.setDate(1); let sel = today, filter = 'all', editing = null;
   const mine = a => a.who === user.phone;
-  const visible = () => items.filter(a => filter === 'all' || mine(a));
+  // visibilidad: si el titular la limitó (a.vis), solo la ven quien la creó, a quien se le asignó y los elegidos
+  const canSee = a => !a.vis || a.by === user.phone || a.who === user.phone || a.vis.includes(user.phone);
+  const visible = () => items.filter(a => canSee(a) && (filter === 'all' || mine(a)));
+  const isOwner = fam && user.role === 'titular';
   const byTime = (a, b) => (a.date + (a.time || '99')).localeCompare(b.date + (b.time || '99'));
   const fdate = (s, o = { weekday: 'long', day: 'numeric', month: 'long' }) => new Date(s + 'T12:00').toLocaleDateString('es-MX', o);
   const fhour = t => t ? new Date('2000-01-01T' + t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }) : 'Todo el día';
@@ -204,7 +235,7 @@ if (user) {
     return `<div class="act" style="--c:${t.c}" data-id="${a.id}">
       <div class="time">${a.time ? fhour(a.time).replace(/\s?[ap]\.?\s?m\.?/i, '') : '—'}<small>${a.time ? (fhour(a.time).match(/[ap]\.?\s?m\.?/i) || [''])[0] : 'Todo el día'}</small></div>
       <div><b>${t.e} ${esc(a.title)}${late ? '<span class="tag">Atrasada</span>' : ''}</b>
-        <div class="meta">${a.date !== sel ? `<span>📆 ${fdate(a.date, { weekday: 'short', day: 'numeric', month: 'short' })}</span>` : ''}${a.place ? `<span>📍 ${esc(a.place)}</span>` : ''}${p ? `<span class="who"><img src="${avatarSrc(p.phone, p.img)}" alt="">${esc(p.name)}</span>` : ''}</div>
+        <div class="meta">${a.date !== sel ? `<span>📆 ${fdate(a.date, { weekday: 'short', day: 'numeric', month: 'short' })}</span>` : ''}${a.place ? `<span>📍 ${esc(a.place)}</span>` : ''}${p ? `<span class="who"><img src="${avatarSrc(p.phone, p.img)}" alt="">${esc(p.name)}</span>` : ''}${a.remind != null && a.time ? `<span>🔔 ${remindTxt(a.remind)}</span>` : ''}${a.vis && (a.by === user.phone) ? `<span title="Quién la puede ver">👁 ${a.vis.length ? esc(a.vis.map(ph => person(ph)?.name).filter(Boolean).join(', ')) : 'Solo tú'}</span>` : ''}</div>
         ${a.note ? `<div class="note">📝 ${esc(a.note)}</div>` : ''}</div>
       <button class="done-btn" data-done="${a.id}" title="Marcar como terminada" aria-label="Marcar ${esc(a.title)} como terminada">✓</button></div>`;
   };
@@ -245,10 +276,27 @@ if (user) {
   // formulario
   $('fTypes').innerHTML = TYPES.map((t, i) => `<label style="--c:${t.c}"><input type="radio" name="ftype" value="${t.id}" ${i === 0 ? 'checked' : ''}><span>${t.e} ${t.name}</span></label>`).join('');
   if (fam) { $('fWhoBox').hidden = false; $('fWho').innerHTML = lines.map(l => `<option value="${l.phone}">${esc(l.name)}${l.phone === user.phone ? ' (yo)' : ''}</option>`).join(''); }
+  // visibilidad (solo titular): integrantes que pueden ver la actividad; se recuerda la última elección
+  const VISKEY = 'navi.agenda.vis.' + user.owner;
+  const others = lines.filter(l => l.phone !== user.phone);
+  const lastVis = () => { try { const v = JSON.parse(localStorage.getItem(VISKEY)); return Array.isArray(v) ? v : others.map(l => l.phone); } catch { return others.map(l => l.phone); } };
+  const paintVis = () => {
+    const who = $('fWho').value;
+    document.querySelectorAll('#fVis input').forEach(i => { const forced = i.value === who; i.disabled = forced; if (forced) i.checked = true; });
+  };
+  if (isOwner) {
+    $('fVisBox').hidden = false;
+    $('fVis').innerHTML = others.map(l => `<label><input type="checkbox" value="${l.phone}"><span><img src="${avatarSrc(l.phone, l.img)}" alt="">${esc(l.name)}</span></label>`).join('');
+    $('fWho').addEventListener('change', paintVis);
+  }
+  const remindTxt = m => m === 0 ? 'a la hora' : m >= 1440 ? '1 día antes' : m >= 60 ? `${m / 60} h antes` : `${m} min antes`;
+  const paintRemind = () => { $('remindHint').textContent = $('fRemind').value !== '' && !$('fTime').value ? 'Ponle una hora para poder avisarte.' : ''; };
+  $('fRemind').onchange = paintRemind; $('fTime').oninput = paintRemind;
   const openForm = () => {
-    $('form').reset(); $('fDate').value = sel; $('fWho').value = user.phone;
+    $('form').reset(); $('fDate').value = sel; $('fWho').value = user.phone; $('fRemind').value = '15';
     document.querySelector('[name=ftype]').checked = true; $('fTitle').closest('.field').classList.remove('err');
-    $('sheet').hidden = false; setTimeout(() => $('fTitle').focus(), 50);
+    if (isOwner) { const v = lastVis(); document.querySelectorAll('#fVis input').forEach(i => i.checked = v.includes(i.value)); paintVis(); }
+    paintRemind(); $('sheet').hidden = false; setTimeout(() => $('fTitle').focus(), 50);
   };
   $('addBtn').onclick = openForm;
   $('cancel').onclick = () => $('sheet').hidden = true;
@@ -259,10 +307,54 @@ if (user) {
     const title = $('fTitle').value.trim(), date = $('fDate').value;
     $('fTitle').closest('.field').classList.toggle('err', !title); $('fDate').closest('.field').classList.toggle('err', !date);
     if (!title || !date) return;
-    items.push({ id: 'a' + Date.now().toString(36), title, type: document.querySelector('[name=ftype]:checked').value, date, time: $('fTime').value, place: $('fPlace').value.trim(), note: $('fNote').value.trim(), who: fam ? $('fWho').value : user.phone });
+    const rv = $('fRemind').value;
+    const act = { id: 'a' + Date.now().toString(36), title, type: document.querySelector('[name=ftype]:checked').value, date, time: $('fTime').value, place: $('fPlace').value.trim(), note: $('fNote').value.trim(), who: fam ? $('fWho').value : user.phone, by: user.phone, remind: rv === '' ? null : +rv };
+    if (isOwner) {
+      const chosen = [...document.querySelectorAll('#fVis input:checked')].map(i => i.value);
+      try { localStorage.setItem(VISKEY, JSON.stringify(chosen)); } catch {}
+      if (chosen.length < others.length) act.vis = chosen; // si la ven todos, no hace falta guardar la lista
+    }
+    items.push(act);
     save(); $('sheet').hidden = true;
+    if (act.remind != null && act.time && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission().then(paintNotifBar);
     sel = date; const d = new Date(date + 'T12:00'); view = new Date(d.getFullYear(), d.getMonth(), 1); draw();
   };
+  // ---------- avisos ----------
+  // Avisa a quien tiene asignada la actividad, los minutos antes que eligió. Con la app abierta sale el aviso en pantalla
+  // y, si dio permiso, también la notificación del celular. (Con la app cerrada hace falta el servidor de notificaciones.)
+  const NKEY = 'navi.agenda.avisos.' + user.phone;
+  let sent; try { sent = JSON.parse(localStorage.getItem(NKEY)) || {}; } catch { sent = {}; }
+  const saveSent = () => { try { localStorage.setItem(NKEY, JSON.stringify(sent)); } catch {} };
+  const startOf = a => new Date(`${a.date}T${a.time}`).getTime();
+  const paintNotifBar = () => { $('notifBar').hidden = !('Notification' in window) || Notification.permission !== 'default' || !items.some(a => a.remind != null && a.time && a.who === user.phone); };
+  $('notifBtn').onclick = () => Notification.requestPermission().then(paintNotifBar);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  let ringing = null;
+  function ring(a) {
+    ringing = a;
+    const mins = Math.round((startOf(a) - Date.now()) / 60000);
+    const when = mins > 1 ? `empieza en ${mins >= 60 ? `${Math.round(mins / 60)} h` : `${mins} minutos`}` : mins >= -1 ? 'empieza ahora' : 'ya empezó';
+    $('ringT').textContent = `${type(a.type).e} ${a.title}`;
+    $('ringP').textContent = `${when[0].toUpperCase() + when.slice(1)} · ${fhour(a.time)}${a.place ? ' · ' + a.place : ''}`;
+    $('ring').hidden = false;
+    try { navigator.vibrate?.([200, 100, 200]); } catch {}
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const opts = { body: $('ringP').textContent, icon: 'assets/icon-192.png', badge: 'assets/icon-192.png', tag: 'agenda-' + a.id, renotify: true };
+      navigator.serviceWorker?.getRegistration().then(r => r ? r.showNotification(`📅 ${a.title}`, opts) : new Notification(`📅 ${a.title}`, opts)).catch(() => {});
+    }
+  }
+  function checkReminders() {
+    if (ringing) return;
+    const now = Date.now();
+    const due = items.find(a => a.who === user.phone && a.remind != null && a.time && !sent[a.id + '@' + a.remind] && (sent[a.id + '@snooze'] || 0) <= now
+      && now >= startOf(a) - a.remind * 60000 && now < startOf(a) + 60 * 60000);
+    if (due) ring(due);
+  }
+  $('ringOk').onclick = () => { if (ringing) { sent[ringing.id + '@' + ringing.remind] = Date.now(); saveSent(); } ringing = null; $('ring').hidden = true; };
+  $('ringLater').onclick = () => { if (ringing) { sent[ringing.id + '@snooze'] = Date.now() + 5 * 60000; saveSent(); } ringing = null; $('ring').hidden = true; };
+  setInterval(checkReminders, 15000); setTimeout(checkReminders, 1500);
+  paintNotifBar();
+
   // si otro integrante cambia la agenda en otra pestaña, se actualiza aquí
   addEventListener('storage', e => { if (e.key === KEY) { try { items = JSON.parse(e.newValue) || []; } catch {} draw(); } });
   draw();
