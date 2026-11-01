@@ -113,8 +113,10 @@ main{padding-bottom:80px}
 .sheet ol{margin:12px 0 0 18px;display:grid;gap:6px;font-size:14px;color:var(--muted)}
 .sheet{z-index:95;overflow:auto}
 .sheet > div{max-height:calc(100dvh - 32px);overflow:auto}
-.vid{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;margin:14px 0 6px}
-.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid{position:relative;aspect-ratio:240/210;max-height:300px;margin:14px auto 6px;border-radius:20px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#2a2a8f,#0d0d45 75%)}
+.vid svg,.pdemo svg{display:block;width:100%;height:100%}
+.pdemo{width:min(78vw,340px);aspect-ratio:240/210;border-radius:24px;background:radial-gradient(circle at 50% 35%,#ffffff14,#ffffff05 70%);border:1px solid #ffffff14}
+@media (max-height:700px){.pdemo{width:min(60vw,240px)}}
 .pvid{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;background:#ffffff14;border:1px solid #ffffff2a;font-weight:700;font-size:13px}
 @media (max-width:900px){.layout{grid-template-columns:1fr}}
 @media (max-width:620px){.levels,.how3{grid-template-columns:1fr}.days{grid-template-columns:repeat(5,1fr)}.hero{grid-template-columns:1fr;justify-items:center;text-align:center}}
@@ -139,6 +141,7 @@ main{padding-bottom:80px}
 <div class="play" id="play" hidden role="dialog" aria-modal="true" aria-label="Entrenamiento"></div>
 <div class="sheet" id="sheet" hidden></div>
 
+<script src="fit-demos.js?v=20261101a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const user = NaviAuth.current();
@@ -167,15 +170,8 @@ const EX = {
   sup:     { n: 'Superman', e: '🦸', unit: 'reps', base: 12, how: ['Boca abajo, brazos al frente.', 'Despega brazos y piernas del piso.', 'Aguanta un segundo arriba.'] },
   hollow:  { n: 'Hollow hold', e: '🥄', unit: 's', base: 20, easy: 'Hollow con rodillas flexionadas', how: ['Boca arriba, espalda baja pegada al piso.', 'Despega hombros y piernas.', 'Cuerpo en forma de cuchara.'] },
 };
-// video demostrativo de cada ejercicio (YouTube, en español): [id, canal]; *Easy = la variante para principiante
-const VIDEOS = {
-  push: ['Yb-GsrtBOcA', 'Entrenador de Acero'], pushEasy: ['uWnPjvnDooE', 'Javier Giménez - Healthy Fitness'], diamond: ['ITe43DiSvrE', 'En Forma 40'],
-  dips: ['qbvUpjfwWBA', 'Mar Itzazo Fitness'], pike: ['u1xmkwOnOOI', 'Calistenia'], plank: ['hAqEhJb9oDs', 'Coach Bruno Reyes'], mc: ['_0rXcBZjd7w', 'Meli Cardenas'],
-  sq: ['AO99m52vrTM', 'DavidSebas LC'], jumpsq: ['c-b6w0EyqIk', 'Kranos Calistenia'], lunge: ['Xcfs_3DMKlc', 'Bestcycling'], bulg: ['klq4ahI59sY', 'Ponte en forma con Santiago Sanxez'],
-  glute: ['NUFvi-gPojg', 'Fisioterapia Osfivel'], wall: ['ufiU47JBqhA', "Pere Posa'm en Forma"], calf: ['6tqRg_tsi3o', 'P4P Workouts'], jj: ['8cLAFjNtjDU', 'CarolMartinez.fitness'],
-  burpee: ['awbFx6HqWns', 'Runnea.com'], sidepl: ['45t3tTcRcKE', 'APTA Vital Sport'], legr: ['eEbq5_AIgpo', 'Higea Salud'], sup: ['FWaMfMSJy3I', 'Strong Runner'], hollow: ['STv31k-AMg8', 'Henry Odreman (DMTX)'],
-};
-const videoOf = k => (S?.level === 'pri' && VIDEOS[k + 'Easy']) || VIDEOS[k];
+// demostración animada de cada ejercicio (fit-demos.js); principiante ve su variante fácil si existe
+const demo = (el, k) => FitDemo.mount(el, k, S?.level === 'pri');
 const WARM = [['🤸', 'Saltos suaves en tu lugar', 30], ['🔄', 'Círculos de brazos', 30], ['🦵', 'Sentadilla lenta', 30], ['🌀', 'Rotación de cadera', 30]];
 const COOL = [['🧘', 'Estiramiento de pecho en pared', 30], ['🦵', 'Estiramiento de cuádriceps', 30], ['🙇', 'Postura del niño', 40], ['🌬️', 'Respiración profunda', 30]];
 const MOBILITY = [['🐈', 'Gato-vaca', 40], ['🦵', 'Estiramiento de isquiotibiales', 40], ['🧍', 'Cuádriceps de pie', 40], ['🚪', 'Pecho en marco de puerta', 40], ['🌀', 'Rotación de torso', 40], ['🙇', 'Postura del niño', 60], ['🌬️', 'Respiración profunda', 60]];
@@ -284,7 +280,7 @@ function renderDetail() {
   let body = '';
   if (w.type === 'T') body = `<div class="exl">${TESTS.map(t => `<button disabled><span class="e">${t.e}</span><span><b>${t.n}</b><small>${t.help}</small></span></button>`).join('')}</div>${S.tests?.[1] && d === 30 ? '' : ''}`;
   else if (w.type === 'R') body = `<p class="muted" style="margin-top:12px">Camina 20 minutos a paso ligero y estira con calma. Hoy tus músculos se recuperan y se hacen más fuertes.</p><div class="exl">${MOBILITY.map(([e, n, s]) => `<button disabled><span class="e">${e}</span><span><b>${n}</b></span><em>${s} s</em></button>`).join('')}</div>`;
-  else body = `<div class="exl">${w.list.map(it => `<button data-how="${it.k}"><span class="e">${it.X.e}</span><span><b>${it.name}</b><small>▶ Ver video de cómo se hace</small></span><em>${amtTxt(it)}</em></button>`).join('')}</div>`;
+  else body = `<div class="exl">${w.list.map(it => `<button data-how="${it.k}"><span class="e">${it.X.e}</span><span><b>${it.name}</b><small>▶ Ver demostración</small></span><em>${amtTxt(it)}</em></button>`).join('')}</div>`;
   const test1 = S.tests?.[1];
   const act = done
     ? `<p class="muted">✓ Completado el ${new Date(done.at).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}.</p><button class="btn btn-ghost wide" id="start" style="margin-top:10px">Repetir este día</button>`
@@ -308,17 +304,17 @@ function renderStart() {
 // video y técnica de un ejercicio; si se abre a media rutina, el tiempo se pausa mientras lo ves
 let pausedBefore = null;
 function showHow(k) {
-  const X = EX[k], easy = S.level === 'pri' && X.easy, V = videoOf(k);
+  const X = EX[k], easy = S.level === 'pri' && X.easy;
   if (!$('play').hidden) { pausedBefore = paused; paused = true; }
   $('sheet').hidden = false;
   $('sheet').innerHTML = `<div><div class="dh"><div class="big" style="background:#FF7A4522">${X.e}</div><div><h2>${easy ? X.easy : X.n}</h2><span class="hint">${X.unit === 's' ? 'Por tiempo' : 'Por repeticiones'}${X.side ? ' · de cada lado' : ''}</span></div></div>
-    ${V ? `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${V[0]}?rel=0&modestbranding=1&playsinline=1" title="Cómo hacer ${esc(easy ? X.easy : X.n)}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
-      <p class="hint">Video: ${esc(V[1])} en YouTube</p>` : ''}
+    <div class="vid" id="shDemo" role="img" aria-label="Demostración animada: ${esc(easy ? X.easy : X.n)}"></div>
     <ol>${X.how.map(h => `<li>${h}</li>`).join('')}</ol>${easy ? `<p class="hint" style="margin-top:10px">Versión fácil de: ${X.n}.</p>` : ''}<button class="btn btn-lime wide" style="margin-top:16px" id="shOk">${$('play').hidden ? 'Entendido' : 'Volver al entrenamiento'}</button></div>`;
   $('shOk').onclick = closeHow;
+  demo($('shDemo'), k);
 }
 function closeHow() {
-  $('sheet').hidden = true; $('sheet').innerHTML = ''; // quitar el iframe detiene el video
+  $('sheet').hidden = true; $('sheet').innerHTML = ''; // al quitarla, la animación se detiene sola
   if (pausedBefore != null) { paused = pausedBefore; pausedBefore = null; if ($('pPause')) $('pPause').textContent = paused ? 'Seguir' : 'Pausa'; }
 }
 $('sheet').onclick = e => { if (e.target === $('sheet')) closeHow(); };
@@ -383,9 +379,10 @@ function step() {
     const it = x.it, secs = x.kind === 'ex' ? it.amt * (it.X.side ? 2 : 1) : x.secs;
     const name = x.kind === 'ex' ? (S.level === 'pri' && it.X.easy ? it.X.easy : it.X.n) : x.n;
     left = secs;
-    frame(`<span class="ptag">${x.tag}</span><div class="pemo">${x.kind === 'ex' ? it.X.e : x.e}</div><div class="pname">${name}</div><div class="pamt" id="pAmt"></div>
-      ${x.kind === 'ex' ? `<p class="phow">${it.X.how.join(' ')}${it.X.side ? ' Cambia de lado a la mitad.' : ''}</p><button class="pvid" data-vid="${it.k}">▶ Ver video</button>` : ''}<p class="pnext">${nextTxt()}</p>`,
+    frame(`<span class="ptag">${x.tag}</span>${x.kind === 'ex' ? `<div class="pdemo" id="pDemo"></div>` : `<div class="pemo">${x.e}</div>`}<div class="pname">${name}</div><div class="pamt" id="pAmt"></div>
+      ${x.kind === 'ex' ? `${it.X.side ? '<p class="phow">Cambia de lado a la mitad.</p>' : ''}<button class="pvid" data-vid="${it.k}">Ver técnica</button>` : ''}<p class="pnext">${nextTxt()}</p>`,
       `<button class="btn btn-ghost" id="pPause">Pausa</button><button class="btn btn-lime" id="pSkip">Siguiente ›</button>`);
+    if (x.kind === 'ex') demo($('pDemo'), it.k);
     $('pPause').onclick = () => { paused = !paused; $('pPause').textContent = paused ? 'Seguir' : 'Pausa'; };
     $('pSkip').onclick = () => { clearInterval(tick); go(); };
     let half = it?.X.side ? Math.floor(secs / 2) : -1;
@@ -394,9 +391,10 @@ function step() {
   }
   if (x.kind === 'ex') {
     const it = x.it, name = S.level === 'pri' && it.X.easy ? it.X.easy : it.X.n;
-    frame(`<span class="ptag">${x.tag}</span><div class="pemo">${it.X.e}</div><div class="pname">${name}</div>
-      <div class="pamt">${it.amt}<small>${it.X.side ? ' por pierna' : ' reps'}</small></div><p class="phow">${it.X.how.join(' ')}</p><button class="pvid" data-vid="${it.k}">▶ Ver video</button><p class="pnext">${nextTxt()}</p>`,
+    frame(`<span class="ptag">${x.tag}</span><div class="pdemo" id="pDemo"></div><div class="pname">${name}</div>
+      <div class="pamt">${it.amt}<small>${it.X.side ? ' por pierna' : ' reps'}</small></div><button class="pvid" data-vid="${it.k}">Ver técnica</button><p class="pnext">${nextTxt()}</p>`,
       `<button class="btn btn-fit" id="pDone">Listo ✓</button>`);
+    demo($('pDemo'), it.k);
     $('pDone').onclick = () => { sess.reps += it.amt * (it.X.side ? 2 : 1); beep(880, 120); go(); };
     return;
   }
