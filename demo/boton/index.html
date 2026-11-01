@@ -60,7 +60,7 @@ body{background:radial-gradient(circle at 50% 42%,#3a0d1c 0,#1a0710 60%);min-hei
 <div class="ov" id="ov" hidden role="alertdialog" aria-modal="true" aria-labelledby="ovTitle"></div>
 <div class="install" id="install" hidden><img src="sos-192.png" alt=""><span id="installTxt"></span><button id="installBtn" hidden>Agregar</button></div>
 
-<script src="../auth.js?v=20261031d"></script>
+<script src="../auth.js?v=20261101a"></script>
 <script>
 const $ = id => document.getElementById(id);
 const user = NaviAuth.current();
@@ -70,7 +70,7 @@ const face = (m, cls = '') => m.img ? `<img class="${cls}" src="../assets/${m.im
 if (!user) {
   $('app').innerHTML = `<div class="lock"><div style="font-size:56px">🔐</div><h1>Inicia sesión una vez</h1><p>Entra a Mi Navi en este celular y el botón SOS queda listo para usarse sin volver a entrar.</p><a class="btn btn-lime" href="../login.html">Entrar a Mi Navi</a></div>`;
 } else if (!user.apps.includes('sos')) {
-  $('app').innerHTML = `<div class="lock"><div style="font-size:56px">🚨</div><h1>Botón SOS</h1><p>Viene incluido en el Plan Familia y en el plan de 24 GB, con NAVI SOS Family.</p><a class="btn btn-lime" href="../index.html#plan">Ver Plan Familia</a></div>`;
+  $('app').innerHTML = `<div class="lock"><div style="font-size:56px">🚨</div><h1>Botón SOS</h1><p>Viene incluido en los planes de 12 GB, 24 GB y el Plan Familia, con NAVI SOS Family.</p><a class="btn btn-lime" href="../index.html#plan">Ver Plan Familia</a></div>`;
 } else {
   // la red familiar es la misma de NAVI SOS Family: las líneas del plan y las personas invitadas
   const KEY = 'navi.sos.' + user.owner;
@@ -78,11 +78,11 @@ if (!user) {
   const lines = accountLines(user);
   // quien entró es "me"; la alerta va a los demás integrantes de su red familiar
   const me = lines.find(l => l.phone === user.phone) || lines[0];
-  const family = [...lines.filter(l => l !== me), ...(S.extra || []).map(x => ({ name: x.name, img: null, invited: true }))];
+  const family = [...lines.filter(l => l !== me), ...(S.extra || []).map(x => ({ name: x.name, img: null, invited: !x.verified }))];
 
   $('app').innerHTML = `<div class="who">${esc(me.name)} · red de <b>${esc(lines.length > 1 ? user.familyName : me.name)}</b></div>
     <button class="btn-sos" id="sos" aria-label="Enviar alerta SOS a mi familia"><div><b>SOS</b><small>TOCA PARA PEDIR AYUDA</small></div></button>
-    <p class="hint">${family.length ? 'Tu familia recibe la alerta con tu ubicación. Tienes 5 segundos para cancelar.' : 'Aún no hay más integrantes en tu red. Agrégalos desde NAVI SOS Family.'}</p>
+    <p class="hint">${family.length ? 'Tu familia recibe la alerta con tu ubicación. Tienes 5 segundos para cancelar.' : 'Aún no hay nadie en tu red. Agrégalos desde NAVI SOS Family verificando su número.'}</p>
     ${family.length ? `<div class="fam">${family.map(m => face(m)).join('')}</div>` : ''}`;
 
   const ov = $('ov');
