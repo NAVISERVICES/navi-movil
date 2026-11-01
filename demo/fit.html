@@ -278,7 +278,7 @@ function render() {
 function renderDetail() {
   const d = sel, w = workout(d), done = S.done[d], cur = d === current();
   let body = '';
-  if (w.type === 'T') body = `<div class="exl">${TESTS.map(t => `<button disabled><span class="e">${t.e}</span><span><b>${t.n}</b><small>${t.help}</small></span></button>`).join('')}</div>${S.tests?.[1] && d === 30 ? '' : ''}`;
+  if (w.type === 'T') body = `<div class="exl">${TESTS.map(t => `<button data-how="${t.k}"><span class="e">${t.e}</span><span><b>${t.n}</b><small>▶ Ver demostración · ${t.help}</small></span></button>`).join('')}</div>`;
   else if (w.type === 'R') body = `<p class="muted" style="margin-top:12px">Camina 20 minutos a paso ligero y estira con calma. Hoy tus músculos se recuperan y se hacen más fuertes.</p><div class="exl">${MOBILITY.map(([e, n, s]) => `<button disabled><span class="e">${e}</span><span><b>${n}</b></span><em>${s} s</em></button>`).join('')}</div>`;
   else body = `<div class="exl">${w.list.map(it => `<button data-how="${it.k}"><span class="e">${it.X.e}</span><span><b>${it.name}</b><small>▶ Ver demostración</small></span><em>${amtTxt(it)}</em></button>`).join('')}</div>`;
   const test1 = S.tests?.[1];
@@ -356,6 +356,7 @@ const nextTxt = () => { const n = Q.slice(qi + 1).find(x => x.kind !== 'rest'); 
 function frame(inner, btns) {
   $('play').innerHTML = `<div class="ptop"><button id="pX" aria-label="Salir">✕</button><div class="pbar"><i style="width:${qi / Q.length * 100}%"></i></div><span class="hint">${Math.min(qi + 1, Q.length)}/${Q.length}</span></div>
     <div class="pmain">${inner}</div><div class="pbtns">${btns}</div>`;
+  $('play').querySelectorAll('.pdemo[data-k]').forEach(el => demo(el, el.dataset.k));
   $('pX').onclick = () => { if (confirm('¿Salir del entrenamiento? Este día no se marcará como hecho.')) closePlay(); };
 }
 function countdown(onEnd) {
@@ -407,16 +408,16 @@ function step() {
     $('pSave').onclick = () => { const v = Math.max(0, Math.min(999, +$('pIn').value || 0)); sess.test[t.k] = v; sess.reps += v; go(); };
   };
   if (t.mode === 'count') {
-    frame(`<span class="ptag">Prueba</span><div class="pemo">${t.e}</div><div class="pname">${t.n}</div><p class="phow">${t.help}</p>`, `<button class="btn btn-fit" id="pGo">Ya terminé</button>`);
+    frame(`<span class="ptag">Prueba</span><div class="pdemo" data-k="${t.k}"></div><div class="pname">${t.n}</div><p class="phow">${t.help}</p>`, `<button class="btn btn-fit" id="pGo">Ya terminé</button>`);
     $('pGo').onclick = ask;
   } else if (t.mode === 'timer') {
-    frame(`<span class="ptag">Prueba</span><div class="pemo">${t.e}</div><div class="pname">${t.n}</div><p class="phow">${t.help}</p>`, `<button class="btn btn-fit" id="pGo">Empezar el minuto</button>`);
-    $('pGo').onclick = () => { left = t.secs; frame(`<span class="ptag">¡Dale!</span><div class="pemo">${t.e}</div><div class="pname">${t.n}</div><div class="pamt" id="pAmt"></div>`, ''); countdown(ask); };
+    frame(`<span class="ptag">Prueba</span><div class="pdemo" data-k="${t.k}"></div><div class="pname">${t.n}</div><p class="phow">${t.help}</p>`, `<button class="btn btn-fit" id="pGo">Empezar el minuto</button>`);
+    $('pGo').onclick = () => { left = t.secs; frame(`<span class="ptag">¡Dale!</span><div class="pdemo" data-k="${t.k}"></div><div class="pname">${t.n}</div><div class="pamt" id="pAmt"></div>`, ''); countdown(ask); };
   } else {
-    frame(`<span class="ptag">Prueba</span><div class="pemo">${t.e}</div><div class="pname">${t.n}</div><p class="phow">${t.help}</p>`, `<button class="btn btn-fit" id="pGo">Empezar</button>`);
+    frame(`<span class="ptag">Prueba</span><div class="pdemo" data-k="${t.k}"></div><div class="pname">${t.n}</div><p class="phow">${t.help}</p>`, `<button class="btn btn-fit" id="pGo">Empezar</button>`);
     $('pGo').onclick = () => {
       let s = 0; clearInterval(tick);
-      frame(`<span class="ptag">Aguanta</span><div class="pemo">${t.e}</div><div class="pname">${t.n}</div><div class="pamt" id="pAmt">0<small> s</small></div>`, `<button class="btn btn-fit" id="pStop">Ya no aguanto</button>`);
+      frame(`<span class="ptag">Aguanta</span><div class="pdemo" data-k="${t.k}"></div><div class="pname">${t.n}</div><div class="pamt" id="pAmt">0<small> s</small></div>`, `<button class="btn btn-fit" id="pStop">Ya no aguanto</button>`);
       tick = setInterval(() => { s++; $('pAmt').innerHTML = `${s}<small> s</small>`; if (s % 30 === 0) beep(700, 100); }, 1000);
       $('pStop').onclick = () => { clearInterval(tick); sess.test[t.k] = s; go(); };
     };
