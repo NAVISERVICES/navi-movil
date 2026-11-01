@@ -23,11 +23,11 @@ const NAVI_APPS = [
 
 // gratis para todo cliente Navi Móvil (Shop y Repair traen tráfico para vender en esas plataformas)
 const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos'];
-// qué apps incluye cada plan: lo gratis + NAVI SOS en 24 GB y Plan Familia
+// qué apps incluye cada plan: lo gratis + NAVI SOS en 12 GB, 24 GB y Plan Familia
 const PLAN_ACCESS = {
   2:  [...FREE_APPS],
   4:  [...FREE_APPS],
-  12: [...FREE_APPS],
+  12: [...FREE_APPS, 'sos'],
   24: [...FREE_APPS, 'sos'],
   familia: [...FREE_APPS, 'sos'],
 };

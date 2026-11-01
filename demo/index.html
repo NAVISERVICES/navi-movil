@@ -377,6 +377,9 @@ section{position:relative}
 .sos{position:absolute;right:6%;top:6%;width:64px;height:64px;border-radius:50%;background:#FF4D6D;color:#fff;font-weight:800;font-family:var(--display);display:grid;place-items:center;box-shadow:0 0 0 0 #ff4d6d;animation:sos 2s infinite}
 @keyframes sos{70%{box-shadow:0 0 0 18px #ff4d6d00}}
 .calm .badge{display:inline-block;background:#FF4D6D22;color:#FF8FA3;border:1px solid #FF4D6D55;padding:6px 12px;border-radius:99px;font-size:13px;font-weight:700}
+.sos-plans{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;font-size:13px;color:#c9c9ef}
+.sos-plans a{background:#B4E32F1f;color:var(--lime);border:1px solid #B4E32F55;padding:4px 10px;border-radius:99px;font-weight:700;text-decoration:none}
+.sos-plans a:hover{background:#B4E32F33}
 .calm h2{font-size:clamp(32px,4vw,52px);margin:16px 0 28px}
 .feat{display:flex;gap:16px;padding:16px;border-radius:20px;transition:background .25s;margin-bottom:6px}
 .feat:hover{background:#ffffff0d}
@@ -734,6 +737,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     </div>
     <div class="reveal">
       <span class="badge">♥ Incluido con NAVI SOS Family</span>
+      <div class="sos-plans"><span>Solo en</span><a href="#individuales">Plan 12 GB</a><a href="#individuales">Plan 24 GB</a><a href="#plan">Plan Familia</a></div>
       <h2>Más que llamadas: la tranquilidad de saber que están bien</h2>
       <div class="feat"><div class="ico" style="background:#b4e32f22;color:var(--lime)">📍</div><div><b>Ubicación en tiempo real</b><span>Ve dónde está cada integrante en el mapa de la familia.</span></div></div>
       <div class="feat"><div class="ico" style="background:#ff6fb122">🏠</div><div><b>Zonas seguras</b><span>Recibe un aviso cuando llegan o salen de casa, la escuela o el trabajo.</span></div></div>
@@ -800,7 +804,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 <canvas id="confetti"></canvas>
 
-<script src="auth.js?v=20261031d"></script>
+<script src="auth.js?v=20261101a"></script>
 <script src="planes.js?v=20261030d"></script>
 <script src="qrcode.min.js"></script>
 <script>
