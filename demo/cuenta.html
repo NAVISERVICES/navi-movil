@@ -133,6 +133,10 @@ main{padding:36px 0 80px}
 .app.locked .ico{background:#ffffff14;filter:grayscale(1);box-shadow:none}
 .app.locked::after{content:"🔒";position:absolute;top:18px;right:18px;font-size:20px}
 .app .need{font-size:13px;font-weight:700;color:var(--lime);margin-bottom:10px}
+.app .plans{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-8px 0 16px;font-size:12px}
+.app .plans b{width:100%;font-size:13px}
+.app .plans i{font-style:normal;font-weight:800;padding:4px 9px;border-radius:99px;background:#0B0B4F1f}
+.app.locked .plans i{background:#B4E32F1f;color:var(--lime)}
 .app .free{position:absolute;top:18px;right:18px;background:var(--ink);color:var(--lime);font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;transform:rotate(5deg)}
 /* NAVI Store destacado: ocupa todo el ancho */
 .app.wide{grid-column:1/-1;min-height:0;color:#fff;display:grid;grid-template-columns:auto 1fr auto;gap:16px 22px;align-items:center;padding:26px 28px;overflow:hidden}
@@ -363,7 +367,9 @@ if (user) {
   $('planTag').textContent = fam ? `-${(p.lines.length - 1) * 5}% familiar` : perLabel;
   $('planName').textContent = fam ? `Plan Familia · ${p.lines.length} líneas` : `Plan ${p.gb} GB`;
   // número de cliente asignado por el sistema (en Plan Familia, uno para toda la familia)
-  $('planMeta').innerHTML = `<div><span>No. de cliente</span><a href="referidos.html" title="También es tu código de referido">${clientCode(user).replace(/^NV/, 'NV-')}</a></div><div><span>Pago</span>${perLabel}</div><div><span>Se renueva</span>${date(renew)}</div><div><span>Número</span>+52 ${user.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</div>`;
+  $('planMeta').innerHTML = `<div><span>No. de cliente</span><a href="referidos.html" title="También es tu código de referido">${clientCode(user).replace(/^NV/, 'NV-')}</a></div><div><span>Pago</span>${perLabel}</div><div><span>Se renueva</span>${date(renew)}</div><div><span>Número</span>+52 ${user.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</div>`
+    // NAVI SOS Family: incluido en 12 GB, 24 GB y Plan Familia
+    + (user.apps.includes('sos') ? `<div><span>NAVI SOS Family</span><a href="sos.html">Incluido ✓</a></div>` : `<div><span>NAVI SOS Family</span><a href="index.html#tranquilidad">Desde 12 GB</a></div>`);
   $('planImg').src = `assets/${user.img}.png`;
 
   // consumo de datos (valores de demostración)
@@ -412,10 +418,12 @@ if (user) {
         <div class="go">${NAVI_TOPUPS.map(t => `<a class="${t.gb === 12 ? 'main' : ''}" href="${a.href}#l${low.k + 1}-${t.gb}">${t.gb} GB · ${mxn(t.price)}</a>`).join('')}</div>
       </article>`;
     }
+    // NAVI SOS Family: muestra en qué planes viene incluido
+    const sosPlans = a.id === 'sos' ? `<div class="plans">${open ? '<b>✓ Incluido en tu plan</b>' : ''}<i>12 GB</i><i>24 GB</i><i>Plan Familia</i></div>` : '';
     return `<article class="app${open ? '' : ' locked'}" style="background:${a.color};animation-delay:${i * .08}s">
-      ${open ? free(a) : ''}<div class="ico">${a.icon}</div><h3>${a.name}</h3><p>${a.desc}</p>
+      ${open ? free(a) : ''}<div class="ico">${a.icon}</div><h3>${a.name}</h3><p>${a.desc}</p>${sosPlans}
       ${open ? (a.href ? `<a class="btn btn-ink" href="${a.href}"${/^https?:/.test(a.href) ? ' target="_blank" rel="noopener"' : ''}>Abrir</a>` : `<button class="btn btn-ink" data-open="${a.id}">Abrir</button>`)
-             : `<div class="need">Incluida en Plan ${unlockPlan(a.id)} o Plan Familia</div><a class="btn btn-ghost" href="index.html#individuales">Desbloquear</a>`}
+             : `<div class="need">${a.id === 'sos' ? 'Incluida en los planes de 12 GB, 24 GB y Plan Familia' : `Incluida en Plan ${unlockPlan(a.id)} o Plan Familia`}</div><a class="btn btn-ghost" href="index.html#individuales">Desbloquear</a>`}
     </article>`;
   }).join('');
   $('count').innerHTML = `<b>${user.apps.length}</b> de ${NAVI_APPS.length} apps activas`;
@@ -425,7 +433,7 @@ if (user) {
   if (missing.length) {
     $('upsell').hidden = false;
     $('upTitle').textContent = `Desbloquea ${missing.map(a => a.name).join(', ')}`;
-    $('upText').textContent = `Viene con el plan de 24 GB o con el Plan Familia, que además te da 5% de descuento por cada línea.`;
+    $('upText').textContent = `Viene con los planes de 12 GB y 24 GB, o con el Plan Familia, que además te da 5% de descuento por cada línea.`;
     $('upBtn').href = 'index.html#plan';
   }
 
