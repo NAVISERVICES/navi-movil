@@ -288,9 +288,23 @@ const fmtPhone = p => '+52 ' + p.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
 const fmtImei = i => i.replace(/(\d{2})(\d{6})(\d{6})(\d)/, '$1 $2 $3 $4');
 const maskImei = i => '•• •••••• ••' + i.slice(10, 14) + ' ' + i.slice(14);
 
+// Sesión: el cliente elige al entrar si se queda abierta ('keep') o se cierra sola tras 5 minutos sin usarla ('auto').
+// DEMO: vive en el navegador. En producción el servidor también vence el token con la misma regla.
+const SESSION_IDLE = 5 * 60 * 1000;
 const NaviAuth = (() => {
   const KEY = 'navi.session';
   const read = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
+  const write = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} };
+  // sesión vigente (si es de cierre automático y lleva 5 min sin uso, se borra aquí mismo)
+  const live = () => {
+    const s = read();
+    if (!s) return null;
+    if (s.mode === 'auto' && Date.now() - (s.last || s.at) > SESSION_IDLE) {
+      try { localStorage.removeItem(KEY); sessionStorage.setItem('navi.expired', '1'); } catch {}
+      return null;
+    }
+    return s;
+  };
   // Cuenta vista por quien entra con su número. En Plan Familia cada integrante entra con su propia línea:
   // comparte plan y red con su familia (owner = número del titular) y "me" es su propia línea.
   //   name: nombre de la cuenta (en familia, "Familia García") · me.name: el nombre de la persona
@@ -310,11 +324,69 @@ const NaviAuth = (() => {
   };
   return {
     find: resolve,
-    login: phone => { try { localStorage.setItem(KEY, JSON.stringify({ phone, at: Date.now() })); } catch {} },
+    // mode: 'keep' = abierta hasta que salga · 'auto' = se cierra tras 5 min sin usarla
+    login: (phone, mode = 'keep') => {
+      write({ phone, at: Date.now(), last: Date.now(), mode });
+      // el Botón SOS sigue funcionando en este celular aunque la sesión se cierre: solo puede mandar la alerta
+      try { localStorage.setItem('navi.sos.device', phone); sessionStorage.removeItem('navi.expired'); } catch {}
+    },
     logout: () => { try { localStorage.removeItem(KEY); } catch {} },
     // devuelve la cuenta con sesión activa, o null
-    current: () => { const s = read(); return s ? resolve(s.phone) : null; },
+    current: () => { const s = live(); return s ? resolve(s.phone) : null; },
+    mode: () => live()?.mode || null,
+    setMode: mode => { const s = live(); if (s) write({ ...s, mode, last: Date.now() }); },
+    // el cliente sigue usando la app: reinicia los 5 minutos
+    touch: () => { const s = live(); if (s && s.mode === 'auto' && Date.now() - (s.last || 0) > 4000) write({ ...s, last: Date.now() }); },
+    idleLeft: () => { const s = live(); return s && s.mode === 'auto' ? SESSION_IDLE - (Date.now() - (s.last || s.at)) : Infinity; },
+    expired: () => { try { return sessionStorage.getItem('navi.expired') === '1'; } catch { return false; } },
   };
+})();
+
+// Cierre automático por inactividad en las páginas de Mi Navi: cuenta el uso (toques, teclas, scroll),
+// avisa 30 s antes y, si no hay respuesta, cierra la sesión y regresa a la pantalla de entrada.
+(() => {
+  const PRIVATE = /\/(cuenta|movil|recargas|sos|fit|conecta|agenda|juegos|videos|referidos)\.html$|\/juegos\//;
+  const inSuite = () => PRIVATE.test(location.pathname);
+  const start = () => {
+    if (!document.body) return addEventListener('DOMContentLoaded', start, { once: true });
+    ['pointerdown', 'keydown', 'scroll', 'touchstart', 'wheel'].forEach(ev => addEventListener(ev, () => { if (!warn?.isConnected) NaviAuth.touch(); }, { passive: true, capture: true }));
+    let warn = null;
+    const out = () => {
+      NaviAuth.logout();
+      try { sessionStorage.setItem('navi.expired', '1'); } catch {}
+      if (!inSuite()) return;
+      const sub = location.pathname.includes('/juegos/'), page = (sub ? 'juegos/' : '') + location.pathname.split('/').pop();
+      location.replace((sub ? '../' : '') + 'login.html?exp=1&next=' + encodeURIComponent(page + location.search + location.hash));
+    };
+    const check = () => {
+      if (NaviAuth.mode() !== 'auto') { warn?.remove(); warn = null; if (!NaviAuth.current() && inSuite() && NaviAuth.expired()) out(); return; }
+      const left = NaviAuth.idleLeft();
+      if (left <= 0) return out();
+      if (left <= 30000) {
+        if (!warn) {
+          warn = document.createElement('div');
+          warn.setAttribute('role', 'alertdialog');
+          warn.style.cssText = 'position:fixed;inset:0;z-index:200;background:#03031ad9;display:grid;place-items:center;padding:16px;font-family:"DM Sans",system-ui,sans-serif';
+          warn.innerHTML = `<div style="width:min(380px,100%);background:#15156E;border:1px solid #ffffff2a;border-radius:24px;padding:24px;text-align:center;color:#F4F3FF">
+            <div style="font-size:44px">🔒</div><h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;margin:6px 0">¿Sigues ahí?</h2>
+            <p style="color:#B9B7E6;font-size:14px">Por tu seguridad, tu sesión se cierra en <b id="naviIdleS" style="color:#B4E32F">30</b> segundos.</p>
+            <button id="naviIdleKeep" style="width:100%;margin-top:16px;background:#B4E32F;color:#06062E;border:0;border-radius:99px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Seguir en Mi Navi</button>
+            <button id="naviIdleOut" style="width:100%;margin-top:8px;background:none;color:#B9B7E6;border:0;padding:8px;font-weight:700;cursor:pointer">Cerrar sesión</button></div>`;
+          document.body.append(warn);
+          warn.querySelector('#naviIdleKeep').onclick = () => { warn.remove(); warn = null; NaviAuth.setMode('auto'); };
+          warn.querySelector('#naviIdleOut').onclick = out;
+        }
+        warn.querySelector('#naviIdleS').textContent = Math.ceil(left / 1000);
+      } else if (warn) { warn.remove(); warn = null; }
+    };
+    setInterval(check, 1000);
+    // al volver a la pestaña o desbloquear el celular se revisa al momento
+    addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+    // si la sesión se cierra en otra pestaña, aquí también
+    addEventListener('storage', e => { if (e.key === 'navi.session' && !e.newValue && inSuite()) out(); });
+    check();
+  };
+  start();
 })();
 
 // lo que cambia un integrante (perfil o foto) se ve al momento en las demás pestañas abiertas de la familia

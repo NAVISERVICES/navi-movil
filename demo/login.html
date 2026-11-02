@@ -78,6 +78,15 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 .install-cta small{display:block;font-size:12px;color:var(--muted)}
 .install-cta em{margin-left:auto;font-style:normal;font-size:22px}
 .install-cta[hidden]{display:none}
+/* tipo de sesión */
+.modes{display:grid;gap:10px}
+.mode{display:flex;gap:14px;align-items:flex-start;text-align:left;padding:16px;border-radius:18px;border:2px solid #ffffff26;background:#ffffff0a;transition:border-color .2s,background .2s,transform .2s}
+.mode:hover{border-color:#ffffff55;transform:translateY(-2px)}
+.mode[aria-checked="true"]{border-color:var(--lime);background:#b4e32f14;box-shadow:0 0 0 4px #b4e32f22}
+.mode i{font-style:normal;font-size:26px;line-height:1}
+.mode b{display:block;font-size:16px}
+.mode small{display:block;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.expired{background:#FFC22E1a;border:1px solid #FFC22E66;border-radius:14px;padding:10px 12px;font-size:14px;margin-bottom:18px}
 /* listo */
 .done{text-align:center}
 .done .ok{width:96px;height:96px;margin:0 auto 20px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-size:48px;font-weight:800;animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
@@ -155,6 +164,19 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
         <div class="links"><button type="button" id="change">← Cambiar número</button><button type="button" id="resend" disabled></button></div>
       </form>
 
+      <!-- paso 3: cómo quiere su sesión en este dispositivo -->
+      <div class="step" id="sMode">
+        <h2>¿Cómo quieres tu sesión?</h2>
+        <p class="sub">Elige cómo cuidamos tu cuenta en este dispositivo. Puedes cambiarlo cuando quieras en Mi perfil.</p>
+        <div class="modes" role="radiogroup" aria-label="Tipo de sesión">
+          <button type="button" class="mode" role="radio" aria-checked="false" data-m="keep"><i>🔓</i><span><b>Mantener mi sesión abierta</b><small>No te pedimos código otra vez en este dispositivo hasta que toques “Salir”. Ideal para tu celular personal.</small></span></button>
+          <button type="button" class="mode" role="radio" aria-checked="false" data-m="auto"><i>⏱️</i><span><b>Cerrarla si no la uso 5 minutos</b><small>Más seguro si compartes el celular o usas una computadora ajena. Te avisamos 30 segundos antes.</small></span></button>
+        </div>
+        <p class="err" id="errM"></p>
+        <button class="btn btn-lime" id="modeGo" type="button" disabled>Entrar a Mi Navi</button>
+        <p class="hint" style="font-size:12px;color:var(--muted);margin-top:12px">🚨 Tu Botón SOS sigue funcionando en este celular aunque la sesión se cierre.</p>
+      </div>
+
       <!-- listo -->
       <div class="step done" id="s3">
         <div class="ok">✓</div>
@@ -165,16 +187,18 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
   </section>
 </div>
 
-<script src="auth.js?v=20261101e"></script>
+<script src="auth.js?v=20261102a"></script>
 <script src="instalar.js?v=1"></script>
 <script>
 const $ = id => document.getElementById(id);
-const steps = ['s1', 's2', 's3'];
+const steps = ['s1', 's2', 'sMode', 's3'];
 const go = id => steps.forEach(s => $(s).classList.toggle('on', s === id));
 const next = new URLSearchParams(location.search).get('next') || 'cuenta.html';
 
 // si ya hay sesión, directo a la suite
 if (NaviAuth.current()) location.replace(next);
+// llegó aquí porque su sesión se cerró sola
+if (new URLSearchParams(location.search).has('exp')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expired">🔒 Tu sesión se cerró porque no usaste Mi Navi en 5 minutos. Entra de nuevo con tu número.</p>');
 
 $('suite').innerHTML = NAVI_APPS.map(a => `<span>${a.icon} ${a.name}</span>`).join('');
 
@@ -251,11 +275,25 @@ $('s2').addEventListener('submit', e => {
     boxes.forEach(b => b.value = ''); boxes[0].focus(); $('verify').disabled = true;
     return;
   }
-  NaviAuth.login(number);
+  // código correcto: antes de entrar, el cliente elige cómo quiere su sesión
   sms.classList.remove('show');
+  clearInterval(timer);
+  mode = null; document.querySelectorAll('.mode').forEach(b => b.setAttribute('aria-checked', 'false')); $('modeGo').disabled = true;
+  go('sMode');
+});
+let mode = null;
+document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => {
+  mode = b.dataset.m;
+  document.querySelectorAll('.mode').forEach(x => x.setAttribute('aria-checked', x === b));
+  $('modeGo').disabled = false; $('errM').textContent = '';
+}));
+$('modeGo').addEventListener('click', () => {
+  if (!mode) { $('errM').textContent = 'Elige una de las dos opciones.'; return; }
+  NaviAuth.login(number, mode);
   $('hello').textContent = `¡Hola, ${NaviAuth.find(number).me.name}!`;
+  document.querySelector('#s3 .sub').textContent = mode === 'auto' ? 'Tu sesión se cerrará sola tras 5 minutos sin usarla. Abriendo tu suite Navi…' : 'Tu sesión quedará abierta en este dispositivo. Abriendo tu suite Navi…';
   go('s3');
-  setTimeout(() => location.href = next, 1100);
+  setTimeout(() => location.href = next, 1400);
 });
 $('change').addEventListener('click', () => { clearInterval(timer); go('s1'); phone.focus(); });
 $('resend').addEventListener('click', sendCode);

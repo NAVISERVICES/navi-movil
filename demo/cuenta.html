@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261101e"></script>
+<script src="auth.js?v=20261102a"></script>
 <script>
   // sin sesión no hay suite: de vuelta al login
   if (!NaviAuth.current()) location.replace('login.html?next=cuenta.html');
@@ -123,6 +123,13 @@ main{padding:36px 0 80px}
 /* suite */
 .suite-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
 .suite-head h2{font-size:clamp(26px,3.4vw,38px)}
+/* tipo de sesión (en Mi perfil) */
+.sess{margin-top:16px;padding-top:14px;border-top:1px solid #ffffff1a}
+.sess b{font-size:14px}
+.sessOpts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 6px}
+.sessOpts button{padding:10px 8px;border-radius:12px;border:2px solid #ffffff24;font-weight:700;font-size:13px}
+.sessOpts button[aria-checked="true"]{border-color:var(--lime);background:#b4e32f1a}
+.sess small{display:block;font-size:12px;color:var(--muted)}
 /* ícono de Mi Navi en la pantalla del celular */
 .install-cta{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 18px;padding:12px 16px;border-radius:18px;background:linear-gradient(120deg,#7B5CFA33,#B4E32F22);border:1px solid #B4E32F66;text-align:left;transition:transform .2s,border-color .2s}
 .install-cta:hover{transform:translateY(-2px);border-color:var(--lime)}
@@ -225,6 +232,9 @@ main{padding:36px 0 80px}
       </div>
       <label class="field">Mi estado <small>(lo ve tu familia)</small><input id="pStatus" maxlength="40" placeholder="Ej. En clases hasta las 2"></label>
       <div class="acts"><button class="btn btn-lime">Guardar perfil</button><span id="pMsg" class="ok" role="status"></span></div>
+      <div class="sess"><b>🔒 Mi sesión en este dispositivo</b>
+        <div class="sessOpts" role="radiogroup" aria-label="Tipo de sesión"><button type="button" role="radio" data-sess="keep">🔓 Mantener abierta</button><button type="button" role="radio" data-sess="auto">⏱️ Cerrar tras 5 min sin uso</button></div>
+        <small id="sessTxt"></small></div>
     </form>
     <div class="fam pane" id="famBox" hidden>
       <p class="muted">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
@@ -465,6 +475,14 @@ if (user) {
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
   $('logout').addEventListener('click', () => { NaviAuth.logout(); location.href = 'index.html'; });
+  // tipo de sesión: el cliente lo puede cambiar cuando quiera
+  const paintSess = () => {
+    const m = NaviAuth.mode() || 'keep';
+    document.querySelectorAll('[data-sess]').forEach(b => b.setAttribute('aria-checked', b.dataset.sess === m));
+    $('sessTxt').textContent = m === 'auto' ? 'Si no usas Mi Navi en 5 minutos se cierra sola (te avisamos 30 s antes).' : 'Queda abierta en este dispositivo hasta que toques “Salir”.';
+  };
+  document.querySelectorAll('[data-sess]').forEach(b => b.addEventListener('click', () => { NaviAuth.setMode(b.dataset.sess); paintSess(); }));
+  paintSess();
 }
 </script>
 <script src="planes.js?v=20261101c"></script>
