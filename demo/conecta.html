@@ -246,9 +246,10 @@ const ageOf = p => p.seed ? p.age : age(p.birth);
 
 function avatar(p, cls = '') {
   if (p.kind === 'f') {
-    if (p.seed) return `<div class="av fam ${cls}">${p.emos.slice(0, 4).map(e => `<span style="background:${p.bg}">${e}</span>`).join('')}</div>`;
-    const ls = famLines(p.owner).slice(0, 4);
-    return `<div class="av fam ${cls}">${ls.map(l => `<img src="${avatarSrc(l.phone, l.img)}" alt="">`).join('')}</div>`;
+    // perfil familiar: solo la foto del titular. Nunca las fotos de los integrantes, para no exponer a menores de edad
+    if (p.seed) return `<div class="av ${cls}" style="background:${p.bg}">${p.emos[0]}</div>`;
+    const t = famLines(p.owner).find(l => l.phone === p.owner);
+    return `<div class="av ${cls}"><img src="${avatarSrc(p.owner, t?.img)}" alt=""></div>`;
   }
   if (p.seed) return `<div class="av ${cls}" style="background:${p.bg}">${p.emo}</div>`;
   const a = NaviAuth.find(p.id);
@@ -472,7 +473,7 @@ function viewProfile() {
   $('view').innerHTML = `<div class="pf"><section class="card">
       ${isFamTitular ? `<div class="seg"><button data-k="p" aria-pressed="${kind === 'p'}">🙋 Mi perfil personal</button><button data-k="f" aria-pressed="${kind === 'f'}">👨‍👩‍👧 Perfil de mi familia</button></div>` : ''}
       <h2 style="font-size:21px;margin-bottom:4px">${cur ? 'Edita tu perfil' : kind === 'f' ? 'Crea el perfil de tu familia' : 'Crea tu perfil'}</h2>
-      <p class="muted" style="margin-bottom:16px">${kind === 'f' ? 'Los hijos nunca aparecen con nombre ni foto: solo sus rangos de edad.' : 'Tu número no se muestra. Solo para mayores de 18 años.'}</p>
+      <p class="muted" style="margin-bottom:16px">${kind === 'f' ? 'El perfil usa solo la foto del titular. Los hijos nunca aparecen con nombre ni foto: solo sus rangos de edad.' : 'Tu número no se muestra. Solo para mayores de 18 años.'}</p>
       <form id="pf" class="fg" novalidate>
         <label>${kind === 'f' ? 'Nombre de la familia' : 'Nombre que verán'}<input id="pName" maxlength="40" value="${esc(d.name || '')}" required></label>
         ${kind === 'f' ? `<label>Integrantes<input id="pMem" type="number" min="2" max="10" value="${d.members || 2}"></label>`
