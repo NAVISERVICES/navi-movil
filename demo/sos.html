@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261102a"></script>
+<script src="auth.js?v=20261102b"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=sos.html');</script>
 <style>
 /* app de una columna, como en el teléfono; barra de pestañas fija abajo */
@@ -250,6 +250,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
         <p class="muted" style="margin:10px 0">Tienes 5 segundos para cancelar.</p>
         <a class="btn block sos911" href="tel:911">📞 Llamar al 911</a>
       </div>
+      <div class="card" id="demoSos" hidden></div>
       <a class="card row between" href="boton/?from=app" style="text-decoration:none">
         <div class="row" style="gap:12px"><img src="boton/sos-192.png" alt="" style="width:46px;height:46px;border-radius:12px"><div><b>Botón SOS en tu pantalla</b><div class="muted">Una app solo con el botón: un toque y tu familia queda avisada.</div></div></div><span style="font-size:20px">›</span>
       </a>
@@ -561,6 +562,7 @@ if (user && !user.apps.includes('sos')) {
       + (BASE === 1 ? `<p class="muted">Tu plan incluye NAVI SOS Family: arma tu red con quien quieras verificando su número, sin importar su plan.</p>${members.length === 1 ? '<a class="btn btn-lime block" href="#red" style="margin-top:10px">+ Crear mi red</a>' : ''}` : '');
     renderWatch();
     renderSosLive();
+    renderDemoSos();
     checkExpects();
     const ex = Object.values(S.expects).filter(e => !e.fired).length;
     $('secCt').textContent = S.contacts.length ? `${S.contacts.length} ${S.contacts.length === 1 ? 'contacto recibe' : 'contactos reciben'} un SMS con tu ubicación si activas SOS` : 'Agrega quién recibe un SMS si activas SOS';
@@ -1201,9 +1203,33 @@ if (user && !user.apps.includes('sos')) {
     c.innerHTML = `<div class="row between" style="align-items:flex-start"><div><b style="font-size:18px">🚨 ${esc(a.name)} activó SOS</b>
         <div class="muted">${hhmm(a.t)} · ${esc(a.where)} · ${ago((Date.now() - a.t) / MIN)}</div>
         <div class="muted">${go.length ? `🚗 Van para allá: ${esc(go.join(', '))}` : 'Nadie ha confirmado que va en camino'}</div></div></div>
+      ${a.demo ? `<button class="lnk" data-sl="end" style="color:#fff;margin-top:8px">🎬 Demo: simular que ${esc(a.name)} dice “Estoy bien”</button>` : ''}
       <div class="qa"><button class="btn" style="background:#fff;color:var(--ink)" data-sl="map">📍 Ver en el mapa</button>${mineGo ? `<a class="btn" style="background:#ffffff26;color:#fff" href="tel:${a.phone}">📞 Llamar</a>` : '<button class="btn btn-lime" data-sl="go">🚗 Voy para allá</button>'}</div>`;
   }
-  $('sosLive').addEventListener('click', e => { const b = e.target.closest('[data-sl]'); if (b) sosAnswer(b.dataset.sl); });
+  $('sosLive').addEventListener('click', e => {
+    const b = e.target.closest('[data-sl]'); if (!b) return;
+    if (b.dataset.sl !== 'end') { sosAnswer(b.dataset.sl); return; }
+    reloadS(); const a = S.sos; if (!a) return;
+    Object.assign(a, { active: false, ended: Date.now() });
+    S.events.push({ t: Date.now(), txt: `✅ <b>${esc(a.name)}</b> terminó la alerta SOS: está bien` }); save(); checkSos(); renderHome();
+  });
+  // DEMO en una sola pantalla: ver cómo le llega la alarma a la familia cuando otro integrante activa SOS
+  function renderDemoSos() {
+    const others = onMap().filter(m => m.i !== me), c = $('demoSos');
+    if (!others.length || theirs()) { c.hidden = true; return; }
+    c.hidden = false;
+    c.innerHTML = `<b>🎬 Demostración de la alarma familiar</b><div class="muted">Mira cómo le suena la alarma a tu familia cuando alguien activa SOS.</div>
+      <div class="row" style="margin-top:10px;gap:8px"><label class="field" style="flex:1;min-width:0"><select id="dsWho" aria-label="Quién activa el SOS">${others.map((m, k) => `<option value="${m.i}"${k === others.length - 1 ? ' selected' : ''}>${esc(m.name)} activa SOS</option>`).join('')}</select></label>
+        <button class="btn btn-lime sm" id="dsGo">Simular</button></div>
+      <p class="muted" style="margin-top:8px">O abre otra pestaña, entra con otra cuenta de la familia y presiona SOS ahí: cada pestaña mantiene su propia cuenta.</p>`;
+    $('dsGo').onclick = () => {
+      const m = members[+$('dsWho').value];
+      reloadS();
+      S.sos = { id: Date.now(), phone: m.phone, name: m.name, t: Date.now(), where: status(m), active: true, seen: {}, going: {}, demo: true };
+      S.events.push({ t: Date.now(), txt: `🚨 <b>${esc(m.name)}</b> activó SOS en ${esc(status(m).replace(/^En (?!camino)/, ''))}` }); save();
+      checkSos(); renderHome();
+    };
+  }
   // lo que hace otro integrante (activar SOS, ir para allá, terminar la alerta) llega al momento a esta pestaña
   addEventListener('storage', e => {
     if (e.key !== KEY) return;

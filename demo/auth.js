@@ -293,14 +293,17 @@ const maskImei = i => '•• •••••• ••' + i.slice(10, 14) + ' '
 const SESSION_IDLE = 5 * 60 * 1000;
 const NaviAuth = (() => {
   const KEY = 'navi.session';
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
-  const write = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} };
+  // DEMO: cada pestaña recuerda con qué número entró (sessionStorage). Así se pueden abrir dos cuentas
+  // en la misma PC (por ejemplo Papá y Toño) para probar el SOS; entrar en una ya no cambia la otra.
+  const tab = () => { try { return JSON.parse(sessionStorage.getItem(KEY)); } catch { return null; } };
+  const read = () => { const t = tab(); if (t) return t; try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
+  const write = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); sessionStorage.setItem(KEY, JSON.stringify(s)); } catch {} };
   // sesión vigente (si es de cierre automático y lleva 5 min sin uso, se borra aquí mismo)
   const live = () => {
     const s = read();
     if (!s) return null;
     if (s.mode === 'auto' && Date.now() - (s.last || s.at) > SESSION_IDLE) {
-      try { localStorage.removeItem(KEY); sessionStorage.setItem('navi.expired', '1'); } catch {}
+      try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); sessionStorage.setItem('navi.expired', '1'); } catch {}
       return null;
     }
     return s;
@@ -330,7 +333,9 @@ const NaviAuth = (() => {
       // el Botón SOS sigue funcionando en este celular aunque la sesión se cierre: solo puede mandar la alerta
       try { localStorage.setItem('navi.sos.device', phone); sessionStorage.removeItem('navi.expired'); } catch {}
     },
-    logout: () => { try { localStorage.removeItem(KEY); } catch {} },
+    logout: () => { try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); } catch {} },
+    // número con el que entró esta pestaña (para no cerrarla si sale otra cuenta en otra pestaña)
+    tabPhone: () => tab()?.phone || null,
     // devuelve la cuenta con sesión activa, o null
     current: () => { const s = live(); return s ? resolve(s.phone) : null; },
     mode: () => live()?.mode || null,
@@ -383,7 +388,13 @@ const NaviAuth = (() => {
     // al volver a la pestaña o desbloquear el celular se revisa al momento
     addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
     // si la sesión se cierra en otra pestaña, aquí también
-    addEventListener('storage', e => { if (e.key === 'navi.session' && !e.newValue && inSuite()) out(); });
+    addEventListener('storage', e => {
+      if (e.key !== 'navi.session' || e.newValue || !inSuite()) return;
+      // solo si salió la misma cuenta de esta pestaña (en el demo puede haber otra cuenta abierta al lado)
+      let old = null; try { old = JSON.parse(e.oldValue); } catch {}
+      const mine = NaviAuth.tabPhone();
+      if (!mine || !old || old.phone === mine) out();
+    });
     check();
   };
   start();

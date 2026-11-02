@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261102a"></script>
+<script src="auth.js?v=20261102b"></script>
 <script>
   // sin sesión no hay suite: de vuelta al login
   if (!NaviAuth.current()) location.replace('login.html?next=cuenta.html');
@@ -77,10 +77,10 @@ main{padding:36px 0 80px}
 .ptabs button{flex:1;border:0;background:none;color:var(--text);font:700 14px var(--body);padding:9px;border-radius:99px;cursor:pointer}
 .ptabs button[aria-selected="true"]{background:var(--lime);color:var(--ink)}
 .people .muted{color:var(--muted);font-size:13px;margin:0 0 14px}
-.prof .field{display:grid;gap:6px;font-size:13px;color:var(--muted);margin-bottom:12px}
-.prof .field small{opacity:.7}
-.prof input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%;color-scheme:dark}
-.prof input:focus{outline:none;border-color:var(--lime)}
+.prof .field,.medit .field{display:grid;gap:6px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.prof .field small,.medit .field small{opacity:.7}
+.prof input,.medit input{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;font-size:15px;color:var(--text);width:100%;color-scheme:dark}
+.prof input:focus,.medit input:focus{outline:none;border-color:var(--lime)}
 .prof .field.err input{border-color:#FF6F8E}
 .prof .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .prof .acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px}
@@ -95,6 +95,15 @@ main{padding:36px 0 80px}
 .mem .tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;background:#ffffff14;white-space:nowrap}
 .mem .tag.me{background:var(--lime);color:var(--ink)}
 .mem .new{display:inline-block;font-size:10px;font-weight:800;color:var(--ink);background:#FFC22E;border-radius:99px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+/* el titular edita nombre y foto de cada integrante */
+.mem .edit{display:block;margin-top:4px;font-size:12px;font-weight:800;color:var(--lime);text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:0;cursor:pointer}
+.medit{grid-column:1/-1;display:grid;gap:2px;background:#ffffff0a;border-radius:16px;padding:12px;margin-top:4px}
+.medit[hidden]{display:none}
+.medit .phrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.medit .phrow img{width:56px;height:56px}
+.medit .lnk{font-size:12px;font-weight:800;color:var(--lime);text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:0;cursor:pointer}
+.medit .lnk.bad{color:#FF8A8D}
+.medit .row2{display:flex;gap:10px;align-items:center}
 @media (max-width:560px){.people{right:16px}}
 @media (max-width:460px){.prof .two{grid-template-columns:1fr}}
 .box .more{display:inline-block;margin-top:14px;font-size:14px;font-weight:700;color:var(--lime)}
@@ -237,8 +246,9 @@ main{padding:36px 0 80px}
         <small id="sessTxt"></small></div>
     </form>
     <div class="fam pane" id="famBox" hidden>
-      <p class="muted">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
+      <p class="muted" id="famIntro">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
       <div id="famList"></div>
+      <input type="file" id="memPhoto" accept="image/*" hidden>
     </div>
   </div>
 </header>
@@ -345,7 +355,7 @@ if (user) {
     bad.forEach(([id, ok]) => $(id).closest('.field').classList.toggle('err', !ok));
     const m = $('pMsg');
     if (bad.some(b => !b[1])) { m.className = 'ok bad'; m.textContent = !bad[0][1] ? 'Escribe tu nombre y al menos un apellido.' : 'Revisa tu correo.'; return; }
-    let saved = Profiles.set(user.phone, { full, nick: $('pNick').value.trim(), mail, bday: $('pBday').value, status: $('pStatus').value.trim() });
+    let saved = Profiles.set(user.phone, { full, nick: $('pNick').value.trim(), mail, bday: $('pBday').value, status: $('pStatus').value.trim(), by: '' });
     if (isOwner && saved) {
       // "Sánchez López" se guarda como "Familia Sánchez López"; vacío regresa al nombre original
       let fn = $('pFam').value.trim().replace(/\s+/g, ' ');
@@ -380,10 +390,45 @@ if (user) {
   if (fam) $('famList').innerHTML = lines.map(l => {
     const pr = Profiles.get(l.phone), mine = l.phone === user.phone, recent = pr.at && Date.now() - pr.at < 864e5 && !mine;
     return `<div class="mem"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt="">
-      <div><b>${esc(l.name)}${recent ? '<span class="new">Actualizó su perfil</span>' : ''}</b><div class="sub">${esc(lineHolder(user, l))} · ${fmtPhone(l.phone).replace('+52 ', '')}${pr.bday ? ` · 🎂 ${bdayTxt(pr.bday)}` : ''}</div>
+      <div><b>${esc(l.name)}${recent ? `<span class="new">${pr.by ? 'Lo editó el titular' : 'Actualizó su perfil'}</span>` : ''}</b><div class="sub">${esc(lineHolder(user, l))} · ${fmtPhone(l.phone).replace('+52 ', '')}${pr.bday ? ` · 🎂 ${bdayTxt(pr.bday)}` : ''}</div>
       ${pr.status ? `<div class="st">💬 ${esc(pr.status)}</div>` : ''}</div>
-      <span class="tag${mine ? ' me' : ''}">${mine ? 'Tú' : l.phone === user.owner ? 'Titular' : 'Integrante'}</span></div>`;
+      <span class="tag${mine ? ' me' : ''}">${mine ? 'Tú' : l.phone === user.owner ? 'Titular' : 'Integrante'}</span>
+      ${isOwner && !mine ? `<button class="edit" type="button" data-ed="${l.phone}" style="grid-column:2">✏️ Editar nombre y foto</button>
+      <form class="medit" data-for="${l.phone}" hidden>
+        <div class="phrow"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt="Foto de ${esc(l.name)}">
+          <div style="display:grid;gap:6px"><button class="lnk" type="button" data-mph="${l.phone}">📷 ${Photos.get(l.phone) ? 'Cambiar foto' : 'Poner foto real'}</button>
+            ${Photos.get(l.phone) ? `<button class="lnk bad" type="button" data-mdel="${l.phone}">Volver al personaje</button>` : ''}</div></div>
+        <label class="field">Cómo le dice la familia<input name="nick" maxlength="20" value="${esc(pr.nick || l.name)}" placeholder="Ej. Toño"></label>
+        <label class="field">Nombre y apellidos <small>(opcional)</small><input name="full" maxlength="48" value="${esc(pr.full || '')}" placeholder="Ej. Antonio García López"></label>
+        <div class="row2"><button class="btn btn-lime sm">Guardar</button><button class="lnk" type="button" data-mcancel>Cancelar</button></div>
+      </form>` : ''}</div>`;
   }).join('');
+  // titular del Plan Familia: cambia el nombre y la foto de cada integrante (lo ven todos al momento:
+  // Mi Navi, SOS Family, Botón SOS). Cada integrante puede seguir editando su propio perfil.
+  if (isOwner) {
+    $('famIntro').textContent = 'Como titular puedes cambiar el nombre y la foto de cada integrante. Cada quien también puede editar su perfil desde su cuenta.';
+    let phFor = null;
+    const reopen = () => { try { sessionStorage.setItem('navi.menu', 'famBox'); } catch {} location.reload(); };
+    $('famList').addEventListener('click', e => {
+      const ed = e.target.closest('[data-ed]'), ph = e.target.closest('[data-mph]'), del = e.target.closest('[data-mdel]'), cancel = e.target.closest('[data-mcancel]');
+      if (ed) { const f = $('famList').querySelector(`.medit[data-for="${ed.dataset.ed}"]`); f.hidden = !f.hidden; if (!f.hidden) f.querySelector('input').focus(); }
+      if (cancel) cancel.closest('.medit').hidden = true;
+      if (ph) { phFor = ph.dataset.mph; $('memPhoto').click(); }
+      if (del) { Photos.set(del.dataset.mdel, null); reopen(); }
+    });
+    $('memPhoto').addEventListener('change', async e => {
+      const f = e.target.files[0]; e.target.value = '';
+      if (!f || !phFor) return;
+      try { if (!Photos.set(phFor, await readPhoto(f))) throw new Error('No hay espacio para guardar la foto en este navegador.'); reopen(); }
+      catch (err) { alert(err.message); }
+    });
+    $('famList').addEventListener('submit', e => {
+      e.preventDefault();
+      const f = e.target, nick = f.nick.value.trim(), full = f.full.value.trim().replace(/\s+/g, ' ');
+      if (!nick) { f.nick.focus(); return; }
+      if (Profiles.set(f.dataset.for, { nick, full, by: user.phone })) reopen(); else alert('No se pudo guardar en este navegador.');
+    });
+  }
   $('today').textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
   // plan
