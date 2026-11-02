@@ -194,6 +194,27 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 .news li > span{font-size:20px}
 .news li small{display:block;color:var(--muted);font-size:12px}
 .news li button{margin-left:auto;flex:none;font-size:12px;font-weight:800;color:var(--lime);text-decoration:underline}
+/* geocercas */
+.gcard{display:grid;gap:10px}
+.gthumb{border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.gthumb svg,.geomap svg{display:block;width:100%;height:auto}
+.geomap{border-radius:18px;overflow:hidden;border:1px solid var(--line);cursor:crosshair;touch-action:manipulation}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days button{width:38px;height:38px;border-radius:50%;border:2px solid #ffffff26;font-weight:800;font-size:13px;color:var(--muted)}
+.days button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two[hidden]{display:none}
+.chk{display:flex;gap:10px;align-items:center;font-size:14px}
+.chk input{width:20px;height:20px;accent-color:var(--lime);flex:none}
+.gbtns{display:flex;gap:8px;flex-wrap:wrap}
+.gbtns button{font-size:12px;font-weight:800;padding:7px 12px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff1c}
+.gbtns button.warn{background:#FF5A5F22;border-color:#FF5A5F66;color:#FF8A8D}
+.dev{display:flex;align-items:center;gap:12px}
+.ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;color:var(--ink);flex:none;background:#7EE0FF}
+.overlay.geo{place-items:start center;overflow:auto}
+.overlay.geo > div{margin:auto 0;width:min(400px,100%)}
+.overlay .gi{background:#ffffff12;border-radius:16px;padding:12px;margin:12px auto;text-align:left;font-size:14px;display:grid;gap:4px}
+.overlay .gacts{display:grid;gap:10px;justify-items:center}
 @media (prefers-reduced-motion:reduce){.overlay .big{animation:none}}
 </style>
 </head>
@@ -232,6 +253,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
           <button class="srow" data-go="red" data-sec="contacts"><span>🆘</span><div><b>Contactos de emergencia</b><small id="secCt"></small></div><i>›</i></button>
           <button class="srow" data-go="acomp"><span>🛡️</span><div><b>Acompáñame</b><small>Tu red te sigue en un trayecto y recibe aviso si algo pasa</small></div><i>›</i></button>
           <button class="srow" data-go="share"><span>📍</span><div><b>Compartir ubicación por enlace</b><small>Para quien no tiene la app · de 15 min a 6 h</small></div><i>›</i></button>
+          <button class="srow" data-go="geo"><span>⭕</span><div><b>Geocercas con horario</b><small id="secGeo"></small></div><i>›</i></button>
           <button class="srow" data-go="mapa"><span>⏰</span><div><b>Llegadas a tiempo</b><small id="secExp"></small></div><i>›</i></button>
           <button class="srow" data-go="actividad" data-act="manejo"><span>🚗</span><div><b>Manejo y alertas de velocidad</b><small id="secDrive"></small></div><i>›</i></button>
         </div></div>
@@ -304,6 +326,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
           <label class="row" style="gap:10px;font-size:14px"><input type="checkbox" id="plTell" checked style="width:20px;height:20px;accent-color:var(--lime)"> Avisar a mi red de este lugar nuevo</label>
           <button class="btn btn-lime" type="submit">Guardar lugar</button>
         </form>
+        <button class="lnk" data-go="geo" style="margin-top:12px">⭕ ¿Necesitas horario y alarma si sale de la zona? Usa Geocercas →</button>
       </div>
       <div class="card"><h2>Contactos de emergencia</h2><p class="muted">Reciben un SMS con tu ubicación cuando activas SOS, aunque no tengan la app.</p>
         <div class="stack" id="contacts" style="margin-top:12px"></div>
@@ -349,6 +372,43 @@ section[data-tab].on{display:block;animation:fade .3s ease}
     </div>
   </section>
 
+  <!-- GEOCERCAS: zona + horario + dispositivo; si sale de la zona en horario, alarma como la de SOS -->
+  <section data-tab="geo">
+    <span class="eyebrow">Seguridad</span><h1>Geocercas</h1>
+    <p class="muted" style="margin:-6px 0 12px">Dibuja una zona alrededor de un lugar, por ejemplo el colegio, elige el horario y el dispositivo que vigila (su celular o su reloj inteligente). Si sale de la zona dentro del horario, tu red recibe una alarma como la de SOS.</p>
+    <div class="stack">
+      <div class="stack" id="geoList"></div>
+      <button class="btn btn-lime block" id="geoNew">+ Nueva geocerca</button>
+      <form class="card stack" id="geoF" hidden>
+        <h2 style="margin:0" id="gfTitle">Nueva geocerca</h2>
+        <label class="field">Nombre<input id="gfName" required maxlength="30" placeholder="Ej. Colegio de Toño"></label>
+        <label class="field">Dispositivo que vigila<select id="gfDev"></select></label>
+        <label class="field">Centrar en<select id="gfAt"></select></label>
+        <div class="geomap" id="gfMap" role="img" aria-label="Mapa de la geocerca: toca para mover el centro"></div>
+        <p class="muted" style="margin-top:-4px">Toca el mapa para mover el centro de la zona.</p>
+        <div><div class="row between"><span class="muted">Tamaño de la zona (radio)</span><b id="gfMv">150 m</b></div>
+          <input type="range" id="gfM" min="50" max="500" step="10" value="150" style="width:100%;accent-color:var(--lime)" aria-label="Radio de la geocerca">
+          <small class="muted" id="gfHint"></small></div>
+        <div><span class="muted">Días</span><div class="days" id="gfDays" style="margin-top:6px"></div></div>
+        <label class="chk"><input type="checkbox" id="gfAll"> Todo el día</label>
+        <div class="two" id="gfHours"><label class="field">Desde<input type="time" id="gfFrom" value="07:30"></label><label class="field">Hasta<input type="time" id="gfTo" value="14:30"></label></div>
+        <label class="chk"><input type="checkbox" id="gfLate" checked> Avisarme también si no ha llegado 10 min después de la hora de inicio</label>
+        <label class="chk"><input type="checkbox" id="gfSms" checked> Mandar SMS con el mapa a mis contactos de emergencia si sale de la zona</label>
+        <button class="btn btn-lime" type="submit">Guardar geocerca</button>
+        <div class="row" style="gap:14px;justify-content:center"><button class="lnk" type="button" id="gfCancel">Cancelar</button><button class="lnk bad" type="button" id="gfDel" hidden>Borrar geocerca</button></div>
+      </form>
+      <div class="card"><h2>Dispositivos</h2><p class="muted">Los celulares de tu red y los relojes inteligentes con línea Navi. Un reloj vigila aunque tu hijo no lleve celular.</p>
+        <div class="stack" id="devList" style="margin-top:12px"></div>
+        <button class="btn out block" id="devNew" style="margin-top:12px">+ Vincular reloj inteligente</button>
+        <form class="stack" id="devF" hidden style="margin-top:12px">
+          <label class="field">¿De quién es el reloj?<select id="dvOf"></select></label>
+          <label class="field">Número de la línea del reloj<input id="dvTel" required inputmode="tel" placeholder="55 1234 5678"></label>
+          <button class="btn btn-lime" type="submit">Vincular reloj</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <div class="card lock" id="locked" hidden><b>🔒</b><h2>NAVI SOS Family viene con los planes de 12 GB, 24 GB o el Plan Familia</h2><p class="muted" style="margin:8px 0 16px">Ubicación en tiempo real, lugares, botón SOS y manejo seguro para toda tu familia.</p><a class="btn btn-lime" href="index.html#plan">Ver Plan Familia</a></div>
 </div>
 
@@ -361,6 +421,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 </nav></div>
 
 <div class="overlay" id="sosOv" hidden role="alertdialog" aria-modal="true" aria-labelledby="sosTitle"></div>
+<div class="overlay geo" id="geoOv" hidden role="alertdialog" aria-modal="true" aria-labelledby="geoTitle"></div>
 <div class="news" id="newsOv" hidden role="dialog" aria-modal="true" aria-labelledby="newsTitle"></div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -395,6 +456,7 @@ if (user && !user.apps.includes('sos')) {
   const BASE = members.length; // líneas del plan; después vienen las personas invitadas
   // conductores: el titular y la segunda línea (en el demo, Papá y Mamá)
   const adults = members.slice(0, 2);
+  const KID = Math.min(2, BASE - 1);
 
   // ---------- estado guardado (demo, en este navegador) ----------
   const KEY = 'navi.sos.' + user.owner;
@@ -408,6 +470,10 @@ if (user && !user.apps.includes('sos')) {
       { who: 2, t: now - 49 * MIN, txt: 'A las 2:30 😊' },
     ],
     events: [], watch: null, expects: {}, extra: [],
+    // geocerca de ejemplo: el reloj de la hija vigilado en el colegio, de lunes a viernes en horario de clases
+    devices: BASE > 1 ? [{ id: 'w1', of: KID, tel: '5590000017', bat: 76, at: 'escuela' }] : [],
+    geos: BASE > 1 ? [{ id: 'g1', name: 'Colegio', dev: 'w1', x: 110, y: 95, m: 150, days: [1, 2, 3, 4, 5], from: '07:30', to: '14:30', allDay: false, on: true, late: true, sms: true }] : [],
+    sim: {}, geoLog: [],
   });
   let S; try { S = { ...def(), ...JSON.parse(localStorage.getItem(KEY)) }; } catch { S = def(); }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
@@ -446,7 +512,7 @@ if (user && !user.apps.includes('sos')) {
   document.querySelectorAll('section .eyebrow').forEach(e => { if (e.textContent === 'Familia Navi') e.textContent = $('netName').textContent; });
 
   // ---------- tabs ----------
-  const TABS = ['inicio', 'mapa', 'chat', 'actividad', 'red', 'share', 'acomp'];
+  const TABS = ['inicio', 'mapa', 'chat', 'actividad', 'red', 'share', 'acomp', 'geo'];
   const show = t => {
     if (!TABS.includes(t)) t = 'inicio';
     document.querySelectorAll('section[data-tab]').forEach(s => s.classList.toggle('on', s.dataset.tab === t));
@@ -457,7 +523,7 @@ if (user && !user.apps.includes('sos')) {
     else { back.textContent = '← Inicio SOS'; back.href = '#inicio'; }
     $('cfgBtn').hidden = t === 'red';
     scrollTo(0, 0);
-    ({ inicio: renderHome, mapa: renderMap, chat: renderChat, actividad: renderAct, red: renderRed, share: renderShare, acomp: renderAcomp })[t]();
+    ({ inicio: renderHome, mapa: renderMap, chat: renderChat, actividad: renderAct, red: renderRed, share: renderShare, acomp: renderAcomp, geo: renderGeo })[t]();
   };
   addEventListener('hashchange', () => show(location.hash.slice(1)));
   document.addEventListener('click', e => {
@@ -486,6 +552,8 @@ if (user && !user.apps.includes('sos')) {
     const ex = Object.values(S.expects).filter(e => !e.fired).length;
     $('secCt').textContent = S.contacts.length ? `${S.contacts.length} ${S.contacts.length === 1 ? 'contacto recibe' : 'contactos reciben'} un SMS con tu ubicación si activas SOS` : 'Agrega quién recibe un SMS si activas SOS';
     $('secExp').textContent = ex ? `${ex} ${ex === 1 ? 'aviso activo' : 'avisos activos'} · te decimos si alguien no llega a la hora` : 'Te avisamos si alguien no llega a un lugar a la hora';
+    const gOn = (S.geos || []).filter(g => g.on).length;
+    $('secGeo').textContent = gOn ? `${gOn} ${gOn === 1 ? 'activa' : 'activas'} · alarma si sale de la zona en su horario` : 'Zona con horario: alarma si alguien sale (ideal para el colegio)';
     $('secDrive').textContent = adults.length ? `Calificación semanal y límite de velocidad para ${adults.map(a => a.i === me ? 'ti' : a.name).join(' y ')}` : 'Para quien maneja en tu red';
   }
   // llegadas a tiempo: al pasar la hora, avisa si llegó o no (una sola vez por aviso)
@@ -561,14 +629,23 @@ if (user && !user.apps.includes('sos')) {
     const off = [[0, 0], [14, -10], [-12, 10], [10, 12]][m.i % 4];
     return { x: pl.x + off[0], y: pl.y + off[1] };
   };
-  function drawMap() {
-    let g = `<rect width="400" height="330" fill="#1A1D72"/>`;
-    for (let x = 20; x < 400; x += 46) g += `<path d="M${x} 0V330" stroke="#2D35A0" stroke-width="${x % 92 ? 3 : 6}"/>`;
-    for (let y = 18; y < 330; y += 42) g += `<path d="M0 ${y}H400" stroke="#2D35A0" stroke-width="${y % 84 ? 3 : 6}"/>`;
+  // calles, avenidas y parques (lo comparten el mapa, las miniaturas y el editor de geocercas)
+  const baseMap = () => {
+    let g = `<rect x="-100" y="-100" width="600" height="530" fill="#1A1D72"/>`;
+    for (let x = 20; x < 400; x += 46) g += `<path d="M${x} -100V430" stroke="#2D35A0" stroke-width="${x % 92 ? 3 : 6}"/>`;
+    for (let y = 18; y < 330; y += 42) g += `<path d="M-100 ${y}H500" stroke="#2D35A0" stroke-width="${y % 84 ? 3 : 6}"/>`;
     g += `<path d="M-10 300L410 40" stroke="#3B46B8" stroke-width="10"/><path d="M60 -10L240 340" stroke="#3B46B8" stroke-width="7"/>`;
     [[200, 120, 50, 40], [30, 140, 40, 34], [240, 170, 44, 36], [160, 270, 38, 34]].forEach(([x, y, w, h]) => g += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#1E5A4E"/>`);
+    return g;
+  };
+  const watchPin = d => { const P = devPos(d); return `<g class="pin" data-geo="1" transform="translate(${P.x} ${P.y})"><rect x="-13" y="-13" width="26" height="26" rx="8" fill="#06062E"/><rect x="-11" y="-11" width="22" height="22" rx="6" fill="${d.color}"/><text y="5" text-anchor="middle" font-size="12">⌚</text></g>`; };
+  const geoCircle = g => { const d = dev(g.dev), out = d && g.on && distM(d, g) > g.m;
+    return `<circle cx="${g.x}" cy="${g.y}" r="${g.m / M_PER}" fill="${out ? '#FF5A5F22' : '#7EE0FF14'}" stroke="${out ? '#FF5A5F' : '#7EE0FF'}" stroke-width="2" stroke-dasharray="6 5"/>`; };
+  function drawMap() {
+    let g = baseMap();
     S.places.forEach(p => g += `<circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="#B4E32F14" stroke="#B4E32F" stroke-width="2"/>
       <g transform="translate(${p.x - p.r + 4} ${p.y - p.r - 6})"><rect width="${p.name.length * 6.2 + 26}" height="18" rx="9" fill="#06062E"/><text x="8" y="13" class="zone-label" fill="#fff">${p.ico} ${p.name}</text></g>`);
+    (S.geos || []).filter(x => x.on).forEach(x => g += geoCircle(x));
     const mv = members.find(m => m.route);
     if (mv && !(mv.i === me && S.paused)) {
       const P = posOf(mv);
@@ -583,6 +660,7 @@ if (user && !user.apps.includes('sos')) {
           : `<text y="6" text-anchor="middle" font-size="16" font-weight="800" fill="#06062E" font-family="DM Sans,sans-serif">${esc(m.name[0].toUpperCase())}</text>`}
         ${lowBat(m) ? '<circle cx="12" cy="-12" r="6" fill="#FF5A5F"/>' : ''}</g>`;
     });
+    devs().filter(d => d.kind === 'watch').forEach(d => g += watchPin(d));
     $('map').innerHTML = g;
   }
   function renderMap() {
@@ -610,7 +688,7 @@ if (user && !user.apps.includes('sos')) {
       </div>
       <div id="sheetMore"></div>`;
   }
-  $('map').addEventListener('click', e => { const p = e.target.closest('.pin'); if (p) { selM = +p.dataset.m; renderMap(); } });
+  $('map').addEventListener('click', e => { const p = e.target.closest('.pin'); if (p?.dataset.geo) { location.hash = 'geo'; return; } if (p) { selM = +p.dataset.m; renderMap(); } });
   $('chips').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { selM = +b.dataset.m; renderMap(); } });
   $('memberSheet').addEventListener('click', e => {
     // ±5 min sobre la hora de llegada sugerida
@@ -834,9 +912,205 @@ if (user && !user.apps.includes('sos')) {
     location.hash = 'inicio'; toast('Tu red ya te acompaña en vivo');
   };
 
+  // ---------- GEOCERCAS ----------
+  // zona + horario + dispositivo (celular de la red o reloj inteligente con línea Navi).
+  // Si el dispositivo sale de la zona dentro del horario, suena una alarma como la de SOS para toda la red.
+  const M_PER = 5; // metros por unidad del mapa (la misma escala de Lugares)
+  const DAYS_UI = [[1, 'L'], [2, 'M'], [3, 'M'], [4, 'J'], [5, 'V'], [6, 'S'], [0, 'D']];
+  const DAY_N = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const devs = () => [
+    ...(S.devices || []).filter(d => members[d.of]).map(d => ({ ...d, kind: 'watch', name: `Reloj de ${members[d.of].name}`, color: members[d.of].color })),
+    ...onMap().map(m => ({ id: 'm' + m.i, kind: 'phone', of: m.i, name: m.i === me ? 'Tu celular' : `Celular de ${m.name}`, color: m.color, bat: m.bat, tel: m.phone })),
+  ];
+  const dev = id => devs().find(d => d.id === id);
+  const geo = id => (S.geos || []).find(g => g.id === id);
+  const devPos = d => {
+    const g = geo(S.sim[d.id]); // demo: "Simular salida" lo deja justo afuera de la zona
+    if (g) { const dir = g.x > 200 ? -1 : 1; return { x: g.x + dir * (g.m / M_PER + 22), y: g.y + 14 }; }
+    if (d.kind === 'phone') return posOf(members[d.of]);
+    const pl = place(d.at) || PLACES0[1]; return { x: pl.x - 16, y: pl.y + 12 };
+  };
+  const distM = (d, g) => { const P = devPos(d); return Math.round(Math.hypot(P.x - g.x, P.y - g.y) * M_PER); };
+  const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+  const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+  const fmtT = s => { const d = new Date(); d.setHours(...s.split(':').map(Number), 0, 0); return hhmm(d); };
+  const inSched = g => g.days.includes(new Date().getDay()) && (g.allDay || (nowMin() >= toMin(g.from) && nowMin() < toMin(g.to)));
+  const schedTxt = g => {
+    const k = g.days.slice().sort((a, b) => (a + 6) % 7 - (b + 6) % 7).join();
+    const d = k === '1,2,3,4,5' ? 'Lun a Vie' : g.days.length === 7 ? 'Todos los días' : k === '6,0' ? 'Sáb y Dom' : g.days.slice().sort((a, b) => (a + 6) % 7 - (b + 6) % 7).map(x => DAY_N[x]).join(', ');
+    return `${d} · ${g.allDay ? 'todo el día' : `${fmtT(g.from)} a ${fmtT(g.to)}`}`;
+  };
+  const geoState = g => { const d = dev(g.dev);
+    return !g.on ? ['Pausada', 'off'] : !d ? ['Sin dispositivo', 'warn'] : !inSched(g) ? ['Fuera de horario', 'off'] : distM(d, g) <= g.m ? ['Dentro de la zona ✓', ''] : ['Fuera de la zona', 'bad']; };
+  const geoLog = (g, txt) => { const t = Date.now(); S.events.push({ t, txt }); (S.geoLog ||= []).push({ g: g.id, t, txt }); };
+
+  // revisa cada geocerca: entró (queda registrado), salió (alarma) o no llegó al inicio del horario (alarma)
+  function checkGeos() {
+    const today = new Date().toDateString(); let changed = false;
+    (S.geos || []).forEach(g => {
+      const d = dev(g.dev); if (!g.on || !d || !inSched(g)) return;
+      if (!g.st || g.st.day !== today) { g.st = { day: today, wasIn: false, out: false, late: false }; changed = true; }
+      const st = g.st, inside = distM(d, g) <= g.m;
+      if (inside) {
+        if (st.out) { geoLog(g, `✅ <b>${esc(d.name)}</b> volvió a la zona ${esc(g.name)}`); st.out = false; changed = true; }
+        if (!st.wasIn) { st.wasIn = true; changed = true; }
+      } else if (st.wasIn && !st.out) {
+        st.out = true; changed = true;
+        geoLog(g, `🚨 <b>${esc(d.name)}</b> salió de la zona ${esc(g.name)} en horario (${schedTxt(g)})`);
+        geoAlarm(g, d, 'out');
+      } else if (!st.wasIn && g.late && !st.late && !g.allDay && nowMin() >= toMin(g.from) + 10) {
+        st.late = true; changed = true;
+        geoLog(g, `⏰ <b>${esc(d.name)}</b> no ha llegado a ${esc(g.name)} (empezó a las ${fmtT(g.from)})`);
+        geoAlarm(g, d, 'late');
+      }
+    });
+    if (changed) save();
+  }
+
+  // alarma tipo SOS: pantalla roja, sirena y vibración hasta que alguien la atiende
+  let siren = null;
+  function sirenOn() {
+    sirenOff();
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)(), o = ac.createOscillator(), v = ac.createGain();
+      o.type = 'square'; v.gain.value = .05; o.connect(v).connect(ac.destination); o.start();
+      let hi = false; const t = setInterval(() => { hi = !hi; o.frequency.setValueAtTime(hi ? 960 : 640, ac.currentTime); }, 450);
+      siren = { ac, t, stop: setTimeout(sirenOff, 60000) };
+    } catch {}
+    try { navigator.vibrate?.([700, 300, 700, 300, 700, 300, 700]); } catch {}
+  }
+  function sirenOff() { if (siren) { clearInterval(siren.t); clearTimeout(siren.stop); siren.ac.close().catch(() => {}); siren = null; } try { navigator.vibrate?.(0); } catch {} }
+  function geoAlarm(g, d, kind, test = false) {
+    const ov2 = $('geoOv'), who = members[d.of], off = Math.max(0, distM(d, g) - g.m);
+    const sms = g.sms && kind === 'out' && !test && S.contacts.length;
+    ov2.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div>
+      <span class="pill bad" style="background:#ffffff22;color:#fff">${test ? 'PRUEBA DE ALARMA' : 'ALERTA DE GEOCERCA'}</span>
+      <h2 id="geoTitle">${kind === 'late' ? `${esc(who.name)} no ha llegado a ${esc(g.name)}` : `${esc(d.name)} salió de la zona ${esc(g.name)}`}</h2>
+      <p class="muted" style="color:#ffd6d8">${hhmm(Date.now())} · horario ${schedTxt(g)}</p>
+      <div class="gi"><div>📍 ${kind === 'late' ? 'Última ubicación: fuera de la zona' : off ? `Está a ${off} m fuera del límite` : 'Justo en el límite de la zona'}${kind === 'late' ? '' : ' · Calle Amores esq. Eje 5 Sur'}</div>
+        <div>${d.kind === 'watch' ? '⌚' : '📱'} ${esc(d.name)} · 🔋 ${d.bat}%</div><div>⭕ Zona de ${g.m} m alrededor de ${esc(g.name)}</div></div>
+      <div class="list">${members.filter(m => m.i !== me && !m.invited).map(m => `<div><span>${esc(m.name)}</span><b>Alarma en la app</b></div>`).join('')}
+        ${sms ? S.contacts.map(c => `<div><span>${esc(c.n)} · ${fmtPhone(c.tel)}</span><b>SMS con mapa</b></div>`).join('') : ''}</div>
+      <p class="muted" style="margin-bottom:14px;color:#ffd6d8">Demostración: no se envían mensajes reales.</p>
+      <div class="gacts"><button class="btn btn-lime" data-g="map">📍 Ver en el mapa</button>
+        <a class="btn" style="background:#fff;color:var(--ink)" href="tel:${d.tel}">📞 Llamar ${d.kind === 'watch' ? 'al reloj' : 'a ' + esc(who.name)}</a>
+        <a class="btn sos911" href="tel:911" style="background:#fff">📞 Llamar al 911</a>
+        <button class="btn out" data-g="ok" style="color:#fff">✅ Ya lo localicé, todo bien</button></div></div>`;
+    ov2.hidden = false; ov2.scrollTop = 0; sirenOn(); ov2.querySelector('[data-g="ok"]').focus({ preventScroll: true });
+    ov2.onclick = e => {
+      const b = e.target.closest('[data-g]'); if (!b) return;
+      sirenOff(); ov2.hidden = true;
+      if (b.dataset.g === 'ok') { if (!test) { geoLog(g, `🙌 <b>${esc(members[me].name)}</b> localizó a ${esc(who.name)}: todo bien`); save(); } toast(test ? 'Prueba terminada' : 'Avisamos a tu red que todo está bien'); }
+      if (b.dataset.g === 'map') { if (d.kind === 'phone') selM = d.of; location.hash = 'mapa'; }
+    };
+  }
+
+  // miniatura de la zona: el mismo mapa, recortado alrededor del centro
+  const thumb = g => { const d = dev(g.dev), w = Math.max(140, g.m / M_PER * 3);
+    return `<svg viewBox="${g.x - w / 2} ${g.y - w * .32} ${w} ${w * .64}" aria-hidden="true">${baseMap()}${geoCircle(g)}<circle cx="${g.x}" cy="${g.y}" r="2.5" fill="#7EE0FF"/>${d ? (d.kind === 'watch' ? watchPin(d) : (() => { const P = devPos(d); return `<circle cx="${P.x}" cy="${P.y}" r="9" fill="#06062E"/><circle cx="${P.x}" cy="${P.y}" r="7" fill="${d.color}"/>`; })()) : ''}</svg>`; };
+
+  function renderGeo() {
+    checkGeos();
+    const list = S.geos || [];
+    $('geoList').innerHTML = list.length ? list.map(g => { const d = dev(g.dev), st = geoState(g), log = (S.geoLog || []).filter(x => x.g === g.id).slice(-6).reverse();
+      return `<div class="card gcard"><div class="row between"><div class="row" style="gap:10px;min-width:0"><div class="ic">⭕</div><div style="min-width:0"><b>${esc(g.name)}</b><div class="muted">${d ? `${d.kind === 'watch' ? '⌚' : '📱'} ${esc(d.name)}` : 'Elige un dispositivo'}</div></div></div>
+          <button class="toggle" role="switch" data-gon="${g.id}" aria-checked="${g.on}" aria-label="Geocerca ${esc(g.name)} activa"></button></div>
+        <div class="gthumb">${thumb(g)}</div>
+        <div class="row between" style="flex-wrap:wrap;gap:6px"><span class="muted">🗓️ ${schedTxt(g)} · radio ${g.m} m</span><span class="pill ${st[1]}">${st[0]}</span></div>
+        <div class="gbtns"><button data-ged="${g.id}">✏️ Editar</button><button data-ghist="${g.id}" aria-pressed="false">🕘 Historial</button>
+          ${d ? `<button class="warn" data-gsim="${g.id}">${S.sim[g.dev] === g.id ? '↩️ Simular regreso' : '🚶 Simular salida'}</button>` : ''}<button data-gtest="${g.id}">🔔 Probar alarma</button></div>
+        <div data-gh="${g.id}" hidden>${log.map(x => `<div class="ev"><div>${x.txt}</div><span>${hhmm(x.t)}</span></div>`).join('')}<div class="ev"><div>Entró a la zona<br><span>${d ? esc(d.name) : ''}</span></div><span>hoy 7:52 a. m.</span></div></div></div>`; }).join('')
+      : '<div class="card muted">Aún no tienes geocercas. Crea la primera, por ejemplo el colegio con su horario de clases.</div>';
+    $('devList').innerHTML = devs().map(d => `<div class="dev"><div class="ic" style="background:${d.color}">${d.kind === 'watch' ? '⌚' : '📱'}</div><div style="flex:1;min-width:0"><b>${esc(d.name)}</b>
+      <div class="muted">${fmtPhone(d.tel)} · 🔋 ${d.bat}% · ${(S.geos || []).filter(g => g.dev === d.id).length} geocercas</div></div>${d.kind === 'watch' ? `<button class="lnk bad" data-dvrm="${d.id}">Quitar</button>` : ''}</div>`).join('');
+    $('dvOf').innerHTML = onMap().map(m => `<option value="${m.i}">${m.i === me ? 'Mío' : esc(m.name)}</option>`).join('');
+  }
+  $('geoList').addEventListener('click', e => {
+    const on = e.target.closest('[data-gon]'), ed = e.target.closest('[data-ged]'), hi = e.target.closest('[data-ghist]'), sim = e.target.closest('[data-gsim]'), te = e.target.closest('[data-gtest]');
+    if (on) { const g = geo(on.dataset.gon); g.on = !g.on; save(); renderGeo(); toast(g.on ? `Geocerca ${g.name} activa` : `Geocerca ${g.name} en pausa`); }
+    if (ed) openGeoF(geo(ed.dataset.ged));
+    if (hi) { const box = document.querySelector(`[data-gh="${hi.dataset.ghist}"]`); box.hidden = !box.hidden; hi.setAttribute('aria-pressed', !box.hidden); }
+    if (te) { const g = geo(te.dataset.gtest), d = dev(g.dev) || devs()[0]; geoAlarm(g, d, 'out', true); }
+    if (sim) {
+      const g = geo(sim.dataset.gsim);
+      if (S.sim[g.dev] === g.id) { delete S.sim[g.dev]; checkGeos(); save(); renderGeo(); toast('Regresó a la zona'); return; }
+      if (!g.on) { toast('Primero activa la geocerca'); return; }
+      checkGeos(); // registra que estaba dentro antes de salir
+      S.sim[g.dev] = g.id; save();
+      if (!inSched(g)) { renderGeo(); toast(`Fuera de horario (${schedTxt(g)}): no suena la alarma. Usa “Probar alarma” o cambia el horario.`); return; }
+      checkGeos(); renderGeo();
+    }
+  });
+
+  // editor: nombre, dispositivo, centro (lugar guardado o toque en el mapa), radio, días y horario
+  let gEd = null; // { id|null, x, y, days }
+  const radHint = m => m <= 100 ? 'Del tamaño de una casa o un edificio' : m <= 250 ? 'Del tamaño de un colegio o un parque' : 'Del tamaño de un campus o varias manzanas';
+  function drawGeoMap() {
+    const m = +$('gfM').value, d = dev($('gfDev').value);
+    let s = baseMap();
+    S.places.forEach(p => s += `<g opacity=".7"><circle cx="${p.x}" cy="${p.y}" r="3" fill="#B4E32F"/><text x="${p.x + 6}" y="${p.y + 4}" class="zone-label" fill="#fff">${p.ico} ${esc(p.name)}</text></g>`);
+    s += `<circle cx="${gEd.x}" cy="${gEd.y}" r="${m / M_PER}" fill="#7EE0FF22" stroke="#7EE0FF" stroke-width="2.5" stroke-dasharray="6 5"/><circle cx="${gEd.x}" cy="${gEd.y}" r="4" fill="#7EE0FF"/>`;
+    if (d) { const P = devPos(d); s += d.kind === 'watch' ? watchPin(d) : `<circle cx="${P.x}" cy="${P.y}" r="9" fill="#06062E"/><circle cx="${P.x}" cy="${P.y}" r="7" fill="${d.color}"/>`; }
+    $('gfMap').innerHTML = `<svg viewBox="0 0 400 330">${s}</svg>`;
+    $('gfMv').textContent = m + ' m'; $('gfHint').textContent = radHint(m);
+  }
+  const paintDays = () => $('gfDays').innerHTML = DAYS_UI.map(([n, l]) => `<button type="button" data-dy="${n}" aria-pressed="${gEd.days.includes(n)}" aria-label="${DAY_N[n]}">${l}</button>`).join('');
+  function openGeoF(g = null) {
+    const f = $('geoF'), base = g || { name: '', dev: devs().find(d => d.kind === 'watch')?.id || devs()[0]?.id, x: place('escuela')?.x ?? 200, y: place('escuela')?.y ?? 160, m: 150, days: [1, 2, 3, 4, 5], from: '07:30', to: '14:30', allDay: false, late: true, sms: true };
+    gEd = { id: g?.id || null, x: base.x, y: base.y, days: base.days.slice() };
+    $('gfTitle').textContent = g ? 'Editar geocerca' : 'Nueva geocerca';
+    $('gfName').value = base.name;
+    $('gfDev').innerHTML = devs().map(d => `<option value="${d.id}">${d.kind === 'watch' ? '⌚' : '📱'} ${esc(d.name)}</option>`).join('');
+    $('gfDev').value = base.dev;
+    $('gfAt').innerHTML = S.places.map(p => `<option value="${p.id}">${p.ico} ${esc(p.name)}</option>`).join('') + '<option value="">📍 Punto que toque en el mapa</option>';
+    $('gfAt').value = S.places.find(p => p.x === base.x && p.y === base.y)?.id || '';
+    $('gfM').value = base.m; $('gfFrom').value = base.from; $('gfTo').value = base.to;
+    $('gfAll').checked = base.allDay; $('gfHours').hidden = base.allDay;
+    $('gfLate').checked = base.late; $('gfSms').checked = base.sms;
+    $('gfDel').hidden = !g;
+    paintDays(); drawGeoMap();
+    f.hidden = false; $('geoNew').hidden = true; f.scrollIntoView({ block: 'start' });
+  }
+  const closeGeoF = () => { $('geoF').hidden = true; $('geoNew').hidden = false; gEd = null; };
+  $('geoNew').onclick = () => openGeoF();
+  $('gfCancel').onclick = closeGeoF;
+  $('gfM').oninput = drawGeoMap;
+  $('gfDev').onchange = drawGeoMap;
+  $('gfAt').onchange = () => { const p = place($('gfAt').value); if (p) { gEd.x = p.x; gEd.y = p.y; drawGeoMap(); } };
+  $('gfMap').addEventListener('click', e => { const r = $('gfMap').getBoundingClientRect(); gEd.x = Math.round((e.clientX - r.left) / r.width * 400); gEd.y = Math.round((e.clientY - r.top) / r.height * 330); $('gfAt').value = ''; drawGeoMap(); });
+  $('gfDays').addEventListener('click', e => { const b = e.target.closest('[data-dy]'); if (!b) return; const n = +b.dataset.dy, k = gEd.days.indexOf(n); if (k >= 0) gEd.days.splice(k, 1); else gEd.days.push(n); paintDays(); });
+  $('gfAll').onchange = () => $('gfHours').hidden = $('gfAll').checked;
+  $('geoF').onsubmit = e => {
+    e.preventDefault();
+    if (!gEd.days.length) { toast('Elige al menos un día'); return; }
+    if (!$('gfAll').checked && toMin($('gfFrom').value) >= toMin($('gfTo').value)) { toast('La hora de inicio debe ser antes de la hora final'); return; }
+    const data = { name: $('gfName').value.trim(), dev: $('gfDev').value, x: gEd.x, y: gEd.y, m: +$('gfM').value, days: gEd.days.slice(), from: $('gfFrom').value, to: $('gfTo').value, allDay: $('gfAll').checked, late: $('gfLate').checked, sms: $('gfSms').checked };
+    S.geos ||= [];
+    const old = gEd.id && geo(gEd.id);
+    if (old) Object.assign(old, data, { st: null });
+    else { const g = { id: 'g' + Date.now(), on: true, ...data }; S.geos.push(g); S.events.push({ t: Date.now(), txt: `⭕ <b>${esc(members[me].name)}</b> creó la geocerca ${esc(g.name)} (${schedTxt(g)})` }); }
+    save(); closeGeoF(); renderGeo(); toast(old ? 'Geocerca actualizada' : 'Geocerca creada: suena la alarma si sale de la zona en su horario');
+  };
+  $('gfDel').onclick = () => { const g = geo(gEd.id); S.geos = S.geos.filter(x => x !== g); Object.keys(S.sim).forEach(k => { if (S.sim[k] === g.id) delete S.sim[k]; }); save(); closeGeoF(); renderGeo(); toast(`Borramos la geocerca ${g.name}`); };
+  // relojes inteligentes: cada uno con su línea Navi, ligado a un integrante de la red
+  $('devNew').onclick = () => { $('devF').hidden = !$('devF').hidden; if (!$('devF').hidden) $('dvTel').focus(); };
+  $('devF').onsubmit = e => {
+    e.preventDefault();
+    const tel = $('dvTel').value.replace(/\D/g, '').slice(-10);
+    if (tel.length !== 10) { toast('Escribe un número de 10 dígitos'); return; }
+    if (devs().some(d => d.tel === tel)) { toast('Ese número ya está vinculado'); return; }
+    const of = +$('dvOf').value;
+    (S.devices ||= []).push({ id: 'w' + Date.now(), of, tel, bat: 90, at: members[of].at || 'casa' });
+    save(); $('devF').reset(); $('devF').hidden = true; renderGeo(); toast(`Reloj de ${members[of].name} vinculado: ya puedes usarlo en una geocerca`);
+  };
+  $('devList').addEventListener('click', e => { const b = e.target.closest('[data-dvrm]'); if (!b) return; S.devices = S.devices.filter(d => d.id !== b.dataset.dvrm); delete S.sim[b.dataset.dvrm]; save(); renderGeo(); toast('Reloj desvinculado'); });
+  checkGeos();
+  setInterval(checkGeos, 5000);
+
   // novedades: después de una actualización, una hoja con lo nuevo y un "Ver" que lleva a cada cosa (una sola vez)
-  const NEWS_V = 'sos-2026-11';
+  const NEWS_V = 'sos-2026-11b';
   const NEWS = [
+    ['⭕', 'Geocercas con horario', 'Zona alrededor del colegio, días y horas: si su celular o reloj sale, suena una alarma como la de SOS.', 'geo'],
     ['🛡️', 'Centro de seguridad en Inicio', 'Contactos, Acompáñame, enlace de ubicación, llegadas a tiempo y manejo, juntos.', 'inicio'],
     ['⏰', 'Espéralo con un toque', 'Cuando alguien va en camino, su hora de llegada se vuelve aviso: ajústala ±5 min.', 'mapa'],
     ['🔧', 'Pedir que lo revise', 'Si el teléfono de alguien deja de actualizar, le mandas los pasos para arreglarlo.', 'mapa'],
