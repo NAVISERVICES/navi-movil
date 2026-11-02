@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#0B0B4F">
 <link rel="icon" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Navi">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -121,6 +123,14 @@ main{padding:36px 0 80px}
 /* suite */
 .suite-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
 .suite-head h2{font-size:clamp(26px,3.4vw,38px)}
+/* ícono de Mi Navi en la pantalla del celular */
+.install-cta{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 18px;padding:12px 16px;border-radius:18px;background:linear-gradient(120deg,#7B5CFA33,#B4E32F22);border:1px solid #B4E32F66;text-align:left;transition:transform .2s,border-color .2s}
+.install-cta:hover{transform:translateY(-2px);border-color:var(--lime)}
+.install-cta img{width:46px;height:46px;border-radius:12px;flex:none;box-shadow:0 6px 14px #0006}
+.install-cta b{display:block;font-size:15px}
+.install-cta small{display:block;font-size:12px;color:var(--muted)}
+.install-cta em{margin-left:auto;font-style:normal;font-size:22px}
+.install-cta[hidden]{display:none}
 .count{background:#ffffff14;border-radius:99px;padding:8px 14px;font-size:14px;font-weight:700}
 .count b{color:var(--lime)}
 .apps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -257,6 +267,7 @@ main{padding:36px 0 80px}
       <div><h2>Tu suite Navi</h2><p style="color:var(--muted)">Las apps que incluye tu plan, con la misma cuenta.</p></div>
       <span class="count" id="count"></span>
     </div>
+    <button type="button" class="install-cta" data-install><img src="assets/icon-192.png" alt=""><span><b>Pon Mi Navi en tu pantalla</b><small>El ícono de Navi en tu celular para abrir tu suite de un toque · iPhone y Android</small></span><em>📲</em></button>
     <div class="apps" id="apps"></div>
     <div class="upsell" id="upsell" hidden>
       <div><b id="upTitle"></b><p id="upText"></p></div>
@@ -459,5 +470,6 @@ if (user) {
 <script src="planes.js?v=20261101c"></script>
 <script src="desk.js?v=1"></script>
 <script src="asistente.js?v=1"></script>
+<script src="instalar.js?v=1"></script>
 </body>
 </html>

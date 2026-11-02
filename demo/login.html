@@ -9,6 +9,9 @@
 <meta name="theme-color" content="#0B0B4F">
 <link rel="icon" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Navi">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -67,6 +70,14 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 .demo small{display:block;color:var(--muted);font-size:11px}
 .join{margin-top:26px;font-size:14px;color:var(--muted);text-align:center}
 .join a{color:var(--lime);font-weight:700}
+/* ícono de Mi Navi en la pantalla del celular */
+.install-cta{display:flex;align-items:center;gap:12px;width:100%;margin-top:18px;padding:12px 14px;border-radius:18px;background:linear-gradient(120deg,#7B5CFA33,#B4E32F22);border:1px solid #B4E32F66;text-align:left;transition:transform .2s,border-color .2s}
+.install-cta:hover{transform:translateY(-2px);border-color:var(--lime)}
+.install-cta img{width:46px;height:46px;border-radius:12px;flex:none;box-shadow:0 6px 14px #0006}
+.install-cta b{display:block;font-size:15px}
+.install-cta small{display:block;font-size:12px;color:var(--muted)}
+.install-cta em{margin-left:auto;font-style:normal;font-size:22px}
+.install-cta[hidden]{display:none}
 /* listo */
 .done{text-align:center}
 .done .ok{width:96px;height:96px;margin:0 auto 20px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-size:48px;font-weight:800;animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
@@ -124,6 +135,7 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
         <div class="phone"><b>+52</b><input id="phone" inputmode="numeric" autocomplete="tel-national" placeholder="55 1234 5678" maxlength="12"></div>
         <p class="err" id="err1"></p>
         <button class="btn btn-lime" id="send" type="submit">Enviarme el código →</button>
+        <button type="button" class="install-cta" data-install><img src="assets/icon-192.png" alt=""><span><b>Pon Mi Navi en tu pantalla</b><small>El ícono de Navi en tu celular, como una app · iPhone y Android</small></span><em>📲</em></button>
         <div class="demo">
           <p>Modo demostración · toca una cuenta para probar:</p>
           <div id="demo"></div>
@@ -154,6 +166,7 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 </div>
 
 <script src="auth.js?v=20261101e"></script>
+<script src="instalar.js?v=1"></script>
 <script>
 const $ = id => document.getElementById(id);
 const steps = ['s1', 's2', 's3'];
