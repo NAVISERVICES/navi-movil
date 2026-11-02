@@ -23,17 +23,16 @@ const NAVI_APPS = [
 ];
 
 // gratis para todo cliente Navi Móvil (Shop y Repair traen tráfico para vender en esas plataformas)
-const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos'];
+// NAVI Fit también es para todos los clientes, en cualquier plan
+const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos', 'fit'];
 // qué apps incluye cada plan: lo gratis + NAVI SOS en 12 GB, 24 GB y Plan Familia
 const PLAN_ACCESS = {
   2:  [...FREE_APPS],
   4:  [...FREE_APPS],
   12: [...FREE_APPS, 'sos'],
-  24: [...FREE_APPS, 'sos', 'fit'],
+  24: [...FREE_APPS, 'sos'],
   familia: [...FREE_APPS, 'sos'],
 };
-// NAVI Fit es solo para clientes de 24 GB (en Plan Familia, si sus líneas son de 24 GB)
-const FIT_GB = 24;
 
 // plan mínimo que desbloquea cada app (para el mensaje de "Disponible desde…")
 const unlockPlan = appId => {
@@ -147,9 +146,7 @@ const NAVI_ACCOUNTS = {
   ] } },
 };
 
-const appsFor = plan => plan.type === 'familia'
-  ? [...PLAN_ACCESS.familia, ...(plan.lines.every(l => l.gb >= FIT_GB) ? ['fit'] : [])]
-  : PLAN_ACCESS[plan.gb] || [];
+const appsFor = plan => plan.type === 'familia' ? PLAN_ACCESS.familia : PLAN_ACCESS[plan.gb] || [];
 
 // ---------- Número de cliente / Referidos ----------
 // Cada cuenta tiene un número de cliente que asigna el sistema; también es su código de referido.
