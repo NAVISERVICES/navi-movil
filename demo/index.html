@@ -215,6 +215,11 @@ section{position:relative}
 .mult .m .gift{display:block;margin-top:12px;background:var(--ink);color:#fff;border-radius:12px;padding:7px 10px;font-size:13px;line-height:1.2}
 .mult .m .gift b{color:#FFE36E;font-family:var(--display);font-size:16px}
 .mult .m.pop .gift{animation:pricePop .5s cubic-bezier(.3,1.6,.5,1)}
+/* total que recibes al mes: plan + regalo, para que se vea si es el doble o el triple */
+.mult .m .total{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-top:8px;padding:8px 10px;border-radius:12px;background:#ffffff8c;line-height:1.1}
+.mult .m .total span{font-size:12px;font-weight:700}
+.mult .m .total b{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em}
+.mult .m .total em{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:#FFE36E;border-radius:99px;padding:3px 8px}
 /* calendario de 12 regalos */
 .cal{margin-top:16px;background:#ffffff10;border:1px solid #ffffff22;border-radius:22px;padding:14px 14px 12px}
 .cal .boxes{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
@@ -239,6 +244,7 @@ section{position:relative}
   .porta .burst{width:96px;height:96px;right:-6px;top:-34px}.porta .burst b{font-size:24px}.porta .burst div{font-size:11px}
   .mult{gap:10px}.mult .m{padding:16px 14px 14px;border-radius:22px}.mult .m .now{font-size:40px}.mult .m .x{width:42px;height:42px;font-size:17px;top:10px;right:10px}
   .mult .m .gift{font-size:11.5px;padding:6px 8px}.mult .m .gift b{font-size:14px}
+  .mult .m .total{padding:6px 8px;gap:4px}.mult .m .total b{font-size:18px}.mult .m .total em{margin-left:0;font-size:10px}
   .cal .boxes{grid-template-columns:repeat(6,1fr)}
 }
 /* insignia de la promo en las tarjetas de planes */
@@ -994,7 +1000,8 @@ document.querySelectorAll('.tilt').forEach(c => {
   // el número grande es el plan real; el regalo va aparte
   mult.innerHTML = PLANS.map(p => `<div class="m" style="background:${colors[p.color]}"><span class="x">🎁</span>
     <small>TU PLAN</small><div class="now">${p.gb}<span>GB</span></div><div class="mo">al mes · ${money(p.prices.m)}</div>
-    <div class="gift"><b>+${portaGift(p.gb)} GB</b> de regalo cada mes</div></div>`).join('');
+    <div class="gift"><b>+${portaGift(p.gb)} GB</b> de regalo cada mes</div>
+    <div class="total"><span>Total al mes</span><b>${portaGb(p.gb)} GB</b><em>${portaWord(p.gb)}</em></div></div>`).join('');
   const cal = document.getElementById('giftCal');
   cal.innerHTML = Array.from({ length: PORTA_MONTHS }, (_, i) => `<div class="b"><span>${i + 1}</span></div>`).join('');
   // al entrar en pantalla: los regalos "brincan" y el calendario se abre caja por caja
