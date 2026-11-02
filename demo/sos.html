@@ -220,6 +220,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 .overlay.geo > div{margin:auto 0;width:min(400px,100%)}
 .overlay .gi{background:#ffffff12;border-radius:16px;padding:12px;margin:12px auto;text-align:left;font-size:14px;display:grid;gap:4px}
 .overlay .gacts{display:grid;gap:10px;justify-items:center}
+.overlay .mute{display:block;margin:0 0 8px auto;font-size:13px;font-weight:800;padding:8px 14px;border-radius:99px;background:#ffffff26;color:#fff}
 @media (prefers-reduced-motion:reduce){.overlay .big{animation:none}}
 </style>
 </head>
@@ -999,15 +1000,21 @@ if (user && !user.apps.includes('sos')) {
       const ac = new (window.AudioContext || window.webkitAudioContext)(), o = ac.createOscillator(), v = ac.createGain();
       o.type = 'square'; v.gain.value = .05; o.connect(v).connect(ac.destination); o.start();
       let hi = false; const t = setInterval(() => { hi = !hi; o.frequency.setValueAtTime(hi ? 960 : 640, ac.currentTime); }, 450);
-      siren = { ac, t, stop: setTimeout(sirenOff, 60000) };
+      siren = { ac, t, stop: setTimeout(() => { sirenOff(); $('geoOv').querySelector('[data-mute]')?.remove(); }, 60000) };
     } catch {}
+    const box = $('geoOv').firstElementChild;
+    if (box && !box.querySelector('[data-mute]')) box.insertAdjacentHTML('afterbegin', muteBtn());
     try { navigator.vibrate?.([700, 300, 700, 300, 700, 300, 700]); } catch {}
   }
+  // botón siempre visible para callar la sirena sin cerrar la alerta; llamar también la calla
+  const muteBtn = () => siren ? '<button class="mute" type="button" data-mute>🔇 Silenciar alarma</button>' : '';
+  $('geoOv').addEventListener('click', e => { if (!e.target.closest('[data-mute], a')) return; sirenOff(); $('geoOv').querySelector('[data-mute]')?.remove(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && siren) { sirenOff(); $('geoOv').querySelector('[data-mute]')?.remove(); } });
   function sirenOff() { if (siren) { clearInterval(siren.t); clearTimeout(siren.stop); siren.ac.close().catch(() => {}); siren = null; } try { navigator.vibrate?.(0); } catch {} }
   function geoAlarm(g, d, kind, test = false) {
     const ov2 = $('geoOv'), who = members[d.of], off = Math.max(0, distM(d, g) - g.m);
     const sms = g.sms && kind === 'out' && !test && S.contacts.length;
-    ov2.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div>
+    ov2.innerHTML = `<div>${muteBtn()}<div class="big" style="font-size:72px">🚨</div>
       <span class="pill bad" style="background:#ffffff22;color:#fff">${test ? 'PRUEBA DE ALARMA' : 'ALERTA DE GEOCERCA'}</span>
       <h2 id="geoTitle">${kind === 'late' ? `${esc(who.name)} no ha llegado a ${esc(g.name)}` : `${esc(d.name)} salió de la zona ${esc(g.name)}`}</h2>
       <p class="muted" style="color:#ffd6d8">${hhmm(Date.now())} · horario ${schedTxt(g)}</p>
@@ -1145,13 +1152,15 @@ if (user && !user.apps.includes('sos')) {
   function checkSos() {
     const a = S.sos, ov2 = $('geoOv');
     if (!a || a.phone === members[me].phone) return;
-    if (a.active && sosShown !== a.id && !a.seen?.[members[me].phone]) { sosShown = a.id; paintSosAlarm(); ov2.hidden = false; ov2.scrollTop = 0; sirenOn(); }
-    else if (a.active && sosShown === a.id && !ov2.hidden) paintSosAlarm();
-    else if (!a.active && sosShown === a.id) { sosShown = null; if (!ov2.hidden) { sirenOff(); ov2.hidden = true; } toast(`✅ ${a.name} terminó la alerta: está bien`); }
+    const mineSeen = a.seen?.[members[me].phone];
+    if (a.active && sosShown !== a.id && !mineSeen) { sosShown = a.id; paintSosAlarm(); ov2.hidden = false; ov2.scrollTop = 0; sirenOn(); }
+    // si la atendí en otra pestaña o ventana, aquí también se calla
+    else if (a.active && sosShown === a.id && !ov2.hidden) { if (mineSeen) { sirenOff(); ov2.hidden = true; } else paintSosAlarm(); }
+    else if (!a.active && sosShown === a.id) { sosShown = null; sirenOff(); ov2.hidden = true; toast(`✅ ${a.name} terminó la alerta: está bien`); }
   }
   function paintSosAlarm() {
     const a = S.sos, m = sosWho(a), ov2 = $('geoOv'), go = sosNames(a, 'going'), seen = sosNames(a, 'seen').filter(n => !go.includes(n));
-    ov2.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div>
+    ov2.innerHTML = `<div>${muteBtn()}<div class="big" style="font-size:72px">🚨</div>
       <span class="pill bad" style="background:#ffffff22;color:#fff">ALERTA SOS</span>
       <h2 id="geoTitle">${esc(a.name)} activó SOS</h2>
       <p class="muted" style="color:#ffd6d8">${hhmm(a.t)} · ${ago((Date.now() - a.t) / MIN)}</p>
