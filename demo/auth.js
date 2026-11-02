@@ -15,7 +15,7 @@ const NAVI_APPS = [
   { id: 'videos', name: 'Videos',             icon: '▶️', color: '#FF9A6B', desc: 'Canales NAVI y cuentos animados para toda la familia.', href: 'videos.html' },
   { id: 'agenda', name: 'Agenda',             icon: '📅', color: '#7EE0FF', desc: 'Organiza visitas y actividades en un calendario; al terminarlas se quitan solas.', href: 'agenda.html' },
   { id: 'referidos', name: 'Referidos',       icon: '🤝', color: '#2BD67B', desc: 'Comparte tu código: por cada 5 amigos que contraten, tú tienes un mes gratis.', href: 'referidos.html' },
-  { id: 'conecta', name: 'Navi Conecta',      icon: '🫶', color: '#FF9EC7', desc: 'La red social de los clientes Navi: conecta con personas y familias verificadas.', href: 'conecta.html' },
+  { id: 'conecta', name: 'Navi Conecta',      icon: '🔗', color: '#6FD3FF', desc: 'La red social de los clientes Navi: conecta con personas y familias verificadas.', href: 'conecta.html' },
   { id: 'fit',    name: 'NAVI Fit',          icon: '💪', color: '#FF7A45', desc: 'Reto de calistenia de 30 días en casa, sin aparatos, con entrenamientos guiados.', href: 'fit.html' },
   { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
     // app funcional dentro de la suite: usa la sesión de Mi Navi, sin volver a iniciar sesión

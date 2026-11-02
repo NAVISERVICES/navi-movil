@@ -13,10 +13,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
 <link rel="stylesheet" href="suite.css?v=20261030d">
-<script src="auth.js?v=20261101d"></script>
+<script src="auth.js?v=20261101e"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=conecta.html');</script>
 <style>
-:root{--cx:#FF9EC7}
+:root{--cx:#6FD3FF}
 main{padding-bottom:90px}
 .muted{color:var(--muted);font-size:14px}
 .hint{font-size:12px;color:var(--muted)}
@@ -60,7 +60,7 @@ main{padding-bottom:90px}
 .pcard .body{padding:20px 22px 22px}
 .pcard h2{font-size:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pcard .meta{color:var(--muted);font-size:14px;margin-top:4px}
-.pcard .goal{display:inline-flex;gap:6px;align-items:center;margin-top:12px;background:#FF9EC722;color:var(--cx);border-radius:12px;padding:7px 12px;font-size:13px;font-weight:700}
+.pcard .goal{display:inline-flex;gap:6px;align-items:center;margin-top:12px;background:#6FD3FF22;color:var(--cx);border-radius:12px;padding:7px 12px;font-size:13px;font-weight:700}
 .pcard .bio{margin-top:12px;font-size:15px}
 .ints{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .ints span{font-size:13px;font-weight:600;padding:6px 11px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff18}
@@ -70,7 +70,7 @@ main{padding-bottom:90px}
 .acts button{width:70px;height:70px;border-radius:50%;font-size:28px;display:grid;place-items:center;transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
 .acts button:hover{transform:scale(1.08)}
 .acts .no{background:#ffffff14;border:2px solid #ffffff30}
-.acts .yes{background:var(--cx);box-shadow:0 6px 0 #c2558a;color:var(--ink);width:84px;height:84px;font-size:34px}
+.acts .yes{background:var(--cx);box-shadow:0 6px 0 #2A8FBF;color:var(--ink);width:84px;height:84px;font-size:34px}
 .acts small{display:block;text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
 .side .card + .card{margin-top:14px}
 .side h3{font-size:18px;margin-bottom:8px}
@@ -103,7 +103,7 @@ main{padding-bottom:90px}
 .msg.me{align-self:flex-end;background:var(--cx);color:var(--ink);border-bottom-left-radius:18px;border-bottom-right-radius:6px}
 .msg small{display:block;font-size:10.5px;opacity:.6;margin-top:3px}
 .msg.plan{border:2px dashed currentColor;background:none}
-.msg.me.plan{background:#FF9EC733;color:var(--text);border-color:var(--cx)}
+.msg.me.plan{background:#6FD3FF33;color:var(--text);border-color:var(--cx)}
 .sys{align-self:center;font-size:12px;color:var(--muted);background:#ffffff0a;border-radius:99px;padding:5px 12px;text-align:center}
 .tip{margin:10px 14px 0;background:#FFC22E1a;border:1px solid #FFC22E55;border-radius:14px;padding:10px 12px;font-size:13px}
 .tip b{color:var(--yellow)}
@@ -120,7 +120,7 @@ main{padding-bottom:90px}
 @media (max-width:900px){.pf{grid-template-columns:1fr}}
 .seg{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 .seg button{padding:10px 16px;border-radius:14px;border:2px solid #ffffff25;font-weight:700;font-size:14px}
-.seg button[aria-pressed="true"]{border-color:var(--cx);background:#FF9EC71f}
+.seg button[aria-pressed="true"]{border-color:var(--cx);background:#6FD3FF1f}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg .full{grid-column:1/-1}
 @media (max-width:560px){.fg{grid-template-columns:1fr}}
@@ -134,7 +134,7 @@ main{padding-bottom:90px}
 .pick button[aria-pressed="true"]{background:var(--cx);border-color:var(--cx);color:var(--ink)}
 .sw{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#ffffff0a;border-radius:14px;padding:12px 14px}
 .sw input{width:44px;height:24px;accent-color:var(--cx)}
-.btn-cx{background:var(--cx);color:var(--ink);box-shadow:0 6px 0 #c2558a}
+.btn-cx{background:var(--cx);color:var(--ink);box-shadow:0 6px 0 #2A8FBF}
 .wide{width:100%;justify-content:center}
 .preview{position:sticky;top:90px}
 .preview .pcard{max-width:none;animation:none}
@@ -147,13 +147,12 @@ main{padding-bottom:90px}
 .ov{position:fixed;inset:0;z-index:90;background:#03031ad9;display:grid;place-items:center;padding:16px}
 .ov[hidden]{display:none}
 .ov > div{width:min(460px,100%);background:var(--navy-2);border:1px solid #ffffff22;border-radius:28px;padding:26px;max-height:calc(100dvh - 32px);overflow:auto}
-.match{text-align:center;background:radial-gradient(circle at 50% 0,#FF9EC755,transparent 60%),var(--navy-2)!important}
+.match{text-align:center;background:radial-gradient(circle at 50% 0,#6FD3FF55,transparent 60%),var(--navy-2)!important}
 .match h2{font-family:var(--display);font-size:40px;color:var(--cx);margin:6px 0}
 .match .pair{display:flex;justify-content:center;align-items:center;margin:18px 0}
 .match .pair .av{width:110px;height:110px;font-size:54px;border:4px solid var(--cx);animation:pairin .5s cubic-bezier(.3,1.6,.5,1)}
 .match .pair .av.fam{width:150px;border:0}
-.match .pair .av:first-child{margin-right:-14px;transform:rotate(-8deg)}
-.match .pair .av:last-child{transform:rotate(8deg)}
+.match .pair .av:first-child{margin-right:-14px}
 @keyframes pairin{from{transform:scale(.3)}}
 .match .heart{position:relative;z-index:2;font-size:34px;margin:0 -8px}
 .ov h3{font-size:22px;margin-bottom:8px}
@@ -173,7 +172,7 @@ main{padding-bottom:90px}
 
 <main class="wrap">
   <div class="title">
-    <div class="ico" style="background:var(--cx)">🫶</div>
+    <div class="ico" style="background:var(--cx)">🔗</div>
     <div><h1>Navi Conecta</h1><p>La red social de los clientes Navi: conecta con personas y familias verificadas.</p></div>
   </div>
   <div id="app"></div>
@@ -296,7 +295,7 @@ function render() {
 }
 
 function viewNeedProfile() {
-  $('view').innerHTML = `<section class="card gate"><div class="big">🫶</div><h2>Crea tu perfil para empezar</h2>
+  $('view').innerHTML = `<section class="card gate"><div class="big">🔗</div><h2>Crea tu perfil para empezar</h2>
     <p class="muted">Cuéntale a otros clientes Navi qué te gusta y qué buscas. Solo verán tu nombre, zona e intereses: nunca tu número.</p>
     <div class="seg" style="justify-content:center;margin-top:18px">
       <button class="btn btn-cx" data-new="p">🙋 Perfil personal</button>
@@ -338,7 +337,7 @@ function viewExplore() {
   $('view').innerHTML = `<div class="explore"><div>
       <div class="filters">${[['all', 'Todos'], ['p', '🙋 Personas'], ['f', '👨‍👩‍👧 Familias']].map(([k, n]) => `<button data-f="${k}" aria-pressed="${filt === k}">${n}</button>`).join('')}
         ${goals.map(g => `<button data-g="${esc(g)}" aria-pressed="${goalF === g}">${esc(g)}</button>`).join('')}</div>
-      ${p ? `${cardHTML(p)}<div class="acts"><div><button class="no" id="no" aria-label="Pasar">✕</button><small>Pasar</small></div><div><button class="yes" id="yes" aria-label="Conectar">🫶</button><small>Conectar</small></div></div>
+      ${p ? `${cardHTML(p)}<div class="acts"><div><button class="no" id="no" aria-label="Pasar">✕</button><small>Pasar</small></div><div><button class="yes" id="yes" aria-label="Conectar">🤝</button><small>Conectar</small></div></div>
         <p class="hint" style="text-align:center;max-width:560px;margin-top:10px">${list.length - 1} perfiles más por ver · Solo si los dos dicen “Conectar” se abre el chat.</p>`
       : `<section class="card done"><div class="big">✨</div><h2>Ya viste todos los perfiles</h2><p class="muted">Vuelve pronto: cada semana se suman clientes nuevos. ¿Conoces a alguien que no es Navi?</p>
         <div class="seg" style="justify-content:center;margin-top:14px"><a class="btn btn-cx" href="referidos.html">Invítalo con tu código</a><button class="btn btn-ghost" id="again">Ver de nuevo los que pasé</button></div></section>`}
@@ -346,7 +345,7 @@ function viewExplore() {
     <aside class="side">
       <section class="card"><h3>Así funciona</h3><ul>
         <li>🔎<span>Ves perfiles ordenados por afinidad contigo.</span></li>
-        <li>🫶<span>Si los dos tocan “Conectar”, es match y se abre el chat.</span></li>
+        <li>🤝<span>Si los dos tocan “Conectar”, quedan conectados y se abre el chat.</span></li>
         <li>🔒<span>Tu número nunca se muestra. Tú decides si lo compartes.</span></li></ul></section>
       <section class="card"><h3>Comunidad segura</h3><ul>
         <li>✓<span>Todos son clientes Navi con línea verificada.</span></li>
@@ -363,7 +362,7 @@ function viewExplore() {
   $('no').onclick = () => swipe('out-l', () => { (D.passes[actingId()] = D.passes[actingId()] || []).push(p.id); save(); viewExplore(); });
   $('yes').onclick = () => swipe('out-r', () => {
     (D.likes[actingId()] = D.likes[actingId()] || []).push(p.id); save();
-    if (isMatch(p.id)) { showMatch(p); render(); } else { toast(`Le avisamos a ${p.name}. Si también conecta contigo, es match.`); viewExplore(); }
+    if (isMatch(p.id)) { showMatch(p); render(); } else { toast(`Le avisamos a ${p.name}. Si también conecta contigo, quedan conectados.`); viewExplore(); }
   });
   $('more').onclick = () => safety(p, () => viewExplore());
 }
@@ -371,9 +370,9 @@ function viewExplore() {
 function showMatch(p) {
   const m = me();
   $('ov').hidden = false;
-  $('ov').innerHTML = `<div class="match"><div style="font-size:14px;font-weight:800;letter-spacing:.14em;color:var(--muted)">NAVI CONECTA</div><h2>¡Es un match!</h2>
+  $('ov').innerHTML = `<div class="match"><div style="font-size:14px;font-weight:800;letter-spacing:.14em;color:var(--muted)">NAVI CONECTA</div><h2>¡Nueva conexión!</h2>
     <p class="muted">Tú y ${esc(p.name)} quieren conectar.</p>
-    <div class="pair">${avatar(m)}<span class="heart">🫶</span>${avatar(p)}</div>
+    <div class="pair">${avatar(m)}<span class="heart">🤝</span>${avatar(p)}</div>
     <button class="btn btn-cx wide" id="mGo">Escribir mensaje</button><button class="btn btn-ghost wide" id="mLater" style="margin-top:10px">Seguir explorando</button></div>`;
   $('mGo').onclick = () => { $('ov').hidden = true; tab = 'cx'; openChat = p.id; render(); };
   $('mLater').onclick = () => { $('ov').hidden = true; render(); };
@@ -402,7 +401,7 @@ const REPLIES = {
   '🚀 Emprender juntos': ['¡Hola! Cuéntame de tu idea 💡', 'Suena muy bien. ¿Hacemos una llamada para platicarlo?'],
   '🧒 Amigos para los niños': ['¡Hola! A los niños les va a encantar 😊 ¿Qué edades tienen los suyos?', 'Nosotros vamos al parque los sábados en la mañana, ¿se apuntan?'],
   '🌳 Planes de fin de semana': ['¡Hola familia! ¿Qué tipo de planes les gustan?', '¡Perfecto! Les compartimos cuando organicemos el próximo.'],
-  '🫂 Red de apoyo entre papás': ['¡Hola! Qué bueno encontrar a otros papás cerca 🫶', 'Cuando quieran nos tomamos un café y platicamos.'],
+  '🫂 Red de apoyo entre papás': ['¡Hola! Qué bueno encontrar a otros papás cerca 🙌', 'Cuando quieran nos tomamos un café y platicamos.'],
 };
 const reply = (p, n) => (REPLIES[p.goal] || ['¡Hola! Gracias por conectar 😊 ¿Qué tal tu día?', '¡Qué bien! Platiquemos más.'])[Math.min(n, 1)];
 const fmtT = t => new Date(t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
@@ -422,7 +421,7 @@ function viewConnections() {
   const isUnread = p => { const l = last(p); return l && l.from !== actingId() && (D.seen[actingId() + '>' + p.id] || 0) < l.t; };
   $('view').innerHTML = `<div class="cx ${openChat ? 'chatting' : ''}"><div class="list">
       <p class="hint" style="margin:0 0 4px 4px">${list.length} ${list.length === 1 ? 'conexión' : 'conexiones'}</p>
-      ${list.map(p => { const l = last(p); return `<button class="row" data-c="${p.id}" aria-pressed="${openChat === p.id}">${avatar(p)}<span style="min-width:0"><b>${esc(p.name)}</b><small>${l ? esc((l.from === actingId() ? 'Tú: ' : '') + l.txt) : 'Nuevo match · ¡salúdalo!'}</small></span>${isUnread(p) ? '<i class="dot"></i>' : ''}</button>`; }).join('')}
+      ${list.map(p => { const l = last(p); return `<button class="row" data-c="${p.id}" aria-pressed="${openChat === p.id}">${avatar(p)}<span style="min-width:0"><b>${esc(p.name)}</b><small>${l ? esc((l.from === actingId() ? 'Tú: ' : '') + l.txt) : 'Nueva conexión · ¡salúdalo!'}</small></span>${isUnread(p) ? '<i class="dot"></i>' : ''}</button>`; }).join('')}
     </div><div class="chat" id="chat">${openChat ? '' : '<div class="done" style="margin:auto"><div class="big">💬</div><p class="muted">Elige una conexión para platicar.</p></div>'}</div></div>`;
   document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { openChat = b.dataset.c; viewConnections(); });
   if (openChat) chatView(prof(openChat));
@@ -435,7 +434,7 @@ function chatView(p) {
   $('chat').innerHTML = `<div class="hd"><button class="back2" id="bk" aria-label="Volver">←</button>${avatar(p)}<div><b>${esc(p.name)}</b> <span class="ver">✓ Cliente Navi</span><div class="hint">📍 ${esc(p.zona)}</div></div>
       <div class="opts"><button id="cProf">Ver perfil</button><button id="cSafe">⋯</button></div></div>
     ${firstTip ? `<div class="tip">🛡️ <b>Antes de verse:</b> elijan un lugar público, avisen a alguien a dónde van y no compartan datos bancarios. <button class="lnk" id="tipOk" style="text-decoration:underline;font-weight:700">Entendido</button></div>` : ''}
-    <div class="msgs" id="msgs"><div class="sys">🫶 Hicieron match · Sus números no se comparten</div>
+    <div class="msgs" id="msgs"><div class="sys">🤝 Ya están conectados · Sus números no se comparten</div>
       ${msgs.map(m => `<div class="msg ${m.from === actingId() ? 'me' : ''} ${m.plan ? 'plan' : ''}">${esc(m.txt)}<small>${fmtT(m.t)}</small></div>`).join('')}</div>
     <div class="quick">${PLANS.map(([e, n]) => `<button data-plan="${n}">${e} Proponer ${n.toLowerCase()}</button>`).join('')}</div>
     <form class="send" id="sendF"><input id="txt" placeholder="Escribe un mensaje…" autocomplete="off" maxlength="500"><button>Enviar</button></form>`;
