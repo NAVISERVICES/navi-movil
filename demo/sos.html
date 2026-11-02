@@ -80,6 +80,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 /* mapa */
 .mapwrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:var(--map)}
 .mapwrap svg{display:block;width:100%;height:auto}
+.osm{position:absolute;right:8px;bottom:6px;font-size:10px;color:#ffffffb0;background:#06062E99;padding:1px 6px;border-radius:6px}
 .pin{cursor:pointer}
 .pin text{font-family:var(--body);font-weight:800}
 .zone-label{font-family:var(--body);font-size:10px;font-weight:800}
@@ -272,7 +273,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
   <section data-tab="mapa">
     <span class="eyebrow">Familia Navi</span>
     <h1>Mapa</h1>
-    <div class="mapwrap"><svg viewBox="0 0 400 330" id="map" role="img" aria-label="Mapa de la familia"></svg></div>
+    <div class="mapwrap"><svg viewBox="0 0 400 330" id="map" role="img" aria-label="Mapa de la familia en la Ciudad de México"></svg><small class="osm">© OpenStreetMap</small></div>
     <div class="chips" id="chips"></div>
     <div class="card sheet" id="memberSheet"></div>
   </section>
@@ -416,6 +417,13 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 </nav></div>
 
 <div class="overlay" id="sosOv" hidden role="alertdialog" aria-modal="true" aria-labelledby="sosTitle"></div>
+<!-- filtro compartido: convierte el mapa de la CDMX a modo oscuro con el azul de Navi -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="mdark" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
+    <feColorMatrix type="hueRotate" values="180"/>
+    <feColorMatrix type="matrix" values=".62 0 0 0 .03  0 .62 0 0 .04  0 0 .72 0 .2  0 0 0 1 0"/>
+  </filter></defs></svg>
 <div class="overlay geo" id="geoOv" hidden role="alertdialog" aria-modal="true" aria-labelledby="geoTitle"></div>
 <div class="news" id="newsOv" hidden role="dialog" aria-modal="true" aria-labelledby="newsTitle"></div>
 <div class="toast" id="toast" role="status"></div>
@@ -498,7 +506,7 @@ if (user && !user.apps.includes('sos')) {
   const STALE = 30;
   const stale = m => !m.invited && !(m.i === me && S.paused) && m.seen >= STALE;
   // dirección de ejemplo de cada lugar (en producción, la dirección real del GPS)
-  const ADDR = { casa: 'Av. Coyoacán 1435, Del Valle', escuela: 'Calle Amores 210, Narvarte', trabajo: 'Insurgentes Sur 1602, Crédito Constructor', gym: 'Eje 7 Sur 85, Insurgentes Mixcoac' };
+  const ADDR = { casa: 'Gral. José Morán 85, San Miguel Chapultepec', escuela: 'Av. Horacio 1040, Polanco', trabajo: 'Antonio Caso 68, San Rafael', gym: 'Córdoba 120, Roma Norte' };
   const status = m => {
     if (m.invited) return 'Falta verificar su número';
     if (m.i === me && S.paused) return 'Ubicación en pausa';
@@ -627,15 +635,9 @@ if (user && !user.apps.includes('sos')) {
     const off = [[0, 0], [14, -10], [-12, 10], [10, 12]][m.i % 4];
     return { x: pl.x + off[0], y: pl.y + off[1] };
   };
-  // calles, avenidas y parques (lo comparten el mapa, las miniaturas y el editor de geocercas)
-  const baseMap = () => {
-    let g = `<rect x="-100" y="-100" width="600" height="530" fill="#1A1D72"/>`;
-    for (let x = 20; x < 400; x += 46) g += `<path d="M${x} -100V430" stroke="#2D35A0" stroke-width="${x % 92 ? 3 : 6}"/>`;
-    for (let y = 18; y < 330; y += 42) g += `<path d="M-100 ${y}H500" stroke="#2D35A0" stroke-width="${y % 84 ? 3 : 6}"/>`;
-    g += `<path d="M-10 300L410 40" stroke="#3B46B8" stroke-width="10"/><path d="M60 -10L240 340" stroke="#3B46B8" stroke-width="7"/>`;
-    [[200, 120, 50, 40], [30, 140, 40, 34], [240, 170, 44, 36], [160, 270, 38, 34]].forEach(([x, y, w, h]) => g += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#1E5A4E"/>`);
-    return g;
-  };
+  // mapa real de la CDMX (Polanco, Anzures, Chapultepec, Condesa, Roma) en modo oscuro con el filtro #mdark;
+  // lo comparten el mapa, las miniaturas y el editor de geocercas
+  const baseMap = () => `<rect x="-100" y="-100" width="600" height="530" fill="#0E1050"/><image href="assets/mapa-cdmx.jpg" x="0" y="-35" width="400" height="400" filter="url(#mdark)"/>`;
   // integrante vigilado (miniatura y editor): su color, con ⌚ si su SIM va en un reloj
   const devPin = d => { const P = devPos(d); return `<g transform="translate(${P.x} ${P.y})"><circle r="10" fill="#06062E"/><circle r="8" fill="${d.color}"/><text y="4" text-anchor="middle" font-size="${d.kind === 'watch' ? 10 : 9}" font-weight="800" fill="#06062E" font-family="DM Sans,sans-serif">${d.kind === 'watch' ? '⌚' : esc(members[d.of].name[0].toUpperCase())}</text></g>`; };
   const geoCircle = g => { const d = dev(g.dev), out = d && g.on && distM(d, g) > g.m;
@@ -666,14 +668,14 @@ if (user && !user.apps.includes('sos')) {
     drawMap();
     $('chips').innerHTML = onMap().map(m => `<button data-m="${m.i}" aria-pressed="${m.i === selM}">${avatar(m, 30)}<span><b>${m.i === me ? 'Tú' : m.name}</b><small>${ago(m.seen)}</small></span></button>`).join('');
     const m = members[selM], st = status(m), exp = S.expects[m.i];
-    // distancia desde ti (el lienzo del mapa mide ~12 km de ancho)
-    const P = posOf(m), Q = posOf(members[me]), km = Math.hypot(P.x - Q.x, P.y - Q.y) * 0.03;
+    // distancia desde ti (el mapa de Polanco a la Roma mide ~4.5 km de ancho)
+    const P = posOf(m), Q = posOf(members[me]), km = Math.hypot(P.x - Q.x, P.y - Q.y) * 0.011;
     const paused = m.i === me && S.paused;
     const etaMin = m.route ? Math.max(1, Math.round((1 - (P.p ?? .45)) * 16)) : 0, etaAt = new Date(Date.now() + etaMin * MIN);
     const by0 = new Date(+etaAt + 5 * MIN);
     $('memberSheet').innerHTML = `<div class="row">${avatar(m, 48)}<div style="flex:1;min-width:0"><h2 style="margin:0">${m.i === me ? m.name + ' (Tú)' : m.name}</h2>
       <div class="muted">${st} · actualizado ${ago(m.seen)}</div></div><span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>
-      ${paused ? '' : `<div class="addr">📍 ${m.route ? 'Av. Universidad, en movimiento' : esc(ADDR[m.at] || place(m.at)?.name || '')}${m.i !== me ? ` · a ${km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1) + ' km'} de ti` : ''}${m.kmh ? ` · ${m.kmh} km/h` : ''}</div>`}
+      ${paused ? '' : `<div class="addr">📍 ${m.route ? 'Calzada Mahatma Gandhi, en movimiento' : esc(ADDR[m.at] || place(m.at)?.name || '')}${m.i !== me ? ` · a ${km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1) + ' km'} de ti` : ''}${m.kmh ? ` · ${m.kmh} km/h` : ''}</div>`}
       ${m.bat <= 15 ? '<p class="pill bad" style="display:inline-block;margin-top:10px">Batería baja</p>' : ''}
       ${exp && !exp.fired ? `<p class="pill" style="display:inline-block;margin-top:10px">⏰ Te avisamos si no llega a ${esc(exp.to)} antes de las ${exp.by}</p>` : ''}
       ${stale(m) ? `<div class="fix"><b>Su ubicación no se actualiza desde hace ${ago(m.seen).replace('hace ', '')}.</b> No es que algo le pase: casi siempre es un ajuste del teléfono (ubicación desactivada, ahorro de batería o sin permiso en segundo plano).<br><button data-a="fix">🔧 Pedir que lo revise</button></div>` : ''}
@@ -988,7 +990,7 @@ if (user && !user.apps.includes('sos')) {
       <span class="pill bad" style="background:#ffffff22;color:#fff">${test ? 'PRUEBA DE ALARMA' : 'ALERTA DE GEOCERCA'}</span>
       <h2 id="geoTitle">${kind === 'late' ? `${esc(who.name)} no ha llegado a ${esc(g.name)}` : `${esc(d.name)} salió de la zona ${esc(g.name)}`}</h2>
       <p class="muted" style="color:#ffd6d8">${hhmm(Date.now())} · horario ${schedTxt(g)}</p>
-      <div class="gi"><div>📍 ${kind === 'late' ? 'Última ubicación: fuera de la zona' : off ? `Está a ${off} m fuera del límite` : 'Justo en el límite de la zona'}${kind === 'late' ? '' : ' · Calle Amores esq. Eje 5 Sur'}</div>
+      <div class="gi"><div>📍 ${kind === 'late' ? 'Última ubicación: fuera de la zona' : off ? `Está a ${off} m fuera del límite` : 'Justo en el límite de la zona'}${kind === 'late' ? '' : ' · Calzada Mahatma Gandhi'}</div>
         <div>${devIco(d)} Línea ${fmtPhone(d.tel)} · en su ${d.gear} · 🔋 ${d.bat}%</div><div>⭕ Zona de ${g.m} m alrededor de ${esc(g.name)}</div></div>
       <div class="list">${members.filter(m => m.i !== me && !m.invited).map(m => `<div><span>${esc(m.name)}</span><b>Alarma en la app</b></div>`).join('')}
         ${sms ? S.contacts.map(c => `<div><span>${esc(c.n)} · ${fmtPhone(c.tel)}</span><b>SMS con mapa</b></div>`).join('') : ''}</div>
