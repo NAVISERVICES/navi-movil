@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Manual de uso · Navi Móvil</title>
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<style>
+.doc{display:grid;grid-template-columns:250px 1fr;gap:36px;align-items:start}
+@media (max-width:900px){.doc{grid-template-columns:1fr}.toc{position:static!important;max-height:none!important}}
+.toc{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;background:var(--navy-2);border:1px solid #ffffff18;border-radius:20px;padding:16px}
+.toc b{display:block;font-size:12px;letter-spacing:.12em;color:var(--lime);margin-bottom:8px}
+.toc a{display:block;padding:5px 8px;border-radius:8px;font-size:14px;color:var(--muted)}
+.toc a:hover{background:#ffffff0d;color:#fff}
+.toc a.sub{padding-left:20px;font-size:13px}
+article{max-width:820px;line-height:1.65}
+article h2{font-size:30px;margin:44px 0 10px;scroll-margin-top:84px;padding-top:6px;border-top:1px solid #ffffff14}
+article h2:first-of-type{border:0;margin-top:0}
+article h3{font-size:20px;margin:24px 0 6px;scroll-margin-top:84px}
+article p,article li{color:#DCD9FF;font-size:15.5px}
+article ul,article ol{margin:6px 0 10px 22px;display:grid;gap:4px}
+article a{color:var(--lime);text-decoration:underline;text-underline-offset:3px}
+article code{background:#ffffff14;border-radius:6px;padding:1px 6px;font-size:13.5px}
+.tip,.warn{border-radius:14px;padding:12px 14px;margin:12px 0;font-size:14.5px}
+.tip{background:#b4e32f14;border:1px solid #b4e32f55}
+.warn{background:#FFC22E14;border:1px solid #FFC22E66}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #ffffff14;vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tw{overflow:auto;background:var(--navy-2);border:1px solid #ffffff18;border-radius:14px;margin:10px 0}
+.hero-m{background:linear-gradient(120deg,var(--lime),#d8f77a);color:var(--ink);border-radius:26px;padding:26px;margin-bottom:26px}
+.hero-m h1{font-size:clamp(32px,4.5vw,48px)}
+.hero-m p{color:#2b2b4f;max-width:640px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0}
+.cards a{display:block;background:var(--navy-2);border:1px solid #ffffff18;border-radius:14px;padding:12px;text-decoration:none;color:var(--text)}
+.cards a b{display:block}
+.cards a span{font-size:13px;color:var(--muted)}
+@media print{header.top,.toc{display:none}.doc{display:block}body{background:#fff;color:#000}article p,article li{color:#222}.hero-m{border:1px solid #999}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="index.html">← <span>Navi Móvil</span></a>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero-m"><small style="font-weight:800;letter-spacing:.14em">MANUAL DE USO · NOVIEMBRE 2026</small><h1>Todo lo que hace Navi Móvil</h1>
+    <p>Guía de la página, la app Mi Navi y sus apps, la atención al cliente 24/7 y la consola interna Navi Central. Sirve para el equipo de Navi y para capacitar a asesores.</p>
+    <button class="btn btn-ink" onclick="print()" style="margin-top:12px">Imprimir o guardar en PDF</button></section>
+  <div class="doc">
+    <nav class="toc" aria-label="Contenido"><b>CONTENIDO</b>
+      <a href="#inicio">1. Antes de empezar</a><a class="sub" href="#cuentas">Cuentas de prueba</a>
+      <a href="#sitio">2. La página pública</a><a class="sub" href="#comprar">Comprar una línea</a><a class="sub" href="#porta">Portabilidad</a><a class="sub" href="#recargas">Recargas</a><a class="sub" href="#empresas">Empresas</a>
+      <a href="#minavi">3. Mi Navi</a>
+      <a href="#apps">4. Las apps de Mi Navi</a><a class="sub" href="#sos">NAVI SOS Family</a><a class="sub" href="#boton">Botón SOS en la pantalla</a><a class="sub" href="#fit">NAVI Fit</a><a class="sub" href="#conecta">Navi Conecta</a><a class="sub" href="#otras">Agenda, Referidos y más</a>
+      <a href="#atencion">5. Atención 24/7</a>
+      <a href="#central">6. Navi Central</a><a class="sub" href="#desk">Front desk</a><a class="sub" href="#ficha">Clientes y ficha</a><a class="sub" href="#proactivo">Proactivo</a><a class="sub" href="#privacidad">Privacidad</a>
+      <a href="#reglas">7. Reglas de negocio</a>
+      <a href="#publicar">8. Cómo se publica</a>
+      <a href="#produccion">9. Demo vs. producción</a>
+    </nav>
+    <article>
+      <h2 id="inicio">1. Antes de empezar</h2>
+      <p>Todo vive en <a href="https://www.navimovil.com/demo/">www.navimovil.com/demo</a>. La raíz del dominio muestra “Muy pronto” mientras el sitio está en prueba. Navi Repair Center y Navi Shop están en <a href="https://www.navirepaircenter.com/demo/">www.navirepaircenter.com/demo</a>.</p>
+      <div class="warn"><b>Importante:</b> hoy es una demostración. Lo que se guarda (cuentas, pedidos, chats, avances) se queda en el navegador de quien lo usa, no en un servidor. No se cobran pagos reales ni se envían SMS o WhatsApp reales.</div>
+      <div class="cards">
+        <a href="index.html"><b>Página principal</b><span>Planes, Plan Familia, regalo de bienvenida</span></a>
+        <a href="login.html"><b>Mi Navi</b><span>La app del cliente</span></a>
+        <a href="central/"><b>Navi Central</b><span>Consola interna</span></a>
+        <a href="whatsapp.html"><b>WhatsApp de prueba</b><span>Simula el chat de clientes</span></a>
+      </div>
+      <h3 id="cuentas">Cuentas de prueba</h3>
+      <p>En Mi Navi se entra con el número. Estas cuentas ya existen:</p>
+      <div class="tw"><table><thead><tr><th>Número</th><th>Cuenta</th><th>Plan</th><th>Para probar</th></tr></thead><tbody>
+        <tr><td><code>55 0000 0001</code></td><td>Sofía Ramírez</td><td>2 GB mensual</td><td>Plan básico: NAVI SOS bloqueado</td></tr>
+        <tr><td><code>55 0000 0002</code></td><td>Luis Pérez</td><td>12 GB trimestral</td><td>Portó desde AT&amp;T: regalo de bienvenida, SOS</td></tr>
+        <tr><td><code>55 0000 0003</code></td><td>Carla Ruiz</td><td>24 GB anual</td><td>Todas las apps</td></tr>
+        <tr><td><code>55 0000 0004</code></td><td>Familia García · Papá (titular)</td><td>Plan Familia, 4 × 12 GB</td><td>Funciones del titular, perfil familiar en Conecta</td></tr>
+        <tr><td><code>55 0000 0005 / 06 / 07</code></td><td>Mamá, Sofi, Toño</td><td>Integrantes</td><td>Vista de integrante; Sofi y Toño son menores</td></tr>
+      </tbody></table></div>
+
+      <h2 id="sitio">2. La página pública</h2>
+      <p>El menú lleva a: Plan Familia, Planes individuales, Tranquilidad (NAVI SOS), Recargas, Portabilidad, Cobertura, Checa tu cel y Empresas. Abajo a la derecha siempre está el botón <b>💬 ¿Te ayudamos?</b> del asistente.</p>
+      <ul>
+        <li><b>Regalo de bienvenida:</b> quien trae su número desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile recibe GB de regalo cada mes por 12 meses. El panel muestra el total por plan (2 GB → 4 GB, el doble; 4, 12 y 24 GB → el triple).</li>
+        <li><b>Planes individuales:</b> 2, 4, 12 y 24 GB en mensual, trimestral, semestral o anual. Cada tarjeta muestra lo que incluye: minutos y SMS ilimitados, hotspot y redes sociales (WhatsApp, Facebook, Instagram, X y Snapchat).</li>
+        <li><b>Arma tu Plan Familia:</b> de 2 a 4 líneas con el mismo plan; 5% menos por cada línea extra.</li>
+        <li><b>Cobertura:</b> consulta por código postal sobre la Red Compartida de Altán.</li>
+        <li><b>Checa tu cel:</b> con el IMEI (<code>*#06#</code>) dice si el equipo es compatible.</li>
+      </ul>
+      <h3 id="comprar">Comprar una línea</h3>
+      <ol><li><b>Tu plan:</b> una línea o Plan Familia, periodo y GB. Se ve el precio por GB y por día y el folio de tarifa ante la CRT.</li>
+        <li><b>Chip o eSIM</b> y, si aplica, el IMEI de cada equipo.</li>
+        <li><b>Tus datos:</b> persona (nombre y CURP, que se valida contra el nombre) o negocio (razón social). Factura opcional y dirección de envío cotizada por código postal.</li>
+        <li><b>Pago:</b> tarjeta, transferencia o efectivo. El pedido queda con folio y estado (pagado, pendiente o rechazado, con opción de reintentar).</li></ol>
+      <h3 id="porta">Portabilidad</h3>
+      <p>El cliente marca <b>051</b> desde su línea actual para recibir su NIP, captura número, NIP y su número Navi, y recibe un folio <code>PORT-AAMMDD-XXXXXX</code> con fecha estimada. El NIP no se guarda. Con el folio puede consultar el avance.</p>
+      <h3 id="recargas">Recargas</h3>
+      <p>Se hacen dentro de la sesión de Mi Navi: se elige la línea (en familia, cualquiera de las líneas), el paquete (2, 4, 12 o 24 GB, 30 días) y se paga. El comprobante tiene folio, y los GB se suman al saldo en cuanto se confirma el pago.</p>
+      <h3 id="empresas">Empresas</h3>
+      <p>La página <a href="empresas.html">Empresas</a> presenta a NAVICom: líneas empresariales, eSIM, internet para negocio, aplicaciones SaaSOC (SOS Family, SOS Kids, Safe City, PTT, Track, IoT), tecnología y un formulario de propuesta que abre un correo a info@naviservices.net.</p>
+
+      <h2 id="minavi">3. Mi Navi</h2>
+      <p>Se entra en <a href="login.html">login.html</a> con el número. En Plan Familia cada integrante entra con su propia línea y comparte la cuenta con su familia.</p>
+      <ul>
+        <li><b>Tarjeta del plan:</b> plan, número de cliente (también es el código de referido), forma de pago, fecha de renovación, número y si tiene NAVI SOS Family.</li>
+        <li><b>Tus datos:</b> GB disponibles. En familia, el consumo de cada línea.</li>
+        <li><b>Tu equipo:</b> marca, modelo y IMEI (enmascarado) de cada línea.</li>
+        <li><b>Perfil y foto:</b> cada quien cambia su nombre, apodo, cumpleaños y estado. El titular puede renombrar a la familia.</li>
+        <li><b>Apps:</b> las que incluye el plan se abren; las demás dicen en qué plan vienen.</li>
+      </ul>
+
+      <h2 id="apps">4. Las apps de Mi Navi</h2>
+      <div class="tw"><table><thead><tr><th>App</th><th>Para qué sirve</th><th>Planes</th></tr></thead><tbody>
+        <tr><td>⚡ Recargas</td><td>Recargar cualquier línea de la cuenta</td><td>Todos</td></tr>
+        <tr><td>📶 Navi Móvil</td><td>Consumo de datos, llamadas y SMS, equipo y recargas</td><td>Todos</td></tr>
+        <tr><td>🚨 NAVI SOS Family</td><td>Mapa familiar, zonas seguras, botón SOS</td><td>12 GB, 24 GB y Plan Familia</td></tr>
+        <tr><td>💪 NAVI Fit</td><td>Reto de calistenia de 30 días con animaciones</td><td>Todos</td></tr>
+        <tr><td>🔗 Navi Conecta</td><td>Red social de networking entre clientes</td><td>Todos</td></tr>
+        <tr><td>📅 Agenda</td><td>Actividades con recordatorio; en familia es compartida</td><td>Todos</td></tr>
+        <tr><td>🤝 Referidos</td><td>Código para invitar; 5 contrataciones = 1 mes gratis</td><td>Todos</td></tr>
+        <tr><td>🎮 Juegos · ▶️ Videos</td><td>Entretenimiento en el navegador</td><td>Todos</td></tr>
+        <tr><td>🛍️ Shop · 🔧 Repair Center</td><td>Tienda (Bose nuevo y reacondicionado, celulares) y reparaciones</td><td>Todos</td></tr>
+      </tbody></table></div>
+      <h3 id="sos">NAVI SOS Family</h3>
+      <ul><li>En Plan Familia, la red son las líneas del plan. Con líneas individuales de 12 o 24 GB se arma una red propia agregando personas y <b>verificando su número con un código</b>, sin importar qué plan tengan.</li>
+        <li>Mapa con la ubicación de cada integrante, zonas seguras (casa, escuela, trabajo) con avisos de llegada y salida, y actividad reciente.</li>
+        <li>El <b>SOS</b> avisa a toda la red con la ubicación, con 5 segundos para cancelar, y ofrece llamar al 911.</li></ul>
+      <h3 id="boton">Botón SOS en la pantalla del celular</h3>
+      <p>Cualquier usuario de NAVI SOS puede tener <b>solo el botón SOS</b> como un ícono aparte en su celular. Desde NAVI SOS → “Botón SOS en tu pantalla”, o en la pantalla del botón con <b>📲 Ponlo en tu pantalla</b>:</p>
+      <ul><li><b>iPhone:</b> abrir el enlace en Safari → <b>Compartir ⬆</b> → <b>Agregar a inicio</b> → Agregar.</li>
+        <li><b>Android:</b> abrir el enlace en Chrome → menú <b>⋮</b> → <b>Agregar a la pantalla principal</b> o <b>Instalar app</b>.</li>
+        <li>Si se abrió desde la app de Mi Navi ya instalada, el celular no deja agregar otro ícono desde ahí: se copia el enlace con el botón <b>Copiar</b> y se abre en Safari o Chrome.</li>
+        <li>Para volver al menú, arriba a la izquierda está <b>← NAVI SOS</b>.</li></ul>
+      <h3 id="fit">NAVI Fit</h3>
+      <ul><li>Reto de 30 días: el día 1 y el 30 son prueba de fuerza (flexiones, sentadillas en 1 minuto, plancha) para medir el avance. Cada 7 días hay descanso activo.</li>
+        <li>Tres niveles (principiante, intermedio, avanzado); la carga sube cada semana.</li>
+        <li>Cada ejercicio, el calentamiento y los estiramientos tienen una <b>animación demostrativa</b> con un maniquí, sin personas reales.</li>
+        <li>Cada día se abre al día siguiente de terminar el anterior, para que el cuerpo descanse. En Plan Familia hay reto familiar.</li></ul>
+      <h3 id="conecta">Navi Conecta</h3>
+      <ul><li>Perfil personal (solo mayores de 18) o perfil familiar (lo crea el titular; los hijos solo aparecen como rangos de edad).</li>
+        <li><b>Explorar</b> muestra perfiles ordenados por % de afinidad (intereses, zona, objetivo). Se toca <b>✕ Pasar</b> o <b>🤝 Conectar</b>.</li>
+        <li>Si los dos conectan, aparece “¡Nueva conexión!” y se abre el chat, con botones para proponer un plan. El número de teléfono nunca se muestra.</li>
+        <li>Se puede bloquear o reportar desde ⋯, y activar el modo invisible.</li></ul>
+      <h3 id="otras">Agenda, Referidos y más</h3>
+      <ul><li><b>Agenda:</b> actividades con aviso (de la hora de inicio a 1 día antes). En familia, el titular puede limitar quién ve cada actividad. Al terminarla se marca y se quita.</li>
+        <li><b>Referidos:</b> por cada 5 amigos que contraten con tu código tienes un mes gratis (con al menos 2 meses en tu plan).</li></ul>
+
+      <h2 id="atencion">5. Atención 24/7: chat web, app y WhatsApp</h2>
+      <p>El asistente contesta al momento en tres canales: el botón <b>💬</b> de la página, el mismo botón dentro de Mi Navi (ya sabe quién es el cliente) y <a href="whatsapp.html">WhatsApp</a>, donde el número del cliente lo identifica solo.</p>
+      <ul><li>Entiende: <b>saldo</b>, <b>recargas</b>, <b>renovación</b>, <b>portabilidad</b>, <b>pagos</b>, <b>cobertura</b>, <b>mi equipo</b>, <b>SOS</b>, <b>planes</b> y <b>cancelar</b>.</li>
+        <li>Si el cliente está identificado, contesta con sus datos reales: GB que le quedan, fecha y monto de renovación, folio de portabilidad, pedido pendiente, regalo del mes.</li>
+        <li>Pasa la conversación a un asesor cuando el cliente escribe “asesor”, cuando quiere cancelar (etiqueta de retención) o cuando no entiende dos veces.</li>
+        <li>Al cerrar pide calificar del 1 al 5.</li></ul>
+
+      <h2 id="central">6. Navi Central (consola interna)</h2>
+      <p>En <a href="central/">central/</a>. Se entra con nombre y rol: <b>Asesor</b>, <b>Supervisor</b> o <b>Administrador</b> (en producción, con cuenta corporativa y verificación en dos pasos).</p>
+      <ul><li><b>Resumen:</b> clientes activos, líneas, ingreso mensual recurrente, conversaciones abiertas, tiempo de primera respuesta, % resuelto por el asistente, satisfacción y avisos pendientes. Abajo, “Lo urgente ahora”.</li></ul>
+      <h3 id="desk">Front desk</h3>
+      <ul><li>Bandeja de conversaciones de los tres canales, con filtros (Abiertas, En espera, Mías, Resueltas). Las que esperan asesor van primero.</li>
+        <li>Al abrir una se ve todo lo que habló con el asistente. <b>Tomar</b> la asigna; desde ahí el asistente deja de contestar.</li>
+        <li>Respuestas rápidas (saludo, revisando, reporte de red, pago, retención, cierre), <b>notas internas</b> que el cliente no ve, etiquetas y <b>Crear ticket</b>.</li>
+        <li>A la derecha, el contexto del cliente: plan, datos, renovación, equipo, portabilidad y sus avisos.</li>
+        <li>La respuesta del asesor le llega al cliente al momento en el mismo canal.</li></ul>
+      <h3 id="ficha">Clientes y ficha 360</h3>
+      <p>Búsqueda por nombre, número de cliente o número completo. La ficha reúne servicio, datos personales enmascarados, avisos, línea de tiempo (altas, pedidos, recargas, portabilidades, conversaciones y tickets) y el botón para escribirle por WhatsApp.</p>
+      <h3 id="proactivo">Proactivo</h3>
+      <p>Reglas que detectan a quién buscar <b>antes</b> de que tenga un problema. Cada aviso trae un mensaje sugerido que se revisa y se envía por WhatsApp (uno por uno o a todos):</p>
+      <ul><li>📶 Se están quedando sin datos (menos del 20%).</li><li>📅 Renuevan en 3 días o menos.</li><li>💳 Pago rechazado o pendiente.</li><li>🔁 Portabilidad detenida (NIP vencido o en proceso).</li><li>🎁 Su regalo de bienvenida está por terminar (meses 11 y 12): retención.</li><li>🚨 Tienen NAVI SOS y no lo han activado.</li><li>⭐ Calificaron mal la atención (1 o 2).</li></ul>
+      <p><b>Operaciones</b> lista pedidos, recargas, portabilidades y tickets. Supervisores y administradores pueden exportar a CSV.</p>
+      <h3 id="privacidad">Privacidad y auditoría</h3>
+      <ul><li>Número, correo e IMEI aparecen <b>enmascarados</b>. Para ver uno completo hay que elegir un motivo, y queda en la <b>auditoría</b> con nombre, hora y motivo.</li>
+        <li>Asesor: puede ver número y correo con motivo. Supervisor y administrador: también IMEI, exportar y ver la auditoría.</li>
+        <li>Lo que Navi <b>no ve</b>: el NIP, los chats de Navi Conecta, la ubicación en vivo de NAVI SOS, la Agenda y las fotos, y los datos completos de tarjetas. De la CURP solo se guarda una huella cifrada.</li>
+        <li>Conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (derechos ARCO).</li></ul>
+
+      <h2 id="reglas">7. Reglas de negocio</h2>
+      <div class="tw"><table><tbody>
+        <tr><th>Precios mensuales</th><td>2 GB $129.99 · 4 GB $169.99 · 12 GB $239.99 · 24 GB $289.99 (MXN, IVA incluido). Trimestral, semestral y anual según el plan.</td></tr>
+        <tr><th>Incluido en todos</th><td>Minutos y SMS ilimitados, hotspot, redes sociales (WhatsApp, Facebook, Instagram, X, Snapchat), sin contrato.</td></tr>
+        <tr><th>Plan Familia</th><td>2 a 4 líneas con el mismo plan; 5% menos por cada línea después de la primera.</td></tr>
+        <tr><th>Regalo de bienvenida</th><td>Portando desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile: 2 GB → el doble; 4, 12 y 24 GB → el triple, cada mes por 12 meses.</td></tr>
+        <tr><th>Roaming</th><td>EE. UU. y Canadá hasta 15 días: 4 GB (plan 12 GB) y 8 GB (plan 24 GB), uso justo.</td></tr>
+        <tr><th>NAVI SOS Family</th><td>12 GB, 24 GB y Plan Familia. Individuales de 12/24 GB arman su red verificando números.</td></tr>
+        <tr><th>NAVI Fit · Navi Conecta</th><td>Todos los planes. Conecta solo para mayores de 18.</td></tr>
+        <tr><th>Referidos</th><td>5 contrataciones con tu código = 1 mes gratis (mínimo 2 meses con tu plan).</td></tr>
+        <tr><th>Operador</th><td>Navi es marca blanca de <b>JR Móvil</b> sobre la Red Compartida de Altán. Altas, recargas y portabilidades siguen los mismos pasos y datos que su plataforma.</td></tr>
+      </tbody></table></div>
+
+      <h2 id="publicar">8. Cómo se publica un cambio</h2>
+      <ol><li>Los archivos viven en la carpeta <code>Documents\NAVI MOVIL\demo</code> (y <code>NAVI REPAIR CENTER\demo</code> para Repair y Shop).</li>
+        <li>Se suben al repositorio <code>NAVISERVICES/navi-movil</code> (o <code>navi-repair-center</code>) en GitHub, en la carpeta <code>demo</code>, con “Add file → Upload files” y “Commit changes”.</li>
+        <li>GitHub Pages lo publica en uno o dos minutos.</li>
+        <li>Si cambia un archivo compartido (<code>auth.js</code>, <code>planes.js</code>, estilos), se sube su número de versión <code>?v=</code> en las páginas para que los celulares no usen la copia vieja.</li></ol>
+
+      <h2 id="produccion">9. Demo vs. producción</h2>
+      <div class="tw"><table><thead><tr><th>Hoy (demo)</th><th>En producción</th></tr></thead><tbody>
+        <tr><td>Datos en el navegador de cada quien</td><td>Base de datos en un servidor</td></tr>
+        <tr><td>Entrar con el número, sin código</td><td>Código por SMS (o WhatsApp) al número</td></tr>
+        <tr><td>Altas, recargas y portabilidad simuladas</td><td>APIs de la plataforma de JR Móvil (tenant navimovil)</td></tr>
+        <tr><td>Pasarela de pago simulada</td><td>Pasarela real con avisos de pago (webhooks)</td></tr>
+        <tr><td>WhatsApp de prueba</td><td>WhatsApp Business API con el número oficial de Navi</td></tr>
+        <tr><td>Avisos SOS dentro del navegador</td><td>Notificaciones push y SMS de respaldo</td></tr>
+        <tr><td>Navi Central sin contraseña</td><td>Acceso corporativo con dos pasos y permisos por rol</td></tr>
+        <tr><td>Reportes de Conecta guardados localmente</td><td>Equipo de moderación con revisión de reportes</td></tr>
+        <tr><td>Fotos de Bose enlazadas desde bose.com</td><td>Fotos propias o con permiso del fabricante</td></tr>
+      </tbody></table></div>
+      <p class="hint" style="margin-top:20px">Manual actualizado el 1 de noviembre de 2026.</p>
+    </article>
+  </div>
+</main>
+</body>
+</html>

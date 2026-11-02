@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Navi en WhatsApp</title>
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<style>
+/* simulación del chat de WhatsApp Business de Navi (en producción: WhatsApp Business API) */
+.wrap2{display:grid;grid-template-columns:1fr 400px;gap:28px;align-items:start}
+@media (max-width:900px){.wrap2{grid-template-columns:1fr}}
+.info h1{font-size:clamp(30px,4vw,44px);margin:10px 0}
+.info p{color:var(--muted)}
+.info .card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:22px;padding:18px;margin-top:16px}
+.info label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.info select{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:10px;color:var(--text);font:inherit}
+.info select option{color:#000}
+.info ul{list-style:none;display:grid;gap:8px;margin-top:10px;font-size:14px;color:var(--muted)}
+.phone{width:100%;max-width:400px;height:min(720px,calc(100dvh - 120px));min-height:520px;border-radius:36px;border:10px solid #05060c;background:#0b141a;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 70px #000a;margin:0 auto}
+.wa-hd{display:flex;align-items:center;gap:10px;background:#1f2c34;padding:12px 14px;color:#e9edef}
+.wa-hd .av{width:40px;height:40px;border-radius:50%;background:#B4E32F;display:grid;place-items:center;overflow:hidden}
+.wa-hd .av img{width:30px}
+.wa-hd b{display:flex;align-items:center;gap:5px;font-size:15px}
+.wa-hd b i{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#25d366;color:#0b141a;font-size:10px;font-style:normal}
+.wa-hd small{font-size:12px;color:#8696a0}
+.wa-body{flex:1;overflow:auto;padding:12px 10px;display:flex;flex-direction:column;gap:6px;background:#0b141a radial-gradient(#ffffff08 1px,transparent 1px) 0 0/18px 18px}
+.wa-m{max-width:82%;padding:7px 10px 18px;border-radius:9px;font-size:14px;line-height:1.38;background:#202c33;color:#e9edef;align-self:flex-start;position:relative;word-wrap:break-word}
+.wa-m.me{align-self:flex-end;background:#005c4b}
+.wa-m a{color:#53bdeb}
+.wa-m small{position:absolute;right:8px;bottom:3px;font-size:10.5px;color:#ffffff99}
+.wa-m .ag{display:block;font-size:12px;font-weight:700;color:#B4E32F;margin-bottom:2px}
+.wa-sys{align-self:center;background:#182229;color:#8696a0;font-size:12px;border-radius:8px;padding:5px 10px;text-align:center;max-width:90%}
+.wa-q{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;background:#0b141a;scrollbar-width:none}
+.wa-q button{flex:none;font:600 12.5px "DM Sans",sans-serif;color:#53bdeb;background:#202c33;border-radius:99px;padding:6px 11px}
+.wa-f{display:flex;gap:8px;padding:8px;background:#0b141a}
+.wa-f input{flex:1;min-width:0;background:#2a3942;border:0;border-radius:99px;padding:11px 14px;color:#e9edef;font:15px "DM Sans",sans-serif}
+.wa-f input:focus{outline:none}
+.wa-f button{width:44px;height:44px;border-radius:50%;background:#00a884;color:#fff;font-size:18px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="index.html">← <span>Navi Móvil</span></a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="wrap2">
+    <div class="info">
+      <span class="eyebrow" style="color:var(--lime);font-weight:800;letter-spacing:.14em;font-size:12px">WHATSAPP · 24/7</span>
+      <h1>Navi en WhatsApp</h1>
+      <p>Escríbenos a cualquier hora: el asistente contesta al momento con los datos de tu línea y, si lo necesitas, te pasa con un asesor que ya ve toda la conversación.</p>
+      <div class="card">
+        <label>Simular que escribe desde el número<select id="who"></select></label>
+        <ul>
+          <li>✅ Si el número es cliente Navi, el asistente lo reconoce solo (en WhatsApp el número viene con el mensaje).</li>
+          <li>🗂️ Cada mensaje queda guardado en la consola central de Navi.</li>
+          <li>🧪 Demostración: en producción esto corre en WhatsApp Business API con el número oficial de Navi.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phone" id="phone"></div>
+  </div>
+</main>
+<script src="auth.js?v=20261101e"></script>
+<script src="planes.js?v=20261101c"></script>
+<script src="desk.js?v=1"></script>
+<script>
+const $ = id => document.getElementById(id);
+const NUMS = [['5500000001', 'Sofía · 2 GB'], ['5500000002', 'Luis · 12 GB'], ['5500000003', 'Carla · 24 GB'], ['5500000004', 'Papá · Familia García'], ['5500000005', 'Mamá · Familia García'], ['', 'Número que no es cliente']];
+let phone = sessionStorage.getItem('wa.phone') ?? '5500000002';
+$('who').innerHTML = NUMS.map(([n, l]) => `<option value="${n}" ${n === phone ? 'selected' : ''}>${n ? fmtPhone(n) + ' · ' : ''}${l}</option>`).join('');
+$('who').onchange = () => { phone = $('who').value; sessionStorage.setItem('wa.phone', phone); start(); };
+let cid = null;
+const QUICK = ['Hola', 'Mi saldo', 'Recargar', 'Portabilidad', 'Pagos', 'Asesor'];
+function start() {
+  const c = Desk.open('whatsapp', phone || null, phone ? custFacts(phone).name : 'WhatsApp +52 55 •••• 7788');
+  cid = c.id;
+  if (!c.msgs.length) Desk.push(cid, { from: 'system', txt: 'Los mensajes con Navi Móvil quedan registrados para darte seguimiento. Navi nunca te pedirá tu NIP ni contraseñas por aquí.' });
+  paint();
+}
+function paint() {
+  const c = Desk.get(cid), draft = $('phone').querySelector('input')?.value || '';
+  const who = c.status === 'agent' ? `te atiende ${c.agent || 'un asesor'}` : c.status === 'waiting' ? 'conectando con un asesor…' : 'cuenta de empresa';
+  $('phone').innerHTML = `<div class="wa-hd"><span class="av"><img src="assets/icon-192.png" alt=""></span><div><b>Navi Móvil <i>✓</i></b><small>${who}</small></div></div>
+    <div class="wa-body" id="body">${c.msgs.map(m => m.from === 'system' ? `<div class="wa-sys">${deskFmt(m.txt)}</div>`
+      : `<div class="wa-m ${m.from === 'customer' ? 'me' : ''}">${m.from === 'agent' ? `<span class="ag">${m.agent || 'Asesor Navi'}</span>` : ''}${deskFmt(m.txt)}<small>${new Date(m.t).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}${m.from === 'customer' ? ' ✓✓' : ''}</small></div>`).join('')}</div>
+    <div class="wa-q">${QUICK.map(q => `<button>${q}</button>`).join('')}</div>
+    <form class="wa-f" id="f"><input placeholder="Mensaje" maxlength="500" autocomplete="off" aria-label="Mensaje"><button aria-label="Enviar">➤</button></form>`;
+  const b = $('body'); b.scrollTop = b.scrollHeight;
+  const inp = $('phone').querySelector('input'); inp.value = draft;
+  const send = t => { if (t.trim()) { NaviBot.handle(cid, t.trim()); paint(); } };
+  $('f').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; send(v); };
+  $('phone').querySelectorAll('.wa-q button').forEach(x => x.onclick = () => send(x.textContent));
+}
+addEventListener('storage', e => { if (e.key === Desk.KEY && cid) paint(); });
+start();
+</script>
+</body>
+</html>
