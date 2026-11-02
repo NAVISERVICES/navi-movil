@@ -83,10 +83,11 @@ body{padding-top:calc(76px + env(safe-area-inset-top,0px))}
 <div class="ov" id="ov" hidden role="alertdialog" aria-modal="true" aria-labelledby="ovTitle"></div>
 <div class="install" id="install" hidden><img src="sos-192.png" alt=""><span id="installTxt"></span><button id="installBtn" hidden>Agregar</button></div>
 
-<script src="../auth.js?v=20261101e"></script>
+<script src="../auth.js?v=20261102a"></script>
 <script>
 const $ = id => document.getElementById(id);
-const user = NaviAuth.current();
+// sin sesión abierta (p. ej. se cerró sola por inactividad) el botón sigue listo en este celular: solo manda la alerta
+const user = NaviAuth.current() || (() => { try { const p = localStorage.getItem('navi.sos.device'); return p ? NaviAuth.find(p) : null; } catch { return null; } })();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const face = (m, cls = '') => m.img ? `<img class="${cls}" src="../assets/${m.img}.png" alt="">` : `<span class="${cls || 'i'}">${esc(m.name[0].toUpperCase())}</span>`;
 
