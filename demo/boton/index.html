@@ -53,9 +53,32 @@ body{background:radial-gradient(circle at 50% 42%,#3a0d1c 0,#1a0710 60%);min-hei
 .install[hidden]{display:none}
 .install img{width:40px;height:40px;border-radius:10px;flex:none}
 .install button{margin-left:auto;flex:none;background:#fff;color:#2a0710;border-radius:99px;padding:8px 14px;font-weight:800;font-size:13px}
+/* barra de arriba: regresar a NAVI SOS y cómo poner el botón en la pantalla */
+body{padding-top:calc(76px + env(safe-area-inset-top,0px))}
+.bar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 12px max(14px,env(safe-area-inset-left,0px))}
+.bar a,.bar button{display:inline-flex;align-items:center;gap:6px;background:#ffffff14;border:1px solid #ffffff26;color:#fff;border-radius:99px;padding:9px 14px;font-weight:700;font-size:14px;text-decoration:none}
+.bar button{background:#fff;color:#2a0710;border:0}
+.sheet{position:fixed;inset:0;z-index:20;background:#0009;display:grid;place-items:end center;padding:12px}
+.sheet[hidden]{display:none}
+.sheet > div{width:min(460px,100%);background:#2a0d18;border:1px solid #ffffff26;border-radius:24px;padding:22px 20px calc(20px + env(safe-area-inset-bottom,0px));text-align:left;max-height:calc(100dvh - 24px);overflow:auto}
+.sheet h2{font-size:22px;margin-bottom:6px}
+.sheet p{color:#ffd1d6;font-size:14px}
+.sheet ol{margin:14px 0 4px;padding-left:0;list-style:none;display:grid;gap:10px;counter-reset:s}
+.sheet li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;font-size:15px}
+.sheet li::before{content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--sos);display:grid;place-items:center;font-weight:800}
+.sheet .ico{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;background:#ffffff1f;vertical-align:middle;margin:0 2px}
+.sheet .url{display:flex;gap:8px;margin-top:12px}
+.sheet .url input{flex:1;min-width:0;background:#ffffff12;border:1px solid #ffffff2a;border-radius:12px;padding:10px;color:#fff;font-size:13px}
+.sheet .url button,.sheet .main{background:#fff;color:#2a0710;border-radius:12px;padding:10px 14px;font-weight:800}
+.sheet .main{width:100%;margin-top:16px;border-radius:99px;padding:13px;font-size:15px}
+.sheet .tabs{display:flex;gap:6px;margin-top:14px}
+.sheet .tabs button{flex:1;padding:8px;border-radius:99px;border:1px solid #ffffff2a;color:#ffd1d6;font-weight:700;font-size:13px}
+.sheet .tabs button[aria-pressed="true"]{background:#fff;color:#2a0710}
 </style>
 </head>
 <body>
+<div class="bar" id="bar"><a href="../sos.html" id="backSos">← NAVI SOS</a><button id="howBtn">📲 Ponlo en tu pantalla</button></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="shTitle"></div>
 <main id="app"></main>
 <div class="ov" id="ov" hidden role="alertdialog" aria-modal="true" aria-labelledby="ovTitle"></div>
 <div class="install" id="install" hidden><img src="sos-192.png" alt=""><span id="installTxt"></span><button id="installBtn" hidden>Agregar</button></div>
@@ -121,17 +144,46 @@ if (!user) {
   };
 }
 
-// ícono propio en la pantalla de inicio: se instala aparte de Navi
+// ícono propio en la pantalla de inicio: se instala aparte de Navi, con instrucciones para iPhone y Android
 (() => {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-  if (matchMedia('(display-mode: standalone)').matches || navigator.standalone || !user) return;
-  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  $('installTxt').innerHTML = ios ? 'Ponlo en tu pantalla: <b>Compartir ⬆ → Agregar a inicio</b>' : 'Ponlo en tu pantalla de inicio para abrirlo de un toque.';
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const android = /Android/.test(ua);
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  // ?from=app: lo abrieron desde Mi Navi / NAVI SOS. Sin eso y en modo app, ya es el botón instalado en la pantalla.
+  const fromApp = new URLSearchParams(location.search).has('from') || /\/demo\/(sos|cuenta)/.test(document.referrer);
+  const isSosApp = standalone && !fromApp;
+  if (isSosApp) { $('howBtn').hidden = true; $('backSos').textContent = '⚙ NAVI SOS'; }
+  const link = new URL('./', location.href).href;
+  let prompt = null, tab = ios ? 'ios' : 'android';
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); prompt = e; if ($('sheet').hidden === false) how(); if (!isSosApp && user) $('installBtn').hidden = false; });
+  addEventListener('appinstalled', () => { $('install').hidden = true; $('sheet').hidden = true; });
+  const copyBox = `<div class="url"><input readonly value="${link}" aria-label="Enlace del botón SOS"><button id="cp">Copiar</button></div>`;
+  function how() {
+    // dentro de una app ya instalada (Mi Navi) el celular no deja agregar otro ícono: hay que abrir el enlace en el navegador
+    const inside = standalone && fromApp;
+    const steps = inside ? `<p>Estás dentro de la app de Mi Navi, y desde aquí el celular no deja agregar otro ícono. Hazlo desde el navegador:</p>
+        <ol><li>Copia el enlace del botón SOS.</li><li>Ábrelo en ${ios ? '<b>Safari</b>' : '<b>Chrome</b>'} (pégalo en la barra de direcciones).</li><li>${ios ? 'Toca <span class="ico">⬆</span> <b>Compartir</b> y luego <b>Agregar a inicio</b>.' : 'Toca <span class="ico">⋮</span> y luego <b>Agregar a la pantalla principal</b>.'}</li></ol>${copyBox}`
+      : tab === 'ios' ? `<ol><li>Abre esta página en <b>Safari</b>${ios && /CriOS|FxiOS|EdgiOS/.test(ua) ? ' (copia el enlace y pégalo ahí)' : ''}.</li><li>Toca <span class="ico">⬆</span> <b>Compartir</b> en la barra de abajo.</li><li>Desliza y elige <b>Agregar a inicio</b> <span class="ico">＋</span>.</li><li>Toca <b>Agregar</b>. Listo: el botón SOS queda en tu pantalla.</li></ol>${copyBox}`
+      : `<ol><li>Abre esta página en <b>Chrome</b>.</li><li>Toca <span class="ico">⋮</span> arriba a la derecha.</li><li>Elige <b>Agregar a la pantalla principal</b> o <b>Instalar app</b>.</li><li>Confirma con <b>Instalar</b>. Listo: el botón SOS queda en tu pantalla.</li></ol>${copyBox}${prompt ? '<button class="main" id="inst">Instalar el botón SOS ahora</button>' : ''}`;
+    $('sheet').innerHTML = `<div><h2 id="shTitle">📲 Solo el botón SOS en tu pantalla</h2><p>Un ícono aparte de Mi Navi: lo tocas y tu familia queda avisada, sin entrar a ningún menú.</p>
+      ${inside ? '' : `<div class="tabs"><button data-t="ios" aria-pressed="${tab === 'ios'}">iPhone</button><button data-t="android" aria-pressed="${tab === 'android'}">Android</button></div>`}
+      ${steps.replace(/<li>/g, '<li><span>').replace(/<\/li>/g, '</span></li>')}<button class="main" id="shOk" style="background:#ffffff1f;color:#fff">Entendido</button></div>`;
+    $('sheet').hidden = false;
+    $('sheet').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; how(); });
+    $('shOk').onclick = () => { $('sheet').hidden = true; };
+    if ($('inst')) $('inst').onclick = async () => { prompt.prompt(); await prompt.userChoice; prompt = null; how(); };
+    $('cp').onclick = async () => { try { await navigator.clipboard.writeText(link); $('cp').textContent = '✓ Copiado'; } catch { const i = $('sheet').querySelector('.url input'); i.select(); document.execCommand?.('copy'); $('cp').textContent = '✓ Copiado'; } };
+  }
+  $('sheet').onclick = e => { if (e.target === $('sheet')) $('sheet').hidden = true; };
+  $('howBtn').onclick = how;
+  if (isSosApp || !user) return;
+  // recordatorio abajo, también en el celular y dentro de la app de Mi Navi
+  $('installTxt').innerHTML = '📲 <b>Pon solo el botón SOS en tu pantalla</b> para usarlo de un toque.';
+  $('installBtn').hidden = false; $('installBtn').textContent = '¿Cómo?';
+  $('installBtn').onclick = how;
   $('install').hidden = false;
-  let prompt = null;
-  addEventListener('beforeinstallprompt', e => { e.preventDefault(); prompt = e; $('installBtn').hidden = false; });
-  $('installBtn').onclick = async () => { if (!prompt) return; prompt.prompt(); await prompt.userChoice; prompt = null; $('install').hidden = true; };
-  addEventListener('appinstalled', () => { $('install').hidden = true; });
 })();
 </script>
 </body>

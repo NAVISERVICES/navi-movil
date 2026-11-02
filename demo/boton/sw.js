@@ -1,5 +1,5 @@
 // service worker del botón SOS: abre al instante aunque no haya señal
-const CACHE = 'navi-sos-v1';
+const CACHE = 'navi-sos-v2';
 const FILES = ['./', 'manifest.webmanifest', 'sos-192.png', '../auth.js', '../navi.css',
   '../assets/sofi.png', '../assets/beto.png', '../assets/chayo.png', '../assets/mama.png', '../assets/tono.png'];
 
