@@ -141,7 +141,7 @@ main{padding-bottom:80px}
 <div class="play" id="play" hidden role="dialog" aria-modal="true" aria-label="Entrenamiento"></div>
 <div class="sheet" id="sheet" hidden></div>
 
-<script src="fit-demos.js?v=20261101a"></script>
+<script src="fit-demos.js?v=20261101b"></script>
 <script>
 const $ = id => document.getElementById(id);
 const user = NaviAuth.current();
@@ -172,9 +172,26 @@ const EX = {
 };
 // demostración animada de cada ejercicio (fit-demos.js); principiante ve su variante fácil si existe
 const demo = (el, k) => FitDemo.mount(el, k, S?.level === 'pri');
-const WARM = [['🤸', 'Saltos suaves en tu lugar', 30], ['🔄', 'Círculos de brazos', 30], ['🦵', 'Sentadilla lenta', 30], ['🌀', 'Rotación de cadera', 30]];
-const COOL = [['🧘', 'Estiramiento de pecho en pared', 30], ['🦵', 'Estiramiento de cuádriceps', 30], ['🙇', 'Postura del niño', 40], ['🌬️', 'Respiración profunda', 30]];
-const MOBILITY = [['🐈', 'Gato-vaca', 40], ['🦵', 'Estiramiento de isquiotibiales', 40], ['🧍', 'Cuádriceps de pie', 40], ['🚪', 'Pecho en marco de puerta', 40], ['🌀', 'Rotación de torso', 40], ['🙇', 'Postura del niño', 60], ['🌬️', 'Respiración profunda', 60]];
+// calentamiento, enfriamiento y descanso activo: también con su demostración (demo = otra animación que sirve igual)
+const MOVES = {
+  hop:    { n: 'Saltos suaves en tu lugar', e: '🤸', how: ['Rebota suave sobre la punta de los pies.', 'Rodillas un poco flexionadas.', 'Respira normal, sin forzar.'] },
+  armc:   { n: 'Círculos de brazos', e: '🔄', how: ['Brazos estirados a los lados del cuerpo.', 'Haz círculos grandes hacia adelante.', 'A la mitad, cambia hacia atrás.'] },
+  slowsq: { n: 'Sentadilla lenta', e: '🦵', how: ['Pies al ancho de los hombros.', 'Baja en 2 segundos y sube en 2.', 'Sin rebotar: solo es para calentar.'] },
+  hipc:   { n: 'Rotación de cadera', e: '🌀', how: ['Manos en la cintura, pies separados.', 'Dibuja círculos con la cadera.', 'A la mitad, cambia de sentido.'] },
+  chest:  { n: 'Estiramiento de pecho en pared', e: '🧘', side: true, how: ['Apoya la mano en la pared a la altura del hombro.', 'Gira el cuerpo despacio hacia el lado contrario.', 'Siente el estiramiento en el pecho, sin dolor.'] },
+  door:   { n: 'Pecho en marco de puerta', e: '🚪', side: true, demo: 'chest', how: ['Apoya el antebrazo en el marco de la puerta.', 'Da un paso al frente con calma.', 'Respira y aguanta, sin dolor.'] },
+  quad:   { n: 'Estiramiento de cuádriceps', e: '🦵', side: true, how: ['De pie, toma tu tobillo por detrás.', 'Rodillas juntas y cadera al frente.', 'Apóyate en la pared si lo necesitas.'] },
+  child:  { n: 'Postura del niño', e: '🙇', how: ['Siéntate sobre tus talones.', 'Estira los brazos al frente en el piso.', 'Relaja la frente y respira lento.'] },
+  breath: { n: 'Respiración profunda', e: '🌬️', how: ['Sube los brazos mientras inhalas por la nariz.', 'Bájalos mientras sacas el aire por la boca.', 'Lento: unos 4 segundos de cada lado.'] },
+  catcow: { n: 'Gato-vaca', e: '🐈', how: ['En cuatro puntos: manos bajo hombros, rodillas bajo cadera.', 'Redondea la espalda y mete la barbilla.', 'Luego hunde la espalda y mira al frente.'] },
+  ham:    { n: 'Estiramiento de isquiotibiales', e: '🦵', how: ['Sentado, con las piernas estiradas al frente.', 'Inclínate desde la cadera hacia tus pies.', 'Llega hasta donde puedas, sin rebotar.'] },
+  torso:  { n: 'Rotación de torso', e: '🌀', how: ['De pie, brazos a la altura del pecho.', 'Gira el tronco a un lado y al otro.', 'La cadera se queda viendo al frente.'] },
+  walk:   { n: 'Caminata a paso ligero', e: '🚶', unit: 'min', how: ['Camina 20 minutos a buen ritmo.', 'Mueve los brazos al paso.', 'Debes poder hablar, pero con algo de esfuerzo.'] },
+};
+const WARM = [['hop', 30], ['armc', 30], ['slowsq', 30], ['hipc', 30]];
+const COOL = [['chest', 30], ['quad', 30], ['child', 40], ['breath', 30]];
+const MOBILITY = [['catcow', 40], ['ham', 40], ['quad', 40], ['door', 40], ['torso', 40], ['child', 60], ['breath', 60]];
+const moveBtns = list => list.map(([k, s]) => `<button data-how="${k}"><span class="e">${MOVES[k].e}</span><span><b>${MOVES[k].n}</b><small>▶ Ver demostración</small></span><em>${s} s</em></button>`).join('');
 
 // ---------- el plan de 30 días ----------
 const TYPES = {
@@ -279,8 +296,12 @@ function renderDetail() {
   const d = sel, w = workout(d), done = S.done[d], cur = d === current();
   let body = '';
   if (w.type === 'T') body = `<div class="exl">${TESTS.map(t => `<button data-how="${t.k}"><span class="e">${t.e}</span><span><b>${t.n}</b><small>▶ Ver demostración · ${t.help}</small></span></button>`).join('')}</div>`;
-  else if (w.type === 'R') body = `<p class="muted" style="margin-top:12px">Camina 20 minutos a paso ligero y estira con calma. Hoy tus músculos se recuperan y se hacen más fuertes.</p><div class="exl">${MOBILITY.map(([e, n, s]) => `<button disabled><span class="e">${e}</span><span><b>${n}</b></span><em>${s} s</em></button>`).join('')}</div>`;
-  else body = `<div class="exl">${w.list.map(it => `<button data-how="${it.k}"><span class="e">${it.X.e}</span><span><b>${it.name}</b><small>▶ Ver demostración</small></span><em>${amtTxt(it)}</em></button>`).join('')}</div>`;
+  else if (w.type === 'R') body = `<p class="muted" style="margin-top:12px">Camina 20 minutos a paso ligero y estira con calma. Hoy tus músculos se recuperan y se hacen más fuertes.</p>
+    <div class="exl"><button data-how="walk"><span class="e">🚶</span><span><b>${MOVES.walk.n}</b><small>▶ Ver demostración · por tu cuenta</small></span><em>20 min</em></button></div>
+    <p class="hint" style="margin-top:12px">ESTIRAMIENTOS GUIADOS</p><div class="exl">${moveBtns(MOBILITY)}</div>`;
+  else body = `<p class="hint" style="margin-top:12px">CALENTAMIENTO · 2 MIN</p><div class="exl">${moveBtns(WARM)}</div>
+    <p class="hint" style="margin-top:12px">RUTINA · ${w.rounds} RONDAS</p><div class="exl">${w.list.map(it => `<button data-how="${it.k}"><span class="e">${it.X.e}</span><span><b>${it.name}</b><small>▶ Ver demostración</small></span><em>${amtTxt(it)}</em></button>`).join('')}</div>
+    <p class="hint" style="margin-top:12px">ENFRIAMIENTO · 2 MIN</p><div class="exl">${moveBtns(COOL)}</div>`;
   const test1 = S.tests?.[1];
   const act = done
     ? `<p class="muted">✓ Completado el ${new Date(done.at).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}.</p><button class="btn btn-ghost wide" id="start" style="margin-top:10px">Repetir este día</button>`
@@ -304,14 +325,14 @@ function renderStart() {
 // video y técnica de un ejercicio; si se abre a media rutina, el tiempo se pausa mientras lo ves
 let pausedBefore = null;
 function showHow(k) {
-  const X = EX[k], easy = S.level === 'pri' && X.easy;
+  const X = EX[k] || MOVES[k], easy = S.level === 'pri' && X.easy;
   if (!$('play').hidden) { pausedBefore = paused; paused = true; }
   $('sheet').hidden = false;
-  $('sheet').innerHTML = `<div><div class="dh"><div class="big" style="background:#FF7A4522">${X.e}</div><div><h2>${easy ? X.easy : X.n}</h2><span class="hint">${X.unit === 's' ? 'Por tiempo' : 'Por repeticiones'}${X.side ? ' · de cada lado' : ''}</span></div></div>
+  $('sheet').innerHTML = `<div><div class="dh"><div class="big" style="background:#FF7A4522">${X.e}</div><div><h2>${easy ? X.easy : X.n}</h2><span class="hint">${X.unit === 'reps' ? 'Por repeticiones' : 'Por tiempo'}${X.side ? ' · de cada lado' : ''}</span></div></div>
     <div class="vid" id="shDemo" role="img" aria-label="Demostración animada: ${esc(easy ? X.easy : X.n)}"></div>
     <ol>${X.how.map(h => `<li>${h}</li>`).join('')}</ol>${easy ? `<p class="hint" style="margin-top:10px">Versión fácil de: ${X.n}.</p>` : ''}<button class="btn btn-lime wide" style="margin-top:16px" id="shOk">${$('play').hidden ? 'Entendido' : 'Volver al entrenamiento'}</button></div>`;
   $('shOk').onclick = closeHow;
-  demo($('shDemo'), k);
+  demo($('shDemo'), X.demo || k);
 }
 function closeHow() {
   $('sheet').hidden = true; $('sheet').innerHTML = ''; // al quitarla, la animación se detiene sola
@@ -333,15 +354,16 @@ const beep = (f = 880, ms = 150) => { try { const a = beep.ctx || (beep.ctx = ne
 function buildQueue(d) {
   const w = workout(d), q = [];
   if (w.type === 'T') { TESTS.forEach(t => q.push({ kind: 'test', t })); return q; }
-  if (w.type === 'R') { MOBILITY.forEach(([e, n, s]) => q.push({ kind: 'timed', tag: 'Movilidad', e, n, secs: s })); return q; }
-  WARM.forEach(([e, n, s]) => q.push({ kind: 'timed', tag: 'Calentamiento', e, n, secs: s }));
+  const timed = tag => ([k, s]) => q.push({ kind: 'timed', tag, k, n: MOVES[k].n, secs: s });
+  if (w.type === 'R') { MOBILITY.forEach(timed('Movilidad')); return q; }
+  WARM.forEach(timed('Calentamiento'));
   const restEx = S.level === 'pri' ? 30 : 20;
   for (let r = 1; r <= w.rounds; r++) w.list.forEach((it, i) => {
     q.push({ kind: 'ex', tag: `Ronda ${r} de ${w.rounds}`, it });
     const last = i === w.list.length - 1;
     if (!(last && r === w.rounds)) q.push({ kind: 'rest', secs: last ? 60 : restEx, tag: last ? 'Descanso entre rondas' : 'Descanso' });
   });
-  COOL.forEach(([e, n, s]) => q.push({ kind: 'timed', tag: 'Enfriamiento', e, n, secs: s }));
+  COOL.forEach(timed('Enfriamiento'));
   return q;
 }
 async function startDay(d) {
@@ -379,14 +401,15 @@ function step() {
   if (x.kind === 'timed' || (x.kind === 'ex' && x.it.X.unit === 's')) {
     const it = x.it, secs = x.kind === 'ex' ? it.amt * (it.X.side ? 2 : 1) : x.secs;
     const name = x.kind === 'ex' ? (S.level === 'pri' && it.X.easy ? it.X.easy : it.X.n) : x.n;
+    const k = x.kind === 'ex' ? it.k : x.k, side = x.kind === 'ex' ? it.X.side : MOVES[k].side;
     left = secs;
-    frame(`<span class="ptag">${x.tag}</span>${x.kind === 'ex' ? `<div class="pdemo" id="pDemo"></div>` : `<div class="pemo">${x.e}</div>`}<div class="pname">${name}</div><div class="pamt" id="pAmt"></div>
-      ${x.kind === 'ex' ? `${it.X.side ? '<p class="phow">Cambia de lado a la mitad.</p>' : ''}<button class="pvid" data-vid="${it.k}">Ver técnica</button>` : ''}<p class="pnext">${nextTxt()}</p>`,
+    frame(`<span class="ptag">${x.tag}</span><div class="pdemo" id="pDemo"></div><div class="pname">${name}</div><div class="pamt" id="pAmt"></div>
+      ${side ? '<p class="phow">Cambia de lado a la mitad.</p>' : ''}<button class="pvid" data-vid="${k}">Ver técnica</button><p class="pnext">${nextTxt()}</p>`,
       `<button class="btn btn-ghost" id="pPause">Pausa</button><button class="btn btn-lime" id="pSkip">Siguiente ›</button>`);
-    if (x.kind === 'ex') demo($('pDemo'), it.k);
+    demo($('pDemo'), x.kind === 'ex' ? k : MOVES[k].demo || k);
     $('pPause').onclick = () => { paused = !paused; $('pPause').textContent = paused ? 'Seguir' : 'Pausa'; };
     $('pSkip').onclick = () => { clearInterval(tick); go(); };
-    let half = it?.X.side ? Math.floor(secs / 2) : -1;
+    let half = side ? Math.floor(secs / 2) : -1;
     const watch = setInterval(() => { if (left === half) { beep(520, 200); half = -1; } if (left <= 0 || qi >= Q.length || Q[qi] !== x) clearInterval(watch); }, 250);
     return countdown(go);
   }

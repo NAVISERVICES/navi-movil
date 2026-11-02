@@ -12,6 +12,9 @@ const FitDemo = (() => {
   const CROUCH = { hip: [100, 146], neck: [144, 124], h: [[154, 176], [156, 176]], f: [[116, 176], [120, 176]] };
   const AIR = { hip: [118, 74], neck: [120, 24], h: [[130, -14], [134, -12]], f: [[116, 154], [120, 156]], toe: [[8, 8], [8, 8]] };
   const up = (p, dy) => ({ ...p, hip: [p.hip[0], p.hip[1] + dy], neck: [p.neck[0], p.neck[1] + dy], h: p.h.map(([x, y]) => [x, y + dy]), f: p.f.map(([x, y]) => [x, y + dy]) });
+  // de frente (pies separados) y vueltas completas en n pasos para los movimientos circulares
+  const FRONT = { hip: [120, 98], neck: [120, 48], h: [[100, 110], [140, 110]], f: [[108, 176], [132, 176]], toe: [[-5, 3], [5, 3]] };
+  const turn = (n, fn) => Array.from({ length: n }, (_, i) => fn(i / n * 2 * Math.PI));
 
   // t = segundos por transición · loop: true = va de la última a la primera; si no, ida y vuelta
   const D = {
@@ -63,6 +66,47 @@ const FitDemo = (() => {
     hollow: { t: 1.4, frames: [
       { hip: [118, 172], neck: [72, 160], h: [[18, 150], [20, 150]], f: [[194, 158], [196, 158]], toe: [[6, -6], [6, -6]] },
       { hip: [118, 172], neck: [72, 157], h: [[18, 147], [20, 147]], f: [[194, 155], [196, 155]], toe: [[6, -6], [6, -6]] }] },
+
+    // ---- calentamiento ----
+    hop: { t: .3, frames: [
+      { hip: [118, 103], neck: [120, 53], h: [[128, 106], [130, 106]], f: [[116, 176], [120, 176]] },
+      { ...up(STAND, -10), toe: [[9, 10], [9, 10]] }] },
+    // brazos estirados dibujando un círculo grande hacia adelante
+    armc: { t: .22, loop: true, lin: true, frames: turn(12, a => ({ ...STAND, h: [[120 + 57 * Math.sin(a), 48 + 57 * Math.cos(a)], [121 + 57 * Math.sin(a), 48 + 57 * Math.cos(a)]] })) },
+    slowsq: { t: 1.8, frames: [STAND, SQ_LOW] },
+    // manos en la cintura, la cadera dibuja un círculo
+    hipc: { t: .25, loop: true, lin: true, front: true, frames: turn(12, a => {
+      const x = 120 + 11 * Math.cos(a), y = 98 + 3 * Math.sin(a);
+      return { ...FRONT, hip: [x, y], h: [[x - 17, y - 8], [x + 17, y - 8]] };
+    }) },
+
+    // ---- enfriamiento y movilidad ----
+    chest: { t: 1.6, props: ['wall'], frames: [
+      { hip: [116, 98], neck: [114, 48], h: [[120, 104], [62, 50]], f: [[114, 176], [118, 176]] },
+      { hip: [118, 98], neck: [118, 49], h: [[126, 104], [62, 50]], f: [[114, 176], [118, 176]] }] },
+    quad: { t: 1.6, frames: [
+      { hip: [118, 100], neck: [113, 52], h: [[148, 74], [97, 107]], f: [[118, 176], [97, 107]], toe: [[11, 3], [-3, -10]] },
+      { hip: [118, 101], neck: [114, 53], h: [[150, 76], [97, 108]], f: [[118, 176], [97, 108]], toe: [[11, 3], [-3, -10]] }] },
+    child: { t: 2, frames: [
+      { hip: [94, 148], neck: [141, 162], h: [[196, 176], [198, 176]], f: [[76, 176], [78, 176]], toe: [[-10, 2], [-10, 2]] },
+      { hip: [94, 145], neck: [141, 159], h: [[196, 176], [198, 176]], f: [[76, 176], [78, 176]], toe: [[-10, 2], [-10, 2]] }] },
+    // inhala subiendo los brazos por los lados, exhala bajándolos
+    breath: { t: 1.4, front: true, frames: [
+      FRONT,
+      { ...FRONT, neck: [120, 47], h: [[52, 56], [188, 56]] },
+      { ...FRONT, neck: [120, 46], h: [[104, -8], [136, -8]] }] },
+    catcow: { t: 1.6, frames: [
+      { hip: [94, 130], neck: [146, 120], h: [[146, 176], [148, 176]], f: [[58, 176], [60, 176]], toe: [[-10, 2], [-10, 2]] },
+      { hip: [94, 124], neck: [142, 134], h: [[146, 176], [148, 176]], f: [[58, 176], [60, 176]], toe: [[-10, 2], [-10, 2]] }] },
+    ham: { t: 1.7, frames: [
+      { hip: [80, 170], neck: [84, 120], h: [[106, 152], [110, 152]], f: [[157, 173], [159, 173]], toe: [[3, -10], [3, -10]] },
+      { hip: [80, 170], neck: [122, 140], h: [[152, 162], [154, 162]], f: [[157, 173], [159, 173]], toe: [[3, -10], [3, -10]] }] },
+    torso: { t: 1.1, front: true, frames: [
+      { ...FRONT, neck: [116, 48], h: [[52, 60], [84, 62]] },
+      { ...FRONT, neck: [124, 48], h: [[156, 62], [188, 60]] }] },
+    walk: { t: .5, frames: [
+      { hip: [118, 99], neck: [121, 49], h: [[142, 100], [98, 100]], f: [[98, 176], [140, 174]] },
+      { hip: [118, 99], neck: [121, 49], h: [[98, 100], [142, 100]], f: [[140, 174], [98, 176]] }] },
   };
 
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -81,7 +125,9 @@ const FitDemo = (() => {
   };
   const C = { far: '#5E54C4', near: '#B3A6FF', torso: '#8E80F7', head: '#DCD4FF', joint: '#B4E32F' };
   const line = (a, b, col, w) => `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
-  const limb = (r, t, l1, l2, s, col, foot) => {
+  // s = 'out' (de frente): el codo o la rodilla se dobla hacia afuera del cuerpo, lejos de cx
+  const limb = (r, t, l1, l2, s, col, foot, cx) => {
+    if (s === 'out') { const a = ik(r, t, l1, l2, 1), b = ik(r, t, l1, l2, -1); s = Math.abs(a[0][0] - cx) >= Math.abs(b[0][0] - cx) ? 1 : -1; }
     const [j, e] = ik(r, t, l1, l2, s);
     return `<path d="M${r[0].toFixed(1)} ${r[1].toFixed(1)}L${j[0].toFixed(1)} ${j[1].toFixed(1)}L${e[0].toFixed(1)} ${e[1].toFixed(1)}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`
       + `<circle cx="${j[0].toFixed(1)}" cy="${j[1].toFixed(1)}" r="2.6" fill="${C.joint}" opacity=".9"/>`
@@ -102,17 +148,17 @@ const FitDemo = (() => {
     // lado lejano detrás del torso, lado cercano enfrente
     return `<svg viewBox="0 -20 240 210" aria-hidden="true"><line x1="0" y1="180" x2="240" y2="180" stroke="#ffffff26" stroke-width="2"/>
       <ellipse cx="${cx.toFixed(1)}" cy="182" rx="62" ry="4" fill="#00000055"/>${(spec.props || []).map(k => PROPS[k]).join('')}
-      ${limb(sh[0], P.h[0], LEN.ua, LEN.fa, fr ? -1 : 1, farC)}${limb(hp[0], P.f[0], LEN.th, LEN.sh, fr ? 1 : -1, farC, P.toe[0])}
+      ${limb(sh[0], P.h[0], LEN.ua, LEN.fa, fr ? 'out' : 1, farC, null, P.neck[0])}${limb(hp[0], P.f[0], LEN.th, LEN.sh, fr ? 'out' : -1, farC, P.toe[0], P.hip[0])}
       ${line(P.hip, P.neck, C.torso, 20)}<circle cx="${P.hip[0].toFixed(1)}" cy="${P.hip[1].toFixed(1)}" r="10" fill="${C.torso}"/>
       <circle cx="${head[0].toFixed(1)}" cy="${head[1].toFixed(1)}" r="11.5" fill="${C.head}"/>
-      ${limb(hp[1], P.f[1], LEN.th, LEN.sh, -1, C.near, P.toe[1])}${limb(sh[1], P.h[1], LEN.ua, LEN.fa, fr ? 1 : 1, C.near)}</svg>`;
+      ${limb(hp[1], P.f[1], LEN.th, LEN.sh, fr ? 'out' : -1, C.near, P.toe[1], P.hip[0])}${limb(sh[1], P.h[1], LEN.ua, LEN.fa, fr ? 'out' : 1, C.near, null, P.neck[0])}</svg>`;
   }
   // postura en el tiempo t (segundos)
   function at(spec, t) {
     const F = spec.frames, seq = spec.loop ? [...F, F[0]] : [...F, ...F.slice(0, -1).reverse()];
     // (el primer cuadro puede llegar con t un poco negativo)
     const n = seq.length - 1, cyc = n * spec.t, u = (((t % cyc) + cyc) % cyc) / spec.t, i = Math.min(n - 1, Math.floor(u)), k = u - i;
-    const e = .5 - .5 * Math.cos(Math.PI * k); // suave al entrar y salir
+    const e = spec.lin ? k : .5 - .5 * Math.cos(Math.PI * k); // suave al entrar y salir (los círculos van parejos)
     return mix(seq[i], seq[i + 1], e);
   }
   const live = new Set();
