@@ -195,6 +195,10 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 .news li > span{font-size:20px}
 .news li small{display:block;color:var(--muted);font-size:12px}
 .news li button{margin-left:auto;flex:none;font-size:12px;font-weight:800;color:var(--lime);text-decoration:underline}
+/* SOS activo de otro integrante */
+.sos-live{background:linear-gradient(120deg,#FF5A5F,#8E1B3A);border:0}
+.sos-live .muted{color:#ffe1e3}
+.sos-live .qa{margin-top:12px}
 /* geocercas */
 .gcard{display:grid;gap:10px}
 .gthumb{border-radius:16px;overflow:hidden;border:1px solid var(--line)}
@@ -212,7 +216,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 .gbtns button.warn{background:#FF5A5F22;border-color:#FF5A5F66;color:#FF8A8D}
 .dev{display:flex;align-items:center;gap:12px}
 .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;color:var(--ink);flex:none;background:#7EE0FF}
-.overlay.geo{place-items:start center;overflow:auto}
+.overlay.geo{place-items:start center;overflow:auto;z-index:58}
 .overlay.geo > div{margin:auto 0;width:min(400px,100%)}
 .overlay .gi{background:#ffffff12;border-radius:16px;padding:12px;margin:12px auto;text-align:left;font-size:14px;display:grid;gap:4px}
 .overlay .gacts{display:grid;gap:10px;justify-items:center}
@@ -234,6 +238,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
     <span class="eyebrow" id="netName"></span>
     <h1>Inicio</h1>
     <div class="stack">
+      <div class="card sos-live" id="sosLive" hidden></div>
       <div class="card trip" id="tripCard"></div>
       <div class="card sosbox">
         <div class="sosbtn" id="sosBtn" role="button" tabindex="0" aria-label="Botón SOS: mantén presionado">
@@ -554,6 +559,7 @@ if (user && !user.apps.includes('sos')) {
       <span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>`).join('')
       + (BASE === 1 ? `<p class="muted">Tu plan incluye NAVI SOS Family: arma tu red con quien quieras verificando su número, sin importar su plan.</p>${members.length === 1 ? '<a class="btn btn-lime block" href="#red" style="margin-top:10px">+ Crear mi red</a>' : ''}` : '');
     renderWatch();
+    renderSosLive();
     checkExpects();
     const ex = Object.values(S.expects).filter(e => !e.fired).length;
     $('secCt').textContent = S.contacts.length ? `${S.contacts.length} ${S.contacts.length === 1 ? 'contacto recibe' : 'contactos reciben'} un SMS con tu ubicación si activas SOS` : 'Agrega quién recibe un SMS si activas SOS';
@@ -599,16 +605,31 @@ if (user && !user.apps.includes('sos')) {
     ov.onclick = e => { if (e.target.id === 'sosCancel') { clearInterval(cdT); ov.hidden = true; toast('Alerta cancelada'); } };
     cdT = setInterval(() => { n--; if (n > 0) { draw(); } else { clearInterval(cdT); sent(); } }, 1000);
   }
+  // el SOS activo vive en el estado compartido de la red (S.sos): así suena la alarma en todos los integrantes
+  // y quien lo activó ve en vivo quién ya lo vio y quién va para allá
   function sent() {
-    const where = S.paused ? 'tu última ubicación' : status(members[me]).replace('En ', '');
+    const where = S.paused ? 'tu última ubicación' : status(members[me]).replace(/^En (?!camino)/, '');
+    reloadS();
+    S.sos = { id: Date.now(), phone: members[me].phone, name: members[me].name, t: Date.now(), where: S.paused ? 'Su última ubicación conocida' : status(members[me]), active: true, seen: {}, going: {} };
     S.events.push({ t: Date.now(), txt: `🚨 <b>${members[me].name}</b> activó SOS en ${where}` }); save();
-    ov.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div><h2 id="sosTitle">Alerta SOS enviada</h2><p class="muted">${hhmm(Date.now())} · ${where}</p>
-      <div class="list">${members.filter(m => m.i !== me).map(m => `<div><span>${esc(m.name)}</span><b>${m.invited ? 'SMS con mapa' : 'Notificado en la app'}</b></div>`).join('')}
-      ${S.contacts.map(c => `<div><span>${c.n} · ${fmtPhone(c.tel)}</span><b>SMS con mapa</b></div>`).join('')}</div>
+    paintSent();
+    ov.onclick = e => {
+      if (e.target.id !== 'sosOk') return;
+      ov.hidden = true; reloadS();
+      if (S.sos) Object.assign(S.sos, { active: false, ended: Date.now() });
+      S.events.push({ t: Date.now(), txt: `✅ <b>${members[me].name}</b> terminó la alerta SOS: está bien` }); save(); toast('Avisamos a tu red que estás bien');
+    };
+  }
+  function paintSent() {
+    const a = S.sos; if (!a) return;
+    const st = m => m.invited ? 'SMS con mapa' : a.going?.[m.phone] ? '🚗 Va para allá' : a.seen?.[m.phone] ? '👀 Ya la vio' : '🔔 Alarma sonando';
+    ov.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div><h2 id="sosTitle">Alerta SOS enviada</h2><p class="muted">${hhmm(a.t)} · ${esc(a.where)}</p>
+      <div class="list">${members.filter(m => m.i !== me).map(m => `<div><span>${esc(m.name)}</span><b>${st(m)}</b></div>`).join('')}
+      ${S.contacts.map(c => `<div><span>${esc(c.n)} · ${fmtPhone(c.tel)}</span><b>SMS con mapa</b></div>`).join('')}</div>
       <p class="muted" style="margin-bottom:14px">Demostración: no se envían mensajes reales.</p>
       <div style="display:grid;gap:10px;justify-items:center"><a class="btn sos911" href="tel:911" style="background:#fff">📞 Llamar al 911</a><button class="btn btn-lime" id="sosOk">Estoy bien, terminar alerta</button></div></div>`;
-    ov.onclick = e => { if (e.target.id === 'sosOk') { ov.hidden = true; S.events.push({ t: Date.now(), txt: `✅ <b>${members[me].name}</b> terminó la alerta SOS: está bien` }); save(); toast('Avisamos a tu red que estás bien'); } };
   }
+  const reloadS = () => { try { const v = JSON.parse(localStorage.getItem(KEY)); if (v) S = { ...def(), ...v }; } catch {} };
 
   // Acompáñame activo
   function renderWatch() {
@@ -1115,9 +1136,80 @@ if (user && !user.apps.includes('sos')) {
   checkGeos();
   setInterval(checkGeos, 5000);
 
+  // ---------- SOS de otro integrante: alarma con sirena para toda la red ----------
+  // (en producción llega como notificación push con sonido de emergencia, aunque la app esté cerrada)
+  let sosShown = null;
+  const sosWho = a => members.find(x => x.phone === a.phone);
+  const sosNames = (a, k) => Object.keys(a[k] || {}).map(p => members.find(x => x.phone === p)).filter(Boolean).map(x => x.i === me ? 'tú' : x.name);
+  const theirs = () => S.sos && S.sos.active && S.sos.phone !== members[me].phone ? S.sos : null;
+  function checkSos() {
+    const a = S.sos, ov2 = $('geoOv');
+    if (!a || a.phone === members[me].phone) return;
+    if (a.active && sosShown !== a.id && !a.seen?.[members[me].phone]) { sosShown = a.id; paintSosAlarm(); ov2.hidden = false; ov2.scrollTop = 0; sirenOn(); }
+    else if (a.active && sosShown === a.id && !ov2.hidden) paintSosAlarm();
+    else if (!a.active && sosShown === a.id) { sosShown = null; if (!ov2.hidden) { sirenOff(); ov2.hidden = true; } toast(`✅ ${a.name} terminó la alerta: está bien`); }
+  }
+  function paintSosAlarm() {
+    const a = S.sos, m = sosWho(a), ov2 = $('geoOv'), go = sosNames(a, 'going'), seen = sosNames(a, 'seen').filter(n => !go.includes(n));
+    ov2.innerHTML = `<div><div class="big" style="font-size:72px">🚨</div>
+      <span class="pill bad" style="background:#ffffff22;color:#fff">ALERTA SOS</span>
+      <h2 id="geoTitle">${esc(a.name)} activó SOS</h2>
+      <p class="muted" style="color:#ffd6d8">${hhmm(a.t)} · ${ago((Date.now() - a.t) / MIN)}</p>
+      <div class="gi"><div>📍 ${esc(a.where)}</div>${m ? `<div>🔋 ${m.bat}% de batería · ${fmtPhone(m.phone)}</div>` : ''}
+        <div>${go.length ? `🚗 Van para allá: <b>${esc(go.join(', '))}</b>` : '🚗 Nadie ha confirmado que va en camino'}</div>
+        ${seen.length ? `<div>👀 Ya la vieron: ${esc(seen.join(', '))}</div>` : ''}</div>
+      <div class="gacts"><button class="btn btn-lime" data-s="go">🚗 Voy para allá</button>
+        <button class="btn" style="background:#fff;color:var(--ink)" data-s="map">📍 Ver en el mapa en vivo</button>
+        <a class="btn" style="background:#fff;color:var(--ink)" href="tel:${a.phone}">📞 Llamar a ${esc(a.name)}</a>
+        <a class="btn sos911" href="tel:911" style="background:#fff">📞 Llamar al 911</a>
+        <button class="btn out" data-s="ack" style="color:#fff">Enterado</button></div>
+      <p class="muted" style="margin-top:12px;color:#ffd6d8">Demostración: en la app real llega aunque el celular esté bloqueado.</p></div>`;
+    ov2.onclick = e => {
+      const b = e.target.closest('[data-s]'); if (!b) return;
+      sirenOff(); ov2.hidden = true;
+      sosAnswer(b.dataset.s);
+    };
+  }
+  // contestar la alerta (desde la alarma o desde la tarjeta roja de Inicio): queda visible para toda la red
+  function sosAnswer(k) {
+    reloadS(); const a = S.sos; if (!a || !a.active) return;
+    const p = members[me].phone, m = sosWho(a);
+    a.seen = { ...a.seen, [p]: Date.now() };
+    if (k === 'go' && !a.going?.[p]) { a.going = { ...a.going, [p]: Date.now() }; S.events.push({ t: Date.now(), txt: `🚗 <b>${esc(members[me].name)}</b> va para allá con ${esc(a.name)}` }); }
+    save();
+    if (k === 'go' || k === 'map') {
+      if (m) selM = m.i;
+      if (m?.route) { live = true; clearInterval(liveT); liveT = setInterval(drawMap, 500); }
+      if (location.hash.slice(1) === 'mapa') renderMap(); else location.hash = 'mapa';
+      toast(k === 'go' ? `Avisamos a la red que vas con ${a.name}` : `Siguiendo a ${a.name} en el mapa`);
+    } else renderHome();
+  }
+  function renderSosLive() {
+    const a = theirs(), c = $('sosLive');
+    if (!a) { c.hidden = true; return; }
+    const go = sosNames(a, 'going'), mineGo = !!a.going?.[members[me].phone];
+    c.hidden = false;
+    c.innerHTML = `<div class="row between" style="align-items:flex-start"><div><b style="font-size:18px">🚨 ${esc(a.name)} activó SOS</b>
+        <div class="muted">${hhmm(a.t)} · ${esc(a.where)} · ${ago((Date.now() - a.t) / MIN)}</div>
+        <div class="muted">${go.length ? `🚗 Van para allá: ${esc(go.join(', '))}` : 'Nadie ha confirmado que va en camino'}</div></div></div>
+      <div class="qa"><button class="btn" style="background:#fff;color:var(--ink)" data-sl="map">📍 Ver en el mapa</button>${mineGo ? `<a class="btn" style="background:#ffffff26;color:#fff" href="tel:${a.phone}">📞 Llamar</a>` : '<button class="btn btn-lime" data-sl="go">🚗 Voy para allá</button>'}</div>`;
+  }
+  $('sosLive').addEventListener('click', e => { const b = e.target.closest('[data-sl]'); if (b) sosAnswer(b.dataset.sl); });
+  // lo que hace otro integrante (activar SOS, ir para allá, terminar la alerta) llega al momento a esta pestaña
+  addEventListener('storage', e => {
+    if (e.key !== KEY) return;
+    reloadS(); syncExtra();
+    if (!ov.hidden && S.sos?.phone === members[me].phone && S.sos.active) paintSent();
+    checkSos();
+    const t = location.hash.slice(1) || 'inicio';
+    if (t === 'inicio') renderHome(); else if (t === 'chat') renderChat();
+  });
+  checkSos();
+
   // novedades: después de una actualización, una hoja con lo nuevo y un "Ver" que lleva a cada cosa (una sola vez)
-  const NEWS_V = 'sos-2026-11b';
+  const NEWS_V = 'sos-2026-11c';
   const NEWS = [
+    ['🚨', 'El SOS suena en toda la familia', 'Si alguien activa SOS, a todos les suena la alarma. Con “Voy para allá” la red sabe quién va en camino.', 'inicio'],
     ['⭕', 'Geocercas con horario', 'Zona alrededor del colegio, días y horas para cualquier integrante: si su SIM Navi (celular o reloj) sale, suena una alarma como la de SOS.', 'geo'],
     ['🛡️', 'Centro de seguridad en Inicio', 'Contactos, Acompáñame, enlace de ubicación, llegadas a tiempo y manejo, juntos.', 'inicio'],
     ['⏰', 'Espéralo con un toque', 'Cuando alguien va en camino, su hora de llegada se vuelve aviso: ajústala ±5 min.', 'mapa'],
