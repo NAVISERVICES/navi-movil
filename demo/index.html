@@ -71,7 +71,7 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 .menu-btn{display:none}
 
 /* ---------- hero ---------- */
-.hero{position:relative;overflow:hidden;padding:72px 0 120px}
+.hero{position:relative;overflow:hidden;padding:64px 0 88px}
 .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
 .b1{width:520px;height:520px;background:var(--purple);top:-160px;left:-120px}
 .b2{width:420px;height:420px;background:var(--blue);bottom:-180px;left:35%;animation-delay:-6s}
@@ -159,11 +159,11 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 /* ---------- sections ---------- */
 section{position:relative}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
-.sec-head{max-width:640px;margin-bottom:48px}
+.sec-head{max-width:640px;margin-bottom:36px}
 .sec-head h2{font-size:clamp(34px,4.6vw,58px);margin:10px 0 14px}
 .sec-head p{color:var(--muted);font-size:17px}
 
-.stages{padding:140px 0 120px;background:linear-gradient(180deg,var(--navy) 0%,#221470 100%)}
+.stages{padding:88px 0 80px;background:linear-gradient(180deg,var(--navy) 0%,#221470 100%)}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .card{border-radius:var(--radius);padding:18px;color:var(--ink);transform-style:preserve-3d;transition:transform .2s ease-out;position:relative;overflow:hidden}
 .card .art{border-radius:20px;height:210px;display:flex;justify-content:center;align-items:flex-end;position:relative;overflow:hidden}
@@ -182,7 +182,7 @@ section{position:relative}
 .c-coral{background:#FF9E7A} .c-coral .art{background:#FFCDB8}
 
 /* ---------- planes individuales ---------- */
-.solo{padding:110px 0 130px;background:linear-gradient(180deg,#221470 0%,var(--navy) 100%);overflow:hidden}
+.solo{padding:72px 0 84px;background:linear-gradient(180deg,#221470 0%,var(--navy) 100%);overflow:hidden}
 .solo .top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;margin-bottom:44px}
 .solo .sec-head{margin-bottom:0}
 .periods{position:relative;display:flex;background:#ffffff12;border:1px solid #ffffff22;border-radius:99px;padding:6px}
@@ -190,7 +190,7 @@ section{position:relative}
 .periods button.on{color:var(--ink)}
 .periods .ind{position:absolute;top:6px;bottom:6px;border-radius:99px;background:var(--lime);box-shadow:0 4px 0 #7FA312;transition:left .45s cubic-bezier(.3,1.4,.5,1),width .45s cubic-bezier(.3,1.4,.5,1)}
 /* ---------- promo de portabilidad ---------- */
-.porta{padding:110px 0 40px;position:relative}
+.porta{padding:72px 0 16px;position:relative}
 .porta .box{position:relative;border-radius:40px;padding:52px 48px;display:grid;grid-template-columns:1.05fr 1fr;gap:36px;align-items:center;
   background:radial-gradient(circle at 85% 15%,#FF6FB1 0,transparent 42%),radial-gradient(circle at 10% 100%,#7B5CFA 0,transparent 50%),linear-gradient(135deg,#1E1E8A,#0B0B4F);
   border:2px solid #ffffff1f;box-shadow:0 30px 70px #0007}
@@ -234,7 +234,7 @@ section{position:relative}
 @keyframes spin{to{transform:rotate(372deg)}}
 @media (max-width:980px){.porta .box{grid-template-columns:1fr;padding:44px 28px 30px}}
 @media (max-width:560px){
-  .porta{padding:80px 0 20px}
+  .porta{padding:52px 0 8px}
   .porta .box{padding:38px 18px 22px;border-radius:30px}
   .porta .burst{width:96px;height:96px;right:-6px;top:-34px}.porta .burst b{font-size:24px}.porta .burst div{font-size:11px}
   .mult{gap:10px}.mult .m{padding:16px 14px 14px;border-radius:22px}.mult .m .now{font-size:40px}.mult .m .x{width:42px;height:42px;font-size:17px;top:10px;right:10px}
@@ -276,7 +276,7 @@ section{position:relative}
 .solo .note{margin-top:22px;font-size:13px;color:var(--muted)}
 
 /* ---------- builder ---------- */
-.family-plan{padding:120px 0;background:var(--purple);overflow:hidden}
+.family-plan{padding:84px 0;background:var(--purple);overflow:hidden}
 .family-plan::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff30 2px,transparent 2px);background-size:28px 28px;mask-image:linear-gradient(90deg,#000,transparent 60%)}
 .family-plan .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;position:relative}
 .family-plan .eyebrow{color:var(--lime-2)}
@@ -352,7 +352,7 @@ section{position:relative}
 .builder .btn{width:100%;justify-content:center}
 
 /* ---------- tranquility ---------- */
-.calm{padding:130px 0;background:radial-gradient(ellipse at 20% 50%,#26208f 0%,var(--navy) 60%)}
+.calm{padding:88px 0;background:radial-gradient(ellipse at 20% 50%,#26208f 0%,var(--navy) 60%)}
 .calm .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .map{position:relative;aspect-ratio:1/1;border-radius:36px;background:#12125f;overflow:hidden;border:1px solid #ffffff1a}
 /* mapa real de CDMX (Roma, Condesa, Chapultepec) en modo oscuro con el azul de Navi */
@@ -388,7 +388,7 @@ section{position:relative}
 .feat span{color:var(--muted);font-size:14px}
 
 /* ---------- switch ---------- */
-.switch{padding:120px 0 140px;background:var(--lime);color:var(--ink);overflow:hidden}
+.switch{padding:84px 0 96px;background:var(--lime);color:var(--ink);overflow:hidden}
 .switch .eyebrow{color:var(--purple)}
 .switch .sec-head p{color:#33334f}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
@@ -409,7 +409,7 @@ section{position:relative}
 @keyframes peek{0%,100%{transform:translateY(60%)}40%,70%{transform:translateY(0) rotate(-6deg)}}
 
 /* ---------- final cta + footer ---------- */
-.final{padding:110px 0;text-align:center;background:var(--navy);overflow:hidden}
+.final{padding:80px 0;text-align:center;background:var(--navy);overflow:hidden}
 .final h2{font-size:clamp(36px,5.5vw,72px);max-width:900px;margin:0 auto 30px}
 .final h2 em{font-style:normal;color:var(--lime)}
 .final .faces{display:flex;justify-content:center;margin-bottom:24px}
@@ -497,6 +497,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
   .hug{height:190px}.hug .who{margin:0 -20px}.hug .who img{height:130px}.hug .who:nth-child(2) img{height:142px}
   .switch .peek{display:none}
   .marquee .track{font-size:20px}
+  /* celular: paneles más juntos, sin que se peguen */
+  .hero{padding:44px 0 64px}.stages{padding:60px 0 52px}.solo{padding:52px 0 60px}.family-plan,.calm{padding:60px 0}.switch{padding:60px 0 68px}.final{padding:60px 0}.sec-head{margin-bottom:28px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
