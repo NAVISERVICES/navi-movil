@@ -282,7 +282,8 @@ section{position:relative}
 /* ---------- builder ---------- */
 .family-plan{padding:84px 0;background:var(--purple);overflow:hidden}
 .family-plan::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff30 2px,transparent 2px);background-size:28px 28px;mask-image:linear-gradient(90deg,#000,transparent 60%)}
-.family-plan .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;position:relative}
+.family-plan .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;position:relative}
+.family-plan .wrap>.reveal:first-child{padding-top:24px} /* el título arranca a la altura del de "Arma tu Plan Familia" */
 .family-plan .eyebrow{color:var(--lime-2)}
 .family-plan h2{font-size:clamp(32px,4vw,52px);margin:10px 0 26px}
 /* familia unida */
