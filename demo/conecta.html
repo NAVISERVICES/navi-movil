@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Navi Conecta · Mi Navi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261101d"></script>
+<script>if (!NaviAuth.current()) location.replace('login.html?next=conecta.html');</script>
+<style>
+:root{--cx:#FF9EC7}
+main{padding-bottom:90px}
+.muted{color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted)}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:22px}
+.tabs{display:flex;gap:6px;background:#ffffff0d;border:1px solid #ffffff18;border-radius:99px;padding:5px;margin-bottom:20px;width:max-content;max-width:100%}
+.tabs button{padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tabs button[aria-pressed="true"]{background:var(--cx);color:var(--ink)}
+.tabs b{background:var(--pink);color:#fff;border-radius:99px;font-size:11px;padding:1px 7px}
+.tabs button[aria-pressed="true"] b{background:var(--ink)}
+@media (max-width:520px){.tabs{width:100%}.tabs button{flex:1;justify-content:center;padding:10px 8px;font-size:13px}}
+
+/* avatares */
+.av{flex:none;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#fff;font-size:28px}
+.av img{width:100%;height:100%;object-fit:cover;object-position:50% 15%}
+.av.fam{background:none;display:flex;justify-content:center;border-radius:0;overflow:visible}
+.av.fam img,.av.fam span{width:62%;height:auto;aspect-ratio:1;border-radius:50%;background:#fff;border:3px solid var(--navy-2);margin:0 -9%}
+.av.fam span{display:grid;place-items:center;font-size:.55em;min-width:0}
+.pcard .top .av.fam span{font-size:40px}.row .av.fam span{font-size:14px}.chat .hd .av.fam span{font-size:13px}.match .pair .av.fam span{font-size:24px}
+.ver{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--ink);background:var(--lime);border-radius:99px;padding:2px 8px;white-space:nowrap}
+
+/* explorar */
+.explore{display:grid;grid-template-columns:1fr 330px;gap:20px;align-items:start}
+@media (max-width:900px){.explore{grid-template-columns:1fr}}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters button{padding:8px 14px;border-radius:99px;border:2px solid #ffffff25;font-weight:700;font-size:13px}
+.filters button[aria-pressed="true"]{background:var(--cx);border-color:var(--cx);color:var(--ink)}
+.pcard{position:relative;background:linear-gradient(180deg,#1d1d86,#15156E 55%);border:1px solid #ffffff22;border-radius:30px;overflow:hidden;box-shadow:0 24px 50px #0006;max-width:560px;animation:in .35s cubic-bezier(.3,1.4,.5,1)}
+@keyframes in{from{transform:translateY(16px) scale(.97);opacity:0}}
+.pcard.out-l{animation:outl .32s forwards}.pcard.out-r{animation:outr .32s forwards}
+@keyframes outl{to{transform:translateX(-120%) rotate(-12deg);opacity:0}}
+@keyframes outr{to{transform:translateX(120%) rotate(12deg);opacity:0}}
+.pcard .top{position:relative;height:210px;display:grid;place-items:center;background:radial-gradient(circle at 50% 70%,#ffffff26,transparent 60%)}
+.pcard .top .av{width:150px;height:150px;font-size:76px;box-shadow:0 14px 30px #0005}
+.pcard .top .av.fam{width:260px;height:auto}
+@media (max-width:520px){.pcard .top{height:190px;padding-top:30px}.pcard .top .av.fam{width:min(200px,62%)}.pcard .top .av.fam span{font-size:30px}.pcard .top .av{width:124px;height:124px}}
+.pcard .aff{position:absolute;top:16px;left:16px;background:#06062Ecc;border:1px solid #ffffff2a;border-radius:16px;padding:8px 12px;text-align:center;line-height:1}
+.pcard .aff b{display:block;font-family:var(--display);font-size:26px;color:var(--cx)}
+.pcard .aff small{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.pcard .kind{position:absolute;top:16px;right:16px;background:#ffffff1f;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800}
+.pcard .more{position:absolute;bottom:12px;right:14px;width:36px;height:36px;border-radius:50%;background:#06062E99;font-size:18px;font-weight:800}
+.pcard .body{padding:20px 22px 22px}
+.pcard h2{font-size:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pcard .meta{color:var(--muted);font-size:14px;margin-top:4px}
+.pcard .goal{display:inline-flex;gap:6px;align-items:center;margin-top:12px;background:#FF9EC722;color:var(--cx);border-radius:12px;padding:7px 12px;font-size:13px;font-weight:700}
+.pcard .bio{margin-top:12px;font-size:15px}
+.ints{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.ints span{font-size:13px;font-weight:600;padding:6px 11px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff18}
+.ints span.same{background:var(--cx);color:var(--ink);border-color:var(--cx)}
+.pcard .extra{margin-top:12px;font-size:13px;color:var(--muted)}
+.acts{display:flex;justify-content:center;gap:18px;margin-top:18px;max-width:560px}
+.acts button{width:70px;height:70px;border-radius:50%;font-size:28px;display:grid;place-items:center;transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
+.acts button:hover{transform:scale(1.08)}
+.acts .no{background:#ffffff14;border:2px solid #ffffff30}
+.acts .yes{background:var(--cx);box-shadow:0 6px 0 #c2558a;color:var(--ink);width:84px;height:84px;font-size:34px}
+.acts small{display:block;text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
+.side .card + .card{margin-top:14px}
+.side h3{font-size:18px;margin-bottom:8px}
+.side ul{list-style:none;display:grid;gap:8px;font-size:14px;color:var(--muted)}
+.side li{display:flex;gap:10px}
+.done{text-align:center;padding:40px 20px}
+.done .big{font-size:56px}
+
+/* conexiones y chat */
+.cx{display:grid;grid-template-columns:320px 1fr;gap:16px;min-height:520px}
+@media (max-width:860px){.cx{grid-template-columns:1fr}.cx.chatting .list{display:none}.cx:not(.chatting) .chat{display:none}}
+.list{display:grid;gap:8px;align-content:start}
+.row{display:flex;align-items:center;gap:12px;background:var(--navy-2);border:1px solid #ffffff14;border-radius:18px;padding:10px 12px;text-align:left;width:100%}
+.row[aria-pressed="true"]{border-color:var(--cx)}
+.row .av{width:48px;height:48px;font-size:24px}
+.row .av.fam{width:72px}
+.row .av.fam img{border-width:2px}
+.row b{display:block;font-size:15px}
+.row small{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.row .dot{margin-left:auto;width:10px;height:10px;border-radius:50%;background:var(--pink);flex:none}
+.chat{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden;min-height:520px}
+.chat .hd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #ffffff14}
+.chat .hd .av{width:42px;height:42px;font-size:22px}.chat .hd .av.fam{width:64px}
+.chat .hd .back2{display:none;font-size:20px;padding:4px 8px}
+@media (max-width:860px){.chat .hd .back2{display:block}}
+.chat .hd .opts{margin-left:auto;display:flex;gap:6px}
+.chat .hd .opts button{font-size:12px;font-weight:700;padding:6px 10px;border-radius:99px;border:1px solid #ffffff2a}
+.msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px;max-height:520px}
+.msg{max-width:78%;padding:9px 13px;border-radius:18px;font-size:14.5px;line-height:1.35;background:#ffffff14;align-self:flex-start;border-bottom-left-radius:6px}
+.msg.me{align-self:flex-end;background:var(--cx);color:var(--ink);border-bottom-left-radius:18px;border-bottom-right-radius:6px}
+.msg small{display:block;font-size:10.5px;opacity:.6;margin-top:3px}
+.msg.plan{border:2px dashed currentColor;background:none}
+.msg.me.plan{background:#FF9EC733;color:var(--text);border-color:var(--cx)}
+.sys{align-self:center;font-size:12px;color:var(--muted);background:#ffffff0a;border-radius:99px;padding:5px 12px;text-align:center}
+.tip{margin:10px 14px 0;background:#FFC22E1a;border:1px solid #FFC22E55;border-radius:14px;padding:10px 12px;font-size:13px}
+.tip b{color:var(--yellow)}
+.quick{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px 0}
+.quick button{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:99px;background:#ffffff12;border:1px solid #ffffff22}
+.send{display:flex;gap:8px;padding:12px 14px 14px}
+.send input{flex:1;min-width:0;background:#ffffff10;border:2px solid #ffffff22;border-radius:99px;padding:11px 16px;font-size:15px;color:var(--text)}
+.send input:focus{outline:none;border-color:var(--cx)}
+.send button{background:var(--cx);color:var(--ink);border-radius:99px;padding:0 18px;font-weight:800}
+.typing{align-self:flex-start;font-size:12px;color:var(--muted)}
+
+/* perfil */
+.pf{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media (max-width:900px){.pf{grid-template-columns:1fr}}
+.seg{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.seg button{padding:10px 16px;border-radius:14px;border:2px solid #ffffff25;font-weight:700;font-size:14px}
+.seg button[aria-pressed="true"]{border-color:var(--cx);background:#FF9EC71f}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg .full{grid-column:1/-1}
+@media (max-width:560px){.fg{grid-template-columns:1fr}}
+.fg label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.fg input,.fg select,.fg textarea{background:#ffffff10;border:2px solid #ffffff22;border-radius:14px;padding:11px 12px;font-size:15px;color:var(--text);font-family:inherit;width:100%}
+.fg select option{color:#000}
+.fg textarea{min-height:80px;resize:vertical}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--cx)}
+.pick{display:flex;flex-wrap:wrap;gap:6px}
+.pick button{font-size:13px;font-weight:600;padding:7px 12px;border-radius:99px;border:2px solid #ffffff22}
+.pick button[aria-pressed="true"]{background:var(--cx);border-color:var(--cx);color:var(--ink)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#ffffff0a;border-radius:14px;padding:12px 14px}
+.sw input{width:44px;height:24px;accent-color:var(--cx)}
+.btn-cx{background:var(--cx);color:var(--ink);box-shadow:0 6px 0 #c2558a}
+.wide{width:100%;justify-content:center}
+.preview{position:sticky;top:90px}
+.preview .pcard{max-width:none;animation:none}
+.preview .pcard .top{height:170px}.preview .pcard .top .av{width:120px;height:120px;font-size:60px}.preview .pcard .top .av.fam{width:210px}
+.gate{max-width:560px;margin:0 auto;text-align:center}
+.gate .big{font-size:60px}
+.gate h2{font-size:26px;margin:8px 0}
+
+/* match y hojas */
+.ov{position:fixed;inset:0;z-index:90;background:#03031ad9;display:grid;place-items:center;padding:16px}
+.ov[hidden]{display:none}
+.ov > div{width:min(460px,100%);background:var(--navy-2);border:1px solid #ffffff22;border-radius:28px;padding:26px;max-height:calc(100dvh - 32px);overflow:auto}
+.match{text-align:center;background:radial-gradient(circle at 50% 0,#FF9EC755,transparent 60%),var(--navy-2)!important}
+.match h2{font-family:var(--display);font-size:40px;color:var(--cx);margin:6px 0}
+.match .pair{display:flex;justify-content:center;align-items:center;margin:18px 0}
+.match .pair .av{width:110px;height:110px;font-size:54px;border:4px solid var(--cx);animation:pairin .5s cubic-bezier(.3,1.6,.5,1)}
+.match .pair .av.fam{width:150px;border:0}
+.match .pair .av:first-child{margin-right:-14px;transform:rotate(-8deg)}
+.match .pair .av:last-child{transform:rotate(8deg)}
+@keyframes pairin{from{transform:scale(.3)}}
+.match .heart{position:relative;z-index:2;font-size:34px;margin:0 -8px}
+.ov h3{font-size:22px;margin-bottom:8px}
+.ov .opt{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:12px;border-radius:14px;border:2px solid #ffffff1f;margin-top:8px;font-weight:600}
+.ov .opt:hover{border-color:var(--cx)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;background:#fff;color:var(--ink);font-weight:700;font-size:14px;padding:12px 18px;border-radius:14px;box-shadow:0 12px 30px #0007;z-index:99;transition:all .3s;max-width:calc(100% - 32px);pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div class="ico" style="background:var(--cx)">🫶</div>
+    <div><h1>Navi Conecta</h1><p>La red social de los clientes Navi: conecta con personas y familias verificadas.</p></div>
+  </div>
+  <div id="app"></div>
+</main>
+<div class="ov" id="ov" hidden role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const user = NaviAuth.current();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(e.t); e.t = setTimeout(() => e.classList.remove('show'), 2400); };
+
+// ---------- catálogos ----------
+const ZONAS = ['Álvaro Obregón', 'Azcapotzalco', 'Benito Juárez', 'Coyoacán', 'Cuauhtémoc', 'Gustavo A. Madero', 'Iztapalapa', 'Miguel Hidalgo', 'Tlalpan', 'Naucalpan', 'Tlalnepantla', 'Ecatepec', 'Guadalajara', 'Monterrey', 'Puebla', 'Querétaro'];
+const INT_P = ['⚽ Fútbol', '🏃 Correr', '💪 Calistenia', '🚴 Bici', '🧘 Yoga', '🎵 Música', '🎮 Videojuegos', '📚 Lectura', '🍳 Cocina', '✈️ Viajes', '🐶 Mascotas', '💼 Emprender', '💻 Tecnología', '🎨 Arte', '🎬 Cine', '🌳 Naturaleza'];
+const INT_F = ['🌳 Parques', '🎂 Fiestas infantiles', '⚽ Deportes', '🏊 Natación', '✈️ Viajes', '🐶 Mascotas', '🎨 Talleres', '🎬 Cine', '🍕 Comidas', '📚 Tareas juntos', '🎮 Juegos', '⛺ Campamentos'];
+const GOALS_P = ['🤝 Hacer amistades', '💼 Networking profesional', '🏃 Compañero de actividades', '🚀 Emprender juntos'];
+const GOALS_F = ['🧒 Amigos para los niños', '🌳 Planes de fin de semana', '🫂 Red de apoyo entre papás'];
+const STAGES = ['👶 Bebés (0-2)', '🧸 Peques (3-5)', '🎒 Primaria (6-11)', '📘 Secundaria (12-14)', '🎓 Prepa (15-17)'];
+
+// ---------- datos (DEMO: en este navegador; en producción, en el servidor con moderación) ----------
+const KEY = 'navi.conecta';
+const D = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })();
+['profiles', 'likes', 'passes', 'chats', 'blocks', 'reports', 'seen'].forEach(k => D[k] = D[k] || {});
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch {} };
+addEventListener('storage', e => { if (e.key === KEY) location.reload(); }); // otra cuenta demo en otra pestaña
+
+// perfiles de ejemplo (personas ficticias con avatar de emoji, nunca fotos); likesYou = ya te dio "Conectar"
+const SEED = [
+  { id: 's1', kind: 'p', name: 'Mariana', age: 29, zona: 'Coyoacán', goal: GOALS_P[2], ints: ['🏃 Correr', '🧘 Yoga', '🐶 Mascotas', '☕'].filter(x => x !== '☕'), bio: 'Corro los domingos en Viveros y busco con quién entrenar para un medio maratón.', emo: '🏃‍♀️', bg: '#FFC22E', fit: 12, likesYou: true },
+  { id: 's2', kind: 'p', name: 'Jorge', age: 34, zona: 'Benito Juárez', goal: GOALS_P[1], ints: ['💼 Emprender', '💻 Tecnología', '📚 Lectura', '🚴 Bici'], bio: 'Tengo una agencia de diseño. Me interesa conocer emprendedores para colaborar.', emo: '🧑‍💻', bg: '#7EE0FF', likesYou: true },
+  { id: 's3', kind: 'p', name: 'Daniela', age: 26, zona: 'Cuauhtémoc', goal: GOALS_P[0], ints: ['🎵 Música', '🎬 Cine', '🎨 Arte', '✈️ Viajes'], bio: 'Recién me mudé a la ciudad. Me gustan los conciertos y los museos.', emo: '🎧', bg: '#A893FF' },
+  { id: 's4', kind: 'p', name: 'Ricardo', age: 41, zona: 'Naucalpan', goal: GOALS_P[2], ints: ['⚽ Fútbol', '🍳 Cocina', '🎮 Videojuegos'], bio: 'Armamos cascarita los martes y nos falta gente. ¡Nivel amateur!', emo: '⚽', bg: '#B4E32F', likesYou: true },
+  { id: 's5', kind: 'p', name: 'Valeria', age: 31, zona: 'Miguel Hidalgo', goal: GOALS_P[3], ints: ['💼 Emprender', '🍳 Cocina', '✈️ Viajes', '💪 Calistenia'], bio: 'Hago repostería y quiero abrir mi local. Busco socios o mentores.', emo: '🧁', bg: '#FF9EC7', fit: 21 },
+  { id: 's6', kind: 'p', name: 'Andrés', age: 23, zona: 'Iztapalapa', goal: GOALS_P[0], ints: ['🎮 Videojuegos', '💻 Tecnología', '🎬 Cine', '🎵 Música'], bio: 'Estudio ingeniería. Juego en línea casi todas las noches.', emo: '🎮', bg: '#FF7A45' },
+  { id: 's7', kind: 'p', name: 'Lucía', age: 37, zona: 'Tlalpan', goal: GOALS_P[2], ints: ['🚴 Bici', '🌳 Naturaleza', '🐶 Mascotas', '🧘 Yoga'], bio: 'Rodadas de bici al Ajusco los sábados. Siempre llevo a mi perro Tacho.', emo: '🚴‍♀️', bg: '#4FD1C0', likesYou: true },
+  { id: 's8', kind: 'p', name: 'Héctor', age: 45, zona: 'Guadalajara', goal: GOALS_P[1], ints: ['💼 Emprender', '📚 Lectura', '⚽ Fútbol'], bio: 'Consultor de ventas. Me gusta compartir lo que he aprendido.', emo: '👔', bg: '#FFC22E' },
+  { id: 'f1', kind: 'f', name: 'Familia Hernández', members: 4, zona: 'Coyoacán', goal: GOALS_F[0], stages: ['🎒 Primaria (6-11)'], ints: ['🌳 Parques', '⚽ Deportes', '🎂 Fiestas infantiles'], bio: 'Dos peques de 7 y 9 que aman el fútbol. Buscamos amigos para tardes de parque.', emos: ['👨', '👩', '👦', '👧'], bg: '#B4E32F', likesYou: true },
+  { id: 'f2', kind: 'f', name: 'Familia Ortiz', members: 3, zona: 'Benito Juárez', goal: GOALS_F[2], stages: ['👶 Bebés (0-2)'], ints: ['🌳 Parques', '🍕 Comidas', '🐶 Mascotas'], bio: 'Papás primerizos. Nos encantaría compartir tips y salir a pasear con otras familias.', emos: ['👩', '👨', '👶'], bg: '#7EE0FF' },
+  { id: 'f3', kind: 'f', name: 'Familia Méndez', members: 5, zona: 'Tlalnepantla', goal: GOALS_F[1], stages: ['🧸 Peques (3-5)', '🎒 Primaria (6-11)'], ints: ['⛺ Campamentos', '✈️ Viajes', '🏊 Natación'], bio: 'Somos de salir los fines de semana: campamentos, balnearios y carretera.', emos: ['👨', '👩', '🧒', '👧', '👶'], bg: '#FFC22E', likesYou: true },
+  { id: 'f4', kind: 'f', name: 'Familia Torres', members: 4, zona: 'Álvaro Obregón', goal: GOALS_F[0], stages: ['📘 Secundaria (12-14)', '🎓 Prepa (15-17)'], ints: ['🎮 Juegos', '🎬 Cine', '📚 Tareas juntos'], bio: 'Hijos adolescentes. Organizamos noches de juegos de mesa y cine.', emos: ['👩', '👨', '🧑', '👦'], bg: '#A893FF' },
+];
+
+// las otras cuentas demo ya tienen perfil, para que se puedan encontrar entre ellas (una sola vez; nunca el de quien entró)
+const DEMO_PROFILES = {
+  '5500000002': { kind: 'p', name: 'Luis', birth: '1988-05-14', zona: 'Benito Juárez', goal: GOALS_P[1], ints: ['💼 Emprender', '⚽ Fútbol', '💻 Tecnología', '🍳 Cocina'], bio: 'Vendo equipo de cómputo. Siempre abierto a conocer gente con negocio propio.' },
+  '5500000003': { kind: 'p', name: 'Carla', birth: '1992-09-03', zona: 'Coyoacán', goal: GOALS_P[2], ints: ['💪 Calistenia', '🏃 Correr', '🧘 Yoga', '🐶 Mascotas'], bio: 'Haciendo el reto de NAVI Fit. ¿Alguien para entrenar en Viveros?', showFit: true },
+  'fam:5500000004': { kind: 'f', owner: '5500000004', name: 'Familia García', members: 4, zona: 'Coyoacán', goal: GOALS_F[0], stages: ['🎒 Primaria (6-11)', '📘 Secundaria (12-14)'], ints: ['🌳 Parques', '⚽ Deportes', '🎮 Juegos', '🍕 Comidas'], bio: 'Sofi y Toño buscan amigos para jugar fútbol y videojuegos los fines de semana.' },
+};
+D.seeded = D.seeded || {};
+Object.entries(DEMO_PROFILES).forEach(([id, p]) => {
+  if (D.seeded[id] || D.profiles[id] || id === user.phone || id === 'fam:' + user.owner) return;
+  D.profiles[id] = { id, visible: true, ...p }; D.seeded[id] = 1;
+});
+save();
+
+// ---------- perfiles de las cuentas demo y del usuario ----------
+const fitDay = phone => { try { const f = JSON.parse(localStorage.getItem('navi.fit.' + phone)); return f ? Object.keys(f.done || {}).length : 0; } catch { return 0; } };
+const famLines = owner => { const a = NaviAuth.find(owner); return a && a.plan.type === 'familia' ? accountLines(a) : []; };
+const myPid = user.phone, myFid = 'fam:' + user.owner;
+const isFamTitular = user.plan.type === 'familia' && user.role === 'titular';
+// modo invisible: no sale en Explorar, pero sus conexiones lo siguen viendo
+const allProfiles = (withHidden = false) => {
+  const real = Object.values(D.profiles).filter(p => withHidden || p.visible !== false || p.id === myPid || p.id === myFid);
+  return [...real, ...SEED.map(s => ({ ...s, seed: true, visible: true }))];
+};
+const prof = id => D.profiles[id] || (SEED.find(s => s.id === id) && { ...SEED.find(s => s.id === id), seed: true });
+const age = b => { if (!b) return 0; const d = new Date(b), n = new Date(); return n.getFullYear() - d.getFullYear() - ((n.getMonth() < d.getMonth() || (n.getMonth() === d.getMonth() && n.getDate() < d.getDate())) ? 1 : 0); };
+const ageOf = p => p.seed ? p.age : age(p.birth);
+
+function avatar(p, cls = '') {
+  if (p.kind === 'f') {
+    if (p.seed) return `<div class="av fam ${cls}">${p.emos.slice(0, 4).map(e => `<span style="background:${p.bg}">${e}</span>`).join('')}</div>`;
+    const ls = famLines(p.owner).slice(0, 4);
+    return `<div class="av fam ${cls}">${ls.map(l => `<img src="${avatarSrc(l.phone, l.img)}" alt="">`).join('')}</div>`;
+  }
+  if (p.seed) return `<div class="av ${cls}" style="background:${p.bg}">${p.emo}</div>`;
+  const a = NaviAuth.find(p.id);
+  return `<div class="av ${cls}"><img src="${avatarSrc(p.id, a?.img)}" alt=""></div>`;
+}
+
+// ---------- afinidad: intereses en común, misma zona, mismo objetivo (y etapa de los hijos en familias) ----------
+function affinity(me, o) {
+  if (!me) return 50;
+  const a = new Set(me.ints || []), b = o.ints || [];
+  const common = b.filter(x => a.has(x)).length, union = new Set([...a, ...b]).size || 1;
+  let s = 30 + common / union * 45;
+  if (me.zona === o.zona) s += 15;
+  if (me.goal === o.goal) s += 10;
+  if (me.kind === 'f' && o.kind === 'f' && (me.stages || []).some(x => (o.stages || []).includes(x))) s += 10;
+  return Math.max(35, Math.min(99, Math.round(s)));
+}
+
+// ---------- quién soy aquí: mi perfil personal o el de mi familia ----------
+let as = (D.as && D.as[user.phone]) || 'p';
+const actingId = () => as === 'f' ? myFid : myPid;
+const me = () => D.profiles[actingId()] || null;
+const setAs = k => { as = k; D.as = D.as || {}; D.as[user.phone] = k; save(); };
+const blocked = id => (D.blocks[actingId()] || []).includes(id) || (D.blocks[id] || []).includes(actingId());
+const liked = (a, b) => (D.likes[a] || []).includes(b) || (b === actingId() && prof(a)?.likesYou);
+const isMatch = id => (D.likes[actingId()] || []).includes(id) && liked(id, actingId());
+const pairKey = (a, b) => [a, b].sort().join('|');
+const matches = () => allProfiles(true).filter(p => p.id !== actingId() && isMatch(p.id) && !blocked(p.id));
+const unread = () => matches().filter(p => { const c = D.chats[pairKey(actingId(), p.id)] || []; const last = c[c.length - 1]; return last && last.from !== actingId() && (D.seen[actingId() + '>' + p.id] || 0) < last.t; }).length;
+
+// ---------- pantallas ----------
+let tab = 'explore', filt = 'all', goalF = '', openChat = null;
+function render() {
+  const m = me();
+  const u = unread();
+  $('app').innerHTML = `<div class="tabs" role="tablist">
+      <button data-tab="explore" aria-pressed="${tab === 'explore'}">🔎 Explorar</button>
+      <button data-tab="cx" aria-pressed="${tab === 'cx'}">💬 Conexiones${u ? `<b>${u}</b>` : ''}</button>
+      <button data-tab="me" aria-pressed="${tab === 'me'}">${m ? '🙂' : '✏️'} Mi perfil</button></div><div id="view"></div>`;
+  document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; openChat = null; render(); });
+  if (tab === 'me' || (!m && tab === 'explore')) return tab === 'me' ? viewProfile() : viewNeedProfile();
+  if (tab === 'explore') return viewExplore();
+  viewConnections();
+}
+
+function viewNeedProfile() {
+  $('view').innerHTML = `<section class="card gate"><div class="big">🫶</div><h2>Crea tu perfil para empezar</h2>
+    <p class="muted">Cuéntale a otros clientes Navi qué te gusta y qué buscas. Solo verán tu nombre, zona e intereses: nunca tu número.</p>
+    <div class="seg" style="justify-content:center;margin-top:18px">
+      <button class="btn btn-cx" data-new="p">🙋 Perfil personal</button>
+      ${isFamTitular ? '<button class="btn btn-ghost" data-new="f">👨‍👩‍👧 Perfil de mi familia</button>' : ''}</div>
+    ${user.plan.type === 'familia' && !isFamTitular ? '<p class="hint" style="margin-top:12px">El perfil de tu familia lo crea el titular del Plan Familia.</p>' : ''}</section>`;
+  document.querySelectorAll('[data-new]').forEach(b => b.onclick = () => { setAs(b.dataset.new); tab = 'me'; render(); });
+}
+
+// tarjeta de perfil (Explorar y vista previa)
+function cardHTML(p, mine) {
+  const m = me(), aff = mine ? null : affinity(m, p);
+  const a = ageOf(p), fit = p.seed ? p.fit : (p.kind === 'p' && p.showFit ? fitDay(p.id) : 0);
+  const myInts = new Set(m?.ints || []);
+  return `<article class="pcard" id="pc">
+    <div class="top">${aff != null ? `<div class="aff"><b>${aff}%</b><small>AFINIDAD</small></div>` : ''}<span class="kind">${p.kind === 'f' ? '👨‍👩‍👧 Familia' : '🙋 Persona'}</span>
+      ${avatar(p)}${mine ? '' : '<button class="more" id="more" aria-label="Más opciones">⋯</button>'}</div>
+    <div class="body">
+      <h2>${esc(p.name || 'Tu nombre')}${p.kind === 'p' && a ? `<span style="font-weight:600;font-size:22px;color:var(--muted)">${a}</span>` : ''}<span class="ver">✓ Cliente Navi</span></h2>
+      <div class="meta">📍 ${esc(p.zona || 'Tu zona')}${p.kind === 'f' ? ` · ${p.members || '?'} integrantes` : ''}</div>
+      ${p.goal ? `<div class="goal">${esc(p.goal)}</div>` : ''}
+      ${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : ''}
+      ${p.kind === 'f' && p.stages?.length ? `<div class="extra">Hijos en: ${p.stages.map(esc).join(' · ')}</div>` : ''}
+      <div class="ints">${(p.ints || []).map(i => `<span class="${!mine && myInts.has(i) ? 'same' : ''}">${esc(i)}</span>`).join('')}</div>
+      ${fit ? `<div class="extra">💪 Va en el día ${fit} de NAVI Fit</div>` : ''}
+    </div></article>`;
+}
+
+function deck() {
+  const m = me();
+  return allProfiles().filter(p => p.id !== myPid && p.id !== myFid && !(p.kind === 'f' && p.owner === user.owner)
+    && !(D.likes[actingId()] || []).includes(p.id) && !(D.passes[actingId()] || []).includes(p.id) && !blocked(p.id)
+    && (filt === 'all' || p.kind === filt) && (!goalF || p.goal === goalF))
+    .map(p => ({ p, a: affinity(m, p) })).sort((x, y) => y.a - x.a).map(x => x.p);
+}
+
+function viewExplore() {
+  const list = deck(), p = list[0];
+  const goals = filt === 'f' ? GOALS_F : filt === 'p' ? GOALS_P : [];
+  $('view').innerHTML = `<div class="explore"><div>
+      <div class="filters">${[['all', 'Todos'], ['p', '🙋 Personas'], ['f', '👨‍👩‍👧 Familias']].map(([k, n]) => `<button data-f="${k}" aria-pressed="${filt === k}">${n}</button>`).join('')}
+        ${goals.map(g => `<button data-g="${esc(g)}" aria-pressed="${goalF === g}">${esc(g)}</button>`).join('')}</div>
+      ${p ? `${cardHTML(p)}<div class="acts"><div><button class="no" id="no" aria-label="Pasar">✕</button><small>Pasar</small></div><div><button class="yes" id="yes" aria-label="Conectar">🫶</button><small>Conectar</small></div></div>
+        <p class="hint" style="text-align:center;max-width:560px;margin-top:10px">${list.length - 1} perfiles más por ver · Solo si los dos dicen “Conectar” se abre el chat.</p>`
+      : `<section class="card done"><div class="big">✨</div><h2>Ya viste todos los perfiles</h2><p class="muted">Vuelve pronto: cada semana se suman clientes nuevos. ¿Conoces a alguien que no es Navi?</p>
+        <div class="seg" style="justify-content:center;margin-top:14px"><a class="btn btn-cx" href="referidos.html">Invítalo con tu código</a><button class="btn btn-ghost" id="again">Ver de nuevo los que pasé</button></div></section>`}
+    </div>
+    <aside class="side">
+      <section class="card"><h3>Así funciona</h3><ul>
+        <li>🔎<span>Ves perfiles ordenados por afinidad contigo.</span></li>
+        <li>🫶<span>Si los dos tocan “Conectar”, es match y se abre el chat.</span></li>
+        <li>🔒<span>Tu número nunca se muestra. Tú decides si lo compartes.</span></li></ul></section>
+      <section class="card"><h3>Comunidad segura</h3><ul>
+        <li>✓<span>Todos son clientes Navi con línea verificada.</span></li>
+        <li>🔞<span>Solo mayores de 18. Los menores solo aparecen como edades dentro del perfil familiar.</span></li>
+        <li>🚩<span>Bloquea o reporta con un toque desde ⋯.</span></li></ul></section>
+      ${isFamTitular ? `<section class="card"><h3>Estás como</h3><div class="seg" style="margin:0"><button data-as="p" aria-pressed="${as === 'p'}">🙋 Yo</button><button data-as="f" aria-pressed="${as === 'f'}">👨‍👩‍👧 Mi familia</button></div></section>` : ''}
+    </aside></div>`;
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt = b.dataset.f; goalF = ''; viewExplore(); });
+  document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { goalF = goalF === b.dataset.g ? '' : b.dataset.g; viewExplore(); });
+  document.querySelectorAll('[data-as]').forEach(b => b.onclick = () => { setAs(b.dataset.as); render(); });
+  if ($('again')) $('again').onclick = () => { D.passes[actingId()] = []; save(); viewExplore(); };
+  if (!p) return;
+  const swipe = (dir, fn) => { $('pc').classList.add(dir); setTimeout(fn, 300); };
+  $('no').onclick = () => swipe('out-l', () => { (D.passes[actingId()] = D.passes[actingId()] || []).push(p.id); save(); viewExplore(); });
+  $('yes').onclick = () => swipe('out-r', () => {
+    (D.likes[actingId()] = D.likes[actingId()] || []).push(p.id); save();
+    if (isMatch(p.id)) { showMatch(p); render(); } else { toast(`Le avisamos a ${p.name}. Si también conecta contigo, es match.`); viewExplore(); }
+  });
+  $('more').onclick = () => safety(p, () => viewExplore());
+}
+
+function showMatch(p) {
+  const m = me();
+  $('ov').hidden = false;
+  $('ov').innerHTML = `<div class="match"><div style="font-size:14px;font-weight:800;letter-spacing:.14em;color:var(--muted)">NAVI CONECTA</div><h2>¡Es un match!</h2>
+    <p class="muted">Tú y ${esc(p.name)} quieren conectar.</p>
+    <div class="pair">${avatar(m)}<span class="heart">🫶</span>${avatar(p)}</div>
+    <button class="btn btn-cx wide" id="mGo">Escribir mensaje</button><button class="btn btn-ghost wide" id="mLater" style="margin-top:10px">Seguir explorando</button></div>`;
+  $('mGo').onclick = () => { $('ov').hidden = true; tab = 'cx'; openChat = p.id; render(); };
+  $('mLater').onclick = () => { $('ov').hidden = true; render(); };
+}
+
+// bloquear y reportar
+function safety(p, after) {
+  $('ov').hidden = false;
+  $('ov').innerHTML = `<div><h3>${esc(p.name)}</h3><p class="muted">Nadie se entera de que lo bloqueaste o reportaste.</p>
+    <button class="opt" data-s="block">🚫 <span><b>Bloquear</b><br><small class="muted">No volverán a verse ni a escribirse.</small></span></button>
+    ${['Perfil falso o engañoso', 'Mensajes ofensivos o acoso', 'Spam o ventas', 'Parece menor de edad'].map(r => `<button class="opt" data-r="${r}">🚩 Reportar: ${r}</button>`).join('')}
+    <button class="btn btn-ghost wide" id="sx" style="margin-top:14px">Cancelar</button></div>`;
+  $('sx').onclick = () => $('ov').hidden = true;
+  $('ov').querySelector('[data-s]').onclick = () => { (D.blocks[actingId()] = D.blocks[actingId()] || []).push(p.id); save(); $('ov').hidden = true; toast(`Bloqueaste a ${p.name}`); after(); };
+  $('ov').querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
+    (D.reports[p.id] = D.reports[p.id] || []).push({ by: actingId(), why: b.dataset.r, t: Date.now() });
+    (D.blocks[actingId()] = D.blocks[actingId()] || []).push(p.id); save();
+    $('ov').hidden = true; toast('Gracias. Nuestro equipo revisará el reporte.'); after();
+  });
+}
+
+// ---------- conexiones y chat ----------
+const REPLIES = {
+  '🏃 Compañero de actividades': ['¡Hola! Qué gusto 🙌 ¿Qué días sueles entrenar?', '¡Va! ¿Te late este fin de semana?'],
+  '💼 Networking profesional': ['¡Hola! Gracias por conectar. ¿A qué te dedicas?', 'Me encantaría platicar. ¿Te late un café virtual esta semana?'],
+  '🚀 Emprender juntos': ['¡Hola! Cuéntame de tu idea 💡', 'Suena muy bien. ¿Hacemos una llamada para platicarlo?'],
+  '🧒 Amigos para los niños': ['¡Hola! A los niños les va a encantar 😊 ¿Qué edades tienen los suyos?', 'Nosotros vamos al parque los sábados en la mañana, ¿se apuntan?'],
+  '🌳 Planes de fin de semana': ['¡Hola familia! ¿Qué tipo de planes les gustan?', '¡Perfecto! Les compartimos cuando organicemos el próximo.'],
+  '🫂 Red de apoyo entre papás': ['¡Hola! Qué bueno encontrar a otros papás cerca 🫶', 'Cuando quieran nos tomamos un café y platicamos.'],
+};
+const reply = (p, n) => (REPLIES[p.goal] || ['¡Hola! Gracias por conectar 😊 ¿Qué tal tu día?', '¡Qué bien! Platiquemos más.'])[Math.min(n, 1)];
+const fmtT = t => new Date(t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+const PLANS = [['☕', 'Café'], ['⚽', 'Deporte'], ['🌳', 'Parque'], ['🍕', 'Comer'], ['💼', 'Reunión']];
+
+function viewConnections() {
+  const list = matches();
+  if (!me()) return viewNeedProfile();
+  if (openChat) { D.seen[actingId() + '>' + openChat] = Date.now(); save(); } // el chat abierto ya está leído
+  if (!list.length) {
+    $('view').innerHTML = `<section class="card done"><div class="big">💬</div><h2>Aún no tienes conexiones</h2><p class="muted">Cuando tú y otra persona o familia se den “Conectar”, aparecerán aquí para que platiquen.</p><button class="btn btn-cx" id="goEx" style="margin-top:14px">Explorar perfiles</button></section>`;
+    $('goEx').onclick = () => { tab = 'explore'; render(); };
+    return;
+  }
+  const last = p => { const c = D.chats[pairKey(actingId(), p.id)] || []; return c[c.length - 1]; };
+  list.sort((a, b) => (last(b)?.t || 0) - (last(a)?.t || 0));
+  const isUnread = p => { const l = last(p); return l && l.from !== actingId() && (D.seen[actingId() + '>' + p.id] || 0) < l.t; };
+  $('view').innerHTML = `<div class="cx ${openChat ? 'chatting' : ''}"><div class="list">
+      <p class="hint" style="margin:0 0 4px 4px">${list.length} ${list.length === 1 ? 'conexión' : 'conexiones'}</p>
+      ${list.map(p => { const l = last(p); return `<button class="row" data-c="${p.id}" aria-pressed="${openChat === p.id}">${avatar(p)}<span style="min-width:0"><b>${esc(p.name)}</b><small>${l ? esc((l.from === actingId() ? 'Tú: ' : '') + l.txt) : 'Nuevo match · ¡salúdalo!'}</small></span>${isUnread(p) ? '<i class="dot"></i>' : ''}</button>`; }).join('')}
+    </div><div class="chat" id="chat">${openChat ? '' : '<div class="done" style="margin:auto"><div class="big">💬</div><p class="muted">Elige una conexión para platicar.</p></div>'}</div></div>`;
+  document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { openChat = b.dataset.c; viewConnections(); });
+  if (openChat) chatView(prof(openChat));
+}
+
+function chatView(p) {
+  const k = pairKey(actingId(), p.id), msgs = D.chats[k] || [];
+  D.seen[actingId() + '>' + p.id] = Date.now(); save();
+  const firstTip = !(D.tipSeen || {})[k];
+  $('chat').innerHTML = `<div class="hd"><button class="back2" id="bk" aria-label="Volver">←</button>${avatar(p)}<div><b>${esc(p.name)}</b> <span class="ver">✓ Cliente Navi</span><div class="hint">📍 ${esc(p.zona)}</div></div>
+      <div class="opts"><button id="cProf">Ver perfil</button><button id="cSafe">⋯</button></div></div>
+    ${firstTip ? `<div class="tip">🛡️ <b>Antes de verse:</b> elijan un lugar público, avisen a alguien a dónde van y no compartan datos bancarios. <button class="lnk" id="tipOk" style="text-decoration:underline;font-weight:700">Entendido</button></div>` : ''}
+    <div class="msgs" id="msgs"><div class="sys">🫶 Hicieron match · Sus números no se comparten</div>
+      ${msgs.map(m => `<div class="msg ${m.from === actingId() ? 'me' : ''} ${m.plan ? 'plan' : ''}">${esc(m.txt)}<small>${fmtT(m.t)}</small></div>`).join('')}</div>
+    <div class="quick">${PLANS.map(([e, n]) => `<button data-plan="${n}">${e} Proponer ${n.toLowerCase()}</button>`).join('')}</div>
+    <form class="send" id="sendF"><input id="txt" placeholder="Escribe un mensaje…" autocomplete="off" maxlength="500"><button>Enviar</button></form>`;
+  const box = $('msgs'); box.scrollTop = box.scrollHeight;
+  $('bk').onclick = () => { openChat = null; viewConnections(); };
+  if ($('tipOk')) $('tipOk').onclick = () => { D.tipSeen = { ...(D.tipSeen || {}), [k]: 1 }; save(); chatView(p); };
+  $('cSafe').onclick = () => safety(p, () => { openChat = null; render(); });
+  $('cProf').onclick = () => { $('ov').hidden = false; $('ov').innerHTML = `<div style="padding:0;background:none;border:0">${cardHTML(p)}<button class="btn btn-ghost wide" id="pcx" style="margin-top:12px">Cerrar</button></div>`; $('ov').querySelector('#more')?.remove(); $('pcx').onclick = () => $('ov').hidden = true; };
+  const send = (txt, plan) => {
+    (D.chats[k] = D.chats[k] || []).push({ from: actingId(), txt, t: Date.now(), plan: !!plan }); save(); chatView(p);
+    // los perfiles de ejemplo contestan solos (DEMO); las cuentas demo reales contestan desde su propia sesión
+    if (p.seed) {
+      const n = (D.chats[k] || []).filter(m => m.from === p.id).length;
+      if (n < 2) setTimeout(() => {
+        const t = document.createElement('div'); t.className = 'typing'; t.textContent = `${p.name} está escribiendo…`; $('msgs')?.appendChild(t);
+        setTimeout(() => { (D.chats[k] = D.chats[k] || []).push({ from: p.id, txt: plan ? '¡Me late! Lo agendamos 🙌' : reply(p, n), t: Date.now() }); save(); if (openChat === p.id) viewConnections(); }, 1200);
+      }, 600);
+    }
+  };
+  $('sendF').onsubmit = e => { e.preventDefault(); const v = $('txt').value.trim(); if (v) send(v); };
+  document.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => send(`📅 Te propongo un plan: ${b.dataset.plan}. ¿Qué día te queda?`, true));
+}
+
+// ---------- mi perfil ----------
+function viewProfile() {
+  const kind = as;
+  if (kind === 'f' && !isFamTitular) { setAs('p'); return viewProfile(); }
+  const id = actingId(), cur = D.profiles[id];
+  const base = Profiles.get(user.phone);
+  const lines = kind === 'f' ? accountLines(user) : [];
+  const d = cur || (kind === 'f'
+    ? { id, kind: 'f', owner: user.owner, name: user.familyName, members: lines.length, zona: '', goal: '', stages: [], ints: [], bio: '', visible: true }
+    : { id, kind: 'p', name: user.me.name, birth: base.bday || '', zona: '', goal: '', ints: fitDay(user.phone) ? ['💪 Calistenia'] : [], bio: '', visible: true, showFit: true });
+  const INTS = kind === 'f' ? INT_F : INT_P, GOALS = kind === 'f' ? GOALS_F : GOALS_P;
+  $('view').innerHTML = `<div class="pf"><section class="card">
+      ${isFamTitular ? `<div class="seg"><button data-k="p" aria-pressed="${kind === 'p'}">🙋 Mi perfil personal</button><button data-k="f" aria-pressed="${kind === 'f'}">👨‍👩‍👧 Perfil de mi familia</button></div>` : ''}
+      <h2 style="font-size:21px;margin-bottom:4px">${cur ? 'Edita tu perfil' : kind === 'f' ? 'Crea el perfil de tu familia' : 'Crea tu perfil'}</h2>
+      <p class="muted" style="margin-bottom:16px">${kind === 'f' ? 'Los hijos nunca aparecen con nombre ni foto: solo sus rangos de edad.' : 'Tu número no se muestra. Solo para mayores de 18 años.'}</p>
+      <form id="pf" class="fg" novalidate>
+        <label>${kind === 'f' ? 'Nombre de la familia' : 'Nombre que verán'}<input id="pName" maxlength="40" value="${esc(d.name || '')}" required></label>
+        ${kind === 'f' ? `<label>Integrantes<input id="pMem" type="number" min="2" max="10" value="${d.members || 2}"></label>`
+          : `<label>Fecha de nacimiento<input id="pBirth" type="date" value="${esc(d.birth || '')}" required></label>`}
+        <label>Zona<select id="pZona"><option value="">Elige tu zona</option>${ZONAS.map(z => `<option ${d.zona === z ? 'selected' : ''}>${z}</option>`).join('')}</select></label>
+        <label>¿Qué buscas?<select id="pGoal"><option value="">Elige una opción</option>${GOALS.map(g => `<option ${d.goal === g ? 'selected' : ''}>${g}</option>`).join('')}</select></label>
+        ${kind === 'f' ? `<div class="full"><label style="margin-bottom:6px">Edades de los hijos</label><div class="pick" id="pStages">${STAGES.map(s => `<button type="button" data-v="${s}" aria-pressed="${(d.stages || []).includes(s)}">${s}</button>`).join('')}</div></div>` : ''}
+        <div class="full"><label style="margin-bottom:6px">Intereses <span class="hint">(elige de 3 a 6)</span></label><div class="pick" id="pInts">${INTS.map(s => `<button type="button" data-v="${s}" aria-pressed="${(d.ints || []).includes(s)}">${s}</button>`).join('')}</div></div>
+        <label class="full">Sobre ${kind === 'f' ? 'ustedes' : 'ti'}<textarea id="pBio" maxlength="200" placeholder="${kind === 'f' ? 'Ej. Dos peques que aman el parque. Buscamos familias para salir los sábados.' : 'Ej. Me gusta correr y busco con quién entrenar los fines.'}">${esc(d.bio || '')}</textarea></label>
+        <div class="full sw"><span><b style="font-size:14px">Aparecer en Explorar</b><br><span class="hint">Apágalo para el modo invisible: solo te ven tus conexiones.</span></span><input type="checkbox" id="pVis" ${d.visible !== false ? 'checked' : ''}></div>
+        ${kind === 'p' ? `<div class="full sw"><span><b style="font-size:14px">Mostrar mi avance en NAVI Fit</b><br><span class="hint">Para encontrar compañeros de entrenamiento.</span></span><input type="checkbox" id="pFit" ${d.showFit !== false ? 'checked' : ''}></div>` : ''}
+        <div class="full"><button class="btn btn-cx wide">${cur ? 'Guardar cambios' : 'Publicar mi perfil'}</button>
+          <p class="hint" id="pErr" style="margin-top:8px;color:#FF9E9E"></p>
+          ${cur ? '<button type="button" class="lnk" id="pDel" style="margin-top:6px;text-decoration:underline;color:var(--muted);font-size:13px">Borrar este perfil</button>' : ''}</div>
+      </form></section>
+    <aside class="preview"><p class="hint" style="margin:0 0 8px 4px">ASÍ TE VERÁN</p><div id="prev"></div></aside></div>`;
+  document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { setAs(b.dataset.k); viewProfile(); });
+  const pick = sel => [...document.querySelectorAll(sel + ' [aria-pressed="true"]')].map(b => b.dataset.v);
+  const collect = () => ({ ...d, name: $('pName').value.trim(), zona: $('pZona').value, goal: $('pGoal').value, ints: pick('#pInts'), bio: $('pBio').value.trim(), visible: $('pVis').checked,
+    ...(kind === 'f' ? { members: +$('pMem').value || 2, stages: pick('#pStages') } : { birth: $('pBirth').value, showFit: $('pFit').checked }) });
+  const paint = () => { $('prev').innerHTML = cardHTML(collect(), true); };
+  document.querySelectorAll('.pick button').forEach(b => b.onclick = () => {
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    if (on && b.closest('#pInts') && pick('#pInts').length >= 6) return toast('Máximo 6 intereses');
+    b.setAttribute('aria-pressed', on); paint();
+  });
+  $('pf').addEventListener('input', paint); paint();
+  $('pf').onsubmit = e => {
+    e.preventDefault();
+    const p = collect(), err = $('pErr');
+    if (!p.name) return err.textContent = 'Escribe un nombre.';
+    if (kind === 'p') { const a = age(p.birth); if (!p.birth) return err.textContent = 'Escribe tu fecha de nacimiento.'; if (a < 18) { err.textContent = ''; return gateMinor(); } }
+    if (!p.zona || !p.goal) return err.textContent = 'Elige tu zona y qué buscas.';
+    if (p.ints.length < 3) return err.textContent = 'Elige al menos 3 intereses.';
+    if (kind === 'f' && !p.stages.length) return err.textContent = 'Elige las edades de los hijos.';
+    const isNew = !cur;
+    D.profiles[id] = p; save();
+    toast(isNew ? '¡Listo! Tu perfil ya está publicado' : 'Cambios guardados');
+    if (isNew) { tab = 'explore'; render(); } else viewProfile();
+  };
+  if ($('pDel')) $('pDel').onclick = () => { if (!confirm('¿Borrar este perfil? Se quitan tus conexiones y chats.')) return; delete D.profiles[id]; delete D.likes[id]; Object.keys(D.chats).filter(k => k.split('|').includes(id)).forEach(k => delete D.chats[k]); save(); toast('Perfil borrado'); render(); };
+}
+function gateMinor() {
+  $('view').innerHTML = `<section class="card gate"><div class="big">🔞</div><h2>Navi Conecta es solo para mayores de 18</h2><p class="muted">Para cuidar a los más chicos, no pueden tener perfil propio. Si tu familia tiene Plan Familia, el titular puede crear el perfil familiar.</p><a class="btn btn-ghost" href="cuenta.html" style="margin-top:14px">Volver a Mi Navi</a></section>`;
+}
+
+render();
+</script>
+</body>
+</html>
