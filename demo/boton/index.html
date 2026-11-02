@@ -99,10 +99,16 @@ if (!user) {
   // la red familiar es la misma de NAVI SOS Family: las líneas del plan y las personas invitadas
   const KEY = 'navi.sos.' + user.owner;
   let S; try { S = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { S = {}; }
+  // se vuelve a leer antes de escribir para no pisar lo que la familia cambió mientras tanto
+  const reload = () => { try { S = JSON.parse(localStorage.getItem(KEY)) || S; } catch {} };
   const lines = accountLines(user);
   // quien entró es "me"; la alerta va a los demás integrantes de su red familiar
   const me = lines.find(l => l.phone === user.phone) || lines[0];
-  const family = [...lines.filter(l => l !== me), ...(S.extra || []).map(x => ({ name: x.name, img: null, invited: !x.verified }))];
+  const family = [...lines.filter(l => l !== me), ...(S.extra || []).map(x => ({ name: x.name, phone: x.phone, img: null, invited: !x.verified }))];
+  // en vivo: quién ya vio la alerta y quién va para allá (lo contestan desde NAVI SOS Family)
+  const famState = m => m.invited ? 'SMS con mapa' : S.sos?.going?.[m.phone] ? '🚗 Va para allá' : S.sos?.seen?.[m.phone] ? '👀 Ya la vio' : '🔔 Alarma sonando';
+  const famList = () => family.map(m => `<div>${face(m, m.img ? '' : 'i')}<span>${esc(m.name)}</span><em>${famState(m)}</em></div>`).join('');
+  addEventListener('storage', e => { if (e.key !== KEY) return; reload(); const l = document.querySelector('#ov .list'); if (l && S.sos?.active) l.innerHTML = famList(); });
 
   $('app').innerHTML = `<div class="who">${esc(me.name)} · red de <b>${esc(lines.length > 1 ? user.familyName : me.name)}</b></div>
     <button class="btn-sos" id="sos" aria-label="Enviar alerta SOS a mi familia"><div><b>SOS</b><small>TOCA PARA PEDIR AYUDA</small></div></button>
@@ -126,11 +132,13 @@ if (!user) {
   function sent() {
     navigator.vibrate?.([300, 120, 300]);
     const t = Date.now(), hh = new Date(t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
-    // queda en la actividad de NAVI SOS Family
+    // queda en la actividad de NAVI SOS Family y hace sonar la alarma en los demás integrantes (S.sos)
+    reload();
+    S.sos = { id: t, phone: me.phone, name: me.name, t, where: pos ? 'Ubicación actual enviada desde el botón SOS' : 'Última ubicación conocida (botón SOS)', active: true, seen: {}, going: {} };
     S.events = [...(S.events || []), { t, txt: `🚨 <b>${esc(me.name)}</b> activó SOS desde el botón` }];
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {}
     ov.innerHTML = `<div><div class="big" style="font-size:84px">🚨</div><h1 id="ovTitle">Tu familia ya está avisada</h1><p>${hh} · enviamos ${where()}</p>
-      <div class="list">${family.map(m => `<div>${face(m, m.img ? '' : 'i')}<span>${esc(m.name)}</span><em>${m.invited ? 'SMS con mapa' : 'Alerta en su celular'}</em></div>`).join('')}</div>
+      <div class="list">${famList()}</div>
       <p style="font-size:12px;margin-bottom:8px">Demostración: no se envían mensajes reales.</p>
       <a class="btn call" href="tel:911">📞 Llamar al 911</a><br><button class="btn btn-lime" id="ok">Estoy bien, terminar alerta</button></div>`;
   }
@@ -138,6 +146,8 @@ if (!user) {
   ov.onclick = e => {
     if (e.target.id === 'cancel') { clearInterval(timer); ov.hidden = true; }
     if (e.target.id === 'ok') {
+      reload();
+      if (S.sos) S.sos = { ...S.sos, active: false, ended: Date.now() };
       S.events = [...(S.events || []), { t: Date.now(), txt: `✅ <b>${esc(me.name)}</b> terminó la alerta SOS: está bien` }];
       try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {}
       ov.hidden = true;
