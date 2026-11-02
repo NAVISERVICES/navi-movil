@@ -152,6 +152,48 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 .lock{text-align:center;padding:40px 10px}
 .lock b{font-size:48px;display:block}
 .confirm{border:2px solid #FF5A5F66}
+/* centro de seguridad en Inicio */
+.srows{display:grid}
+.srow{display:flex;align-items:center;gap:12px;padding:11px 2px;border-top:1px solid var(--line);text-align:left;width:100%}
+.srow:first-child{border-top:0}
+.srow > span{width:38px;height:38px;border-radius:12px;background:#ffffff12;display:grid;place-items:center;font-size:18px;flex:none}
+.srow b{display:block;font-size:15px}
+.srow small{display:block;font-size:12px;color:var(--muted)}
+.srow i{margin-left:auto;font-style:normal;color:var(--muted);font-size:18px}
+/* tarjeta del integrante en el mapa */
+.addr{font-size:13px;margin-top:8px}
+.eta{margin-top:12px;background:#ffffff0d;border-radius:16px;padding:12px}
+.eta b{font-family:var(--display);font-size:18px}
+.eta .row{margin-top:8px;gap:8px}
+.eta .step{width:38px;height:38px;border-radius:50%;background:#ffffff14;font-weight:800}
+.eta .go{flex:1;background:var(--lime);color:var(--ink);border-radius:99px;padding:10px;font-weight:800}
+.fix{margin-top:12px;background:#FFC22E14;border:1px solid #FFC22E55;border-radius:16px;padding:12px;font-size:13px}
+.fix b{color:#FFC22E}
+.fix button{margin-top:8px;background:#FFC22E;color:var(--ink);border-radius:99px;padding:8px 14px;font-weight:800;font-size:13px}
+/* reacciones en el feed */
+.event{flex-wrap:wrap}
+.react{display:inline-flex;gap:4px;margin-left:6px}
+.react button{font-size:12px;padding:2px 7px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff1c;color:var(--text)}
+.react button.on{background:#b4e32f2a;border-color:var(--lime)}
+/* detalle de viaje y estadísticas */
+.trip-d{display:grid;gap:0;margin-top:6px}
+.trip-d div{display:grid;grid-template-columns:76px 1fr;gap:10px;padding:7px 0;border-top:1px dashed var(--line);font-size:13px}
+.trip-d div:first-child{border-top:0}
+.trip-d span{color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.stats4 div{background:#ffffff0a;border-radius:14px;padding:10px 6px;text-align:center}
+.stats4 b{display:block;font-family:var(--display);font-size:20px}
+.stats4 small{font-size:11px;color:var(--muted)}
+@media (max-width:420px){.stats4{grid-template-columns:1fr 1fr}}
+/* novedades */
+.news{position:fixed;inset:0;z-index:55;background:#03031acc;display:grid;place-items:end center;padding:12px}
+.news[hidden]{display:none}
+.news > div{width:min(480px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;max-height:calc(100dvh - 24px);overflow:auto}
+.news li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);list-style:none}
+.news li:first-child{border-top:0}
+.news li > span{font-size:20px}
+.news li small{display:block;color:var(--muted);font-size:12px}
+.news li button{margin-left:auto;flex:none;font-size:12px;font-weight:800;color:var(--lime);text-decoration:underline}
 @media (prefers-reduced-motion:reduce){.overlay .big{animation:none}}
 </style>
 </head>
@@ -183,11 +225,16 @@ section[data-tab].on{display:block;animation:fade .3s ease}
       <a class="card row between" href="boton/?from=app" style="text-decoration:none">
         <div class="row" style="gap:12px"><img src="boton/sos-192.png" alt="" style="width:46px;height:46px;border-radius:12px"><div><b>Botón SOS en tu pantalla</b><div class="muted">Una app solo con el botón: un toque y tu familia queda avisada.</div></div></div><span style="font-size:20px">›</span>
       </a>
-      <div class="qa">
-        <button class="btn out" data-go="acomp">🛡️ Acompáñame</button>
-        <button class="btn out" data-go="share">📍 Compartir ubicación</button>
-      </div>
       <div class="card" id="watchCard" hidden></div>
+      <!-- centro de seguridad: todo lo que cuida a la familia en un solo lugar -->
+      <div class="card"><h2 style="margin:0 0 4px">Seguridad</h2>
+        <div class="srows">
+          <button class="srow" data-go="red" data-sec="contacts"><span>🆘</span><div><b>Contactos de emergencia</b><small id="secCt"></small></div><i>›</i></button>
+          <button class="srow" data-go="acomp"><span>🛡️</span><div><b>Acompáñame</b><small>Tu red te sigue en un trayecto y recibe aviso si algo pasa</small></div><i>›</i></button>
+          <button class="srow" data-go="share"><span>📍</span><div><b>Compartir ubicación por enlace</b><small>Para quien no tiene la app · de 15 min a 6 h</small></div><i>›</i></button>
+          <button class="srow" data-go="mapa"><span>⏰</span><div><b>Llegadas a tiempo</b><small id="secExp"></small></div><i>›</i></button>
+          <button class="srow" data-go="actividad" data-act="manejo"><span>🚗</span><div><b>Manejo y alertas de velocidad</b><small id="secDrive"></small></div><i>›</i></button>
+        </div></div>
       <div class="card row between">
         <div><b>Compartir mi ubicación</b><div class="muted" id="shareTxt"></div></div>
         <button class="toggle" role="switch" id="pauseSw" aria-label="Compartir mi ubicación"></button>
@@ -254,6 +301,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
         <form class="stack" id="addPlace" hidden style="margin-top:12px">
           <label class="field">Nombre<input id="plName" required placeholder="Ej. Casa de la abuela"></label>
           <label class="field">Tipo<select id="plIco"><option value="🏠">Casa</option><option value="🏫">Escuela</option><option value="💼">Trabajo</option><option value="🏋️">Gimnasio</option><option value="📍">Otro</option></select></label>
+          <label class="row" style="gap:10px;font-size:14px"><input type="checkbox" id="plTell" checked style="width:20px;height:20px;accent-color:var(--lime)"> Avisar a mi red de este lugar nuevo</label>
           <button class="btn btn-lime" type="submit">Guardar lugar</button>
         </form>
       </div>
@@ -313,6 +361,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
 </nav></div>
 
 <div class="overlay" id="sosOv" hidden role="alertdialog" aria-modal="true" aria-labelledby="sosTitle"></div>
+<div class="news" id="newsOv" hidden role="dialog" aria-modal="true" aria-labelledby="newsTitle"></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -339,7 +388,7 @@ if (user && !user.apps.includes('sos')) {
   const STATES = [
     { at: 'trabajo', bat: 64, kmh: 0, seen: 1 },
     { at: 'casa', bat: 88, kmh: 0, seen: 3 },
-    { at: 'escuela', bat: 41, kmh: 0, seen: 2 },
+    { at: 'escuela', bat: 41, kmh: 0, seen: 46 }, // su teléfono dejó de actualizar: se muestra "Pedir que lo revise"
     { at: null, bat: 12, kmh: 18, seen: 0, route: ['escuela', 'casa'] },
   ];
   const members = lines.map((l, i) => ({ ...l, i, color: COLORS[i % 4], ...STATES[lines.length === 1 ? 0 : i] }));
@@ -381,9 +430,15 @@ if (user && !user.apps.includes('sos')) {
   // foto real (Photos, compartida con Mi Navi) o personaje; las personas invitadas sin foto muestran su inicial
   const pic = m => Photos.get(m.phone) || (m.img ? `assets/${m.img}.png` : null);
   const avatar = (m, size = 40) => `<div class="av" style="width:${size}px;height:${size}px;background:${m.color};font-size:${Math.round(size * .42)}px">${pic(m) ? `<img src="${pic(m)}" alt="">` : m.name[0].toUpperCase()}${m.invited ? '' : `<i class="${m.i === me && S.paused ? 'paused' : ''}"></i>`}</div>`;
+  // sin actualizar hace 30 min o más: no es que esté "perdido", casi siempre es un ajuste del teléfono
+  const STALE = 30;
+  const stale = m => !m.invited && !(m.i === me && S.paused) && m.seen >= STALE;
+  // dirección de ejemplo de cada lugar (en producción, la dirección real del GPS)
+  const ADDR = { casa: 'Av. Coyoacán 1435, Del Valle', escuela: 'Calle Amores 210, Narvarte', trabajo: 'Insurgentes Sur 1602, Crédito Constructor', gym: 'Eje 7 Sur 85, Insurgentes Mixcoac' };
   const status = m => {
     if (m.invited) return 'Falta verificar su número';
     if (m.i === me && S.paused) return 'Ubicación en pausa';
+    if (stale(m)) return `Sin actualizar · última vez en ${place(m.at)?.name || 'un lugar'}`;
     if (m.route) return `En camino a ${place(m.route[1])?.name || 'Casa'} · ${m.kmh} km/h`;
     return `En ${place(m.at)?.name || 'un lugar'}`;
   };
@@ -405,7 +460,12 @@ if (user && !user.apps.includes('sos')) {
     ({ inicio: renderHome, mapa: renderMap, chat: renderChat, actividad: renderAct, red: renderRed, share: renderShare, acomp: renderAcomp })[t]();
   };
   addEventListener('hashchange', () => show(location.hash.slice(1)));
-  document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) location.hash = b.dataset.go; });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-go]'); if (!b) return;
+    if (b.dataset.act) actV = b.dataset.act;
+    if (location.hash.slice(1) === b.dataset.go) show(b.dataset.go); else location.hash = b.dataset.go;
+    if (b.dataset.sec) setTimeout(() => $(b.dataset.sec)?.closest('.card')?.scrollIntoView({ block: 'start' }), 60);
+  });
 
   // ---------- INICIO ----------
   function renderHome() {
@@ -422,6 +482,23 @@ if (user && !user.apps.includes('sos')) {
       <span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>`).join('')
       + (BASE === 1 ? `<p class="muted">Tu plan incluye NAVI SOS Family: arma tu red con quien quieras verificando su número, sin importar su plan.</p>${members.length === 1 ? '<a class="btn btn-lime block" href="#red" style="margin-top:10px">+ Crear mi red</a>' : ''}` : '');
     renderWatch();
+    checkExpects();
+    const ex = Object.values(S.expects).filter(e => !e.fired).length;
+    $('secCt').textContent = S.contacts.length ? `${S.contacts.length} ${S.contacts.length === 1 ? 'contacto recibe' : 'contactos reciben'} un SMS con tu ubicación si activas SOS` : 'Agrega quién recibe un SMS si activas SOS';
+    $('secExp').textContent = ex ? `${ex} ${ex === 1 ? 'aviso activo' : 'avisos activos'} · te decimos si alguien no llega a la hora` : 'Te avisamos si alguien no llega a un lugar a la hora';
+    $('secDrive').textContent = adults.length ? `Calificación semanal y límite de velocidad para ${adults.map(a => a.i === me ? 'ti' : a.name).join(' y ')}` : 'Para quien maneja en tu red';
+  }
+  // llegadas a tiempo: al pasar la hora, avisa si llegó o no (una sola vez por aviso)
+  function checkExpects() {
+    let changed = false;
+    Object.entries(S.expects).forEach(([i, e]) => {
+      if (e.fired || !members[i]) return;
+      const m = members[i], [h, mi] = e.by.split(':').map(Number), by = new Date(); by.setHours(h, mi, 0, 0);
+      const there = !m.route && place(m.at)?.name === e.to;
+      if (there) { S.events.push({ t: Date.now(), txt: `✅ <b>${esc(m.name)}</b> llegó a ${esc(e.to)} a tiempo` }); e.fired = true; changed = true; }
+      else if (Date.now() > +by) { S.events.push({ t: Date.now(), txt: `⏰ <b>${esc(m.name)}</b> no ha llegado a ${esc(e.to)} (lo esperabas antes de las ${e.by})` }); e.fired = true; changed = true; }
+    });
+    if (changed) save();
   }
   $('pauseSw').addEventListener('click', () => { S.paused = !S.paused; save(); renderHome(); toast(S.paused ? 'Ubicación en pausa' : 'Compartiendo tu ubicación'); });
 
@@ -512,10 +589,19 @@ if (user && !user.apps.includes('sos')) {
     drawMap();
     $('chips').innerHTML = onMap().map(m => `<button data-m="${m.i}" aria-pressed="${m.i === selM}">${avatar(m, 30)}<span><b>${m.i === me ? 'Tú' : m.name}</b><small>${ago(m.seen)}</small></span></button>`).join('');
     const m = members[selM], st = status(m), exp = S.expects[m.i];
+    // distancia desde ti (el lienzo del mapa mide ~12 km de ancho)
+    const P = posOf(m), Q = posOf(members[me]), km = Math.hypot(P.x - Q.x, P.y - Q.y) * 0.03;
+    const paused = m.i === me && S.paused;
+    const etaMin = m.route ? Math.max(1, Math.round((1 - (P.p ?? .45)) * 16)) : 0, etaAt = new Date(Date.now() + etaMin * MIN);
+    const by0 = new Date(+etaAt + 5 * MIN);
     $('memberSheet').innerHTML = `<div class="row">${avatar(m, 48)}<div style="flex:1;min-width:0"><h2 style="margin:0">${m.i === me ? m.name + ' (Tú)' : m.name}</h2>
       <div class="muted">${st} · actualizado ${ago(m.seen)}</div></div><span class="bat ${m.bat <= 15 ? 'low' : ''}">🔋 ${m.bat}%</span></div>
+      ${paused ? '' : `<div class="addr">📍 ${m.route ? 'Av. Universidad, en movimiento' : esc(ADDR[m.at] || place(m.at)?.name || '')}${m.i !== me ? ` · a ${km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1) + ' km'} de ti` : ''}${m.kmh ? ` · ${m.kmh} km/h` : ''}</div>`}
       ${m.bat <= 15 ? '<p class="pill bad" style="display:inline-block;margin-top:10px">Batería baja</p>' : ''}
-      ${exp ? `<p class="pill" style="display:inline-block;margin-top:10px">⏰ Te avisamos si no llega a ${exp.to} antes de ${exp.by}</p>` : ''}
+      ${exp && !exp.fired ? `<p class="pill" style="display:inline-block;margin-top:10px">⏰ Te avisamos si no llega a ${esc(exp.to)} antes de las ${exp.by}</p>` : ''}
+      ${stale(m) ? `<div class="fix"><b>Su ubicación no se actualiza desde hace ${ago(m.seen).replace('hace ', '')}.</b> No es que algo le pase: casi siempre es un ajuste del teléfono (ubicación desactivada, ahorro de batería o sin permiso en segundo plano).<br><button data-a="fix">🔧 Pedir que lo revise</button></div>` : ''}
+      ${m.route && !paused ? `<div class="eta">🧭 Va a <b>${esc(place(m.route[1])?.name || 'Casa')}</b> · llega ~${hhmm(etaAt)} (${etaMin} min)
+        <div class="row"><button class="step" data-by="-5" aria-label="5 minutos antes">−5</button><button class="go" data-a="expEta" data-at="${+by0}">⏰ Espéralo a las ${hhmm(by0)}</button><button class="step" data-by="5" aria-label="5 minutos después">+5</button></div></div>` : ''}
       <div class="acts">
         <button data-a="live" aria-pressed="${live}" ${m.route ? '' : 'disabled style="opacity:.4"'}><span>📡</span>En vivo</button>
         <button data-a="exp"><span>⏰</span>Espéralo</button>
@@ -527,8 +613,13 @@ if (user && !user.apps.includes('sos')) {
   $('map').addEventListener('click', e => { const p = e.target.closest('.pin'); if (p) { selM = +p.dataset.m; renderMap(); } });
   $('chips').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { selM = +b.dataset.m; renderMap(); } });
   $('memberSheet').addEventListener('click', e => {
+    // ±5 min sobre la hora de llegada sugerida
+    const st = e.target.closest('[data-by]');
+    if (st) { const g = $('memberSheet').querySelector('[data-a="expEta"]'), t = +g.dataset.at + +st.dataset.by * MIN; if (t > Date.now()) { g.dataset.at = t; g.textContent = `⏰ Espéralo a las ${hhmm(t)}`; } return; }
     const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
     const m = members[selM], more = $('sheetMore');
+    if (b.dataset.a === 'expEta') { const t = new Date(+b.dataset.at); S.expects[m.i] = { to: place(m.route[1])?.name || 'Casa', by: t.toTimeString().slice(0, 5) }; save(); renderMap(); toast(`Te avisamos si ${m.name} no llega antes de las ${hhmm(t)}`); return; }
+    if (b.dataset.a === 'fix') { S.events.push({ t: Date.now(), txt: `🔧 Le pediste a <b>${esc(m.name)}</b> revisar su ubicación: le llegó una guía para activarla` }); save(); toast(`Le enviamos a ${m.name} los pasos para volver a compartir su ubicación`); b.disabled = true; b.textContent = '✓ Enviado'; return; }
     if (b.dataset.a === 'live') { live = !live; clearInterval(liveT); if (live) liveT = setInterval(drawMap, 500); renderMap(); toast(live ? `Siguiendo a ${m.name} en vivo` : 'Seguimiento en vivo apagado'); }
     if (b.dataset.a === 'msg') { location.hash = 'chat'; setTimeout(() => { $('msgIn').value = `@${m.name} `; $('msgIn').focus(); }, 50); }
     if (b.dataset.a === 'hist') more.innerHTML = `<h2 style="margin-top:16px">Hoy</h2>${timeline(m)}`;
@@ -536,7 +627,7 @@ if (user && !user.apps.includes('sos')) {
       <label class="field">A<select id="exTo">${S.places.map(p => `<option>${p.name}</option>`).join('')}</select></label>
       <label class="field">Antes de las<input type="time" id="exBy" value="${new Date(now + 40 * MIN).toTimeString().slice(0, 5)}"></label>
       <button class="btn btn-lime">Avisarme</button></form>`;
-    const f = $('expF'); if (f) f.onsubmit = ev => { ev.preventDefault(); S.expects[m.i] = { to: $('exTo').value, by: $('exBy').value }; save(); renderMap(); toast(`Te avisamos si ${m.name} no llega a tiempo`); };
+    const f = $('expF'); if (f) f.onsubmit = ev => { ev.preventDefault(); S.expects[m.i] = { to: $('exTo').value, by: $('exBy').value }; save(); checkExpects(); renderMap(); toast(`Te avisamos si ${m.name} no llega a tiempo`); };
   });
   // historial del día (demo)
   const timeline = m => {
@@ -554,14 +645,23 @@ if (user && !user.apps.includes('sos')) {
       ...(members[3] ? [{ k: 'ev', t: now - 8 * MIN, txt: `🚗 <b>${members[3].name}</b> salió de Escuela rumbo a Casa` }] : []),
       ...(S.batt && members.some(lowBat) ? [{ k: 'ev', t: now - 5 * MIN, txt: `🔋 <b>${members.find(lowBat).name}</b> tiene batería baja (${members.find(lowBat).bat}%)` }] : []),
     ].sort((a, b) => a.t - b.t);
+    S.reacts ||= {};
+    const rk = txt => txt.replace(/<[^>]+>/g, '').slice(0, 60);
     $('feed').innerHTML = items.map(it => it.k === 'ev'
-      ? `<div class="event"><span>${it.txt} · ${hhmm(it.t)}</span></div>`
+      ? `<div class="event"><span>${it.txt} · ${hhmm(it.t)}</span><span class="react">${['👍', '❤️', '🙏'].map(r => { const who = S.reacts[rk(it.txt)]?.[r] || []; return `<button data-rk="${esc(rk(it.txt))}" data-r="${r}" class="${who.includes(me) ? 'on' : ''}" aria-label="Reaccionar ${r}">${r}${who.length ? ' ' + who.length : ''}</button>`; }).join('')}</span></div>`
       : `<div class="msg ${it.who === me ? 'me' : ''}">${avatar(members[it.who] || members[0], 30)}<div class="bubble">${it.txt.replace(/</g, '&lt;')}<small>${(members[it.who] || members[0]).name} · ${hhmm(it.t)}</small></div></div>`).join('');
   }
+  // reaccionar a un aviso (llegadas, salidas, SOS terminado…) sin escribir
+  $('feed').addEventListener('click', e => {
+    const b = e.target.closest('[data-rk]'); if (!b) return;
+    const k = b.dataset.rk, r = b.dataset.r, list = ((S.reacts[k] ||= {})[r] ||= []);
+    const at = list.indexOf(me); if (at >= 0) list.splice(at, 1); else list.push(me);
+    save(); renderChat();
+  });
   $('compose').addEventListener('submit', e => { e.preventDefault(); const v = $('msgIn').value.trim(); if (!v) return; S.chat.push({ who: me, t: Date.now(), txt: v }); save(); $('msgIn').value = ''; renderChat(); scrollTo(0, document.body.scrollHeight); });
 
   // ---------- ACTIVIDAD ----------
-  let actV = 'recorridos', actW = adults[0]?.i ?? 0;
+  let actV = 'recorridos', actW = adults[0]?.i ?? 0, statDays = 7;
   const rng = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const week = i => { const r = rng(+members[i].phone.slice(-5) + 11); return DAYS.map((d, k) => k === 3 && i % 2 ? null : Math.round(66 + r() * 32)); };
@@ -573,9 +673,14 @@ if (user && !user.apps.includes('sos')) {
     $('whoSeg').hidden = who.length < 2;
     const m = members[actW];
     if (actV === 'recorridos') {
+      // estadísticas de 7 y 30 días: distancia, trayectos, tiempo en camino y velocidad máxima
+      const r = rng(+m.phone.slice(-5) + 3), k = statDays === 7 ? 1 : 4.1;
+      const km = Math.round(((42 + actW * 17) % 90 + 20) * k), trips = Math.round((9 + actW * 3) * k), hrs = (km / 28).toFixed(1), top = Math.round(48 + r() * 40);
       $('actBody').innerHTML = `<div class="card"><h2>Hoy · ${m.name}</h2>${timeline(m)}</div>
-        <div class="card"><h2>Últimos 7 días</h2><div class="qa"><div><b style="font-family:var(--display);font-size:28px">${(42 + actW * 17) % 90 + 20} km</b><div class="muted">recorridos</div></div><div><b style="font-family:var(--display);font-size:28px">${9 + actW * 3}</b><div class="muted">trayectos</div></div></div>
-        <p class="muted" style="margin-top:10px">Historial de 30 días incluido en tu plan.</p></div>`;
+        <div class="card"><div class="row between"><h2 style="margin:0">Estadísticas</h2><div class="seg" id="statSeg" style="margin:0"><button data-d="7" aria-pressed="${statDays === 7}">7 días</button><button data-d="30" aria-pressed="${statDays === 30}">30 días</button></div></div>
+          <div class="stats4"><div><b>${km}</b><small>km</small></div><div><b>${trips}</b><small>trayectos</small></div><div><b>${hrs} h</b><small>en camino</small></div><div><b>${top}</b><small>km/h máx.</small></div></div>
+          <p class="muted" style="margin-top:10px">Historial de 30 días incluido en tu plan. Si el teléfono se apaga en un aeropuerto y se prende en otro, se registra como vuelo.</p></div>`;
+      $('statSeg').onclick = e => { const b = e.target.closest('[data-d]'); if (b) { statDays = +b.dataset.d; renderAct(); } };
     } else if (actV === 'manejo') {
       if (!adults.length) { $('actBody').innerHTML = '<div class="card muted">Nadie en tu red maneja todavía.</div>'; return; }
       const w = week(actW), valid = w.filter(Boolean), avg = Math.round(valid.reduce((a, b) => a + b, 0) / valid.length);
@@ -584,6 +689,11 @@ if (user && !user.apps.includes('sos')) {
         <div class="score"><b>${avg}</b><span class="muted">/ 100</span><span class="pill ${lbl[1]}" style="margin-left:auto">${lbl[0]}</span></div>
         <div class="bars">${w.map((v, k) => `<div>${v ? `<em>${v}</em>` : '<em>–</em>'}<i class="${!v ? 'none' : v < 80 ? 'mid' : ''}" style="height:${v ? Math.round((v - 50) * 1.6) : 3}px"></i>${DAYS[k]}</div>`).join('')}</div>
         <p class="muted" style="margin-top:10px">Se calcula con frenadas bruscas, aceleraciones y excesos de velocidad.</p></div>
+        <div class="card"><div class="row between"><h2 style="margin:0">Último viaje</h2><span class="pill ${avg >= 85 ? '' : 'warn'}">${avg >= 85 ? 'Viaje tranquilo' : '1 exceso'}</span></div>
+          <div class="trip-d"><div><span>SALIÓ</span>7:40 a. m. · Casa</div><div><span>PARADA</span>7:47 a. m. · Av. Universidad y Copilco (5 min)</div><div><span>LLEGÓ</span>8:20 a. m. · ${esc(place('trabajo')?.name || 'Trabajo')}</div></div>
+          <div class="stats4"><div><b>12.6</b><small>km</small></div><div><b>40 min</b><small>duración</small></div><div><b>27</b><small>km/h prom.</small></div><div><b>${avg >= 85 ? 58 : 68}</b><small>km/h máx.</small></div></div>
+          ${avg >= 85 ? '' : '<p class="muted" style="margin-top:8px">⚠️ Av. Insurgentes · límite 50 km/h · 68 km/h durante 1 min</p>'}</div>
+        <div class="card"><h2>Alertas de velocidad</h2>${adults.map(a => { const L = S.limits[a.i]; return `<div class="ev"><div><b>${a.i === me ? 'Tú' : esc(a.name)}</b><br><span>${L?.on ? `Avisar arriba de ${L.kmh} km/h · último: mar, 1 min, máx. 68 km/h` : 'Alerta apagada'}</span></div><span class="pill ${L?.on ? '' : 'off'}">${L?.on ? L.kmh + ' km/h' : 'Apagada'}</span></div>`; }).join('')}</div>
         <div class="card"><h2>Eventos de la semana</h2>
           <div class="ev"><div>Exceso de velocidad<br><span>Av. Insurgentes · límite 50 km/h</span></div><b>68 km/h</b></div>
           <div class="ev"><div>Frenada brusca<br><span>Periférico Sur</span></div><b>Mar 8:12</b></div>
@@ -620,8 +730,10 @@ if (user && !user.apps.includes('sos')) {
           ${m.i >= BASE ? `<button class="lnk bad" data-rm="${m.i}">Quitar de la red</button>` : ''}
         </div></div></div>`).join('');
     $('places').innerHTML = S.places.map(p => `<div class="card place" style="background:#ffffff08">
-      <div class="hd"><div class="ico">${p.ico}</div><div style="flex:1"><b>${p.name}</b><div class="muted">Zona de aviso: <span data-rv="${p.id}">${p.r * 5} m</span></div></div>${p.custom ? `<button class="sw" data-del="${p.id}" aria-label="Borrar ${p.name}">✕</button>` : ''}</div>
+      <div class="hd"><div class="ico">${p.ico}</div><div style="flex:1"><b>${p.name}</b><div class="muted">Zona de aviso: <span data-rv="${p.id}">${p.r * 5} m</span>${p.r * 5 < 150 ? ' · funciona mejor desde 150 m' : ''}</div></div>${p.custom ? `<button class="sw" data-del="${p.id}" aria-label="Borrar ${p.name}">✕</button>` : ''}</div>
       <input type="range" min="20" max="80" value="${p.r}" data-r="${p.id}" aria-label="Zona de aviso de ${p.name}">
+      <div class="row between"><span class="muted">Te avisan aquí: <b style="color:var(--text)">${onMap().filter(m => { const a = S.alerts[p.id]?.[m.i]; return a && (a.arr || a.lev); }).length} de ${onMap().length}</b> · solo tú ves esto</span>
+        <div class="sw"><button data-all="${p.id}" aria-pressed="${onMap().every(m => { const a = S.alerts[p.id]?.[m.i]; return a && a.arr && a.lev; })}">Todos</button></div></div>
       <div class="who">${onMap().map(m => { const a = S.alerts[p.id]?.[m.i] || { arr: false, lev: false }; return `<div class="row">${avatar(m, 28)}<span>${m.i === me ? 'Tú' : m.name}</span>
         <div class="sw"><button data-p="${p.id}" data-mi="${m.i}" data-k="arr" aria-pressed="${a.arr}">Llega</button><button data-p="${p.id}" data-mi="${m.i}" data-k="lev" aria-pressed="${a.lev}">Sale</button></div></div>`; }).join('')}</div></div>`).join('');
     $('contacts').innerHTML = S.contacts.length ? S.contacts.map((c, k) => `<div class="row between"><div><b>${c.n.replace(/</g, '&lt;')}</b><div class="muted">${fmtPhone(c.tel)}</div></div><button class="sw" data-ct="${k}"><span style="font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;border:2px solid #ffffff26">Quitar</span></button></div>`).join('') : '<p class="muted">Aún no tienes contactos de emergencia.</p>';
@@ -666,7 +778,11 @@ if (user && !user.apps.includes('sos')) {
     const p = { ...pend.p, verified: true };
     S.extra = S.extra || [];
     if (pend.k != null) S.extra[pend.k] = p; else S.extra.push(p);
-    S.events.push({ t: Date.now(), txt: `✅ <b>${esc(p.name)}</b> verificó su número y se unió a la red` }); save(); syncExtra();
+    S.events.push({ t: Date.now(), txt: `✅ <b>${esc(p.name)}</b> verificó su número y se unió a la red` }); syncExtra();
+    // los lugares con "Todos" encendido también avisan de quien se acaba de sumar
+    const ni = members.find(x => x.phone === p.phone)?.i;
+    Object.entries(S.allOn || {}).forEach(([pid, on]) => { if (on && ni != null) (S.alerts[pid] ||= [])[ni] = { arr: true, lev: true }; });
+    save();
     $('addPerson').reset(); $('verify').hidden = true; pend = null; renderRed(); renderHome();
     toast(`${p.name} ya está en tu red SOS Family`);
   };
@@ -674,8 +790,10 @@ if (user && !user.apps.includes('sos')) {
   $('vCancel').onclick = () => { pend = null; $('verify').hidden = true; };
   $('places').addEventListener('input', e => { const r = e.target.dataset.r; if (r) { const p = place(r); p.r = +e.target.value; document.querySelector(`[data-rv="${r}"]`).textContent = p.r * 5 + ' m'; save(); } });
   $('places').addEventListener('click', e => {
-    const b = e.target.closest('[data-k]'), d = e.target.closest('[data-del]');
-    if (b) { const a = (S.alerts[b.dataset.p] ||= members.map(() => ({ arr: false, lev: false })))[+b.dataset.mi] ||= { arr: false, lev: false }; a[b.dataset.k] = !a[b.dataset.k]; save(); b.setAttribute('aria-pressed', a[b.dataset.k]); }
+    const b = e.target.closest('[data-k]'), d = e.target.closest('[data-del]'), all = e.target.closest('[data-all]');
+    if (b) { const a = (S.alerts[b.dataset.p] ||= members.map(() => ({ arr: false, lev: false })))[+b.dataset.mi] ||= { arr: false, lev: false }; a[b.dataset.k] = !a[b.dataset.k]; save(); renderRed(); }
+    // todos encendidos o todos apagados de un toque (y quien se sume después a la red también queda incluido)
+    if (all) { const on = all.getAttribute('aria-pressed') !== 'true', list = (S.alerts[all.dataset.all] ||= []); members.forEach(m => list[m.i] = { arr: on, lev: on }); S.allOn = { ...(S.allOn || {}), [all.dataset.all]: on }; save(); renderRed(); }
     if (d) { S.places = S.places.filter(p => p.id !== d.dataset.del); save(); renderRed(); }
   });
   $('addPlaceBtn').onclick = () => { $('addPlace').hidden = !$('addPlace').hidden; $('plName').focus(); };
@@ -684,7 +802,9 @@ if (user && !user.apps.includes('sos')) {
     const id = 'p' + Date.now(), spots = [[220, 300], [360, 160], [40, 40], [200, 30], [370, 300]];
     const [x, y] = spots[S.places.filter(p => p.custom).length % spots.length];
     S.places.push({ id, name: $('plName').value.trim(), ico: $('plIco').value, x, y, r: 28, custom: true });
-    S.alerts[id] = members.map(() => ({ arr: true, lev: true })); save();
+    S.alerts[id] = members.map(() => ({ arr: true, lev: true }));
+    if ($('plTell').checked) S.events.push({ t: Date.now(), txt: `📍 <b>${esc(members[me].name)}</b> guardó un lugar nuevo: ${$('plIco').value} ${esc($('plName').value.trim())}` });
+    save();
     $('addPlace').reset(); $('addPlace').hidden = true; renderRed(); toast('Lugar guardado: avisaremos cuando lleguen o salgan');
   };
   $('addContact').onsubmit = e => { e.preventDefault(); const tel = $('ctTel').value.replace(/\D/g, '').slice(-10); if (tel.length !== 10) { toast('Escribe un celular de 10 dígitos'); return; } S.contacts.push({ n: $('ctName').value.trim(), tel }); save(); $('addContact').reset(); renderRed(); toast('Contacto agregado'); };
@@ -713,6 +833,26 @@ if (user && !user.apps.includes('sos')) {
     S.events.push({ t: Date.now(), txt: `🛡️ <b>${members[me].name}</b> activó Acompáñame rumbo a ${S.watch.to}` }); save();
     location.hash = 'inicio'; toast('Tu red ya te acompaña en vivo');
   };
+
+  // novedades: después de una actualización, una hoja con lo nuevo y un "Ver" que lleva a cada cosa (una sola vez)
+  const NEWS_V = 'sos-2026-11';
+  const NEWS = [
+    ['🛡️', 'Centro de seguridad en Inicio', 'Contactos, Acompáñame, enlace de ubicación, llegadas a tiempo y manejo, juntos.', 'inicio'],
+    ['⏰', 'Espéralo con un toque', 'Cuando alguien va en camino, su hora de llegada se vuelve aviso: ajústala ±5 min.', 'mapa'],
+    ['🔧', 'Pedir que lo revise', 'Si el teléfono de alguien deja de actualizar, le mandas los pasos para arreglarlo.', 'mapa'],
+    ['📍', 'Lugares más claros', 'Ves cuántos te avisan en cada lugar y enciendes a todos de un toque.', 'red'],
+    ['🚗', 'Detalle de cada viaje', 'Salida, paradas, llegada, velocidad promedio y máxima, y alertas por conductor.', 'actividad'],
+    ['👍', 'Reacciones en el chat', 'Responde a una llegada o a un aviso sin escribir.', 'chat'],
+  ];
+  if (S.news !== NEWS_V) {
+    const nv = $('newsOv');
+    nv.innerHTML = `<div><h2 id="newsTitle" style="font-size:22px">Novedades de NAVI SOS Family</h2><ul style="margin:8px 0 0;padding:0">${NEWS.map(([i, t, d, go]) => `<li><span>${i}</span><div><b>${t}</b><small>${d}</small></div><button data-news="${go}">Ver</button></li>`).join('')}</ul>
+      <button class="btn btn-lime block" id="newsOk" style="margin-top:14px">Entendido</button></div>`;
+    nv.hidden = false;
+    const close = () => { nv.hidden = true; S.news = NEWS_V; save(); };
+    $('newsOk').onclick = close;
+    nv.onclick = e => { const b = e.target.closest('[data-news]'); if (b) { close(); location.hash = b.dataset.news; } else if (e.target === nv) close(); };
+  }
 
   show(location.hash.slice(1) || 'inicio');
 }
