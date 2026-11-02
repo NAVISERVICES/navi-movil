@@ -265,8 +265,8 @@ section{position:relative}
 .pcard li::before{content:"✓";font-weight:800;margin-right:8px}
 .pcard .redes{margin:-8px 0 18px;position:relative;z-index:1}
 .pcard .redes small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
-.pcard .redes span{display:flex;flex-wrap:wrap;gap:4px}
-.pcard .redes i{font-style:normal;font-size:12px;font-weight:700;background:#ffffff80;border-radius:99px;padding:3px 9px}
+.pcard .redes span{display:flex;flex-wrap:wrap;gap:10px;color:var(--ink)}
+.pcard .redes svg{width:20px;height:20px}
 .pcard .go{margin-top:auto;justify-content:center;width:100%}
 .pcard .badge-save{position:absolute;top:18px;right:18px;z-index:2;background:var(--ink);color:var(--lime);font-size:12px;font-weight:700;padding:6px 10px;border-radius:99px;transform:rotate(6deg);animation:wiggle 2.4s ease-in-out infinite}
 @keyframes wiggle{50%{transform:rotate(-4deg) scale(1.06)}}
@@ -812,7 +812,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 <canvas id="confetti"></canvas>
 
 <script src="auth.js?v=20261101b"></script>
-<script src="planes.js?v=20261101b"></script>
+<script src="planes.js?v=20261101c"></script>
 <script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
