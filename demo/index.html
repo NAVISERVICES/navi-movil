@@ -263,6 +263,10 @@ section{position:relative}
 .pcard .eq b{display:block}
 .pcard ul{list-style:none;margin:18px 0 22px;display:grid;gap:6px;font-size:14px}
 .pcard li::before{content:"✓";font-weight:800;margin-right:8px}
+.pcard .redes{margin:-8px 0 18px;position:relative;z-index:1}
+.pcard .redes small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
+.pcard .redes span{display:flex;flex-wrap:wrap;gap:4px}
+.pcard .redes i{font-style:normal;font-size:12px;font-weight:700;background:#ffffff80;border-radius:99px;padding:3px 9px}
 .pcard .go{margin-top:auto;justify-content:center;width:100%}
 .pcard .badge-save{position:absolute;top:18px;right:18px;z-index:2;background:var(--ink);color:var(--lime);font-size:12px;font-weight:700;padding:6px 10px;border-radius:99px;transform:rotate(6deg);animation:wiggle 2.4s ease-in-out infinite}
 @keyframes wiggle{50%{transform:rotate(-4deg) scale(1.06)}}
@@ -625,7 +629,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
         <div class="art"><img src="assets/sofi.png" alt=""></div>
         <span class="tag">ADOLESCENTES</span>
         <h3>Redes sin gastar sus datos</h3>
-        <p>WhatsApp, TikTok e Instagram ilimitados, y avisos cuando llegan a casa o a la escuela.</p>
+        <p>WhatsApp, Facebook, Instagram, X y Snapchat incluidos, y avisos cuando llegan a casa o a la escuela.</p>
       </article>
       <article class="card c-teal reveal tilt" style="transition-delay:.16s">
         <div class="art"><img src="assets/mama.png" alt=""><img src="assets/beto.png" alt=""></div>
@@ -807,7 +811,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 <canvas id="confetti"></canvas>
 
 <script src="auth.js?v=20261101b"></script>
-<script src="planes.js?v=20261101a"></script>
+<script src="planes.js?v=20261101b"></script>
 <script src="qrcode.min.js"></script>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1034,7 +1038,7 @@ document.querySelectorAll('.tilt').forEach(c => {
       return `<article class="pcard ${p.color} swap">${badge}${head}
         <div class="price"><sup>$</sup>${int}${dec ? `<span style="font-size:22px">.${dec}</span>` : ''}</div>
         <div class="per">MXN ${P.per}</div>${eq}
-        <ul><li>Sin contratos</li><li>Conserva tu número</li></ul>
+        <ul>${INCLUYE.map(t => `<li>${t}</li>`).join('')}<li>Sin contratos</li></ul>${redesHTML()}
         ${ROAMING[p.gb] ? `<div class="roam-chip">🌎 <b>Roaming incluido</b> · ${roamingTxt(p.gb)}</div>` : ''}
         ${PORTA_BONUS[p.gb] ? `<a class="porta-chip" href="#promo">🎁 Cámbiate y te regalamos <b>+${portaGift(p.gb)} GB</b> cada mes por ${PORTA_MONTHS} meses</a>` : ''}
         <button class="btn btn-ink go" data-gb="${p.gb}">Lo quiero</button></article>`;

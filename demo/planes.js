@@ -32,6 +32,11 @@ const giftMonth = since => {
   return m >= 1 && m <= PORTA_MONTHS ? m : 0;
 };
 
+// lo que incluye cada plan de datos, igual que la oferta del operador (todos los planes por igual)
+const INCLUYE = ['Minutos ilimitados', 'SMS ilimitados', 'Hotspot para compartir datos'];
+const REDES = ['WhatsApp', 'Facebook', 'Instagram', 'X', 'Snapchat'];
+const redesHTML = () => `<div class="redes"><small>Redes sociales incluidas</small><span>${REDES.map(r => `<i>${r}</i>`).join('')}</span></div>`;
+
 // roaming internacional en Estados Unidos y Canadá (uso justo): GB para usar allá, hasta 15 días
 const ROAMING = { 12: 4, 24: 8 };
 const ROAMING_DAYS = 15;
