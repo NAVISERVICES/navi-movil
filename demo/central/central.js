@@ -162,6 +162,7 @@ document.addEventListener('click', e => { const r = e.target.closest('[data-reve
 
 // ---------- estructura ----------
 let view = sessionStorage.getItem('central.view') || 'resumen', sel = null, inboxF = 'abiertas', segF = 'todos', q = '', opsTab = 'pedidos';
+let cliSt = 'todos', cliPlan = 'todos', cliSort = '', chF = '', deskX = '', stageF = ''; // filtros que llegan desde el Resumen
 const NAV = [['resumen', '📊', 'Resumen'], ['desk', '💬', 'Front desk'], ['empresas', '🏢', 'Empresas B2B'], ['clientes', '👥', 'Clientes'], ['proactivo', '⚡', 'Proactivo'], ['ops', '📦', 'Operaciones'], ['privacidad', '🔒', 'Privacidad']];
 const openConvs = () => Desk.all().filter(c => c.status !== 'closed');
 function shell(inner, title, right = '') {
@@ -172,7 +173,7 @@ function shell(inner, title, right = '') {
       <div class="who"><b>${esc(staff.name)}</b>${ROLES[staff.role].n}<br><a class="rv" id="logout" style="margin:0">Salir</a></div>
       <div class="foot">DEMO · datos de este navegador + cartera ficticia</div></aside>
     <main class="main"><div class="top"><h1>${title}</h1><div class="sp">${right}</div></div>${inner}</main></div>`;
-  document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { view = b.dataset.v; sel = null; sessionStorage.setItem('central.view', view); route(); });
+  document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => go(b.dataset.v));
   $('logout').onclick = () => { sessionStorage.removeItem('central.staff'); staff = null; route(); };
 }
 function route() {
@@ -205,16 +206,22 @@ function resumen() {
   // requerimientos por tipo de cliente: personas (B2C, Navi Móvil) y empresas (B2B, NAVICom)
   const b2c = openConvs().filter(c => segOf(c) === 'b2c'), b2bC = openConvs().filter(c => segOf(c) === 'b2b'), ol = openLeads(), newL = Desk.leads().filter(l => l.stage === 'nuevo');
   const pipe = STAGES.slice(0, 4).map(([k, n]) => [n, Desk.leads().filter(l => l.stage === k).length]);
-  const bars = (rows, color) => { const mx = Math.max(1, ...rows.map(r => r[1])); return `<div class="bars">${rows.map(([n, v]) => `<div class="bar"><span>${n}</span><i style="width:${v / mx * 100}%;background:${color}"></i><span>${v}</span></div>`).join('')}</div>`; };
+  // cada tarjeta y cada barra lleva a su detalle (data-go = "vista?filtro=valor", ver go())
+  const bars = (rows, color) => { const mx = Math.max(1, ...rows.map(r => r[1])); return `<div class="bars">${rows.map(([n, v, to]) => `<button class="bar" data-go="${to}" title="Ver detalle"><span>${n}</span><i style="width:${v / mx * 100}%;background:${color}"></i><span>${v}</span></button>`).join('')}</div>`; };
+  const PLAN_K = ['2', '4', '12', '24', 'fam'];
+  mix.forEach((r, i) => r.push('clientes?plan=' + PLAN_K[i]));
+  chans.forEach((r, i) => r.push('desk?f=todas&ch=' + ['whatsapp', 'web', 'app', 'empresas'][i]));
+  pipe.forEach((r, i) => r.push('empresas?stage=' + STAGES[i][0]));
+  const kpi = (to, cls, inner) => `<button class="kpi go ${cls}" data-go="${to}" title="Ver detalle">${inner}<span class="kgo">Ver →</span></button>`;
   shell(`<div class="kpis">
-      <div class="kpi"><small>Clientes activos</small><b>${act.length}</b><em>${lines} líneas</em></div>
-      <div class="kpi"><small>Ingreso mensual recurrente</small><b>${mxn(mrr).replace(/\.\d+$/, '')}</b><em>estimado</em></div>
-      <div class="kpi seg-b2c"><small>👤 Requerimientos personas (B2C)</small><b>${b2c.length}</b><em>${b2c.filter(c => c.status === 'waiting').length} esperando asesor</em></div>
-      <div class="kpi seg-b2b"><small>🏢 Requerimientos empresas (B2B)</small><b>${ol.length + b2bC.filter(c => !Desk.leads().some(l => l.conv === c.id)).length}</b><em>${newL.length} nuevos · ${mxn(ol.reduce((s, l) => s + leadValue(l), 0)).replace(/\.\d+$/, '')}/mes en juego</em></div>
-      <div class="kpi"><small>Primera respuesta</small><b>${firstReply.length ? Math.max(1, Math.round(firstReply.reduce((a, b) => a + b, 0) / firstReply.length)) + ' s' : '—'}</b><em>el asistente contesta al momento</em></div>
-      <div class="kpi"><small>Resueltas por el asistente</small><b>${closed ? Math.round(closedByBot / closed * 100) : 0}%</b><em>${closed} cerradas</em></div>
-      <div class="kpi"><small>Satisfacción (CSAT)</small><b>${csat ? csat.toFixed(1) : '—'}<span style="font-size:15px">/5</span></b><em>${rated.length} calificaciones</em></div>
-      <div class="kpi"><small>Avisos proactivos pendientes</small><b>${al.length}</b><em>clientes a contactar</em></div>
+      ${kpi('clientes?st=activa', '', `<small>Clientes activos</small><b>${act.length}</b><em>${lines} líneas</em>`)}
+      ${kpi('clientes?sort=pago', '', `<small>Ingreso mensual recurrente</small><b>${mxn(mrr).replace(/\.\d+$/, '')}</b><em>estimado</em>`)}
+      ${kpi('desk?seg=b2c&f=abiertas', 'seg-b2c', `<small>👤 Requerimientos personas (B2C)</small><b>${b2c.length}</b><em>${b2c.filter(c => c.status === 'waiting').length} esperando asesor</em>`)}
+      ${kpi('empresas', 'seg-b2b', `<small>🏢 Requerimientos empresas (B2B)</small><b>${ol.length + b2bC.filter(c => !Desk.leads().some(l => l.conv === c.id)).length}</b><em>${newL.length} nuevos · ${mxn(ol.reduce((s, l) => s + leadValue(l), 0)).replace(/\.\d+$/, '')}/mes en juego</em>`)}
+      ${kpi('desk?f=abiertas', '', `<small>Primera respuesta</small><b>${firstReply.length ? Math.max(1, Math.round(firstReply.reduce((a, b) => a + b, 0) / firstReply.length)) + ' s' : '—'}</b><em>el asistente contesta al momento</em>`)}
+      ${kpi('desk?f=cerradas&x=bot', '', `<small>Resueltas por el asistente</small><b>${closed ? Math.round(closedByBot / closed * 100) : 0}%</b><em>${closed} cerradas</em>`)}
+      ${kpi('desk?f=todas&x=csat', '', `<small>Satisfacción (CSAT)</small><b>${csat ? csat.toFixed(1) : '—'}<span style="font-size:15px">/5</span></b><em>${rated.length} calificaciones</em>`)}
+      ${kpi('proactivo', '', `<small>Avisos proactivos pendientes</small><b>${al.length}</b><em>clientes a contactar</em>`)}
     </div>
     <div class="g2"><section class="card"><h3>⚡ Lo urgente ahora<span class="hint">primero quien espera, luego lo proactivo</span></h3><div class="list">
       ${waiting.map(c => `<button class="item" data-conv="${c.id}"><span class="ic">${CH[c.channel]}</span><span><b>${esc(c.name || c.anon)} espera a ${segOf(c) === 'b2b' ? 'un ejecutivo' : 'un asesor'}</b><small>${esc(c.msgs[c.msgs.length - 1]?.txt.slice(0, 70))}</small></span><span class="r">${segTag(c)} <span class="pill bad">${ago(c.updated)}</span></span></button>`).join('')}
@@ -224,7 +231,16 @@ function resumen() {
       <div style="display:grid;gap:14px"><section class="card"><h3>🏢 Embudo de empresas<span class="hint">NAVICom · B2B</span></h3>${bars(pipe, '#A893FF')}</section><section class="card"><h3>Planes</h3>${bars(mix, 'var(--lime)')}</section><section class="card"><h3>Canales de atención</h3>${bars(chans, '#7EE0FF')}</section></div></div>`, 'Resumen', `<span class="pill ok">● Asistente en línea 24/7</span>`);
   document.querySelectorAll('[data-conv]').forEach(b => b.onclick = () => { view = 'desk'; sel = b.dataset.conv; route(); });
   document.querySelectorAll('[data-lead]').forEach(b => b.onclick = () => leadCard(b.dataset.lead));
-  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { view = b.dataset.go; route(); });
+  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+}
+// ir a una vista con filtros: "clientes?st=activa&plan=12", "desk?seg=b2c&f=abiertas", "empresas?stage=nuevo"…
+function go(to) {
+  const [v, qs] = to.split('?'), p = new URLSearchParams(qs || '');
+  view = v; sel = null; sessionStorage.setItem('central.view', view);
+  if (v === 'clientes') { q = ''; cliSt = p.get('st') || 'todos'; cliPlan = p.get('plan') || 'todos'; cliSort = p.get('sort') || ''; }
+  if (v === 'desk') { segF = p.get('seg') || 'todos'; inboxF = p.get('f') || 'abiertas'; chF = p.get('ch') || ''; deskX = p.get('x') || ''; }
+  if (v === 'empresas') { leadQ = ''; stageF = p.get('stage') || ''; }
+  route(); scrollTo(0, 0);
 }
 
 // ---------- Front desk ----------
@@ -249,17 +265,21 @@ const TPL = [
   ['Cierre', () => '¿Hay algo más en lo que te pueda ayudar? Si no, cierro la conversación. ¡Gracias por elegir Navi! 💚'],
 ];
 function desk() {
-  const all = Desk.all().filter(c => segF === 'todos' || segOf(c) === segF).filter(c => inboxF === 'abiertas' ? c.status !== 'closed' : inboxF === 'mias' ? c.agent === staff.name && c.status !== 'closed' : inboxF === 'espera' ? c.status === 'waiting' : c.status === 'closed')
+  const XF = { bot: ['🤖 Resueltas solo por el asistente', c => !c.msgs.some(m => m.from === 'agent')], csat: ['⭐ Con calificación del cliente', c => !!c.csat] };
+  const extra = [chF && [`${CH[chF]} ${CH_N[chF]}`, 'ch'], deskX && [XF[deskX][0], 'x']].filter(Boolean);
+  const all = Desk.all().filter(c => segF === 'todos' || segOf(c) === segF).filter(c => !chF || c.channel === chF).filter(c => !deskX || XF[deskX][1](c)).filter(c => inboxF === 'todas' || (inboxF === 'abiertas' ? c.status !== 'closed' : inboxF === 'mias' ? c.agent === staff.name && c.status !== 'closed' : inboxF === 'espera' ? c.status === 'waiting' : c.status === 'closed'))
     .sort((a, b) => (b.status === 'waiting') - (a.status === 'waiting') || b.updated - a.updated);
   const c = sel && Desk.get(sel);
   shell(`<div class="desk ${c ? 'open' : ''}">
     <section class="inbox"><div class="hd"><div class="seg segs">${[['todos', 'Todos'], ['b2c', '👤 Personas B2C'], ['b2b', '🏢 Empresas B2B']].map(([k, n]) => { const cnt = openConvs().filter(c => k === 'todos' || segOf(c) === k).length; return `<button data-sg="${k}" aria-pressed="${segF === k}">${n} · ${cnt}</button>`; }).join('')}</div>
-        <div class="seg" style="margin-top:6px">${[['abiertas', 'Abiertas'], ['espera', 'En espera'], ['mias', 'Mías'], ['cerradas', 'Resueltas']].map(([k, n]) => `<button data-f="${k}" aria-pressed="${inboxF === k}">${n}</button>`).join('')}</div></div>
+        <div class="seg" style="margin-top:6px">${[['abiertas', 'Abiertas'], ['espera', 'En espera'], ['mias', 'Mías'], ['cerradas', 'Resueltas'], ['todas', 'Todas']].map(([k, n]) => `<button data-f="${k}" aria-pressed="${inboxF === k}">${n}</button>`).join('')}</div>
+        ${extra.map(([n, k]) => `<button class="fchip" data-xf="${k}">${n} <b>✕</b></button>`).join('')}</div>
       <div class="rows">${all.map(x => { const l = x.msgs[x.msgs.length - 1]; return `<button class="crow" data-c="${x.id}" aria-current="${x.id === sel}"><span class="ch c-${x.channel}">${CH[x.channel]}</span><span class="mid"><b>${esc(x.name || x.anon)}${x.unread ? '<i class="dot"></i>' : ''}</b><small>${l ? esc((l.from === 'customer' ? '' : l.from === 'bot' ? '🤖 ' : '🙋 ') + l.txt) : ''}</small><span style="display:flex;gap:4px">${segTag(x)}<span class="pill ${ST[x.status][1]}">${ST[x.status][0]}</span></span></span><span class="r">${ago(x.updated)}</span></button>`; }).join('') || '<p class="muted" style="padding:14px">Sin conversaciones aquí.</p>'}</div></section>
     <section class="conv">${c ? convHTML(c) : '<div style="margin:auto;text-align:center;padding:30px" class="muted">💬<br>Elige una conversación</div>'}</section>
     <aside class="cust">${c ? custPanel(c) : '<p class="muted">El contexto del cliente aparece aquí.</p>'}</aside></div>`, 'Front desk', `<span class="pill">${Desk.all().filter(x => x.status === 'waiting').length} en espera</span><a class="btn btn-line xs" href="../whatsapp.html" target="_blank">Abrir WhatsApp de prueba ↗</a>`);
   document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { inboxF = b.dataset.f; desk(); });
   document.querySelectorAll('[data-sg]').forEach(b => b.onclick = () => { segF = b.dataset.sg; desk(); });
+  document.querySelectorAll('[data-xf]').forEach(b => b.onclick = () => { if (b.dataset.xf === 'ch') chF = ''; else deskX = ''; desk(); });
   document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { sel = b.dataset.c; desk(); });
   if (c) bindConv(c);
 }
@@ -353,10 +373,12 @@ function empresas() {
       <div class="kpi"><small>Tasa de cierre</small><b>${closed.length ? Math.round(won.length / closed.length * 100) : 0}%</b><em>${closed.length} cerradas</em></div>
     </div>
     <div class="search"><input id="lq" placeholder="Busca empresa, contacto o interés" value="${esc(leadQ)}"><span class="hint" style="align-self:center">Entran del formulario de propuesta y del chat de la página Empresas.</span></div>
-    <div class="kanban">${STAGES.map(([k, n, c]) => { const xs = vis.filter(l => l.stage === k).sort((a, b) => b.updated - a.updated); return `<section class="col"><h4><i style="background:${c}"></i>${n}<span>${xs.length}</span></h4>${xs.map(card).join('') || '<p class="hint" style="padding:6px">—</p>'}</section>`; }).join('')}</div>`,
+    <div class="kanban">${STAGES.map(([k, n, c]) => { const xs = vis.filter(l => l.stage === k).sort((a, b) => b.updated - a.updated); return `<section class="col ${stageF === k ? 'on' : ''}" data-stage="${k}"><h4><i style="background:${c}"></i>${n}<span>${xs.length}</span></h4>${xs.map(card).join('') || '<p class="hint" style="padding:6px">—</p>'}</section>`; }).join('')}</div>`,
     'Empresas B2B', `<span class="pill b2b">NAVICom</span><a class="btn btn-line xs" href="../empresas.html" target="_blank">Abrir página Empresas ↗</a>`);
   const inp = $('lq'); inp.oninput = () => { leadQ = inp.value; empresas(); const i = $('lq'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); };
   document.querySelectorAll('[data-l]').forEach(b => b.onclick = () => leadCard(b.dataset.l));
+  // llegó desde el embudo del Resumen: resalta esa etapa un momento
+  if (stageF) { const col = document.querySelector(`.col[data-stage="${stageF}"]`); col?.scrollIntoView({ inline: 'center', block: 'nearest' }); stageF = ''; setTimeout(() => col?.classList.remove('on'), 2500); }
 }
 function leadCard(lid) {
   const l = Desk.leads().find(x => x.id === lid); if (!l) return;
@@ -389,13 +411,23 @@ function leadCard(lid) {
 // ---------- Clientes ----------
 function clientes() {
   const qq = q.toLowerCase().replace(/\s/g, '');
-  const list = customers().filter(c => !qq || (c.name + c.client + c.phone).toLowerCase().replace(/\s/g, '').includes(qq));
+  const monthly = c => (c.price || 0) / PER_MONTHS[c.per];
+  const list = customers().filter(c => !qq || (c.name + c.client + c.phone).toLowerCase().replace(/\s/g, '').includes(qq))
+    .filter(c => cliSt === 'todos' || c.status === cliSt).filter(c => cliPlan === 'todos' || (cliPlan === 'fam' ? c.fam : !c.fam && c.gb === +cliPlan))
+    .sort((a, b) => cliSort === 'pago' ? monthly(b) - monthly(a) : 0);
+  const chips = (cur, opts, attr) => `<div class="seg">${opts.map(([k, n]) => `<button ${attr}="${k}" aria-pressed="${cur === k}">${n}</button>`).join('')}</div>`;
   shell(`<div class="search"><input id="q" placeholder="Busca por nombre, no. de cliente o número completo" value="${esc(q)}"></div>
-    <div class="tw"><table><thead><tr><th>Cliente</th><th>No. cliente</th><th>Número</th><th>Plan</th><th>Datos</th><th>Renueva</th><th>Estado</th></tr></thead><tbody>
-    ${list.map(c => `<tr class="click" data-id="${c.id}"><td><b>${esc(c.synth ? c.name : c.name)}</b>${c.synth ? '' : ' <span class="pill lime">demo</span>'}</td><td>${c.client}</td><td>${esc(Mask.phone(c.phone))}</td><td>${planTxt(c)}</td>
+    <div class="search" style="gap:14px;align-items:center">${chips(cliSt, [['todos', 'Todos'], ['activa', 'Activos'], ['suspendida', 'Suspendidos']], 'data-cst')}
+      ${chips(cliPlan, [['todos', 'Todos los planes'], ['2', '2 GB'], ['4', '4 GB'], ['12', '12 GB'], ['24', '24 GB'], ['fam', 'Plan Familia']], 'data-cpl')}
+      ${chips(cliSort, [['', 'Orden normal'], ['pago', 'Mayor pago mensual']], 'data-cso')}</div>
+    <div class="tw"><table><thead><tr><th>Cliente</th><th>No. cliente</th><th>Número</th><th>Plan</th><th>Pago mensual</th><th>Datos</th><th>Renueva</th><th>Estado</th></tr></thead><tbody>
+    ${list.map(c => `<tr class="click" data-id="${c.id}"><td><b>${esc(c.synth ? c.name : c.name)}</b>${c.synth ? '' : ' <span class="pill lime">demo</span>'}</td><td>${c.client}</td><td>${esc(Mask.phone(c.phone))}</td><td>${planTxt(c)}</td><td>${c.price ? mxn(monthly(c)).replace(/\.\d+$/, '') : '—'}</td>
       <td><div style="display:flex;gap:8px;align-items:center"><div class="meter"><i class="${c.pct < .2 ? 'low' : ''}" style="width:${Math.round(c.pct * 100)}%"></i></div><span class="hint">${c.left} GB</span></div></td>
       <td>${fmtDay(c.renew)}</td><td>${c.status === 'activa' ? '<span class="pill ok">Activa</span>' : '<span class="pill bad">Suspendida</span>'} ${RULES.filter(r => r.test(c)).map(r => `<span title="${r.n}">${r.ic}</span>`).join('')}</td></tr>`).join('')}
-    </tbody></table></div><p class="hint" style="margin-top:8px">${list.length} clientes · los números se muestran enmascarados; para buscar por número escríbelo completo.</p>`, 'Clientes');
+    </tbody></table></div><p class="hint" style="margin-top:8px">${list.length} clientes${cliSt === 'activa' ? ' activos' : ''} · ${list.reduce((s, c) => s + c.lines, 0)} líneas · ${mxn(list.reduce((s, c) => s + monthly(c), 0)).replace(/\.\d+$/, '')}/mes · los números se muestran enmascarados; para buscar por número escríbelo completo.</p>`, 'Clientes');
+  document.querySelectorAll('[data-cst]').forEach(b => b.onclick = () => { cliSt = b.dataset.cst; clientes(); });
+  document.querySelectorAll('[data-cpl]').forEach(b => b.onclick = () => { cliPlan = b.dataset.cpl; clientes(); });
+  document.querySelectorAll('[data-cso]').forEach(b => b.onclick = () => { cliSort = b.dataset.cso; clientes(); });
   const inp = $('q'); inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
   inp.oninput = () => { q = inp.value; clientes(); };
   document.querySelectorAll('tr[data-id]').forEach(r => r.onclick = () => ficha(r.dataset.id));

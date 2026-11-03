@@ -139,6 +139,17 @@ tr.click:hover td{background:#ffffff08}
 .inbox .segs button[aria-pressed="true"]{background:#fff;border-color:#fff}
 .kanban{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px;align-items:start}
 .kanban .col{background:#12125F;border:1px solid #ffffff14;border-radius:16px;padding:10px;display:grid;gap:8px}
+.kanban .col{transition:box-shadow .4s,border-color .4s}
+.kanban .col.on{border-color:var(--lime);box-shadow:0 0 0 3px #B4E32F55}
+/* resumen: tarjetas y barras que llevan al detalle */
+.kpi.go{text-align:left;width:100%;color:inherit;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
+.kpi.go:hover{border-color:var(--lime);background:#16166E}
+.kpi .kgo{position:absolute;top:12px;right:12px;font-size:11px;font-weight:800;color:var(--lime);opacity:0;transition:opacity .2s}
+.kpi.go:hover .kgo,.kpi.go:focus-visible .kgo{opacity:1}
+button.bar{width:100%;text-align:left;color:inherit;border-radius:8px;padding:3px 4px;margin:-3px -4px;cursor:pointer}
+button.bar:hover{background:#ffffff0d}
+.fchip{display:inline-flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:#7EE0FF22;color:#9DE8FF}
+.fchip b{opacity:.8}
 .kanban h4{display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 2px 4px}
 .kanban h4 i{width:9px;height:9px;border-radius:50%}
 .kanban h4 span{margin-left:auto;color:var(--muted);font-size:12px}
