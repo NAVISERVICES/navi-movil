@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Navi Pet · Mi Navi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261103a"></script>
+<script>if (!NaviAuth.current()) location.replace('login.html?next=pet.html');</script>
+<style>
+:root{--pet:#FFB547}
+main{padding-bottom:80px}
+.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:22px}
+.card + .card{margin-top:18px}
+.card h2{font-size:21px;margin-bottom:4px}
+.muted{color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted)}
+.btn.wide{width:100%;justify-content:center}
+.btn-pet{background:var(--pet);color:#2A1600;box-shadow:0 5px 0 #B9781C}
+.lnk{color:var(--muted);font-size:13px;text-decoration:underline}
+.note{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+/* pestañas */
+.tabs{display:flex;gap:6px;margin:0 0 18px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:none;padding:10px 16px;border-radius:99px;border:1px solid #ffffff26;font-weight:800;font-size:14px;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--pet);border-color:var(--pet);color:#2A1600}
+/* alta del perro */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.fgrid label,.fld{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.fgrid .full{grid-column:1/-1}
+.inp{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;color:var(--text);font:inherit;font-size:15px}
+.inp:focus{outline:none;border-color:var(--pet)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts label{position:relative;cursor:pointer;border:2px solid #ffffff22;border-radius:16px;padding:10px 12px;display:flex;gap:8px;align-items:center;font-size:14px;color:var(--text);font-weight:700}
+.opts label small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.opts input{position:absolute;opacity:0}
+.opts label:has(input:checked){border-color:var(--pet);background:#FFB54718}
+.opts.emo label{font-size:30px;padding:8px 12px}
+/* resumen del perro */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.dog{width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#FFD58F,#FFB547);display:grid;place-items:center;font-size:62px;box-shadow:0 0 0 6px #FFB54733;animation:wag 2.4s ease-in-out infinite}
+@keyframes wag{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.stats div{background:#ffffff0a;border-radius:16px;padding:12px;text-align:center}
+.stats b{display:block;font-family:var(--display);font-size:22px}
+.stats span{font-size:12px;color:var(--muted)}
+/* plan de 4 semanas */
+.weeks{display:grid;gap:10px;margin-top:14px}
+.wk{display:grid;grid-template-columns:86px repeat(7,1fr);gap:6px;align-items:center}
+.wk > span{font-size:12px;color:var(--muted);font-weight:700;line-height:1.2}
+.wk > span b{display:block;color:var(--text);font-size:13px}
+.d{position:relative;aspect-ratio:1;border-radius:14px;background:#ffffff08;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:14px;line-height:1.1}
+.d:hover{background:#ffffff14}
+.d i{font-style:normal;font-size:15px}
+.d.done{background:var(--pet);color:#2A1600}
+.d.done::after{content:"✓";position:absolute;top:3px;right:5px;font-size:10px}
+.d.now{border-color:var(--lime)}
+.d.lock{opacity:.45}
+.d.sel{box-shadow:0 0 0 3px #fff}
+.dh{display:flex;align-items:center;gap:14px}
+.dh .big{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:30px;flex:none;background:#FFB54722}
+.dh h2{margin:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chips span{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:#ffffff14}
+.chips span.star{background:#FFB54733;color:#FFD58F}
+.exl{display:grid;gap:8px;margin:16px 0}
+.exl button{display:flex;align-items:center;gap:12px;text-align:left;background:#ffffff0a;border-radius:16px;padding:10px 12px;width:100%}
+.exl button:hover{background:#ffffff14}
+.exl .e{font-size:24px;width:36px;text-align:center;flex:none}
+.exl b{display:block;font-size:15px}
+.exl small{color:var(--muted);font-size:12px}
+.exl em{margin-left:auto;font-style:normal;font-weight:800;color:var(--lime);white-space:nowrap;font-size:13px}
+/* nivel de cada truco */
+.lv{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;background:#ffffff14;color:var(--muted)}
+.lv.l1{background:#7EE0FF22;color:#9DE8FF}.lv.l2{background:#2BD67B22;color:#7BF0AE}
+.meter{height:8px;border-radius:99px;background:#ffffff18;overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--pet);border-radius:99px}
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+.sk{background:#ffffff0a;border-radius:18px;padding:14px;display:grid;gap:6px}
+.sk .t{display:flex;gap:10px;align-items:center}
+.sk .t span{font-size:28px}
+.sk .t b{font-size:15px;display:block}
+.sk .a{display:flex;gap:8px;margin-top:4px}
+.sk .a button{flex:1;padding:8px;border-radius:12px;font-weight:800;font-size:13px;background:#ffffff12}
+.sk .a button.go{background:var(--pet);color:#2A1600}
+/* rutina */
+.rt{display:grid;gap:6px;margin-top:12px}
+.rt label{display:grid;grid-template-columns:52px 30px 1fr auto;gap:8px;align-items:center;padding:9px 10px;border-radius:14px;background:#ffffff08;cursor:pointer;font-size:14px}
+.rt label:has(input:checked){background:#2BD67B18}
+.rt label:has(input:checked) .tx{color:var(--muted);text-decoration:line-through}
+.rt time{font-weight:800;font-size:13px;color:var(--muted)}
+.rt .ic{font-size:20px;text-align:center}
+.rt input{width:20px;height:20px;accent-color:#2BD67B}
+.rt small{font-size:11px;color:var(--muted);display:block}
+.potty{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.potty button{padding:16px 10px;border-radius:18px;font-weight:800;font-size:15px;display:grid;gap:4px;justify-items:center}
+.potty button span{font-size:28px}
+.potty .ok{background:#2BD67B22;color:#7BF0AE}.potty .no{background:#7EE0FF1a;color:#9DE8FF}
+.pstats{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+.pstats b{color:var(--text)}
+.wk7{display:flex;gap:6px;margin-top:10px;align-items:flex-end;height:60px}
+.wk7 div{flex:1;display:grid;gap:3px;justify-items:center;font-size:10px;color:var(--muted);align-self:stretch;grid-template-rows:1fr auto}
+.wk7 i{width:100%;border-radius:6px;background:#2BD67B;align-self:end;min-height:3px}
+.soc{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.soc label{display:flex;gap:8px;align-items:center;font-size:13px;padding:8px 10px;border-radius:12px;background:#ffffff08;cursor:pointer}
+.soc label:has(input:checked){background:#FFB5471f}
+.soc input{accent-color:var(--pet);width:17px;height:17px;flex:none}
+.team{display:grid;gap:10px;margin-top:12px}
+.team .r{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center}
+.team img{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.team em{font-style:normal;font-weight:800;font-size:13px}
+.tips{display:grid;gap:8px;margin-top:10px;font-size:14px;color:var(--muted)}
+.tips div{display:grid;grid-template-columns:28px 1fr;gap:8px}
+/* sesión de entrenamiento */
+.play{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 30%,#3a2a6e,#06062E 70%);display:flex;flex-direction:column;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px));overflow:auto}
+.play[hidden]{display:none}
+.ptop{display:flex;align-items:center;gap:12px;max-width:560px;width:100%;margin:0 auto}
+.ptop button{width:40px;height:40px;border-radius:50%;background:#ffffff14;font-size:18px;flex:none}
+.pbar{flex:1;height:8px;border-radius:99px;background:#ffffff18;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--pet);transition:width .3s}
+.pmain{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;max-width:560px;width:100%;margin:0 auto;padding:10px 0}
+.ptag{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--pet)}
+.pemo{font-size:72px;line-height:1;animation:wag 2.4s ease-in-out infinite}
+.pname{font-family:var(--display);font-size:clamp(26px,6vw,36px);line-height:1.05}
+.psteps{text-align:left;background:#ffffff0d;border-radius:18px;padding:12px 14px 12px 34px;font-size:14px;color:var(--muted);display:grid;gap:5px;max-width:460px;width:100%}
+.psteps li b{color:var(--text)}
+.ptime{font-family:var(--display);font-weight:800;font-size:44px;line-height:1}
+.ptime.off{color:var(--muted)}
+.clicker{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFD58F,#FFB547 60%,#D98A1F);color:#2A1600;font-family:var(--display);font-weight:800;font-size:26px;box-shadow:0 8px 0 #9C5F12,0 18px 40px #0008;display:grid;place-items:center;line-height:1;transition:transform .06s}
+.clicker small{display:block;font-family:var(--body);font-size:11px;font-weight:700;margin-top:4px}
+.clicker:active,.clicker.hit{transform:translateY(6px);box-shadow:0 2px 0 #9C5F12,0 10px 24px #0008}
+.tally{display:flex;gap:10px}
+.tally button{padding:12px 16px;border-radius:16px;font-weight:800;font-size:15px;background:#ffffff12;min-width:130px}
+.tally .y{background:#2BD67B26;color:#7BF0AE}
+.tally .n{background:#FF6F8E1f;color:#FF9EB0}
+.rate{display:grid;gap:10px;width:100%;max-width:380px}
+.rate button{padding:14px;border-radius:18px;background:#ffffff10;border:2px solid #ffffff1f;font-weight:800;font-size:16px;text-align:left;display:flex;gap:12px;align-items:center}
+.rate button span{font-size:28px}
+.rate button small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.rate button.sug{border-color:var(--pet)}
+.pbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:560px;width:100%;margin:0 auto}
+.pbtns .btn{min-width:150px;justify-content:center}
+.sheet{position:fixed;inset:0;z-index:95;background:#03031acc;display:grid;place-items:end center;padding:16px;overflow:auto}
+.sheet[hidden]{display:none}
+.sheet > div{width:min(520px,100%);background:var(--navy-2);border:1px solid #ffffff22;border-radius:24px;padding:22px;max-height:calc(100dvh - 32px);overflow:auto}
+.sheet ol{margin:12px 0 0 18px;display:grid;gap:6px;font-size:14px;color:var(--muted)}
+.sheet .tip{margin-top:12px;background:#FFB5471a;border-radius:14px;padding:10px 12px;font-size:13px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+@media (max-width:620px){.fgrid,.soc{grid-template-columns:1fr}.hero{grid-template-columns:1fr;justify-items:center;text-align:center}.wk{grid-template-columns:repeat(7,1fr)}.wk > span{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div class="ico" style="background:#FFB547">🐶</div>
+    <div><h1>Navi Pet</h1><p>Entrena a tu cachorro o perro en casa: sesiones cortas, premios y mucho cariño.</p></div>
+  </div>
+  <div id="app"></div>
+</main>
+
+<div class="play" id="play" hidden role="dialog" aria-modal="true" aria-label="Sesión de entrenamiento"></div>
+<div class="sheet" id="sheet" hidden></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const user = NaviAuth.current();
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---------- lo que se entrena (siempre con refuerzo positivo: marcar con "¡Sí!" y premiar) ----------
+// st: etapas donde aplica (c cachorro · j joven · a adulto) · cat: básicos, casa, paseo, trucos
+const L = {
+  marcador: { n: 'El "¡Sí!" vale premio', e: '🔔', cat: 'Básicos', st: 'cja', steps: ['Ten 10 premios pequeños a la mano.', 'Toca el clicker (o di "¡Sí!") y en menos de 2 segundos dale un premio.', 'Repite 10 veces sin pedirle nada.', 'Listo cuando voltea a verte al escuchar el sonido.'], tip: 'Es la base de todo: el sonido le dice "eso que hiciste fue lo correcto".' },
+  nombre:   { n: 'Responde a su nombre', e: '📣', cat: 'Básicos', st: 'cja', steps: ['Di su nombre una vez, con voz alegre.', 'En cuanto te mire: clic y premio.', 'Hazlo en distintos cuartos de la casa.', 'Nunca uses su nombre para regañarlo.'], tip: 'Si no te mira, haz un ruidito suave y premia cuando voltee.' },
+  sentado:  { n: 'Sentado', e: '🪑', cat: 'Básicos', st: 'cja', steps: ['Lleva un premio de su nariz hacia arriba y atrás, despacio.', 'Al bajar la cola al piso: clic y premio.', 'Cuando lo haga fácil, di "sentado" justo antes del movimiento.', 'Poco a poco quita el premio de la mano y usa solo la seña.'], tip: 'No lo empujes de la cadera: que lo descubra él.' },
+  echado:   { n: 'Echado', e: '🛏️', cat: 'Básicos', st: 'cja', steps: ['Empieza con tu perro sentado.', 'Baja el premio de su nariz al piso, entre sus patas.', 'Cuando apoye codos y pecho: clic y premio.', 'Agrega la palabra "echado" cuando lo haga seguido.'], tip: 'Si se para, empieza otra vez sin regañarlo; sobre una alfombra es más fácil.' },
+  quieto:   { n: 'Quieto', e: '✋', cat: 'Básicos', st: 'cja', steps: ['Pídele sentado y muestra la palma: "quieto".', 'Cuenta 2 segundos, clic y premio en su lugar.', 'Sube poco a poco: tiempo, luego distancia, luego distracciones.', 'Termina con una palabra de salida: "libre".'], tip: 'Cambia una sola cosa a la vez: si subes la distancia, baja el tiempo.' },
+  ven:      { n: 'Ven (llamado)', e: '🏃', cat: 'Básicos', st: 'cja', steps: ['Agáchate, abre los brazos y di "¡ven!" con alegría.', 'Cuando llegue: clic, premio grande y caricias.', 'Empieza a 2 metros y alarga la distancia.', 'Practica en patio o parque con correa larga.'], tip: 'Nunca lo llames para algo que no le guste (bañarlo, regañarlo).' },
+  mirame:   { n: 'Mírame', e: '👀', cat: 'Básicos', st: 'cja', steps: ['Sostén un premio junto a tus ojos.', 'Cuando te mire a los ojos: clic y premio.', 'Alarga el contacto a 3, 5 y 10 segundos.', 'Úsalo en el paseo cuando haya distracciones.'], tip: 'Ayuda mucho con perros que se distraen o se ponen nerviosos.' },
+  dejalo:   { n: 'Déjalo', e: '🚫', cat: 'Básicos', st: 'cja', steps: ['Cierra un premio en tu puño frente a su nariz.', 'Cuando deje de insistir y se aleje: clic y premio de la otra mano.', 'Después ponlo en el piso cubierto con tu mano.', 'Así aprende a soltar lo que encuentre en la calle.'], tip: 'El premio que recibe nunca es el que dejó: siempre viene de ti.' },
+  correa:   { n: 'Caminar sin jalar', e: '🦮', cat: 'Paseo', st: 'cja', steps: ['Usa pechera y correa de 1.5 a 2 m.', 'Cada paso con la correa floja: clic y premio junto a tu pierna.', 'Si jala, detente como árbol hasta que la correa se afloje.', 'Practica primero en casa, luego en la calle.'], tip: 'Paseos cortos y frecuentes enseñan más que uno largo y frustrante.' },
+  saludo:   { n: 'Saludar sin brincar', e: '🤝', cat: 'Casa', st: 'cja', steps: ['Cuando brinque, quédate quieto y voltea a otro lado.', 'En cuanto tenga las 4 patas en el piso: clic y premio.', 'Pide a tus visitas que hagan lo mismo.', 'Pedirle "sentado" para saludar también funciona.'], tip: 'Toda la familia debe hacer lo mismo para que lo entienda.' },
+  cama:     { n: 'A tu cama', e: '🧺', cat: 'Casa', st: 'cja', steps: ['Lanza un premio sobre su cama o tapete.', 'Cuando suba: clic y premio.', 'Agrega "a tu cama" y pídele echado ahí.', 'Úsalo cuando comas o lleguen visitas.'], tip: 'Que su cama sea un lugar feliz: nunca la uses de castigo.' },
+  solo:     { n: 'Quedarse solo tranquilo', e: '🏠', cat: 'Casa', st: 'cja', steps: ['Dale un juguete rellenable con su comida.', 'Sal del cuarto 10 segundos y regresa sin hacer fiesta.', 'Sube a 1, 5 y 15 minutos, poco a poco.', 'Salidas y llegadas tranquilas, sin despedidas largas.'], tip: 'Si llora mucho, regresaste a un tiempo muy largo: baja y sube más despacio.' },
+  bano:     { n: 'Ir al baño en su lugar', e: '🚽', cat: 'Casa', st: 'c', steps: ['Llévalo al mismo lugar al despertar, después de comer, jugar y dormir.', 'Cuando termine: clic, premio y fiesta ahí mismo.', 'Si tiene un accidente, límpialo sin regañar (usa limpiador enzimático).', 'Registra cada salida en la pestaña Rutina.'], tip: 'Un cachorro aguanta más o menos 1 hora por cada mes de edad (máximo unas 6).' },
+  mordida:  { n: 'Morder suave', e: '🦷', cat: 'Casa', st: 'cj', steps: ['Juega con tus manos de forma tranquila.', 'Si muerde fuerte, di "¡auch!" suave y deja de jugar 10 segundos.', 'Ofrécele un juguete para morder y premia cuando lo use.', 'Que nadie juegue brusco con las manos.'], tip: 'Morder es normal en cachorros: le estamos enseñando qué sí puede morder.' },
+  manejo:   { n: 'Tocar patas, orejas y boca', e: '🐾', cat: 'Casa', st: 'cja', steps: ['Toca una pata 1 segundo: clic y premio.', 'Luego orejas, boca, cola y cepillo.', 'Sube el tiempo poco a poco.', 'Así el veterinario, el baño y las uñas serán fáciles.'], tip: 'Si se aparta, fuiste muy rápido: regresa a un toque más corto.' },
+  pata:     { n: 'Dame la pata', e: '🫱', cat: 'Trucos', st: 'cja', steps: ['Con tu perro sentado, cierra un premio en tu mano a la altura de su pecho.', 'Cuando toque tu mano con la pata: clic y premio.', 'Abre la mano y di "pata" justo antes.', 'Luego prueba con la otra pata: "la otra".'], tip: 'Los trucos fortalecen el vínculo y cansan la mente.' },
+  gira:     { n: 'Gira', e: '🌀', cat: 'Trucos', st: 'cja', steps: ['Lleva un premio en círculo alrededor de su cabeza.', 'Al completar la vuelta: clic y premio.', 'Haz el círculo cada vez más pequeño con tu mano.', 'Di "gira" y usa solo la seña.'], tip: 'Practica hacia los dos lados.' },
+};
+const STAGES = { c: { n: 'Cachorro', d: '2 a 6 meses', mins: 3 }, j: { n: 'Joven', d: '6 a 18 meses', mins: 5 }, a: { n: 'Adulto', d: 'más de 18 meses', mins: 5 } };
+const SIZES = { s: 'Chico', m: 'Mediano', l: 'Grande' };
+const ENERGY = { b: 'Tranquilo', m: 'Normal', a: 'Muy activo' };
+const GOALS = [['basicos', '🎓 Obediencia básica', ['sentado', 'echado', 'quieto', 'ven']], ['bano', '🚽 Ir al baño', ['bano']], ['correa', '🦮 Pasear sin jalar', ['correa']],
+  ['morder', '🦷 Que no muerda', ['mordida', 'dejalo']], ['solo', '🏠 Quedarse solo', ['solo']], ['social', '🤝 Convivir y saludar', ['saludo']], ['trucos', '🎪 Trucos', ['pata', 'gira']]];
+const EMOS = ['🐶', '🐕', '🐩', '🦮', '🐕‍🦺', '🐾'];
+// puntos por truco: 0-2 aprendiendo, 3-7 va bien, 8+ ya lo domina
+const LEVEL = p => p >= 8 ? ['¡Lo domina!', 'l2'] : p >= 3 ? ['Va bien', 'l1'] : p > 0 ? ['Aprendiendo', ''] : ['Sin empezar', ''];
+
+// ---------- datos del perro: uno por cuenta, así toda la familia entrena al mismo perro ----------
+const KEY = 'navi.pet.' + (user.owner || user.phone);
+let S = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } })();
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+const me = user.me?.name || user.name.split(' ')[0];
+const dayKey = t => { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+const today = () => dayKey(Date.now());
+const pts = id => S.skills[id]?.pts || 0;
+const goalLessons = () => new Set(GOALS.filter(g => S.dog.goals.includes(g[0])).flatMap(g => g[2]));
+const fits = id => L[id].st.includes(S.dog.stage);
+
+// ---------- plan de 4 semanas: 6 días de práctica y 1 de paseo y repaso por semana ----------
+function pool(w) {
+  const c = S.dog.stage === 'c';
+  const W = [
+    ['marcador', 'nombre', 'sentado', c ? 'bano' : 'mirame', c ? 'mordida' : 'correa', 'manejo'],
+    ['echado', 'mirame', 'ven', 'cama', c ? 'mordida' : 'saludo', 'sentado'],
+    ['quieto', 'dejalo', 'correa', 'saludo', 'ven'],
+    ['solo', 'pata', 'gira', 'quieto', 'ven'],
+  ].map(p => p.filter(fits));
+  // un objetivo que no venía en ninguna semana entra desde la primera (p. ej. "morder suave" en un perro joven)
+  if (w === 0) goalLessons().forEach(id => { if (fits(id) && !W.flat().includes(id)) W[0].push(id); });
+  return [...new Set(W[w])];
+}
+const isReview = d => d % 7 === 0;
+function dayPlan(d) {
+  const w = Math.floor((d - 1) / 7);
+  if (isReview(d)) {
+    const known = Object.keys(L).filter(id => pts(id) > 0 && fits(id)).sort((a, b) => pts(b) - pts(a)).slice(0, 3);
+    return { w, review: true, list: known.length ? known : pool(w).slice(0, 3) };
+  }
+  const P = pool(w), i = (d - 1) % 7;
+  return { w, review: false, list: [0, 1, 2].map(k => P[(i + k) % P.length]).filter((x, k, a) => a.indexOf(x) === k) };
+}
+const current = () => { for (let d = 1; d <= 28; d++) if (!S.done[d]) return d; return 29; };
+// un día nuevo se abre al día siguiente: los perros aprenden mejor con descanso entre sesiones
+const available = d => d === current() && (d === 1 || dayKey(S.done[d - 1].at) < today());
+const streak = () => { const ks = new Set(Object.values(S.done).map(x => dayKey(x.at))); let n = 0; const t = new Date(); if (!ks.has(dayKey(t))) t.setDate(t.getDate() - 1); while (ks.has(dayKey(t))) { n++; t.setDate(t.getDate() - 1); } return n; };
+const WEEK_N = ['Las bases', 'Más control', 'En la calle', 'Retos y trucos'];
+
+// ---------- rutina diaria según la etapa ----------
+const ROUTINE = {
+  c: [['07:00', '🚽', 'Salida al baño al despertar'], ['07:15', '🥣', 'Desayuno'], ['07:30', '🚽', 'Salida al baño después de comer'], ['08:00', '🎾', 'Juego corto (10 min)'], ['09:00', '😴', 'Siesta en su cama'],
+    ['11:00', '🚽', 'Salida al baño'], ['11:15', '🎓', 'Entrenamiento del día'], ['13:00', '🥣', 'Comida'], ['13:15', '🚽', 'Salida al baño'], ['15:00', '🌳', 'Socialización: algo nuevo hoy'],
+    ['17:00', '🚽', 'Salida al baño'], ['19:00', '🥣', 'Cena'], ['19:15', '🚽', 'Salida al baño'], ['20:30', '🦴', 'Juguete para morder y calma'], ['22:30', '🚽', 'Última salida y a dormir']],
+  j: [['07:00', '🚶', 'Paseo de la mañana (30 min)'], ['07:45', '🥣', 'Desayuno'], ['09:00', '🧩', 'Juego de olfato o juguete rellenable'], ['12:00', '🚽', 'Salida al baño'], ['13:00', '🎓', 'Entrenamiento del día'],
+    ['14:00', '🥣', 'Comida (si come 3 veces)'], ['15:00', '😴', 'Descanso'], ['18:00', '🏃', 'Paseo largo o juego activo (45 min)'], ['19:30', '🥣', 'Cena'], ['21:30', '🚶', 'Paseo corto y a dormir']],
+  a: [['07:00', '🚶', 'Paseo de la mañana (30 min)'], ['07:45', '🥣', 'Desayuno'], ['10:00', '🧩', 'Juego de olfato o juguete rellenable'], ['13:00', '🚽', 'Salida al baño'], ['18:00', '🎓', 'Entrenamiento del día'],
+    ['18:30', '🏃', 'Paseo largo o juego activo (45 min)'], ['19:30', '🥣', 'Cena'], ['21:30', '🚶', 'Paseo corto y a dormir']],
+};
+const routine = () => [...ROUTINE[S.dog.stage], ...(S.dog.energy === 'a' && S.dog.stage !== 'c' ? [['16:00', '⚡', 'Energía extra: buscar la pelota o carrera (20 min)']] : [])].sort((a, b) => a[0].localeCompare(b[0]));
+const SOCIAL = ['Personas con sombrero o lentes', 'Niños jugando (con calma)', 'Un perro adulto tranquilo y vacunado', 'Ruido de tráfico', 'Aspiradora o licuadora', 'Subir al coche', 'Elevador o escaleras', 'Piso resbaloso',
+  'Cepillado y corte de uñas', 'Visita al veterinario solo por un premio', 'Un paraguas que se abre', 'Bicicletas o patinetas', 'El timbre de la casa', 'Gatos (a distancia)', 'Personas con uniforme', 'Mercado o tianguis (en brazos)'];
+
+// ---------- pantallas ----------
+let tab = sessionStorage.getItem('pet.tab') || 'plan', sel = null;
+function render() {
+  if (!S) return renderSetup();
+  if (sel == null) sel = Math.min(28, current());
+  const D = S.dog, n = Object.keys(S.done).length, master = Object.keys(L).filter(id => pts(id) >= 8).length;
+  $('app').innerHTML = `<section class="card" style="margin-bottom:18px"><div class="hero"><div class="dog">${D.emo}</div>
+      <div><h2>${esc(D.name)} ${n === 28 ? '🏆' : ''}</h2><p class="muted">${STAGES[D.stage].n} · ${SIZES[D.size]} · ${ENERGY[D.energy]} · ${n === 28 ? '¡Terminó el plan de 4 semanas!' : `Semana ${Math.min(4, Math.floor((current() - 1) / 7) + 1)}: ${WEEK_N[Math.min(3, Math.floor((current() - 1) / 7))]}`}</p>
+      <div class="stats"><div><b>${n}/28</b><span>días</span></div><div><b>${master}</b><span>trucos dominados</span></div><div><b>🔥 ${streak()}</b><span>días seguidos</span></div></div></div></div></section>
+    <div class="tabs" role="tablist">${[['plan', '📅 Plan'], ['rutina', '🕒 Rutina de hoy'], ['trucos', '🎓 Trucos'], ['perro', `${D.emo} ${esc(D.name)}`]].map(([k, t]) => `<button data-tab="${k}" aria-pressed="${tab === k}">${t}</button>`).join('')}</div>
+    <div id="pane"></div>`;
+  document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; sessionStorage.setItem('pet.tab', tab); render(); });
+  ({ plan: paneP, rutina: paneR, trucos: paneT, perro: paneD }[tab] || paneP)();
+}
+
+function paneP() {
+  const cur = current();
+  $('pane').innerHTML = `<div class="layout"><div><section class="card"><h2>Plan de 4 semanas</h2><p class="muted">3 ejercicios al día de ${STAGES[S.dog.stage].mins} minutos cada uno. Toca un día para ver qué toca.</p>
+      <div class="weeks">${[0, 1, 2, 3].map(w => `<div class="wk"><span><b>Semana ${w + 1}</b>${WEEK_N[w]}</span>${Array.from({ length: 7 }, (_, i) => { const d = w * 7 + i + 1; const cls = S.done[d] ? 'done' : d === cur ? 'now' : d > cur ? 'lock' : ''; return `<button class="d ${cls}${d === sel ? ' sel' : ''}" data-d="${d}" aria-label="Día ${d}"><i>${isReview(d) ? '🌳' : '🎓'}</i>${d}</button>`; }).join('')}</div>`).join('')}</div>
+      <p class="hint" style="margin-top:10px">🎓 práctica · 🌳 paseo de exploración y repaso</p></section>
+      ${teamHTML()}</div>
+    <div><section class="card" id="detail"></section>
+      <section class="card"><h2>Reglas de oro</h2><div class="tips"><div>🍖<span>Premios pequeños y muy ricos; divide su comida si come poco.</span></div><div>⏱️<span>Sesiones cortas: mejor 3 de 3 minutos que una de 20.</span></div>
+        <div>🙂<span>Termina siempre con algo que le salga bien.</span></div><div>🚫<span>Nada de gritos ni golpes: el castigo le enseña miedo, no obediencia.</span></div><div>👨‍👩‍👧<span>Todos en casa usan las mismas palabras y reglas.</span></div></div></section></div></div>`;
+  const P = dayPlan(sel), done = S.done[sel], g = goalLessons();
+  const act = done ? `<p class="muted">✓ Lo hizo ${esc(done.by)} el ${new Date(done.at).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}.</p><button class="btn btn-ghost wide" id="start" style="margin-top:10px">Repetir este día</button>`
+    : sel === cur && available(sel) ? `<button class="btn btn-pet wide" id="start">Empezar el día ${sel} ▶</button>`
+    : sel === cur ? `<p class="muted">Hoy ya entrenaron. El día ${sel} se abre mañana; mientras, puedes practicar cualquier truco en la pestaña Trucos.</p>`
+    : `<p class="muted">🔒 Se abre después del día ${sel - 1}.</p>`;
+  $('detail').innerHTML = `<div class="dh"><div class="big">${P.review ? '🌳' : '🎓'}</div><div><span class="hint">DÍA ${sel} · SEMANA ${P.w + 1}</span><h2>${P.review ? 'Paseo y repaso' : WEEK_N[P.w]}</h2>
+      <div class="chips"><span>⏱ ${P.list.length * STAGES[S.dog.stage].mins + (P.review ? 25 : 0)} min</span><span>${P.list.length} ejercicios</span></div></div></div>
+    ${P.review ? '<p class="muted" style="margin-top:12px">Hoy toca un paseo de exploración de 20 a 30 minutos: deja que huela todo con calma. Al regresar, repasa lo que ya sabe.</p>' : ''}
+    <div class="exl">${P.list.map(id => `<button data-how="${id}"><span class="e">${L[id].e}</span><span><b>${L[id].n}</b><small>${L[id].cat} · <span class="lv ${LEVEL(pts(id))[1]}">${LEVEL(pts(id))[0]}</span>${g.has(id) ? ' · ⭐ tu objetivo' : ''}</small></span><em>${STAGES[S.dog.stage].mins} min</em></button>`).join('')}</div>${act}`;
+  document.querySelector('.weeks').onclick = e => { const b = e.target.closest('[data-d]'); if (b) { sel = +b.dataset.d; paneP(); } };
+  if ($('start')) $('start').onclick = () => startSession(P.list, sel);
+  $('detail').querySelectorAll('[data-how]').forEach(b => b.onclick = () => showHow(b.dataset.how));
+}
+
+function paneR() {
+  const t = today(), R = S.routine[t] || {}, list = routine(), done = list.filter(r => R[r[0] + r[2]]).length;
+  const showPotty = S.dog.stage === 'c' || S.dog.goals.includes('bano'), showSoc = S.dog.stage !== 'a' || S.dog.goals.includes('social');
+  const pt = S.potty.filter(p => dayKey(p.t) === t), ok = pt.filter(p => p.ok).length;
+  const days7 = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); const k = dayKey(d), ps = S.potty.filter(p => dayKey(p.t) === k); return { lbl: d.toLocaleDateString('es-MX', { weekday: 'narrow' }), pct: ps.length ? ps.filter(p => p.ok).length / ps.length : 0, n: ps.length }; });
+  const all7 = S.potty.filter(p => Date.now() - p.t < 7 * 864e5), pct7 = all7.length ? Math.round(all7.filter(p => p.ok).length / all7.length * 100) : 0;
+  const socN = Object.keys(S.social).length;
+  $('pane').innerHTML = `<div class="layout"><div><section class="card"><h2>Rutina de hoy</h2><p class="muted">Horarios sugeridos para un ${STAGES[S.dog.stage].n.toLowerCase()} (${STAGES[S.dog.stage].d}). La rutina le da seguridad y acelera el aprendizaje.</p>
+      <div class="meter" style="margin-top:12px"><i style="width:${done / list.length * 100}%"></i></div><p class="hint" style="margin-top:6px">${done} de ${list.length} hechas hoy</p>
+      <div class="rt">${list.map(r => { const k = r[0] + r[2]; return `<label><time>${r[0]}</time><span class="ic">${r[1]}</span><span class="tx">${r[2]}${R[k] ? `<small>✓ ${esc(R[k])}</small>` : ''}</span><input type="checkbox" data-r="${esc(k)}" ${R[k] ? 'checked' : ''}></label>`; }).join('')}</div></section></div>
+    <div>${showPotty ? `<section class="card"><h2>Registro de baño</h2><p class="muted">Anota cada salida para ver cómo mejora ${esc(S.dog.name)}.</p>
+        <div class="potty"><button class="ok" data-p="1"><span>✅</span>Lo hizo afuera</button><button class="no" data-p="0"><span>💧</span>Accidente en casa</button></div>
+        <div class="pstats"><span>Hoy: <b>${ok}</b> afuera · <b>${pt.length - ok}</b> accidentes</span><span>7 días: <b>${pct7}%</b> afuera</span></div>
+        <div class="wk7">${days7.map(d => `<div title="${d.n} registros"><i style="height:${Math.max(3, d.pct * 100)}%;${d.n ? '' : 'background:#ffffff18'}"></i>${d.lbl}</div>`).join('')}</div>
+        ${pt.length ? `<button class="lnk" id="pUndo" style="margin-top:8px">Deshacer el último registro</button>` : ''}
+        <p class="hint" style="margin-top:8px">Un accidente no se regaña: límpialo con limpiador enzimático y llévalo afuera más seguido.</p></section>` : ''}
+      ${showSoc ? `<section class="card"><h2>Socialización</h2><p class="muted">Experiencias nuevas y tranquilas, siempre con premio. ${socN} de ${SOCIAL.length}.</p>
+        <div class="meter"><i style="width:${socN / SOCIAL.length * 100}%"></i></div>
+        <div class="soc">${SOCIAL.map((s, i) => `<label><input type="checkbox" data-s="${i}" ${S.social[i] ? 'checked' : ''}>${s}</label>`).join('')}</div>
+        <p class="hint" style="margin-top:10px">Hasta que tenga todas sus vacunas, socialízalo en brazos o en casa. Pregúntale a tu veterinario.</p></section>` : ''}
+      ${!showPotty && !showSoc ? '<section class="card"><h2>Consejo del día</h2><p class="muted">Un juguete rellenable o 10 minutos de olfatear en el paseo cansan tanto como una carrera. La mente también necesita ejercicio.</p></section>' : ''}</div></div>`;
+  document.querySelectorAll('[data-r]').forEach(c => c.onchange = () => { S.routine = { [t]: S.routine[t] || {} }; if (c.checked) S.routine[t][c.dataset.r] = me; else delete S.routine[t][c.dataset.r]; save(); paneR(); });
+  document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { S.potty.push({ t: Date.now(), ok: b.dataset.p === '1', by: me }); S.potty = S.potty.filter(p => Date.now() - p.t < 30 * 864e5); save(); if (b.dataset.p === '1') click(); paneR(); });
+  if ($('pUndo')) $('pUndo').onclick = () => { S.potty.pop(); save(); paneR(); };
+  document.querySelectorAll('[data-s]').forEach(c => c.onchange = () => { if (c.checked) S.social[c.dataset.s] = me; else delete S.social[c.dataset.s]; save(); paneR(); });
+}
+
+function paneT() {
+  const g = goalLessons(), ids = Object.keys(L).sort((a, b) => fits(b) - fits(a) || g.has(b) - g.has(a));
+  $('pane').innerHTML = `<section class="card"><h2>Trucos y habilidades</h2><p class="muted">Practica cualquiera cuando quieras: suma a su avance sin mover el plan. Con 8 puntos ya lo domina.</p>
+    <div class="skills">${ids.map(id => { const p = pts(id), [lv, c] = LEVEL(p); return `<div class="sk" style="${fits(id) ? '' : 'opacity:.55'}"><div class="t"><span>${L[id].e}</span><div><b>${L[id].n}</b><span class="hint">${L[id].cat}${g.has(id) ? ' · ⭐ tu objetivo' : ''}${fits(id) ? '' : ' · para cachorros'}</span></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="lv ${c}">${lv}</span><span class="hint">${Math.min(p, 8)}/8</span></div><div class="meter"><i style="width:${Math.min(1, p / 8) * 100}%"></i></div>
+      <div class="a"><button data-how="${id}">Cómo se hace</button><button class="go" data-pr="${id}">Practicar</button></div></div>`; }).join('')}</div></section>`;
+  document.querySelectorAll('[data-how]').forEach(b => b.onclick = () => showHow(b.dataset.how));
+  document.querySelectorAll('[data-pr]').forEach(b => b.onclick = () => startSession([b.dataset.pr], null));
+}
+
+function paneD() {
+  $('pane').innerHTML = `<div class="layout"><section class="card"><h2>Datos de ${esc(S.dog.name)}</h2><p class="muted">Si cambias la etapa o los objetivos, el plan se ajusta y su avance se queda.</p>${dogForm(S.dog, 'Guardar cambios')}</section>
+    <div><section class="card"><h2>Su historial</h2>${histHTML()}</section>
+      <section class="card"><h2>Empezar de nuevo</h2><p class="muted">Borra el plan, la rutina y el avance de cada truco.</p><button class="lnk" id="reset" style="margin-top:8px">Borrar todo y empezar otra vez</button></section>
+      <p class="note">Navi Pet es una guía de entrenamiento con refuerzo positivo. Si tu perro muestra agresión, miedo intenso o un cambio brusco de conducta, consulta a un veterinario o a un adiestrador certificado.</p></div></div>`;
+  bindDogForm(dog => { S.dog = dog; save(); toast('Guardado ✓'); render(); });
+  $('reset').onclick = () => { if (confirm(`¿Borrar todo el avance de ${S.dog.name}?`)) { try { localStorage.removeItem(KEY); } catch {} S = null; sel = null; tab = 'plan'; render(); } };
+}
+function histHTML() {
+  const ev = [...Object.entries(S.done).map(([d, x]) => ({ t: x.at, txt: `🎓 Día ${d} completado · ${x.by}` })), ...(S.log || []).map(x => ({ t: x.t, txt: x.txt }))].sort((a, b) => b.t - a.t).slice(0, 10);
+  return ev.length ? `<div class="tips">${ev.map(e => `<div><span class="hint">${new Date(e.t).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</span><span>${esc(e.txt)}</span></div>`).join('')}</div>` : '<p class="muted">Aquí aparecerán sus sesiones.</p>';
+}
+// en el Plan Familia todos entrenan al mismo perro: ¿quién ha ayudado más?
+function teamHTML() {
+  if (user.plan.type !== 'familia') return '';
+  const cnt = {}; [...Object.values(S.done).map(x => x.by), ...(S.log || []).map(x => x.by)].forEach(b => cnt[b] = (cnt[b] || 0) + 1);
+  const rows = accountLines(user).map(l => ({ l, n: cnt[l.name] || 0 })).sort((a, b) => b.n - a.n);
+  return `<section class="card"><h2>El equipo de ${esc(S.dog.name)}</h2><p class="muted">Toda la familia entrena al mismo perro desde su línea.</p>
+    <div class="team">${rows.map((r, i) => `<div class="r"><img src="${avatarSrc(r.l.phone, r.l.img)}" alt=""><b>${esc(r.l.name)}${r.l.phone === user.phone ? ' (Tú)' : ''}</b><em>${i === 0 && r.n ? '👑 ' : ''}${r.n} ${r.n === 1 ? 'sesión' : 'sesiones'}</em></div>`).join('')}</div></section>`;
+}
+
+// ---------- alta del perro ----------
+function dogForm(D, btn) {
+  const radio = (name, obj, cur) => Object.entries(obj).map(([k, v]) => `<label><input type="radio" name="${name}" value="${k}" ${cur === k ? 'checked' : ''}><span>${typeof v === 'string' ? v : `${v.n}<small>${v.d}</small>`}</span></label>`).join('');
+  return `<form id="dogF"><div class="fgrid">
+    <label class="full">¿Cómo se llama?<input class="inp" name="name" maxlength="20" required value="${esc(D.name || '')}" placeholder="Ej. Canela"></label>
+    <div class="fld full">Elige su ícono<div class="opts emo">${EMOS.map(e => `<label><input type="radio" name="emo" value="${e}" ${(D.emo || EMOS[0]) === e ? 'checked' : ''}>${e}</label>`).join('')}</div></div>
+    <div class="fld full">Edad<div class="opts">${radio('stage', STAGES, D.stage || 'c')}</div></div>
+    <div class="fld">Tamaño<div class="opts">${radio('size', SIZES, D.size || 'm')}</div></div>
+    <div class="fld">Energía<div class="opts">${radio('energy', ENERGY, D.energy || 'm')}</div></div>
+    <div class="fld full">¿Qué quieres lograr? <span class="hint" style="font-weight:500">Elige los que quieras</span><div class="opts">${GOALS.map(([k, n]) => `<label><input type="checkbox" name="goals" value="${k}" ${(D.goals || ['basicos']).includes(k) ? 'checked' : ''}>${n}</label>`).join('')}</div></div>
+  </div><button class="btn btn-pet wide" style="margin-top:18px">${btn}</button></form>`;
+}
+function bindDogForm(onSave) {
+  $('dogF').onsubmit = e => {
+    e.preventDefault(); const f = e.target, v = n => f.querySelector(`[name=${n}]:checked`)?.value;
+    const name = f.name.value.trim(); if (!name) return f.name.focus();
+    onSave({ name, emo: v('emo'), stage: v('stage'), size: v('size'), energy: v('energy'), goals: [...f.querySelectorAll('[name=goals]:checked')].map(x => x.value) });
+  };
+}
+function renderSetup() {
+  $('app').innerHTML = `<div class="layout"><section class="card"><h2>Registra a tu perro</h2><p class="muted">Armamos un plan de 4 semanas a su medida: según su edad, su energía y lo que quieres lograr.</p>${dogForm({}, 'Crear su plan de entrenamiento')}</section>
+    <div><section class="card"><h2>Así funciona</h2><div class="tips"><div>🔔<span><b style="color:var(--text)">Clicker en tu celular.</b> Marca el momento exacto en que lo hace bien y dale su premio.</span></div>
+      <div>📅<span><b style="color:var(--text)">Plan de 4 semanas.</b> 3 ejercicios cortos al día, de lo básico a los trucos.</span></div><div>🕒<span><b style="color:var(--text)">Rutina diaria.</b> Comidas, paseos, baño y siestas a sus horas.</span></div>
+      <div>📈<span><b style="color:var(--text)">Avance de cada truco.</b> Ve qué ya domina y qué le cuesta.</span></div>${user.plan.type === 'familia' ? '<div>👨‍👩‍👧<span><b style="color:var(--text)">En familia.</b> Todos entrenan al mismo perro desde su línea.</span></div>' : ''}</div></section>
+      <p class="note">Solo refuerzo positivo: premios, juego y cariño. Nunca castigos físicos.</p></div></div>`;
+  bindDogForm(dog => { S = { dog, start: Date.now(), done: {}, skills: {}, routine: {}, potty: [], social: {}, log: [] }; save(); sel = 1; tab = 'plan'; render(); scrollTo(0, 0); });
+}
+const toast = t => { const e = document.createElement('div'); e.textContent = t; e.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#0B0B4F;font-weight:800;padding:10px 16px;border-radius:12px;z-index:99'; document.body.append(e); setTimeout(() => e.remove(), 2000); };
+
+function showHow(id) {
+  const X = L[id];
+  $('sheet').hidden = false;
+  $('sheet').innerHTML = `<div><div class="dh"><div class="big">${X.e}</div><div><h2>${X.n}</h2><span class="hint">${X.cat} · sesiones de ${STAGES[S.dog.stage].mins} min</span></div></div>
+    <ol>${X.steps.map(s => `<li>${s}</li>`).join('')}</ol><div class="tip">💡 ${X.tip}</div>
+    <button class="btn btn-lime wide" style="margin-top:16px" id="shOk">Entendido</button></div>`;
+  $('shOk').onclick = () => { $('sheet').hidden = true; };
+}
+$('sheet').onclick = e => { if (e.target === $('sheet')) $('sheet').hidden = true; };
+
+// ---------- sesión: pasos, temporizador, clicker y aciertos por ejercicio ----------
+const audio = () => click.ctx || (click.ctx = new (window.AudioContext || window.webkitAudioContext)());
+// sonido de clicker: dos golpes muy cortos, como el aparato de entrenamiento
+function click() {
+  try { const a = audio(), t = a.currentTime; [0, .045].forEach((dt, i) => { const o = a.createOscillator(), g = a.createGain(); o.type = 'square'; o.frequency.value = i ? 2600 : 3400; g.gain.setValueAtTime(.25, t + dt); g.gain.exponentialRampToValueAtTime(.001, t + dt + .03); o.connect(g); g.connect(a.destination); o.start(t + dt); o.stop(t + dt + .035); }); } catch {}
+  navigator.vibrate?.(25);
+}
+const bell = () => { try { const a = audio(), o = a.createOscillator(), g = a.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(.2, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + .6); o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + .6); } catch {} navigator.vibrate?.(200); };
+let Q = [], qi = 0, day = null, tick = null, left = 0, run = false, cnt = null, sess = null, wake = null;
+async function startSession(list, d) {
+  Q = list; qi = 0; day = d; sess = { t0: Date.now(), clicks: 0, hits: 0, res: [] };
+  $('play').hidden = false; document.body.style.overflow = 'hidden';
+  try { wake = await navigator.wakeLock?.request('screen'); } catch {}
+  lesson();
+}
+function closePlay() { clearInterval(tick); $('play').hidden = true; document.body.style.overflow = ''; try { wake?.release(); } catch {} wake = null; }
+function frame(inner, btns, closable = true) {
+  $('play').innerHTML = `<div class="ptop"><button id="pX" aria-label="Salir" ${closable ? '' : 'hidden'}>✕</button><div class="pbar"><i style="width:${qi / Q.length * 100}%"></i></div><span class="hint">${Math.min(qi + 1, Q.length)}/${Q.length}</span></div>
+    <div class="pmain">${inner}</div><div class="pbtns">${btns}</div>`;
+  if (closable) $('pX').onclick = () => { if (confirm('¿Salir de la sesión? Lo que ya calificaste se guarda.')) { clearInterval(tick); closePlay(); render(); } };
+}
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+function lesson() {
+  if (qi >= Q.length) return finish();
+  const id = Q[qi], X = L[id]; left = STAGES[S.dog.stage].mins * 60; run = false; cnt = { y: 0, n: 0 }; clearInterval(tick);
+  frame(`<span class="ptag">${day ? `Día ${day} · ejercicio ${qi + 1} de ${Q.length}` : 'Práctica libre'}</span><div class="pemo">${X.e}</div><div class="pname">${X.n}</div>
+    <ol class="psteps">${X.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+    <div class="ptime off" id="pT">${fmt(left)}</div>
+    <button class="clicker" id="pClk" aria-label="Clicker: marcar y premiar">¡Sí!<small>🔔 clicker</small></button>
+    <div class="tally"><button class="y" id="pY">✓ Lo hizo · <b id="pYn">0</b></button><button class="n" id="pN">✗ No salió · <b id="pNn">0</b></button></div>
+    <p class="hint">Toca el clicker justo cuando lo haga bien y dale su premio. Anota los intentos para medir su avance.</p>`,
+    `<button class="btn btn-ghost" id="pRun">▶ Iniciar ${STAGES[S.dog.stage].mins} min</button><button class="btn btn-pet" id="pEnd">Terminar ejercicio</button>`);
+  const paint = () => { $('pT').textContent = fmt(left); $('pT').classList.toggle('off', !run); };
+  $('pRun').onclick = () => {
+    run = !run; $('pRun').textContent = run ? '⏸ Pausa' : '▶ Seguir'; paint();
+    clearInterval(tick); if (run) tick = setInterval(() => { left--; paint(); if (left <= 0) { clearInterval(tick); run = false; bell(); $('pRun').textContent = '⏱ Tiempo'; $('pRun').disabled = true; $('pT').textContent = '¡Tiempo! 🎉'; } }, 1000);
+  };
+  $('pClk').onclick = () => { click(); sess.clicks++; const b = $('pClk'); b.classList.add('hit'); setTimeout(() => b.classList.remove('hit'), 90); };
+  $('pY').onclick = () => { cnt.y++; sess.hits++; $('pYn').textContent = cnt.y; click(); };
+  $('pN').onclick = () => { cnt.n++; $('pNn').textContent = cnt.n; };
+  $('pEnd').onclick = () => { clearInterval(tick); rate(id); };
+}
+// ¿cómo le fue? suma puntos al truco (le costó +1 · va bien +2 · lo logró +3)
+function rate(id) {
+  const X = L[id], tot = cnt.y + cnt.n, ratio = tot ? cnt.y / tot : null, sug = ratio == null ? null : ratio >= .8 ? 3 : ratio >= .5 ? 2 : 1;
+  frame(`<span class="ptag">¿Cómo le fue?</span><div class="pemo">${X.e}</div><div class="pname">${X.n}</div>${tot ? `<p class="hint">${cnt.y} de ${tot} intentos bien (${Math.round(ratio * 100)}%)</p>` : ''}
+    <div class="rate">${[[1, '😅', 'Le costó', 'Repítelo mañana con pasos más fáciles'], [2, '🙂', 'Va bien', 'Lo hace casi siempre'], [3, '🤩', '¡Lo logró!', '8 de cada 10 veces o más']].map(([v, e, n, d]) => `<button data-v="${v}" class="${sug === v ? 'sug' : ''}"><span>${e}</span><b>${n}<small>${d}${sug === v ? ' · sugerido' : ''}</small></b></button>`).join('')}</div>`, '');
+  $('play').querySelectorAll('[data-v]').forEach(b => b.onclick = () => {
+    const v = +b.dataset.v, before = pts(id);
+    S.skills[id] = { pts: before + v, last: Date.now() };
+    sess.res.push({ id, v, up: before < 8 && before + v >= 8 });
+    if (!day) S.log = [{ t: Date.now(), by: me, txt: `${X.e} Practicó ${X.n} · ${me}` }, ...(S.log || [])].slice(0, 40);
+    save(); qi++; lesson();
+  });
+}
+function finish() {
+  const mins = Math.max(1, Math.round((Date.now() - sess.t0) / 60000)), first = day && !S.done[day];
+  if (first) S.done[day] = { at: Date.now(), by: me, mins };
+  save();
+  const ups = sess.res.filter(r => r.up);
+  frame(`<div class="pemo">${day === 28 ? '🏆' : '🎉'}</div><div class="pname">${day === 28 ? `¡${esc(S.dog.name)} terminó el plan!` : day ? `¡Día ${day} completado!` : '¡Buena práctica!'}</div>
+    <p class="phow hint">${mins} min · ${sess.clicks + sess.hits} clics · ${sess.hits} aciertos</p>
+    ${ups.map(r => `<p class="pnext" style="font-size:16px">🏅 ¡${esc(S.dog.name)} ya domina <b>${L[r.id].n}</b>!</p>`).join('')}
+    ${day && day < 28 ? `<p class="hint">Mañana: ${dayPlan(day + 1).list.map(id => L[id].e + ' ' + L[id].n).join(' · ')}</p>` : ''}
+    <p class="hint">Dale un rato de juego libre o un paseo: se lo ganó 🐾</p>`, `<button class="btn btn-lime" id="pFin">Terminar</button>`, false);
+  bell();
+  $('pFin').onclick = () => { closePlay(); sel = Math.min(28, current()); render(); };
+}
+
+// Navi Pet es para todos los clientes Navi, en cualquier plan
+render();
+</script>
+</body>
+</html>
