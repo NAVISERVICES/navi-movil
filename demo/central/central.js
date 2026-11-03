@@ -503,9 +503,13 @@ function ops() {
     recargas: ['Recargas', ['Folio', 'Fecha', 'Línea', 'Paquete', 'Monto', 'Estado'], tops.map(t => [t.folio, t.at, Mask.phone(t.phone), t.gb + ' GB', mxn(t.price), t.status, 1])],
     portas: ['Portabilidades', ['Folio', 'Fecha', 'Cliente / número', 'Desde', 'Fecha estimada', 'Estado'], [...portas.map(p => [p.folio, p.at, Mask.phone(p.num), p.de, fmtDay(p.date), 'en proceso', 1]), ...synthPortas.map(p => [p.folio, p.at, p.name, p.de, '—', p.status])]],
     tickets: ['Tickets', ['Ticket', 'Fecha', 'Cliente', 'Área', 'Prioridad', 'Estado'], tks.map(t => [t.id, t.t, Mask.name(t.name), t.area, t.prio, t.status, 1])],
+    // Navi Ride: reservas de viajes compartidos (lo que se reserva en este navegador + ejemplo)
+    viajes: ['Navi Ride', ['Folio', 'Fecha del viaje', 'Pasajero', 'Ruta', 'Total (cuota)', 'Estado'], [
+      ...RideStore.bookings().map(b => { const t = RideStore.trip(b.trip) || b.snap; return [b.id, t.at, Mask.name(b.name), `${RIDE_CITIES[t.from].n} → ${RIDE_CITIES[t.to].n}`, `${mxn(b.total)} (${mxn(b.fee)})`, b.status, 1]; }),
+      ...rideSeeds().slice(0, 8).map((t, i) => { const sub = t.price * (1 + (i % 2)); return ['NR-' + String(518200 + i * 13), t.at, Mask.name(SYNTH[i + 5].name), `${RIDE_CITIES[t.from].n} → ${RIDE_CITIES[t.to].n}`, `${mxn(sub * 1.1)} (${mxn(sub * .1)})`, i === 3 ? 'pendiente' : 'confirmada']; })]],
   };
   const [, heads, rows] = T[opsTab];
-  const pill = s => `<span class="pill ${/pagad|aplicad|complet/.test(s) ? 'ok' : /rechaz/.test(s) ? 'bad' : 'warn'}">${s}</span>`;
+  const pill = s => `<span class="pill ${/pagad|aplicad|complet|confirm|termin/.test(s) ? 'ok' : /rechaz|cancel/.test(s) ? 'bad' : 'warn'}">${s}</span>`;
   shell(`<div class="seg" style="margin-bottom:12px">${Object.entries(T).map(([k, [n, , r]]) => `<button data-o="${k}" aria-pressed="${opsTab === k}">${n} · ${r.length}</button>`).join('')}</div>
     <div class="tw"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>
     ${rows.sort((a, b) => b[1] - a[1]).map(r => `<tr><td><b>${esc(r[0])}</b>${r[6] ? ' <span class="pill lime">demo</span>' : ''}</td><td>${new Date(r[1]).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })} ${hhmm(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td><td>${pill(r[5])}</td></tr>`).join('') || `<tr><td colspan="6" class="muted">Sin registros todavía.</td></tr>`}
