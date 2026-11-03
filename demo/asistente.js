@@ -35,7 +35,9 @@
   document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
   const user = NaviAuth.current();
   const inApp = /cuenta|movil|recargas|fit|conecta|sos|agenda|juegos|videos|referidos/.test(location.pathname);
-  const channel = user && inApp ? 'app' : 'web';
+  // en la página Empresas el chat es de NAVICom (B2B) y llega a la consola como requerimiento de empresa
+  const b2b = /empresas/.test(location.pathname);
+  const channel = b2b ? 'empresas' : user && inApp ? 'app' : 'web';
   const anonKey = 'navi.desk.anon';
   let anon = localStorage.getItem(anonKey); if (!anon) { anon = 'Visitante ' + Math.floor(1000 + Math.random() * 9000); try { localStorage.setItem(anonKey, anon); } catch {} }
   const fab = document.createElement('button'); fab.className = 'nb-fab'; fab.setAttribute('aria-label', 'Abrir chat con Navi');
@@ -44,17 +46,19 @@
   document.body.append(fab, panel);
   let cid = null;
   const conv = () => cid && Desk.get(cid);
-  const QUICK = ['Mi saldo', 'Recargar', '¿Cuándo se renueva?', 'Portabilidad', 'Pagos', 'Hablar con un asesor'];
+  const QUICK = b2b ? ['Quiero una propuesta', 'Líneas para mi empresa', 'Rastreo de flotillas', 'PTT', 'Seguridad', 'IoT', 'Hablar con un ejecutivo']
+    : ['Mi saldo', 'Recargar', '¿Cuándo se renueva?', 'Portabilidad', 'Pagos', 'Para mi empresa', 'Hablar con un asesor'];
   function paint() {
     const c = conv(); if (!c) return;
     const draft = panel.querySelector('.nb-f input')?.value || '';
-    const who = c.status === 'agent' ? `Te atiende ${c.agent || 'un asesor'}` : c.status === 'waiting' ? 'Conectando con un asesor…' : 'Asistente Navi · 24/7';
-    panel.innerHTML = `<div class="nb-hd"><span class="av">${c.status === 'agent' ? '🙋' : '🤖'}</span><div><b>Navi Móvil</b><small><i></i>${who}</small></div><button aria-label="Cerrar">✕</button></div>
+    const exec = c.seg === 'b2b' ? 'un ejecutivo' : 'un asesor';
+    const who = c.status === 'agent' ? `Te atiende ${c.agent || exec}` : c.status === 'waiting' ? (c.seg === 'b2b' ? 'Un ejecutivo de NAVICom te contactará' : 'Conectando con un asesor…') : c.seg === 'b2b' ? 'Asistente NAVICom · 24/7' : 'Asistente Navi · 24/7';
+    panel.innerHTML = `<div class="nb-hd"><span class="av">${c.status === 'agent' ? '🙋' : c.seg === 'b2b' ? '🏢' : '🤖'}</span><div><b>${b2b ? 'NAVICom · Empresas' : 'Navi Móvil'}</b><small><i></i>${who}</small></div><button aria-label="Cerrar">✕</button></div>
       <div class="nb-msgs">${c.msgs.map(m => m.from === 'system' ? `<div class="nb-sys">${deskFmt(m.txt)}</div>`
         : `<div class="nb-m ${m.from === 'customer' ? 'me' : m.from === 'agent' ? 'agent' : ''}">${m.from === 'agent' ? `<b style="font-size:11px;opacity:.8">${m.agent || 'Asesor'}</b><br>` : ''}${deskFmt(m.txt)}<small>${new Date(m.t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}</small></div>`).join('')}</div>
       <div class="nb-q">${QUICK.map(q => `<button>${q}</button>`).join('')}</div>
       <form class="nb-f"><input placeholder="Escribe tu mensaje…" maxlength="500" autocomplete="off" aria-label="Mensaje"><button>Enviar</button></form>
-      <div class="nb-wa">¿Prefieres WhatsApp? <a href="whatsapp.html" target="_blank" rel="noopener">Escríbenos ahí</a></div>`;
+      <div class="nb-wa">${b2b ? '¿Prefieres correo? <a href="mailto:info@naviservices.net">info@naviservices.net</a>' : '¿Prefieres WhatsApp? <a href="whatsapp.html" target="_blank" rel="noopener">Escríbenos ahí</a>'}</div>`;
     const box = panel.querySelector('.nb-msgs'); box.scrollTop = box.scrollHeight;
     panel.querySelector('.nb-hd button').onclick = () => { panel.hidden = true; };
     const send = t => { if (!t.trim()) return; NaviBot.handle(cid, t.trim()); paint(); };
@@ -66,7 +70,9 @@
     if (!panel.hidden) { panel.hidden = true; return; }
     const c = Desk.open(channel, user?.phone || null, user ? user.me.name : anon);
     cid = c.id;
-    if (!c.msgs.length) Desk.push(cid, { from: 'bot', txt: `¡Hola${user ? ' ' + user.me.name : ''}! 👋 Soy el asistente de Navi Móvil, disponible las 24 horas.${user ? ' Ya sé quién eres, así que puedo darte datos de tu línea.' : ''}\n\n${NaviBot.MENU}` });
+    if (!c.msgs.length) Desk.push(cid, { from: 'bot', txt: b2b
+      ? `¡Hola! 👋 Soy el asistente de NAVICom, la división de Navi para empresas, gobierno y escuelas. Te resuelvo dudas y, si quieres, armo tu requerimiento para que un ejecutivo te mande una propuesta.\n\n${NaviBot.MENU_B2B}`
+      : `¡Hola${user ? ' ' + user.me.name : ''}! 👋 Soy el asistente de Navi Móvil, disponible las 24 horas.${user ? ' Ya sé quién eres, así que puedo darte datos de tu línea.' : ''}\n\n${NaviBot.MENU}` });
     Desk.set(cid, { seenByCustomer: Date.now() });
     panel.hidden = false; paint(); badge();
   };

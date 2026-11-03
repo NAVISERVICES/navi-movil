@@ -39,17 +39,18 @@ const fmtDay = d => new Date(d).toLocaleDateString('es-MX', { day: 'numeric', mo
 // ---------- conversaciones ----------
 const Desk = (() => {
   const KEY = 'navi.desk';
-  const read = () => readLS(KEY, { convs: [], audit: [], done: {}, tickets: [] });
+  const read = () => ({ leads: [], ...readLS(KEY, { convs: [], audit: [], done: {}, tickets: [] }) });
   const write = d => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
   const upd = fn => { const d = read(); const r = fn(d); write(d); return r; };
   const id = () => 'C' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
   return {
     all: () => read().convs,
     get: cid => read().convs.find(c => c.id === cid),
-    // conversación abierta de un cliente en un canal (o una nueva)
+    // conversación abierta de un cliente en un canal (o una nueva).
+    // seg: 'b2c' (personas, Navi Móvil) o 'b2b' (empresas, NAVICom); el chat de la página Empresas siempre es b2b
     open: (channel, phone, name) => upd(d => {
       let c = d.convs.find(x => x.channel === channel && x.phone === phone && x.status !== 'closed' && (phone || x.anon === name));
-      if (!c) { c = { id: id(), channel, phone: phone || null, anon: phone ? null : name, name: name || null, status: 'bot', created: Date.now(), updated: Date.now(), msgs: [], tags: [], notes: [], csat: null, agent: null }; d.convs.unshift(c); }
+      if (!c) { c = { id: id(), channel, seg: channel === 'empresas' ? 'b2b' : 'b2c', phone: phone || null, anon: phone ? null : name, name: name || null, status: 'bot', created: Date.now(), updated: Date.now(), msgs: [], tags: [], notes: [], csat: null, agent: null }; d.convs.unshift(c); }
       return c;
     }),
     push: (cid, m) => upd(d => { const c = d.convs.find(x => x.id === cid); if (!c) return; c.msgs.push({ t: Date.now(), ...m }); c.updated = Date.now(); if (m.from === 'customer') c.unread = (c.unread || 0) + 1; return c; }),
@@ -62,6 +63,15 @@ const Desk = (() => {
     markDone: (key, by) => upd(d => { d.done[key] = { t: Date.now(), by }; }),
     tickets: () => read().tickets,
     ticket: tk => upd(d => { const t = { id: 'T-' + String(Date.now()).slice(-6), t: Date.now(), status: 'abierto', ...tk }; d.tickets.unshift(t); return t; }),
+    // requerimientos de empresas (B2B): llegan del formulario de propuesta o del chat de Empresas
+    leads: () => read().leads,
+    lead: l => upd(d => {
+      let x = l.conv && d.leads.find(y => y.conv === l.conv);
+      if (x) Object.assign(x, l, { updated: Date.now() });
+      else { x = { id: 'L-' + String(Date.now()).slice(-6), t: Date.now(), updated: Date.now(), stage: 'nuevo', owner: null, notes: [], ...l }; d.leads.unshift(x); }
+      return x;
+    }),
+    setLead: (lid, patch) => upd(d => { const x = d.leads.find(y => y.id === lid); if (x) Object.assign(x, patch, { updated: Date.now() }); return x; }),
     KEY,
   };
 })();
@@ -73,8 +83,50 @@ const NaviBot = (() => {
   const has = (s, ...w) => w.some(x => s.includes(x));
   const MENU = 'Puedo ayudarte con: 📶 *saldo* de datos · ⚡ *recargas* · 📅 *renovación* · 🔁 *portabilidad* · 💳 *pagos* · 📍 *cobertura* · 📱 *mi equipo* · 🚨 *SOS* · 👤 *asesor*. ¿Qué necesitas?';
   const base = 'https://www.navimovil.com/demo/';
+  // ---------- empresas (NAVICom): resuelve dudas y arma el requerimiento para un ejecutivo ----------
+  const MENU_B2B = 'Te ayudo con: 📱 *líneas* empresariales · 🔳 *eSIM* · 🌐 *internet* para negocio · 🛡️ *seguridad* (SOS / Safe City) · 📻 *PTT* · 🚚 *rastreo* de flotillas · 📡 *IoT* · 📶 *equipos* y cobertura. Si ya sabes lo que necesitas, escribe *propuesta*.';
+  const B2B_TOPICS = [
+    [['linea', 'plan', 'chip', 'sim fisica'], 'Líneas móviles', 'Líneas empresariales sobre la Red Compartida (4.5G LTE) con datos, minutos y SMS, facturación central y un ejecutivo asignado. Desde 5 líneas.'],
+    [['esim'], 'eSIM', 'Activamos eSIM a distancia para que tu equipo no espere chips físicos; ideal para altas rápidas y personal en campo.'],
+    [['internet', 'modem', 'wifi', 'oficina', 'sucursal'], 'Internet para negocio', 'Internet fijo inalámbrico para oficinas y sucursales, sin obra ni cableado. Se instala en días.'],
+    [['segur', 'sos', 'safe city', 'emergencia', 'vigila', 'escuela', 'colegio'], 'Seguridad (SOS / Safe City)', 'NAVI SOS para empresas y escuelas: botón de pánico, ubicación en tiempo real y geocercas con horario. Safe City para municipios y fraccionamientos.'],
+    [['ptt', 'radio', 'push to talk', 'walkie'], 'PTT', 'PTT (push to talk): radio digital en el celular con cobertura nacional, grupos y despacho desde una consola web.'],
+    [['rastreo', 'track', 'gps', 'flotilla', 'unidades', 'chofer', 'vehicul', 'camion'], 'Rastreo (Track)', 'Navi Track: rastreo de unidades y personal en tiempo real, rutas, geocercas y alertas desde un panel web.'],
+    [['iot', 'lora', 'sensor', 'telemetria', 'medidor'], 'IoT / LoRaWAN', 'IoT y LoRaWAN: sensores y medidores conectados (agua, energía, temperatura) con su tablero de monitoreo.'],
+    [['equipo', 'cobertura', 'booster', 'senal', 'rudo'], 'Equipos y cobertura', 'Equipos de uso rudo, celulares y amplificadores de señal (booster) para bodegas, sótanos y zonas con poca cobertura.'],
+  ];
+  // pasos para armar el requerimiento: empresa → nombre → líneas → correo
+  const STEPS = { empresa: '¿Cómo se llama tu empresa o institución? 🏢', nombre: '¿Con quién tengo el gusto? (tu nombre)', lineas: '¿Cuántas líneas, equipos o unidades necesitas, más o menos?', mail: '¿A qué *correo de trabajo* te enviamos la propuesta? 📧' };
+  const nextStep = L => !L.company ? 'empresa' : !L.contact ? 'nombre' : !L.lines ? 'lineas' : !L.mail ? 'mail' : null;
+  function answerB2B(conv, text) {
+    const s = norm(text), L = { interest: [], ...(conv.lead || {}) };
+    const mail = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)?.[0], n = +(text.match(/\d+/)?.[0] || 0);
+    const ask = (lead, pre = '') => {
+      const st = nextStep(lead);
+      if (st) return { lead, step: st, txt: `${pre}${STEPS[st]}` };
+      return { lead, step: null, final: true, status: 'waiting', tag: 'venta', txt: `${pre}¡Listo, ${lead.contact.split(' ')[0]}! ✅ Registré tu requerimiento para *${lead.company}*${lead.lines ? ` (${lead.lines} líneas/equipos)` : ''}. Un ejecutivo de NAVICom te escribe aquí y a ${lead.mail} en horario laboral. Si tienes más detalles (ciudad, fechas, equipos), escríbelos aquí y los verá.` };
+    };
+    // respuestas a la pregunta que hizo el asistente
+    if (conv.b2bStep === 'empresa' && text.trim().length > 1) return ask({ ...L, company: text.trim().slice(0, 60) });
+    if (conv.b2bStep === 'nombre' && text.trim().length > 1) return ask({ ...L, contact: text.trim().slice(0, 50) });
+    if (conv.b2bStep === 'lineas' && n) return ask({ ...L, lines: n });
+    if (conv.b2bStep === 'mail') { if (mail) return ask({ ...L, mail }); return { lead: L, step: 'mail', txt: 'Ese correo no se ve completo 🤔. Escríbelo así: nombre@empresa.com' }; }
+    if (has(s, 'gracias', 'eso es todo', 'ok gracias')) return { csat: true, txt: '¡Con gusto! 😊 ¿Cómo calificarías la atención del 1 al 5?' };
+    if (/^[1-5]$/.test(s.trim()) && conv.askedCsat) return { rate: +s.trim(), txt: '¡Gracias por tu calificación! 💚' };
+    if (has(s, 'propuesta', 'cotiza', 'precio', 'costo', 'cuanto cuesta', 'ejecutivo', 'asesor', 'vendedor', 'contratar', 'humano', 'llamen', 'llamada')) return ask(L, nextStep(L) ? 'Con gusto te armamos una propuesta a la medida. Solo necesito unos datos.\n\n' : '');
+    const hit = B2B_TOPICS.filter(([w]) => has(s, ...w));
+    if (hit.length) {
+      const lead = { ...L, interest: [...new Set([...L.interest, ...hit.map(h => h[1])])] };
+      return { lead, txt: hit.map(h => `*${h[1]}*: ${h[2]}`).join('\n\n') + '\n\n¿Te armamos una propuesta? Escribe *propuesta* y te pido unos datos.' };
+    }
+    if (has(s, 'hola', 'buenas', 'buen dia', 'menu', 'ayuda', 'info')) return { txt: `¡Hola! 👋 Soy el asistente de NAVICom, la división de Navi para empresas.\n\n${MENU_B2B}` };
+    return { miss: true, txt: `No estoy seguro de haberte entendido 🤔.\n\n${MENU_B2B}` };
+  }
   function answer(conv, text) {
+    if (conv.seg === 'b2b') return answerB2B(conv, text);
     const s = norm(text), f = conv.phone ? custFacts(conv.phone) : null, hi = f ? f.first : '';
+    // una persona que pregunta por su empresa pasa al flujo de empresas (B2B)
+    if (has(s, 'empresa', 'negocio', 'flotilla', 'corporativ', 'pyme', 'para mi equipo de trabajo')) return { seg: 'b2b', tag: 'empresa', txt: `¡Claro! Para empresas tenemos NAVICom 🏢.\n\n${MENU_B2B}\n\nMás información: ${base}empresas.html` };
     const need = () => ({ txt: 'Para darte datos de tu línea necesito saber quién eres. Escríbeme tu número Navi de 10 dígitos 📱' });
     // número escrito para identificarse
     const num = text.replace(/\D/g, '');
@@ -128,13 +180,18 @@ const NaviBot = (() => {
     if (r.csat) Desk.set(cid, { askedCsat: true });
     if (r.rate) Desk.set(cid, { csat: r.rate, askedCsat: false, status: 'closed' });
     if (r.miss) Desk.set(cid, { misses: (c.misses || 0) + 1 });
+    if (r.seg) Desk.set(cid, { seg: r.seg });
+    if (r.lead) Desk.set(cid, { lead: r.lead });
+    if ('step' in r) Desk.set(cid, { b2bStep: r.step });
+    // requerimiento completo: entra a la consola como oportunidad de empresa
+    if (r.final) Desk.lead({ conv: cid, source: 'Chat Empresas', company: r.lead.company, contact: r.lead.contact, mail: r.lead.mail, lines: r.lead.lines, interest: r.lead.interest, msg: c.msgs.filter(m => m.from === 'customer').map(m => m.txt).slice(0, 3).join(' · ') });
     Desk.push(cid, { from: 'bot', txt: r.txt });
     // si el bot no entiende dos veces, pasa la conversación a un asesor
     c = Desk.get(cid);
     if ((c.misses || 0) >= 2 && c.status === 'bot') { Desk.set(cid, { status: 'waiting' }); Desk.push(cid, { from: 'bot', txt: 'Mejor te comunico con un asesor para ayudarte 🙋.' }); }
     return Desk.get(cid);
   }
-  return { handle, answer, MENU };
+  return { handle, answer, MENU, MENU_B2B };
 })();
 
 // texto con *negritas* estilo WhatsApp y enlaces

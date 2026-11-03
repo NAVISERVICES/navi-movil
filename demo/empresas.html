@@ -447,6 +447,9 @@ $('leadF').onsubmit = e => {
     ok.style.display = 'block'; ok.style.background = '#ff6fb133'; ok.textContent = 'Escribe tu nombre, tu empresa y un correo válido.'; return;
   }
   const ints = [...document.querySelectorAll('#fInt input:checked')].map(x => x.value);
+  // también entra a Navi Central como requerimiento de empresa (B2B)
+  const lines = +(v('fMsg').match(/\d+/)?.[0] || 0) || null;
+  Desk.lead({ source: 'Formulario web', company: v('fEmp'), contact: v('fNom'), mail: v('fMail'), tel: v('fTel').replace(/\D/g, '') || null, lines, interest: ints, msg: v('fMsg') });
   const body = [`Nombre: ${v('fNom')}`, `Empresa: ${v('fEmp')}`, `Correo: ${v('fMail')}`, `Teléfono: ${v('fTel') || '—'}`, `Interés: ${ints.join(', ') || '—'}`, '', v('fMsg')].join('\n');
   location.href = `mailto:info@naviservices.net?subject=${encodeURIComponent('Solicitud de propuesta · ' + v('fEmp'))}&body=${encodeURIComponent(body)}`;
   ok.style.display = 'block'; ok.style.background = ''; ok.textContent = '✓ Listo. Revisa tu correo y envía la solicitud.';
@@ -454,5 +457,10 @@ $('leadF').onsubmit = e => {
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
+<!-- chat "¿Te ayudamos?" en modo empresas: lo atiende el asistente de NAVICom y llega a Navi Central como B2B -->
+<script src="auth.js?v=20261102b"></script>
+<script src="planes.js?v=20261101c"></script>
+<script src="desk.js?v=2"></script>
+<script src="asistente.js?v=2"></script>
 </body>
 </html>
