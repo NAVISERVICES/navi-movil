@@ -1,6 +1,8 @@
 // Navi Central: consola interna de Navi Móvil.
 //  · ERP: clientes, servicio, pedidos, recargas y portabilidades en un solo lugar
-//  · Front desk: conversaciones de chat web, app y WhatsApp con el asistente y los asesores
+//  · Front desk: conversaciones de chat web, app, WhatsApp y Empresas con el asistente y los asesores,
+//    separadas en personas (B2C, Navi Móvil) y empresas (B2B, NAVICom)
+//  · Empresas B2B: embudo de oportunidades que llegan del formulario y del chat de la página Empresas
 //  · Proactivo: reglas que detectan a quién hay que buscar antes de que nos busque
 //  · Privacidad: datos enmascarados por defecto; ver un dato completo pide motivo y queda en auditoría
 // DEMO: lee los datos de este navegador y suma una cartera de ejemplo (clientes ficticios).
@@ -73,6 +75,45 @@ const planTxt = c => c.fam ? `Familia · ${c.lines} × ${c.gb} GB` : `${c.gb} GB
   localStorage.setItem('navi.desk.seeded', '1');
 })();
 
+// ---------- empresas (B2B, NAVICom): oportunidades de ejemplo, una sola vez ----------
+const STAGES = [['nuevo', 'Nuevo', '#FF6FB1'], ['contactado', 'Contactado', '#7EE0FF'], ['propuesta', 'Propuesta enviada', '#FFC22E'], ['negociacion', 'Negociación', '#A893FF'], ['ganado', 'Ganado', '#2BD67B'], ['perdido', 'Perdido', '#8A88B8']];
+const STAGE = Object.fromEntries(STAGES.map(([k, n, c]) => [k, { n, c }]));
+const LINE_PRICE = PLANS.find(p => p.gb === 12).prices.m; // valor estimado por línea al mes
+const leadValue = l => (l.lines || 0) * LINE_PRICE;
+const SRC = { 'Formulario web': '📝', 'Chat Empresas': '🏢', 'Chat web': '💬', WhatsApp: '🟢', Referido: '🤝' };
+(() => {
+  if (localStorage.getItem('navi.desk.seeded.b2b')) return;
+  const ex = [
+    ['Transportes del Bajío', 'Laura Méndez', 60, ['Rastreo (Track)', 'Líneas móviles'], 'Chat Empresas', 'nuevo', 25, '60 unidades de carga, queremos rastreo y líneas para choferes'],
+    ['Colegio Monteverde', 'Prof. Ricardo Salas', 35, ['Seguridad (SOS / Safe City)'], 'Formulario web', 'nuevo', 140, 'Relojes con SIM para alumnos de primaria y geocercas del colegio'],
+    ['Seguridad Privada Centinela', 'Mario Ortega', 120, ['PTT', 'Equipos y cobertura'], 'Formulario web', 'contactado', 60 * 26, 'Radios PTT para guardias en 3 turnos'],
+    ['Farmacias Vida Plena', 'Claudia Ríos', 18, ['Internet para negocio'], 'Referido', 'propuesta', 60 * 70, 'Internet para 18 sucursales'],
+    ['Constructora Ribera', 'Ing. Pablo Núñez', 45, ['Líneas móviles', 'Equipos y cobertura'], 'Chat web', 'negociacion', 60 * 24 * 4, 'Líneas y equipos de uso rudo para obra'],
+    ['Agua Clara Municipal', 'Lic. Sandra Paz', 400, ['IoT / LoRaWAN'], 'Formulario web', 'propuesta', 60 * 24 * 6, 'Medidores de agua conectados'],
+    ['Logística Express Norte', 'Raúl Cantú', 25, ['Rastreo (Track)'], 'WhatsApp', 'ganado', 60 * 24 * 12, 'Rastreo de 25 camionetas de reparto'],
+    ['Clínica San Rafael', 'Dra. Elena Ruiz', 12, ['Líneas móviles'], 'Formulario web', 'perdido', 60 * 24 * 20, 'Líneas para médicos de guardia'],
+  ];
+  const d = JSON.parse(localStorage.getItem(Desk.KEY) || '{}'); d.leads = d.leads || [];
+  ex.forEach(([company, contact, lines, interest, source, stage, minAgo, msg], i) => {
+    const t = Date.now() - minAgo * 6e4;
+    d.leads.push({ id: 'L-' + (204810 + i * 7), t, updated: t, synth: true, company, contact, lines, interest, source, stage, msg, owner: stage === 'nuevo' ? null : pick(['Marco R.', 'Ana López', 'Sofía T.']), notes: [],
+      mail: contact.replace(/^(Prof|Ing|Lic|Dra)\.\s/, '').split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') + '@' + company.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '').slice(0, 14) + '.mx' });
+  });
+  localStorage.setItem(Desk.KEY, JSON.stringify(d));
+  // una conversación de empresa en el chat, esperando ejecutivo
+  const c = Desk.open('empresas', null, 'Laura Méndez · Transportes del Bajío');
+  [['bot', '¡Hola! 👋 Soy el asistente de NAVICom…', 27], ['customer', 'Tenemos 60 unidades de carga, queremos rastreo y líneas para choferes', 26], ['bot', '*Rastreo (Track)*: rastreo de unidades y personal en tiempo real… ¿Te armamos una propuesta?', 26], ['customer', 'propuesta', 25], ['bot', '¡Listo, Laura! ✅ Registré tu requerimiento para *Transportes del Bajío* (60 líneas/equipos). Un ejecutivo de NAVICom te escribe aquí.', 25]]
+    .forEach(([from, txt]) => Desk.push(c.id, { from, txt }));
+  Desk.set(c.id, { status: 'waiting', tags: ['venta'], unread: 2, seed: true, lead: { company: 'Transportes del Bajío', contact: 'Laura Méndez', lines: 60, interest: ['Rastreo (Track)', 'Líneas móviles'] } });
+  const d2 = JSON.parse(localStorage.getItem(Desk.KEY)); const cc = d2.convs.find(x => x.id === c.id);
+  cc.msgs.forEach((m, i) => m.t = Date.now() - [27, 26, 26, 25, 25][i] * 6e4); cc.updated = cc.created = Date.now() - 25 * 6e4;
+  const ld = d2.leads.find(l => l.company === 'Transportes del Bajío'); if (ld) ld.conv = c.id;
+  localStorage.setItem(Desk.KEY, JSON.stringify(d2));
+  localStorage.setItem('navi.desk.seeded.b2b', '1');
+})();
+const segOf = c => c.seg || 'b2c';
+const openLeads = () => Desk.leads().filter(l => !['ganado', 'perdido'].includes(l.stage));
+
 // ---------- reglas proactivas ----------
 const RULES = [
   { id: 'datos', ic: '📶', color: '#7EE0FF', n: 'Se están quedando sin datos', d: 'Les queda menos del 20% de su plan.', test: c => c.pct < .2 && c.status === 'activa',
@@ -120,14 +161,14 @@ function askReveal(id, field, after) {
 document.addEventListener('click', e => { const r = e.target.closest('[data-reveal]'); if (!r) return; const [id, f] = r.dataset.reveal.split('|'); askReveal(id, f, () => route()); });
 
 // ---------- estructura ----------
-let view = sessionStorage.getItem('central.view') || 'resumen', sel = null, inboxF = 'abiertas', q = '', opsTab = 'pedidos';
-const NAV = [['resumen', '📊', 'Resumen'], ['desk', '💬', 'Front desk'], ['clientes', '👥', 'Clientes'], ['proactivo', '⚡', 'Proactivo'], ['ops', '📦', 'Operaciones'], ['privacidad', '🔒', 'Privacidad']];
+let view = sessionStorage.getItem('central.view') || 'resumen', sel = null, inboxF = 'abiertas', segF = 'todos', q = '', opsTab = 'pedidos';
+const NAV = [['resumen', '📊', 'Resumen'], ['desk', '💬', 'Front desk'], ['empresas', '🏢', 'Empresas B2B'], ['clientes', '👥', 'Clientes'], ['proactivo', '⚡', 'Proactivo'], ['ops', '📦', 'Operaciones'], ['privacidad', '🔒', 'Privacidad']];
 const openConvs = () => Desk.all().filter(c => c.status !== 'closed');
 function shell(inner, title, right = '') {
-  const w = Desk.all().filter(c => c.status === 'waiting').length, al = alerts().length;
+  const w = Desk.all().filter(c => c.status === 'waiting').length, al = alerts().length, nl = Desk.leads().filter(l => l.stage === 'nuevo').length;
   $('root').innerHTML = `<div class="app"><aside class="side">
       <div class="brand"><img src="../assets/navi-logo.png" alt="Navi"><small>CENTRAL</small></div>
-      <nav>${NAV.map(([k, i, n]) => `<button data-v="${k}" aria-current="${view === k}">${i} ${n}${k === 'desk' && w ? `<b>${w}</b>` : ''}${k === 'proactivo' && al ? `<b>${al}</b>` : ''}</button>`).join('')}</nav>
+      <nav>${NAV.map(([k, i, n]) => `<button data-v="${k}" aria-current="${view === k}">${i} ${n}${k === 'desk' && w ? `<b>${w}</b>` : ''}${k === 'proactivo' && al ? `<b>${al}</b>` : ''}${k === 'empresas' && nl ? `<b>${nl}</b>` : ''}</button>`).join('')}</nav>
       <div class="who"><b>${esc(staff.name)}</b>${ROLES[staff.role].n}<br><a class="rv" id="logout" style="margin:0">Salir</a></div>
       <div class="foot">DEMO · datos de este navegador + cartera ficticia</div></aside>
     <main class="main"><div class="top"><h1>${title}</h1><div class="sp">${right}</div></div>${inner}</main></div>`;
@@ -136,7 +177,7 @@ function shell(inner, title, right = '') {
 }
 function route() {
   if (!staff) return login();
-  ({ resumen, desk, clientes, proactivo, ops, privacidad }[view] || resumen)();
+  ({ resumen, desk, empresas, clientes, proactivo, ops, privacidad }[view] || resumen)();
 }
 
 function login() {
@@ -160,29 +201,45 @@ function resumen() {
   const firstReply = convs.map(c => { const i = c.msgs.findIndex(m => m.from === 'customer'), j = c.msgs.findIndex((m, k) => k > i && m.from !== 'customer'); return i >= 0 && j > i ? (c.msgs[j].t - c.msgs[i].t) / 1000 : null; }).filter(x => x != null);
   const al = alerts();
   const mix = [2, 4, 12, 24].map(g => [g + ' GB', cs.filter(c => c.gb === g && !c.fam).length]).concat([['Plan Familia', cs.filter(c => c.fam).length]]);
-  const chans = [['whatsapp', 'WhatsApp'], ['web', 'Chat web'], ['app', 'App Mi Navi']].map(([k, n]) => [n, convs.filter(c => c.channel === k).length]);
+  const chans = [['whatsapp', 'WhatsApp'], ['web', 'Chat web'], ['app', 'App Mi Navi'], ['empresas', 'Chat Empresas']].map(([k, n]) => [n, convs.filter(c => c.channel === k).length]);
+  // requerimientos por tipo de cliente: personas (B2C, Navi Móvil) y empresas (B2B, NAVICom)
+  const b2c = openConvs().filter(c => segOf(c) === 'b2c'), b2bC = openConvs().filter(c => segOf(c) === 'b2b'), ol = openLeads(), newL = Desk.leads().filter(l => l.stage === 'nuevo');
+  const pipe = STAGES.slice(0, 4).map(([k, n]) => [n, Desk.leads().filter(l => l.stage === k).length]);
   const bars = (rows, color) => { const mx = Math.max(1, ...rows.map(r => r[1])); return `<div class="bars">${rows.map(([n, v]) => `<div class="bar"><span>${n}</span><i style="width:${v / mx * 100}%;background:${color}"></i><span>${v}</span></div>`).join('')}</div>`; };
   shell(`<div class="kpis">
       <div class="kpi"><small>Clientes activos</small><b>${act.length}</b><em>${lines} líneas</em></div>
       <div class="kpi"><small>Ingreso mensual recurrente</small><b>${mxn(mrr).replace(/\.\d+$/, '')}</b><em>estimado</em></div>
-      <div class="kpi"><small>Conversaciones abiertas</small><b>${openConvs().length}</b><em>${waiting.length} esperando asesor</em></div>
+      <div class="kpi seg-b2c"><small>👤 Requerimientos personas (B2C)</small><b>${b2c.length}</b><em>${b2c.filter(c => c.status === 'waiting').length} esperando asesor</em></div>
+      <div class="kpi seg-b2b"><small>🏢 Requerimientos empresas (B2B)</small><b>${ol.length + b2bC.filter(c => !Desk.leads().some(l => l.conv === c.id)).length}</b><em>${newL.length} nuevos · ${mxn(ol.reduce((s, l) => s + leadValue(l), 0)).replace(/\.\d+$/, '')}/mes en juego</em></div>
       <div class="kpi"><small>Primera respuesta</small><b>${firstReply.length ? Math.max(1, Math.round(firstReply.reduce((a, b) => a + b, 0) / firstReply.length)) + ' s' : '—'}</b><em>el asistente contesta al momento</em></div>
       <div class="kpi"><small>Resueltas por el asistente</small><b>${closed ? Math.round(closedByBot / closed * 100) : 0}%</b><em>${closed} cerradas</em></div>
       <div class="kpi"><small>Satisfacción (CSAT)</small><b>${csat ? csat.toFixed(1) : '—'}<span style="font-size:15px">/5</span></b><em>${rated.length} calificaciones</em></div>
       <div class="kpi"><small>Avisos proactivos pendientes</small><b>${al.length}</b><em>clientes a contactar</em></div>
     </div>
     <div class="g2"><section class="card"><h3>⚡ Lo urgente ahora<span class="hint">primero quien espera, luego lo proactivo</span></h3><div class="list">
-      ${waiting.map(c => `<button class="item" data-conv="${c.id}"><span class="ic">${c.channel === 'whatsapp' ? '🟢' : c.channel === 'app' ? '📱' : '💬'}</span><span><b>${esc(c.name || c.anon)} espera a un asesor</b><small>${esc(c.msgs[c.msgs.length - 1]?.txt.slice(0, 70))}</small></span><span class="r"><span class="pill bad">${ago(c.updated)}</span></span></button>`).join('')}
+      ${waiting.map(c => `<button class="item" data-conv="${c.id}"><span class="ic">${CH[c.channel]}</span><span><b>${esc(c.name || c.anon)} espera a ${segOf(c) === 'b2b' ? 'un ejecutivo' : 'un asesor'}</b><small>${esc(c.msgs[c.msgs.length - 1]?.txt.slice(0, 70))}</small></span><span class="r">${segTag(c)} <span class="pill bad">${ago(c.updated)}</span></span></button>`).join('')}
+      ${newL.filter(l => !waiting.some(c => c.id === l.conv)).map(l => `<button class="item" data-lead="${l.id}"><span class="ic">${SRC[l.source] || '🏢'}</span><span><b>${esc(l.company)} pide propuesta</b><small>${esc((l.interest || []).join(', ') || l.msg || '')}${l.lines ? ' · ' + l.lines + ' líneas' : ''}</small></span><span class="r"><span class="pill b2b">B2B</span> <span class="pill bad">${ago(l.t)}</span></span></button>`).join('')}
       ${al.slice(0, 6).map(a => `<button class="item" data-go="proactivo"><span class="ic" style="background:${a.r.color}33">${a.r.ic}</span><span><b>${esc(a.c.name)}</b><small>${a.r.n}</small></span><span class="r"><span class="pill info">${planTxt(a.c)}</span></span></button>`).join('')}
-      ${!waiting.length && !al.length ? '<p class="muted">Todo al día ✨</p>' : ''}</div></section>
-      <div style="display:grid;gap:14px"><section class="card"><h3>Planes</h3>${bars(mix, 'var(--lime)')}</section><section class="card"><h3>Canales de atención</h3>${bars(chans, '#7EE0FF')}</section></div></div>`, 'Resumen', `<span class="pill ok">● Asistente en línea 24/7</span>`);
+      ${!waiting.length && !al.length && !newL.length ? '<p class="muted">Todo al día ✨</p>' : ''}</div></section>
+      <div style="display:grid;gap:14px"><section class="card"><h3>🏢 Embudo de empresas<span class="hint">NAVICom · B2B</span></h3>${bars(pipe, '#A893FF')}</section><section class="card"><h3>Planes</h3>${bars(mix, 'var(--lime)')}</section><section class="card"><h3>Canales de atención</h3>${bars(chans, '#7EE0FF')}</section></div></div>`, 'Resumen', `<span class="pill ok">● Asistente en línea 24/7</span>`);
   document.querySelectorAll('[data-conv]').forEach(b => b.onclick = () => { view = 'desk'; sel = b.dataset.conv; route(); });
+  document.querySelectorAll('[data-lead]').forEach(b => b.onclick = () => leadCard(b.dataset.lead));
   document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { view = b.dataset.go; route(); });
 }
 
 // ---------- Front desk ----------
 const ST = { bot: ['🤖 Asistente', 'info'], waiting: ['⏳ Espera asesor', 'bad'], agent: ['🙋 Con asesor', 'warn'], closed: ['✓ Resuelta', 'ok'] };
-const CH = { whatsapp: '🟢', web: '💬', app: '📱' };
+const CH = { whatsapp: '🟢', web: '💬', app: '📱', empresas: '🏢' };
+const CH_N = { whatsapp: 'WhatsApp', web: 'Chat web', app: 'App Mi Navi', empresas: 'Chat Empresas' };
+const segTag = c => segOf(c) === 'b2b' ? '<span class="pill b2b">B2B</span>' : '<span class="pill b2c">B2C</span>';
+const TPL_B2B = [
+  ['Saludo', n => `Hola ${n}, soy ${staff.name.split(' ')[0]}, ejecutivo de NAVICom 👋. Ya revisé tu requerimiento.`],
+  ['Datos', () => 'Para armar tu propuesta, ¿me confirmas la ciudad o ciudades donde operan y para cuándo lo necesitan?'],
+  ['Llamada', () => '¿Te parece si agendamos una llamada de 15 minutos para entender tu operación? Dime día y hora.'],
+  ['Propuesta', () => 'Te acabo de enviar la propuesta a tu correo 📧. Cualquier duda la vemos por aquí.'],
+  ['Prueba', () => 'Podemos darte una prueba piloto con algunas líneas o equipos antes de contratar todo. ¿Te interesa?'],
+  ['Cierre', () => '¡Gracias por considerar a NAVICom! Quedo pendiente 💚'],
+];
 const TPL = [
   ['Saludo', n => `Hola ${n}, soy ${staff.name.split(' ')[0]} de Navi Móvil 👋. Ya revisé tu conversación, ¿me das un momento?`],
   ['Revisando', () => 'Estoy revisando tu cuenta, en un momento te confirmo 🔎'],
@@ -192,29 +249,31 @@ const TPL = [
   ['Cierre', () => '¿Hay algo más en lo que te pueda ayudar? Si no, cierro la conversación. ¡Gracias por elegir Navi! 💚'],
 ];
 function desk() {
-  const all = Desk.all().filter(c => inboxF === 'abiertas' ? c.status !== 'closed' : inboxF === 'mias' ? c.agent === staff.name && c.status !== 'closed' : inboxF === 'espera' ? c.status === 'waiting' : c.status === 'closed')
+  const all = Desk.all().filter(c => segF === 'todos' || segOf(c) === segF).filter(c => inboxF === 'abiertas' ? c.status !== 'closed' : inboxF === 'mias' ? c.agent === staff.name && c.status !== 'closed' : inboxF === 'espera' ? c.status === 'waiting' : c.status === 'closed')
     .sort((a, b) => (b.status === 'waiting') - (a.status === 'waiting') || b.updated - a.updated);
   const c = sel && Desk.get(sel);
   shell(`<div class="desk ${c ? 'open' : ''}">
-    <section class="inbox"><div class="hd"><div class="seg">${[['abiertas', 'Abiertas'], ['espera', 'En espera'], ['mias', 'Mías'], ['cerradas', 'Resueltas']].map(([k, n]) => `<button data-f="${k}" aria-pressed="${inboxF === k}">${n}</button>`).join('')}</div></div>
-      <div class="rows">${all.map(x => { const l = x.msgs[x.msgs.length - 1]; return `<button class="crow" data-c="${x.id}" aria-current="${x.id === sel}"><span class="ch c-${x.channel}">${CH[x.channel]}</span><span class="mid"><b>${esc(x.name || x.anon)}${x.unread ? '<i class="dot"></i>' : ''}</b><small>${l ? esc((l.from === 'customer' ? '' : l.from === 'bot' ? '🤖 ' : '🙋 ') + l.txt) : ''}</small><span class="pill ${ST[x.status][1]}">${ST[x.status][0]}</span></span><span class="r">${ago(x.updated)}</span></button>`; }).join('') || '<p class="muted" style="padding:14px">Sin conversaciones aquí.</p>'}</div></section>
+    <section class="inbox"><div class="hd"><div class="seg segs">${[['todos', 'Todos'], ['b2c', '👤 Personas B2C'], ['b2b', '🏢 Empresas B2B']].map(([k, n]) => { const cnt = openConvs().filter(c => k === 'todos' || segOf(c) === k).length; return `<button data-sg="${k}" aria-pressed="${segF === k}">${n} · ${cnt}</button>`; }).join('')}</div>
+        <div class="seg" style="margin-top:6px">${[['abiertas', 'Abiertas'], ['espera', 'En espera'], ['mias', 'Mías'], ['cerradas', 'Resueltas']].map(([k, n]) => `<button data-f="${k}" aria-pressed="${inboxF === k}">${n}</button>`).join('')}</div></div>
+      <div class="rows">${all.map(x => { const l = x.msgs[x.msgs.length - 1]; return `<button class="crow" data-c="${x.id}" aria-current="${x.id === sel}"><span class="ch c-${x.channel}">${CH[x.channel]}</span><span class="mid"><b>${esc(x.name || x.anon)}${x.unread ? '<i class="dot"></i>' : ''}</b><small>${l ? esc((l.from === 'customer' ? '' : l.from === 'bot' ? '🤖 ' : '🙋 ') + l.txt) : ''}</small><span style="display:flex;gap:4px">${segTag(x)}<span class="pill ${ST[x.status][1]}">${ST[x.status][0]}</span></span></span><span class="r">${ago(x.updated)}</span></button>`; }).join('') || '<p class="muted" style="padding:14px">Sin conversaciones aquí.</p>'}</div></section>
     <section class="conv">${c ? convHTML(c) : '<div style="margin:auto;text-align:center;padding:30px" class="muted">💬<br>Elige una conversación</div>'}</section>
     <aside class="cust">${c ? custPanel(c) : '<p class="muted">El contexto del cliente aparece aquí.</p>'}</aside></div>`, 'Front desk', `<span class="pill">${Desk.all().filter(x => x.status === 'waiting').length} en espera</span><a class="btn btn-line xs" href="../whatsapp.html" target="_blank">Abrir WhatsApp de prueba ↗</a>`);
   document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { inboxF = b.dataset.f; desk(); });
+  document.querySelectorAll('[data-sg]').forEach(b => b.onclick = () => { segF = b.dataset.sg; desk(); });
   document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { sel = b.dataset.c; desk(); });
   if (c) bindConv(c);
 }
 function convHTML(c) {
   const cu = c.phone && custById(c.phone);
   return `<div class="hd"><button class="btn btn-line xs back" id="cBack">←</button><span class="ch c-${c.channel}" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center">${CH[c.channel]}</span>
-      <div><b>${esc(c.name || c.anon)}</b><div class="hint">${{ whatsapp: 'WhatsApp', web: 'Chat web', app: 'App Mi Navi' }[c.channel]} · ${cu ? cu.client : 'sin identificar'} · ${c.id}</div></div>
+      <div><b>${esc(c.name || c.anon)}</b> ${segTag(c)}<div class="hint">${CH_N[c.channel]} · ${segOf(c) === 'b2b' ? esc(c.lead?.company || 'empresa sin datos') : cu ? cu.client : 'sin identificar'} · ${c.id}</div></div>
       <span class="pill ${ST[c.status][1]}">${ST[c.status][0]}${c.agent && c.status === 'agent' ? ' · ' + esc(c.agent) : ''}</span>
       <div style="margin-left:auto;display:flex;gap:6px">${c.status !== 'agent' || c.agent !== staff.name ? `<button class="btn btn-lime xs" id="cTake">Tomar</button>` : ''}${c.status !== 'closed' ? `<button class="btn btn-line xs" id="cClose">Resolver</button>` : `<button class="btn btn-line xs" id="cReopen">Reabrir</button>`}</div></div>
     <div class="msgs" id="cMsgs">${c.msgs.map(m => m.from === 'system' ? `<div class="sys">${deskFmt(m.txt)}</div>`
       : m.from === 'note' ? `<div class="m note"><span class="who">📝 Nota interna · ${esc(m.agent)}</span>${deskFmt(m.txt)}<small>${hhmm(m.t)} · el cliente no la ve</small></div>`
       : `<div class="m ${m.from === 'customer' ? '' : 'out'} ${m.from === 'agent' ? 'agent' : ''}"><span class="who">${m.from === 'customer' ? esc(c.name || c.anon) : m.from === 'bot' ? '🤖 Asistente' : '🙋 ' + esc(m.agent || 'Asesor') + (m.proactive ? ' · proactivo' : '')}</span>${deskFmt(m.txt)}<small>${hhmm(m.t)}</small></div>`).join('')}
       ${c.csat ? `<div class="sys">Calificación del cliente: ${'★'.repeat(c.csat)}${'☆'.repeat(5 - c.csat)}</div>` : ''}</div>
-    <div class="compose" id="comp"><div class="tpl">${TPL.map(([n], i) => `<button data-t="${i}">${n}</button>`).join('')}</div>
+    <div class="compose" id="comp"><div class="tpl">${(segOf(c) === 'b2b' ? TPL_B2B : TPL).map(([n], i) => `<button data-t="${i}">${n}</button>`).join('')}</div>
       <form id="cForm"><textarea id="cTxt" placeholder="Escribe al cliente… (Enter envía, Shift+Enter salto de línea)"></textarea><button class="btn btn-lime xs">Enviar</button></form>
       <div class="opts"><label><input type="checkbox" id="cNote"> Nota interna (el cliente no la ve)</label><span style="margin-left:auto">${c.channel === 'whatsapp' ? 'Se envía por WhatsApp' : 'Se envía al chat'}</span></div></div>`;
 }
@@ -225,8 +284,11 @@ function bindConv(c) {
   if ($('cTake')) $('cTake').onclick = () => { Desk.set(c.id, { status: 'agent', agent: staff.name }); Desk.push(c.id, { from: 'system', txt: `${staff.name} tomó la conversación` }); desk(); };
   if ($('cClose')) $('cClose').onclick = () => { Desk.push(c.id, { from: 'system', txt: `Resuelta por ${staff.name}` }); Desk.set(c.id, { status: 'closed' }); toast('Conversación resuelta'); desk(); };
   if ($('cReopen')) $('cReopen').onclick = () => { Desk.set(c.id, { status: 'agent', agent: staff.name }); desk(); };
-  const first = (c.name || '').split(' ')[0];
-  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { $('cTxt').value = TPL[b.dataset.t][1](first); $('cTxt').focus(); });
+  const first = (c.lead?.contact || c.name || '').replace(/^(Prof|Ing|Lic|Dra?)\.\s/, '').split(' ')[0];
+  const tpl = segOf(c) === 'b2b' ? TPL_B2B : TPL;
+  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { $('cTxt').value = tpl[b.dataset.t][1](first); $('cTxt').focus(); });
+  if ($('cLead')) $('cLead').onclick = () => { const L = c.lead || {}; const l = Desk.leads().find(x => x.conv === c.id) || Desk.lead({ conv: c.id, source: CH_N[c.channel], company: L.company || c.name || c.anon, contact: L.contact || c.name || c.anon, mail: L.mail || null, lines: L.lines || null, interest: L.interest || [], msg: c.msgs.filter(m => m.from === 'customer').map(m => m.txt).slice(0, 3).join(' · ') }); leadCard(l.id); };
+  if ($('cToB2b')) $('cToB2b').onclick = () => { Desk.set(c.id, { seg: segOf(c) === 'b2b' ? 'b2c' : 'b2b' }); toast(segOf(c) === 'b2b' ? 'Marcada como persona (B2C)' : 'Marcada como empresa (B2B)'); desk(); };
   $('cNote').onchange = () => $('comp').classList.toggle('noting', $('cNote').checked);
   const send = () => {
     const v = $('cTxt').value.trim(); if (!v) return;
@@ -241,6 +303,7 @@ function bindConv(c) {
   if ($('cFicha')) $('cFicha').onclick = () => ficha(c.phone);
 }
 function custPanel(c) {
+  if (segOf(c) === 'b2b') return b2bPanel(c);
   const cu = c.phone && custById(c.phone);
   const TAGS = ['cobros', 'red', 'portabilidad', 'equipo', 'retención', 'venta'];
   const hist = c.phone ? Desk.all().filter(x => x.phone === c.phone && x.id !== c.id) : [];
@@ -251,7 +314,18 @@ function custPanel(c) {
     <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn btn-lime xs" id="cFicha">Ficha completa</button><button class="btn btn-line xs" id="cTicket">Crear ticket</button></div>`
     : '<b>Cliente sin identificar</b><p class="hint">El asistente le pide su número Navi para identificarlo.</p>'}
     <h4>Etiquetas</h4><div class="seg">${TAGS.map(t => `<button data-tag="${t}" aria-pressed="${(c.tags || []).includes(t)}">${t}</button>`).join('')}</div>
-    <h4>Historial</h4>${hist.length ? hist.map(h => `<div class="hint">${CH[h.channel]} ${new Date(h.created).toLocaleDateString('es-MX')} · ${ST[h.status][0]}</div>`).join('') : '<span class="hint">Primera conversación</span>'}`;
+    <h4>Historial</h4>${hist.length ? hist.map(h => `<div class="hint">${CH[h.channel]} ${new Date(h.created).toLocaleDateString('es-MX')} · ${ST[h.status][0]}</div>`).join('') : '<span class="hint">Primera conversación</span>'}
+    <h4>Tipo de cliente</h4><button class="btn btn-line xs" id="cToB2b">🏢 Es una empresa: pasar a B2B</button>`;
+}
+// panel de una conversación de empresa: lo que el asistente ya capturó y la oportunidad en el embudo
+function b2bPanel(c) {
+  const L = c.lead || {}, l = Desk.leads().find(x => x.conv === c.id);
+  return `<b style="font-size:16px">🏢 ${esc(L.company || 'Empresa sin identificar')}</b><div class="hint">Requerimiento de empresa · NAVICom</div>
+    <h4>Lo que capturó el asistente</h4><div class="kv"><span>Contacto</span><b>${esc(L.contact || '—')}</b><span>Correo</span><b>${esc(L.mail ? Mask.mail(L.mail) : '—')}</b><span>Líneas / equipos</span><b>${L.lines || '—'}</b><span>Valor estimado</span><b>${L.lines ? mxn(leadValue(L)).replace(/\.\d+$/, '') + '/mes' : '—'}</b></div>
+    <h4>Le interesa</h4>${(L.interest || []).map(i => `<span class="pill" style="margin:0 4px 4px 0">${esc(i)}</span>`).join('') || '<span class="hint">Aún no lo dice</span>'}
+    <h4>Oportunidad</h4>${l ? `<div class="kv"><span>Folio</span><b>${l.id}</b><span>Etapa</span><b style="color:${STAGE[l.stage].c}">${STAGE[l.stage].n}</b><span>Ejecutivo</span><b>${esc(l.owner || 'sin asignar')}</b></div>` : '<span class="hint">Todavía no está en el embudo.</span>'}
+    <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn btn-lime xs" id="cLead">${l ? 'Ver oportunidad' : 'Crear oportunidad'}</button><button class="btn btn-line xs" id="cToB2b">👤 Es persona: pasar a B2C</button></div>
+    <h4>Etiquetas</h4><div class="seg">${['venta', 'propuesta', 'piloto', 'gobierno', 'escuela'].map(t => `<button data-tag="${t}" aria-pressed="${(c.tags || []).includes(t)}">${t}</button>`).join('')}</div>`;
 }
 function newTicket(c) {
   $('ov').hidden = false;
@@ -262,6 +336,54 @@ function newTicket(c) {
     <div class="acts"><button class="btn btn-line xs" id="tkNo">Cancelar</button><button class="btn btn-lime xs" id="tkOk">Crear</button></div></div>`;
   $('tkNo').onclick = () => $('ov').hidden = true;
   $('tkOk').onclick = () => { const t = Desk.ticket({ conv: c.id, cust: c.phone, name: c.name || c.anon, area: $('tkA').value, prio: $('tkP').value, desc: $('tkD').value, by: staff.name }); Desk.push(c.id, { from: 'note', agent: staff.name, txt: `Ticket ${t.id} creado · ${t.area} · ${t.prio}` }); $('ov').hidden = true; toast('Ticket ' + t.id + ' creado'); route(); };
+}
+
+// ---------- Empresas B2B (NAVICom): embudo de oportunidades ----------
+let leadQ = '';
+function empresas() {
+  const ls = Desk.leads(), qq = leadQ.toLowerCase();
+  const vis = ls.filter(l => !qq || (l.company + ' ' + l.contact + ' ' + (l.interest || []).join(' ')).toLowerCase().includes(qq));
+  const ol = openLeads(), won = ls.filter(l => l.stage === 'ganado'), closed = ls.filter(l => ['ganado', 'perdido'].includes(l.stage));
+  const card = l => `<button class="lead" data-l="${l.id}" style="--c:${STAGE[l.stage].c}"><b>${esc(l.company)}</b><small>${esc((l.interest || []).join(' · ') || l.msg || 'Sin detalle')}</small>
+    <span class="lf"><span>${SRC[l.source] || '🏢'} ${l.lines ? l.lines + ' líneas · ' + mxn(leadValue(l)).replace(/\.\d+$/, '') : esc(l.source)}</span><span>${l.owner ? '🙋 ' + esc(l.owner.split(' ')[0]) : '<i class="dot"></i> sin asignar'} · ${ago(l.updated)}</span></span></button>`;
+  shell(`<div class="kpis">
+      <div class="kpi"><small>Oportunidades abiertas</small><b>${ol.length}</b><em>${ls.filter(l => l.stage === 'nuevo').length} nuevas sin contactar</em></div>
+      <div class="kpi"><small>Valor mensual en juego</small><b>${mxn(ol.reduce((s, l) => s + leadValue(l), 0)).replace(/\.\d+$/, '')}</b><em>${ol.reduce((s, l) => s + (l.lines || 0), 0)} líneas/equipos</em></div>
+      <div class="kpi"><small>Ganadas</small><b>${won.length}</b><em>${mxn(won.reduce((s, l) => s + leadValue(l), 0)).replace(/\.\d+$/, '')}/mes</em></div>
+      <div class="kpi"><small>Tasa de cierre</small><b>${closed.length ? Math.round(won.length / closed.length * 100) : 0}%</b><em>${closed.length} cerradas</em></div>
+    </div>
+    <div class="search"><input id="lq" placeholder="Busca empresa, contacto o interés" value="${esc(leadQ)}"><span class="hint" style="align-self:center">Entran del formulario de propuesta y del chat de la página Empresas.</span></div>
+    <div class="kanban">${STAGES.map(([k, n, c]) => { const xs = vis.filter(l => l.stage === k).sort((a, b) => b.updated - a.updated); return `<section class="col"><h4><i style="background:${c}"></i>${n}<span>${xs.length}</span></h4>${xs.map(card).join('') || '<p class="hint" style="padding:6px">—</p>'}</section>`; }).join('')}</div>`,
+    'Empresas B2B', `<span class="pill b2b">NAVICom</span><a class="btn btn-line xs" href="../empresas.html" target="_blank">Abrir página Empresas ↗</a>`);
+  const inp = $('lq'); inp.oninput = () => { leadQ = inp.value; empresas(); const i = $('lq'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); };
+  document.querySelectorAll('[data-l]').forEach(b => b.onclick = () => leadCard(b.dataset.l));
+}
+function leadCard(lid) {
+  const l = Desk.leads().find(x => x.id === lid); if (!l) return;
+  const conv = l.conv && Desk.get(l.conv), shown = revealed.has(l.id + ':mail');
+  $('ov').hidden = false;
+  $('ov').innerHTML = `<div><div style="display:flex;gap:10px;align-items:start"><div><h3>🏢 ${esc(l.company)}</h3><p class="muted">${l.id} · ${SRC[l.source] || ''} ${esc(l.source)} · ${new Date(l.t).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })} ${hhmm(l.t)}</p></div><span class="pill b2b" style="margin-left:auto">B2B</span></div>
+    <div class="kv" style="margin-top:12px"><span>Contacto</span><b>${esc(l.contact || '—')}</b>
+      <span>Correo</span><b>${l.mail ? (shown ? esc(l.mail) : esc(Mask.mail(l.mail)) + `<a class="rv" id="lRv">Ver</a>`) : '—'}</b>
+      ${l.tel ? `<span>Teléfono</span><b>${esc(Mask.phone(l.tel))}</b>` : ''}
+      <span>Líneas / equipos</span><b>${l.lines || '—'}</b><span>Valor estimado</span><b>${l.lines ? mxn(leadValue(l)).replace(/\.\d+$/, '') + '/mes' : '—'}</b>
+      <span>Le interesa</span><b>${esc((l.interest || []).join(', ') || '—')}</b></div>
+    ${l.msg ? `<p style="margin-top:10px;background:#ffffff0a;border-radius:12px;padding:10px;font-size:13px">“${esc(l.msg)}”</p>` : ''}
+    <label>Etapa<select class="inp" id="lSt">${STAGES.map(([k, n]) => `<option value="${k}" ${l.stage === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <label>Ejecutivo<div style="display:flex;gap:8px;align-items:center"><b style="color:var(--text)">${esc(l.owner || 'Sin asignar')}</b>${l.owner !== staff.name ? '<button class="btn btn-line xs" id="lMe" type="button">Asignármela</button>' : ''}</div></label>
+    <label>Notas<textarea class="inp" id="lNote" style="min-height:60px" placeholder="Ej. Llamada agendada el jueves; quieren piloto de 5 unidades"></textarea></label>
+    ${(l.notes || []).map(n => `<div class="hint" style="margin-top:6px">📝 ${esc(n.txt)} · ${esc(n.by)} · ${ago(n.t)}</div>`).join('')}
+    <div class="acts">${conv ? '<button class="btn btn-line xs" id="lConv">💬 Abrir conversación</button>' : ''}<button class="btn btn-line xs" id="lX">Cerrar</button><button class="btn btn-lime xs" id="lOk">Guardar</button></div></div>`;
+  $('lX').onclick = () => { $('ov').hidden = true; route(); };
+  if ($('lRv')) $('lRv').onclick = () => { Desk.audit({ by: staff.name, role: staff.role, cust: l.id, name: l.company, field: 'correo (empresa)', why: 'Contactar a la empresa' }); revealed.add(l.id + ':mail'); leadCard(lid); };
+  if ($('lMe')) $('lMe').onclick = () => { Desk.setLead(l.id, { owner: staff.name, stage: l.stage === 'nuevo' ? 'contactado' : l.stage }); toast('Asignada a ti'); leadCard(lid); };
+  if ($('lConv')) $('lConv').onclick = () => { $('ov').hidden = true; view = 'desk'; segF = 'b2b'; sel = conv.id; sessionStorage.setItem('central.view', view); route(); };
+  $('lOk').onclick = () => {
+    const note = $('lNote').value.trim(), st = $('lSt').value;
+    Desk.setLead(l.id, { stage: st, owner: l.owner || staff.name, notes: note ? [{ t: Date.now(), by: staff.name, txt: note }, ...(l.notes || [])] : l.notes || [] });
+    if (conv && st !== l.stage) Desk.push(conv.id, { from: 'note', agent: staff.name, txt: `Oportunidad ${l.id}: ${STAGE[l.stage].n} → ${STAGE[st].n}` });
+    $('ov').hidden = true; toast('Oportunidad actualizada'); route();
+  };
 }
 
 // ---------- Clientes ----------
@@ -382,6 +504,6 @@ function privacidad() {
 addEventListener('storage', e => {
   if (e.key !== Desk.KEY || !staff || !$('ov').hidden) return;
   if (document.activeElement?.id === 'cTxt' && $('cTxt').value) return; // no borrar lo que el asesor está escribiendo
-  if (view === 'desk' || view === 'resumen') route();
+  if (['desk', 'resumen', 'empresas'].includes(view)) route();
 });
 route();
