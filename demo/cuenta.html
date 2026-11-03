@@ -441,16 +441,16 @@ if (user) {
     + (user.apps.includes('sos') ? `<div><span>NAVI SOS Family</span><a href="sos.html">Incluido ✓</a></div>` : `<div><span>NAVI SOS Family</span><a href="index.html#tranquilidad">Desde 12 GB</a></div>`);
   $('planImg').src = `assets/${user.img}.png`;
 
-  // consumo de datos (valores de demostración)
+  // consumo de datos (valores de demostración). En Plan Familia no se muestra el panel de datos por línea:
+  // solo queda el recuadro del plan, a todo lo ancho.
   const used = DEMO_USED;
-  $('usage').innerHTML = fam
-    ? '<h3>Datos por línea</h3>' + lines.map((l, i) => `
-        <div class="line"><img src="${avatarSrc(l.phone, l.img)}" data-ph="${l.phone}" alt=""><div><b>${l.name}</b><div class="meter"><i data-w="${used[i] * 100}"></i></div></div><em>${(l.gb * (1 - used[i])).toFixed(1)} de ${l.gb} GB</em></div>`).join('')
-    : `<h3>Tus datos</h3><div class="usage"><b style="font-family:var(--display);font-size:34px">${(p.gb * (1 - used[0])).toFixed(1)} GB</b> <small>disponibles de ${p.gb} GB</small>
-        <div class="meter"><i data-w="${used[0] * 100}"></i></div><small>Llamadas y SMS ilimitados · Redes sociales incluidas</small></div>`;
-  $('usage').insertAdjacentHTML('beforeend', '<a class="more" href="movil.html">Ver consumo detallado →</a>');
+  if (fam) { $('usage').remove(); document.querySelector('.plan').style.gridTemplateColumns = '1fr'; }
+  else $('usage').innerHTML = `<h3>Tus datos</h3><div class="usage"><b style="font-family:var(--display);font-size:34px">${(p.gb * (1 - used[0])).toFixed(1)} GB</b> <small>disponibles de ${p.gb} GB</small>
+        <div class="meter"><i data-w="${used[0] * 100}"></i></div><small>Llamadas y SMS ilimitados · Redes sociales incluidas</small></div><a class="more" href="movil.html">Ver consumo detallado →</a>`;
 
-  // equipos registrados (uno por línea)
+  // equipos registrados (uno por línea). En Plan Familia el detalle de los equipos solo lo ve el titular.
+  if (fam && !isOwner) $('devs').closest('section').remove();
+  else {
   $('devTitle').textContent = lines.length > 1 ? 'Equipos de la familia' : 'Tu equipo';
   $('devs').innerHTML = lines.map((l, i) => { const D = l.device; return `
     <article class="dev">
@@ -468,6 +468,7 @@ if (user) {
     s.textContent = show ? fmtImei(lines[i].device.imei) : maskImei(lines[i].device.imei);
     b.textContent = show ? 'Ocultar' : 'Mostrar';
   });
+  }
 
   requestAnimationFrame(() => setTimeout(() => document.querySelectorAll('.meter i').forEach(i => i.style.width = i.dataset.w + '%'), 100));
 
