@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Navi Ride · Mi Navi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261103b"></script>
+<script>if (!NaviAuth.current()) location.replace('login.html?next=ride.html');</script>
+<script src="ride-data.js?v=1"></script>
+<style>
+:root{--ride:#4F8BFF}
+main{padding-bottom:80px}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:22px}
+.card + .card{margin-top:16px}
+.card h2{font-size:21px;margin-bottom:4px}
+.muted{color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted)}
+.btn.wide{width:100%;justify-content:center}
+.btn-ride{background:var(--ride);color:#fff;box-shadow:0 5px 0 #2A5BC4}
+.lnk{color:var(--muted);font-size:13px;text-decoration:underline}
+.layout{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start}
+.tabs{display:flex;gap:6px;margin:0 0 18px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:none;padding:10px 16px;border-radius:99px;border:1px solid #ffffff26;font-weight:800;font-size:14px;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--ride);border-color:var(--ride);color:#fff}
+.tabs b{background:#FF6FB1;color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;margin-left:4px}
+.verif{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#4F8BFF14;border:1px solid #4F8BFF44;border-radius:16px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.verif b{color:#9DBBFF}
+.inp{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;color:var(--text);font:inherit;font-size:15px;width:100%;min-width:0}
+.inp:focus{outline:none;border-color:var(--ride)}
+.inp option{color:#000}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.fgrid label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.fgrid .full{grid-column:1/-1}
+.swap{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;grid-column:1/-1}
+.swap button{width:42px;height:46px;border-radius:12px;background:#ffffff12;font-size:18px}
+.swap label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.chipsrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chipsrow button{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff22}
+.chipsrow button[aria-pressed="true"]{background:var(--ride);border-color:var(--ride)}
+/* resultados */
+.res{display:grid;gap:10px;margin-top:14px}
+.trip{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:#ffffff0a;border:1px solid #ffffff12;border-radius:18px;padding:14px;text-align:left;width:100%}
+.trip:hover{background:#ffffff12;border-color:#4F8BFF66}
+.tl{display:grid;grid-template-columns:auto 14px 1fr;gap:2px 8px;align-items:center;font-size:14px}
+.tl time{font-weight:800;font-size:15px}
+.tl i{width:10px;height:10px;border-radius:50%;border:2px solid var(--ride);justify-self:center}
+.tl .ln{width:2px;height:16px;background:#4F8BFF66;justify-self:center}
+.tl small{color:var(--muted)}
+.drv{display:flex;gap:10px;align-items:center}
+.drv .av{width:40px;height:40px;border-radius:50%;background:#ffffff14;display:grid;place-items:center;font-size:22px;flex:none}
+.drv b{display:block;font-size:14px}
+.drv small{color:var(--muted);font-size:12px}
+.price{text-align:right}
+.price b{font-family:var(--display);font-size:24px;display:block}
+.price small{color:var(--muted);font-size:12px}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.tags span{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:#ffffff12}
+.tags .v{background:#4F8BFF26;color:#9DBBFF}
+.tags .ok{background:#2BD67B22;color:#7BF0AE}
+.tags .w{background:#FFC22E22;color:#FFD66B}
+.tags .bad{background:#FF6F8E22;color:#FF9EB0}
+.empty{text-align:center;padding:24px 10px;color:var(--muted)}
+/* hoja de detalle */
+.sheet{position:fixed;inset:0;z-index:90;background:#03031acc;display:grid;place-items:end center;padding:16px;overflow:auto}
+.sheet[hidden]{display:none}
+.sheet > div{width:min(560px,100%);background:var(--navy-2);border:1px solid #ffffff22;border-radius:24px;padding:22px;max-height:calc(100dvh - 32px);overflow:auto}
+.route{display:grid;grid-template-columns:52px 14px 1fr;gap:4px 10px;margin:14px 0}
+.route time{font-weight:800}
+.route i{width:12px;height:12px;border-radius:50%;border:3px solid var(--ride);justify-self:center;margin-top:4px}
+.route .ln{width:3px;background:#4F8BFF66;justify-self:center;min-height:30px}
+.route small{display:block;color:var(--muted);font-size:12px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px;margin-top:10px}
+.kv span{color:var(--muted)}
+.kv b{text-align:right}
+.kv .tot{font-size:17px;border-top:1px solid #ffffff22;padding-top:8px}
+.rev{background:#ffffff0a;border-radius:14px;padding:10px 12px;font-size:13px;margin-top:8px}
+.rev b{font-size:13px}
+.stars{display:flex;gap:6px;justify-content:center;margin:10px 0}
+.stars button{font-size:34px;filter:grayscale(1);opacity:.5}
+.stars button.on{filter:none;opacity:1}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.acts .btn{flex:1;justify-content:center;min-width:140px}
+/* mis viajes */
+.mine{display:grid;gap:10px;margin-top:12px}
+.mt{background:#ffffff0a;border-radius:18px;padding:14px;display:grid;gap:8px}
+.mt .h{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.mt .h b{font-size:15px}
+.mt .a{display:flex;gap:6px;flex-wrap:wrap}
+.mt .a button,.mt .a a{padding:8px 12px;border-radius:12px;font-weight:800;font-size:13px;background:#ffffff12}
+.mt .a .go{background:var(--ride);color:#fff}
+.req{display:flex;gap:8px;align-items:center;background:#ffffff08;border-radius:12px;padding:8px 10px;font-size:13px}
+.req .sp{margin-left:auto;display:flex;gap:6px}
+.req button{padding:6px 10px;border-radius:10px;font-weight:800;font-size:12px;background:#ffffff14}
+.req .y{background:#2BD67B33;color:#7BF0AE}
+/* viaje en vivo */
+.live{position:fixed;inset:0;z-index:85;background:radial-gradient(circle at 50% 20%,#1d2f7a,#06062E 70%);display:flex;flex-direction:column;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px));overflow:auto}
+.live[hidden]{display:none}
+.live .in{max-width:560px;width:100%;margin:0 auto;display:grid;gap:12px}
+.map{border-radius:22px;overflow:hidden;background:#0d1450;border:1px solid #ffffff1f}
+.map svg{display:block;width:100%;height:auto}
+.eta{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.eta b{font-family:var(--display);font-size:30px}
+.shared{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.shared img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.sosr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sosr a,.sosr button{padding:14px;border-radius:16px;font-weight:800;text-align:center;font-size:15px}
+.legal{font-size:12px;color:var(--muted);margin-top:12px;text-align:center}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+@media (max-width:560px){.fgrid{grid-template-columns:1fr}.trip{grid-template-columns:1fr auto}.trip .drv{grid-column:1/-1;order:3}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div class="ico" style="background:#4F8BFF">🚗</div>
+    <div><h1>Navi Ride</h1><p>Viajes compartidos entre ciudades con otros clientes Navi: comparten gastos de gasolina y casetas.</p></div>
+  </div>
+  <div class="verif">✅ <span><b>Tu línea Navi verifica tu perfil.</b> Solo viajas con clientes Navi identificados por su línea. Tu número nunca se muestra: todo se habla dentro de la app.</span></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="app"></div>
+  <p class="legal">Navi Ride es para compartir gastos, no para lucrar: el precio por asiento no puede pasar del costo estimado de gasolina y casetas. En una emergencia llama al 911.</p>
+</main>
+
+<div class="sheet" id="sheet" hidden></div>
+<div class="live" id="live" hidden role="dialog" aria-modal="true" aria-label="Viaje en vivo"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const user = NaviAuth.current();
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const C = RIDE_CITIES, me = user.me?.name || user.name.split(' ')[0];
+const hhmm = t => new Date(t).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+const dayTxt = t => { const d = new Date(t), n = new Date(); const diff = Math.round((new Date(d).setHours(0, 0, 0, 0) - new Date(n).setHours(0, 0, 0, 0)) / 864e5); return diff === 0 ? 'Hoy' : diff === 1 ? 'Mañana' : d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'short' }); };
+const money = n => '$' + Math.round(n).toLocaleString('es-MX');
+const toast = t => { const e = document.createElement('div'); e.textContent = t; e.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#0B0B4F;font-weight:800;padding:10px 16px;border-radius:12px;z-index:99;max-width:calc(100% - 32px);text-align:center'; document.body.append(e); setTimeout(() => e.remove(), 2600); };
+const ME_KEY = 'navi.ride.me.' + user.phone;
+const meData = () => { try { return JSON.parse(localStorage.getItem(ME_KEY)) || {}; } catch { return {}; } };
+const LIVE_KEY = 'navi.ride.live.' + (user.owner || user.phone);
+const left = t => t.seats - RideStore.taken(t.id);
+const arrive = t => t.at + rideMins(rideKm(t.from, t.to)) * 6e4;
+const REVIEWS = ['Muy puntual y manejó con cuidado. 100% recomendado.', 'Plática agradable y auto limpio. Repetiría.', 'Nos esperó 5 minutos sin problema. Excelente.', 'Todo muy bien, llegamos antes de lo previsto.'];
+const ST = { confirmada: ['Confirmada', 'ok'], pendiente: ['Esperando al conductor', 'w'], cancelada: ['Cancelada', 'bad'], rechazada: ['No aceptada', 'bad'], terminada: ['Terminada', 'v'] };
+
+// ---------- pestañas ----------
+let tab = (location.hash.slice(1) || 'buscar');
+let q = { from: 'cdmx', to: 'pue', day: 0, pax: 1 };
+function render() {
+  const mineN = RideStore.bookings().filter(b => b.phone === user.phone && ['confirmada', 'pendiente'].includes(b.status)).length
+    + RideStore.bookings().filter(b => b.status === 'pendiente' && RideStore.trip(b.trip)?.driverPhone === user.phone).length;
+  $('tabs').innerHTML = [['buscar', '🔎 Buscar viaje'], ['publicar', '➕ Publicar viaje'], ['mis', `🧳 Mis viajes${mineN ? `<b>${mineN}</b>` : ''}`]].map(([k, n]) => `<button data-t="${k}" aria-pressed="${tab === k}">${n}</button>`).join('');
+  $('tabs').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; history.replaceState(null, '', '#' + tab); render(); });
+  autoAccept();
+  ({ buscar, publicar, mis }[tab] || buscar)();
+}
+const cityOpts = sel => Object.entries(C).map(([k, c]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${c.n}</option>`).join('');
+
+// ---------- buscar ----------
+function buscar() {
+  const days = [0, 1, 2, 3].map(d => { const t = new Date(); t.setDate(t.getDate() + d); return t; });
+  const sameDay = (t, d) => new Date(t).toDateString() === days[d].toDateString();
+  const all = RideStore.trips().filter(t => t.from === q.from && t.to === q.to && t.at > Date.now());
+  const list = all.filter(t => sameDay(t.at, q.day)).sort((a, b) => a.at - b.at);
+  const km = rideKm(q.from, q.to);
+  $('app').innerHTML = `<div class="layout"><div><section class="card"><h2>¿A dónde vas?</h2>
+      <div class="fgrid"><div class="swap"><label>Desde<select class="inp" id="qF">${cityOpts(q.from)}</select></label><button id="qX" type="button" aria-label="Intercambiar">⇄</button><label>Hasta<select class="inp" id="qT">${cityOpts(q.to)}</select></label></div>
+        <label>Pasajeros<select class="inp" id="qP">${[1, 2, 3, 4].map(n => `<option ${n === q.pax ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        <label>Distancia<input class="inp" disabled value="${q.from === q.to ? '—' : `${km} km · ${Math.floor(rideMins(km) / 60)} h ${rideMins(km) % 60} min aprox.`}"></label></div>
+      <div class="chipsrow">${days.map((d, i) => { const n = all.filter(t => sameDay(t.at, i)).length; return `<button data-day="${i}" aria-pressed="${q.day === i}">${dayTxt(d)} · ${n}</button>`; }).join('')}</div></section>
+    <div class="res">${q.from === q.to ? '<div class="empty">Elige una ciudad de destino distinta.</div>' : list.map(tripCard).join('') || `<div class="empty card">😕 No hay viajes ${dayTxt(days[q.day]).toLowerCase()} de ${C[q.from].n} a ${C[q.to].n}.<br>Prueba otro día, o <a class="lnk" href="#publicar" data-t2="publicar">publica tú el viaje</a> y comparte gastos.</div>`}</div></div>
+    <div><section class="card"><h2>Rutas populares</h2><div class="chipsrow">${[['cdmx', 'pue'], ['cdmx', 'qro'], ['cdmx', 'cva'], ['cdmx', 'tol'], ['cdmx', 'pac'], ['cdmx', 'mor'], ['cdmx', 'gdl'], ['pue', 'cdmx']].map(([a, b]) => `<button data-r="${a}|${b}" aria-pressed="${q.from === a && q.to === b}">${C[a].n.replace('Ciudad de México', 'CDMX')} → ${C[b].n.replace('Ciudad de México', 'CDMX')}</button>`).join('')}</div></section>
+      <section class="card"><h2>Viaja seguro</h2><div class="muted" style="display:grid;gap:8px;margin-top:8px">
+        <div>✅ Todos son clientes Navi verificados por su línea.</div><div>⭐ Calificaciones después de cada viaje.</div>
+        <div>🛡️ Comparte el viaje en vivo con tu familia en NAVI SOS y ten el botón SOS a la mano.</div><div>💳 El pago se libera al conductor hasta que termina el viaje.</div></div></section></div></div>`;
+  $('qF').onchange = () => { q.from = $('qF').value; buscar(); };
+  $('qT').onchange = () => { q.to = $('qT').value; buscar(); };
+  $('qP').onchange = () => { q.pax = +$('qP').value; buscar(); };
+  $('qX').onclick = () => { [q.from, q.to] = [q.to, q.from]; buscar(); };
+  $('app').querySelectorAll('[data-day]').forEach(b => b.onclick = () => { q.day = +b.dataset.day; buscar(); });
+  $('app').querySelectorAll('[data-r]').forEach(b => b.onclick = () => { [q.from, q.to] = b.dataset.r.split('|'); buscar(); });
+  $('app').querySelectorAll('[data-trip]').forEach(b => b.onclick = () => detail(b.dataset.trip));
+  $('app').querySelectorAll('[data-t2]').forEach(a => a.onclick = e => { e.preventDefault(); tab = 'publicar'; Object.assign(pub, { from: q.from, to: q.to }); render(); });
+}
+function tripCard(t) {
+  const l = left(t), full = l < q.pax, mine = t.driverPhone === user.phone;
+  return `<button class="trip" data-trip="${t.id}" ${full && !mine ? 'style="opacity:.55"' : ''}>
+    <div class="tl"><time>${hhmm(t.at)}</time><i></i><span>${C[t.from].n}<small> · ${esc(t.meet)}</small></span><small>${Math.floor(rideMins(rideKm(t.from, t.to)) / 60)}h${String(rideMins(rideKm(t.from, t.to)) % 60).padStart(2, '0')}</small><span class="ln"></span><span></span><time>${hhmm(arrive(t))}</time><i></i><span>${C[t.to].n}</span></div>
+    <div class="price"><b>${money(t.price)}</b><small>${full ? 'Lleno' : `${l} ${l === 1 ? 'lugar' : 'lugares'}`}</small></div>
+    <div class="drv"><span class="av">${t.emo}</span><div><b>${esc(t.driver)}${mine ? ' (Tú)' : ''}</b><small>${typeof t.rating === 'number' ? `⭐ ${t.rating.toFixed(1)} · ${t.trips} viajes` : '🆕 Nuevo en Navi Ride'} · ${esc(t.car)}</small>
+      <div class="tags"><span class="v">✓ Cliente Navi</span>${t.instant ? '<span class="ok">⚡ Reserva inmediata</span>' : '<span>El conductor acepta</span>'}${t.prefs.pets ? '<span>🐾 Mascotas</span>' : ''}${t.prefs.back2 ? '<span>Máx. 2 atrás</span>' : ''}</div></div></div></button>`;
+}
+
+// ---------- detalle y reserva ----------
+function detail(id) {
+  const t = RideStore.trip(id), l = left(t), mine = t.driverPhone === user.phone, km = rideKm(t.from, t.to);
+  const pax = Math.min(q.pax, Math.max(1, l)), sub = t.price * pax, fee = Math.round(sub * RIDE_FEE), had = RideStore.bookings().find(b => b.trip === id && b.phone === user.phone && ['confirmada', 'pendiente'].includes(b.status));
+  const revs = t.seed ? [0, 1].map(i => REVIEWS[(t.trips + i) % REVIEWS.length]) : [];
+  $('sheet').hidden = false;
+  $('sheet').innerHTML = `<div><div style="display:flex;justify-content:space-between;align-items:start;gap:10px"><div><span class="hint">${dayTxt(t.at).toUpperCase()}</span><h2>${C[t.from].n} → ${C[t.to].n}</h2></div><button class="lnk" id="shX" style="font-size:20px;text-decoration:none">✕</button></div>
+    <div class="route"><time>${hhmm(t.at)}</time><i></i><div><b>${C[t.from].n}</b><small>Punto de encuentro: ${esc(t.meet)}</small></div><span></span><span class="ln"></span><small style="align-self:center">${km} km · ${Math.floor(rideMins(km) / 60)} h ${rideMins(km) % 60} min</small><time>${hhmm(arrive(t))}</time><i></i><div><b>${C[t.to].n}</b><small>Llegada: ${esc(t.drop)}</small></div></div>
+    <div class="drv" style="background:#ffffff0a;border-radius:16px;padding:12px"><span class="av">${t.emo}</span><div><b>${esc(t.driver)}</b><small>${typeof t.rating === 'number' ? `⭐ ${t.rating.toFixed(1)} · ${t.trips} viajes` : '🆕 Nuevo en Navi Ride'} · ${esc(t.car)}</small>
+      <div class="tags"><span class="v">✓ Línea Navi verificada</span><span class="v">✓ Identidad verificada</span></div></div></div>
+    <div class="tags" style="margin-top:10px">${t.instant ? '<span class="ok">⚡ Reserva inmediata</span>' : '<span class="w">El conductor acepta cada reserva</span>'}<span>${t.prefs.smoke ? '🚬 Se puede fumar' : '🚭 No fumar'}</span><span>${t.prefs.pets ? '🐾 Acepta mascotas' : 'Sin mascotas'}</span><span>${t.prefs.music ? '🎵 Con música' : '🤫 Viaje tranquilo'}</span>${t.prefs.back2 ? '<span>Máx. 2 personas atrás</span>' : ''}</div>
+    ${t.notes ? `<p class="muted" style="margin-top:10px">“${esc(t.notes)}”</p>` : ''}
+    ${revs.map(r => `<div class="rev"><b>⭐⭐⭐⭐⭐</b> ${esc(r)}</div>`).join('')}
+    ${mine ? '<p class="muted" style="margin-top:14px">Es tu viaje. Las solicitudes llegan a <b>Mis viajes</b>.</p>'
+      : had ? `<p class="muted" style="margin-top:14px">Ya tienes ${had.seats} ${had.seats === 1 ? 'lugar' : 'lugares'} en este viaje (${ST[had.status][0].toLowerCase()}).</p><div class="acts"><button class="btn btn-ride" id="goMine">Ver en Mis viajes</button></div>`
+      : l < 1 ? '<p class="muted" style="margin-top:14px">Este viaje ya está lleno.</p>'
+      : `<div class="kv"><span>${pax} ${pax === 1 ? 'asiento' : 'asientos'} × ${money(t.price)}</span><b>${money(sub)}</b><span>Cuota de servicio Navi Ride (10%)</span><b>${money(fee)}</b><span class="tot">Total</span><b class="tot">${money(sub + fee)}</b></div>
+        ${pax < q.pax ? `<p class="hint" style="margin-top:6px">Solo quedan ${l} lugares.</p>` : ''}
+        <div class="acts"><button class="btn btn-ride" id="book">${t.instant ? 'Reservar' : 'Solicitar lugar'} · ${money(sub + fee)}</button></div>
+        <p class="hint" style="margin-top:8px">DEMO sin cobro real. En producción el pago se retiene y se libera al conductor al terminar el viaje. Cancelando con más de 24 h te devolvemos todo menos la cuota.</p>`}</div>`;
+  $('shX').onclick = closeSheet;
+  if ($('goMine')) $('goMine').onclick = () => { closeSheet(); tab = 'mis'; render(); };
+  if ($('book')) $('book').onclick = () => {
+    const b = RideStore.upd(d => { const b = { id: 'NR-' + String(Date.now()).slice(-6), trip: t.id, snap: t, phone: user.phone, name: me, seats: pax, sub, fee, total: sub + fee, status: t.instant ? 'confirmada' : 'pendiente', at: Date.now() }; d.bookings.unshift(b); return b; });
+    closeSheet(); tab = 'mis'; history.replaceState(null, '', '#mis'); render();
+    toast(t.instant ? `✅ Reservado con ${t.driver}. Folio ${b.id}` : `📨 Solicitud enviada a ${t.driver}`);
+    if (!t.instant && t.seed) setTimeout(() => { autoAccept(true); if (tab === 'mis') render(); }, 5000);
+  };
+}
+function closeSheet() { $('sheet').hidden = true; $('sheet').innerHTML = ''; }
+$('sheet').onclick = e => { if (e.target === $('sheet')) closeSheet(); };
+// DEMO: los conductores de ejemplo aceptan las solicitudes a los pocos segundos
+function autoAccept(force) {
+  RideStore.upd(d => d.bookings.forEach(b => { if (b.status === 'pendiente' && b.snap?.seed && (force || Date.now() - b.at > 5000)) { b.status = 'confirmada'; b.accepted = Date.now(); if (force) toast(`✅ ${b.snap.driver} aceptó tu solicitud`); } }));
+}
+
+// ---------- publicar ----------
+const pub = { from: 'cdmx', to: 'pue', seats: 3 };
+function publicar() {
+  const M = meData(), tmr = new Date(); tmr.setDate(tmr.getDate() + 1);
+  const km = rideKm(pub.from, pub.to), sug = rideSuggest(km, pub.seats), max = rideMax(km, pub.seats);
+  $('app').innerHTML = `<div class="layout"><section class="card"><h2>Publica tu viaje</h2><p class="muted">¿Vas a otra ciudad con lugares libres? Comparte gastos con otros clientes Navi.</p>
+    <form id="pf"><div class="fgrid">
+      <div class="swap"><label>Desde<select class="inp" name="from">${cityOpts(pub.from)}</select></label><span style="padding-bottom:12px">→</span><label>Hasta<select class="inp" name="to">${cityOpts(pub.to)}</select></label></div>
+      <label>Fecha<input class="inp" type="date" name="date" required min="${new Date().toISOString().slice(0, 10)}" value="${pub.date || tmr.toISOString().slice(0, 10)}"></label>
+      <label>Hora de salida<input class="inp" type="time" name="time" required value="${pub.time || '08:00'}"></label>
+      <label>Punto de encuentro<select class="inp" name="meet">${C[pub.from].meet.map(m => `<option>${m}</option>`).join('')}</select></label>
+      <label>Lugares libres<select class="inp" name="seats">${[1, 2, 3, 4].map(n => `<option ${n === pub.seats ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+      <label class="full">Precio por asiento: <b style="color:var(--text)" id="pv">${money(pub.price && pub.price <= max ? pub.price : sug)}</b> <span class="hint">sugerido ${money(sug)} · máximo ${money(max)}</span>
+        <input type="range" name="price" min="40" max="${max}" step="10" value="${Math.min(pub.price || sug, max)}" style="accent-color:var(--ride)"></label>
+      <p class="hint full" style="margin-top:-4px">Costo estimado del viaje: ${money(rideCost(km))} (gasolina y casetas, ${km} km). El precio máximo evita que alguien lucre con los viajes.</p>
+      <label class="full" style="display:flex;gap:10px;align-items:center"><input type="checkbox" name="instant" checked style="width:20px;height:20px;accent-color:var(--ride)"><span><b style="color:var(--text)">Reserva inmediata</b><br><span class="hint">Si lo quitas, tú aceptas cada solicitud.</span></span></label>
+      <div class="full"><span style="font-size:13px;font-weight:700;color:var(--muted)">Preferencias</span><div class="chipsrow" style="margin-top:6px">${[['pets', '🐾 Acepto mascotas'], ['music', '🎵 Con música'], ['back2', 'Máx. 2 atrás'], ['smoke', '🚬 Se puede fumar']].map(([k, n]) => `<label style="display:flex;gap:6px;align-items:center;font-size:13px;padding:6px 10px;border-radius:99px;background:#ffffff10"><input type="checkbox" name="${k}" ${k === 'music' ? 'checked' : ''}>${n}</label>`).join('')}</div></div>
+      <label class="full">Tu auto<input class="inp" name="car" required maxlength="40" placeholder="Ej. Nissan Versa gris" value="${esc(M.car || '')}"></label>
+      <label class="full">Notas para los pasajeros <span class="hint">(opcional)</span><textarea class="inp" name="notes" maxlength="200" placeholder="Ej. Una maleta mediana por persona; salgo puntual."></textarea></label>
+    </div><button class="btn btn-ride wide" style="margin-top:16px">Publicar viaje</button></form></section>
+    <div><section class="card"><h2>Cómo funciona</h2><div class="muted" style="display:grid;gap:8px;margin-top:8px"><div>1️⃣ Publica tu ruta, fecha y precio por asiento.</div><div>2️⃣ Clientes Navi reservan; ves su perfil verificado y calificación.</div><div>3️⃣ Viajan juntos y compartes el viaje en vivo con tu familia.</div><div>4️⃣ Al terminar recibes el pago completo de los asientos; la cuota de servicio la paga el pasajero.</div></div></section>
+      <section class="card"><h2>Reglas</h2><div class="muted" style="display:grid;gap:6px;margin-top:8px"><div>🪪 Licencia vigente y auto con seguro.</div><div>💸 Solo compartir gastos: nada de cobrar como taxi.</div><div>⏰ Puntualidad: avisa en la app si te retrasas.</div><div>🚭 Respeta las preferencias que publicaste.</div></div></section></div></div>`;
+  const f = $('pf');
+  f.addEventListener('change', e => {
+    pub.from = f.from.value; pub.to = f.to.value; pub.seats = +f.seats.value; pub.date = f.date.value; pub.time = f.time.value; pub.price = +f.price.value;
+    if (['from', 'to', 'seats'].includes(e.target.name)) { delete pub.price; publicar(); } // otra ruta: vuelve al precio sugerido
+  });
+  f.price.oninput = () => { $('pv').textContent = money(f.price.value); };
+  f.onsubmit = e => {
+    e.preventDefault();
+    if (f.from.value === f.to.value) return toast('Elige un destino distinto al origen');
+    const at = new Date(`${f.date.value}T${f.time.value}`);
+    if (!(at > Date.now() + 30 * 60e3)) return toast('La salida debe ser al menos en 30 minutos');
+    const k = rideKm(f.from.value, f.to.value), s = +f.seats.value, price = Math.min(+f.price.value, rideMax(k, s));
+    localStorage.setItem(ME_KEY, JSON.stringify({ ...M, car: f.car.value.trim() }));
+    const t = { id: 'U' + Date.now().toString(36), from: f.from.value, to: f.to.value, at: +at, seats: s, price, instant: f.instant.checked, driver: me, driverPhone: user.phone, rating: null, trips: 0, car: f.car.value.trim(), emo: '🧑',
+      meet: f.meet.value, drop: C[f.to.value].meet[0], prefs: { pets: f.pets.checked, music: f.music.checked, back2: f.back2.checked, smoke: f.smoke.checked }, notes: f.notes.value.trim(), created: Date.now() };
+    RideStore.upd(d => { d.trips.unshift(t); });
+    toast('🚗 Viaje publicado. Te avisamos cuando alguien reserve.'); tab = 'mis'; history.replaceState(null, '', '#mis'); render();
+  };
+}
+
+// ---------- mis viajes ----------
+function mis() {
+  const bs = RideStore.bookings(), mineB = bs.filter(b => b.phone === user.phone).sort((a, b) => (RideStore.trip(a.trip)?.at || 0) - (RideStore.trip(b.trip)?.at || 0));
+  const myTrips = RideStore.read().trips.filter(t => t.driverPhone === user.phone).sort((a, b) => a.at - b.at);
+  const live = liveData();
+  $('app').innerHTML = `<div class="layout"><section class="card"><h2>Como pasajero</h2>
+      <div class="mine">${mineB.map(b => { const t = RideStore.trip(b.trip) || b.snap, [sn, sc] = ST[b.status], act = ['confirmada', 'pendiente'].includes(b.status); return `<div class="mt"><div class="h"><b>${C[t.from].n} → ${C[t.to].n}</b><span class="tags"><span class="${sc}">${sn}</span></span></div>
+        <div class="muted">${dayTxt(t.at)} · ${hhmm(t.at)} en ${esc(t.meet)} · con ${t.emo} ${esc(t.driver)} (${esc(t.car)})</div><div class="hint">${b.id} · ${b.seats} ${b.seats === 1 ? 'lugar' : 'lugares'} · ${money(b.total)}${b.refund != null ? ` · reembolso ${money(b.refund)}` : ''}${b.rated ? ` · calificaste ${'⭐'.repeat(b.rated)}` : ''}</div>
+        <div class="a">${b.status === 'confirmada' ? `<button class="go" data-live="${b.id}">${live?.booking === b.id ? '📍 Ver viaje en vivo' : '🚗 Iniciar viaje y compartir en vivo'}</button>` : ''}${act ? `<button data-cancel="${b.id}">Cancelar</button>` : ''}${b.status === 'terminada' && !b.rated ? `<button class="go" data-rate="${b.id}">⭐ Calificar a ${esc(t.driver)}</button>` : ''}</div></div>`; }).join('') || '<div class="empty">Aún no reservas viajes. <a class="lnk" href="#buscar" id="toSearch">Busca uno</a>.</div>'}</div></section>
+    <section class="card"><h2>Como conductor</h2>
+      <div class="mine">${myTrips.map(t => { const rq = bs.filter(b => b.trip === t.id && b.status !== 'cancelada'); return `<div class="mt" ${t.canceled ? 'style="opacity:.5"' : ''}><div class="h"><b>${C[t.from].n} → ${C[t.to].n}</b><span class="tags">${t.canceled ? '<span class="bad">Cancelado</span>' : `<span class="v">${left(t)} de ${t.seats} libres</span>`}</span></div>
+        <div class="muted">${dayTxt(t.at)} · ${hhmm(t.at)} · ${esc(t.meet)} · ${money(t.price)} por asiento</div>
+        ${rq.map(b => `<div class="req">👤 <span><b>${esc(b.name)}</b> · ${b.seats} ${b.seats === 1 ? 'lugar' : 'lugares'} <span class="tags" style="display:inline-flex;margin:0"><span class="v">✓ Cliente Navi</span></span></span><span class="sp">${b.status === 'pendiente' ? `<button class="y" data-acc="${b.id}">Aceptar</button><button data-rej="${b.id}">Rechazar</button>` : `<span class="tags"><span class="${ST[b.status][1]}">${ST[b.status][0]}</span></span>`}</span></div>`).join('') || '<span class="hint">Nadie ha reservado todavía.</span>'}
+        ${t.canceled ? '' : `<div class="a">${rq.some(b => b.status === 'confirmada') ? `<button class="go" data-dlive="${t.id}">🚗 Iniciar viaje y compartir en vivo</button>` : ''}<button data-tcancel="${t.id}">Cancelar viaje</button></div>`}</div>`; }).join('') || '<div class="empty">No has publicado viajes. <a class="lnk" href="#publicar" id="toPub">Publica uno</a> y comparte gastos.</div>'}</div></section></div>`;
+  const A = $('app');
+  $('toSearch')?.addEventListener('click', e => { e.preventDefault(); tab = 'buscar'; render(); });
+  $('toPub')?.addEventListener('click', e => { e.preventDefault(); tab = 'publicar'; render(); });
+  A.querySelectorAll('[data-cancel]').forEach(b => b.onclick = () => cancelBooking(b.dataset.cancel));
+  A.querySelectorAll('[data-acc],[data-rej]').forEach(b => b.onclick = () => { const id = b.dataset.acc || b.dataset.rej; RideStore.upd(d => { const x = d.bookings.find(y => y.id === id); x.status = b.dataset.acc ? 'confirmada' : 'rechazada'; }); toast(b.dataset.acc ? 'Reserva aceptada' : 'Solicitud rechazada'); render(); });
+  A.querySelectorAll('[data-tcancel]').forEach(b => b.onclick = () => { if (!confirm('¿Cancelar el viaje? A quienes reservaron se les devuelve todo, incluida la cuota.')) return; RideStore.upd(d => { const t = d.trips.find(x => x.id === b.dataset.tcancel); t.canceled = true; d.bookings.filter(x => x.trip === t.id && ['confirmada', 'pendiente'].includes(x.status)).forEach(x => { x.status = 'cancelada'; x.refund = x.total; }); }); toast('Viaje cancelado'); render(); });
+  A.querySelectorAll('[data-live]').forEach(b => b.onclick = () => startLive(b.dataset.live, null));
+  A.querySelectorAll('[data-dlive]').forEach(b => b.onclick = () => startLive(null, b.dataset.dlive));
+  A.querySelectorAll('[data-rate]').forEach(b => b.onclick = () => rate(b.dataset.rate));
+}
+// cancelación: con más de 24 h se devuelve todo menos la cuota; con menos, la mitad de los asientos
+function cancelBooking(id) {
+  const b = RideStore.bookings().find(x => x.id === id), t = RideStore.trip(b.trip) || b.snap, early = t.at - Date.now() > 864e5;
+  const refund = b.status === 'pendiente' ? b.total : early ? b.sub : Math.round(b.sub / 2);
+  if (!confirm(`¿Cancelar tu lugar? ${b.status === 'pendiente' ? 'Aún no te aceptaban: te devolvemos todo' : early ? 'Faltan más de 24 h: te devolvemos todo menos la cuota de servicio' : 'Faltan menos de 24 h: te devolvemos la mitad de los asientos'} (${money(refund)}).`)) return;
+  RideStore.upd(d => { const x = d.bookings.find(y => y.id === id); x.status = 'cancelada'; x.refund = refund; });
+  toast(`Cancelado. Reembolso de ${money(refund)}`); render();
+}
+function rate(id) {
+  const b = RideStore.bookings().find(x => x.id === id), t = RideStore.trip(b.trip) || b.snap; let v = 5;
+  $('sheet').hidden = false;
+  $('sheet').innerHTML = `<div style="text-align:center"><div style="font-size:48px">${t.emo}</div><h2>¿Cómo te fue con ${esc(t.driver)}?</h2><p class="muted">${C[t.from].n} → ${C[t.to].n}</p>
+    <div class="stars">${[1, 2, 3, 4, 5].map(n => `<button data-s="${n}" class="on">⭐</button>`).join('')}</div>
+    <textarea class="inp" id="rvT" maxlength="200" placeholder="Cuéntale a otros clientes Navi cómo estuvo el viaje (opcional)"></textarea>
+    <div class="acts"><button class="btn btn-ghost" id="rvNo">Después</button><button class="btn btn-ride" id="rvOk">Enviar calificación</button></div></div>`;
+  const paint = () => $('sheet').querySelectorAll('[data-s]').forEach(s => s.classList.toggle('on', +s.dataset.s <= v));
+  $('sheet').querySelectorAll('[data-s]').forEach(s => s.onclick = () => { v = +s.dataset.s; paint(); });
+  $('rvNo').onclick = closeSheet;
+  $('rvOk').onclick = () => { RideStore.upd(d => { d.bookings.find(x => x.id === id).rated = v; d.reviews.unshift({ t: Date.now(), trip: b.trip, driver: t.driver, by: me, stars: v, txt: $('rvT').value.trim() }); }); closeSheet(); toast('¡Gracias! Tu calificación ayuda a toda la comunidad'); render(); };
+}
+
+// ---------- viaje en vivo: mapa, hora de llegada, familia y SOS ----------
+const liveData = () => { try { const r = JSON.parse(localStorage.getItem(LIVE_KEY)); return r && r.active && r.phone === user.phone ? r : null; } catch { return null; } };
+const DEMO_MIN = 3; // la demo recorre el viaje en 3 minutos
+function startLive(bookingId, tripId) {
+  let r = liveData();
+  const t = bookingId ? (RideStore.trip(RideStore.bookings().find(b => b.id === bookingId).trip) || RideStore.bookings().find(b => b.id === bookingId).snap) : RideStore.trip(tripId);
+  if (!r || (bookingId && r.booking !== bookingId) || (tripId && r.trip !== tripId)) {
+    r = { active: true, booking: bookingId, trip: t.id, phone: user.phone, name: me, from: C[t.from].n, to: C[t.to].n, fk: t.from, tk: t.to, driver: tripId ? `${me} (conduce)` : t.driver, car: t.car, start: Date.now(), eta: Date.now() + DEMO_MIN * 6e4 };
+    localStorage.setItem(LIVE_KEY, JSON.stringify(r));
+    toast('📍 Tu familia ya ve tu viaje en NAVI SOS');
+  }
+  paintLive();
+}
+let liveTick = null;
+function paintLive() {
+  const r = liveData(); if (!r) { $('live').hidden = true; clearInterval(liveTick); return; }
+  const p = Math.min(1, (Date.now() - r.start) / (r.eta - r.start));
+  // mapa esquemático: origen y destino según su posición real, y el auto avanzando sobre la ruta
+  const A = C[r.fk], B = C[r.tk], minLng = Math.min(A.lng, B.lng), maxLng = Math.max(A.lng, B.lng), minLat = Math.min(A.lat, B.lat), maxLat = Math.max(A.lat, B.lat);
+  const sx = lng => 40 + (maxLng - minLng ? (lng - minLng) / (maxLng - minLng) : .5) * 320, sy = lat => 180 - (maxLat - minLat ? (lat - minLat) / (maxLat - minLat) : .5) * 140;
+  const ax = sx(A.lng), ay = sy(A.lat), bx = sx(B.lng), by = sy(B.lat), mx = (ax + bx) / 2 + (by - ay) * .18, my = (ay + by) / 2 - (bx - ax) * .18;
+  const qp = u => [(1 - u) ** 2 * ax + 2 * (1 - u) * u * mx + u * u * bx, (1 - u) ** 2 * ay + 2 * (1 - u) * u * my + u * u * by], [cx, cy] = qp(p);
+  const fam = user.plan.type === 'familia' ? accountLines(user).filter(l => l.phone !== user.phone) : [];
+  $('live').hidden = false; document.body.style.overflow = 'hidden';
+  $('live').innerHTML = `<div class="in"><div style="display:flex;justify-content:space-between;align-items:center"><span class="hint" style="letter-spacing:.12em;font-weight:800;color:#9DBBFF">VIAJE EN VIVO · NAVI RIDE</span><button class="lnk" id="lvX" style="font-size:14px">Minimizar</button></div>
+    <div class="map"><svg viewBox="0 0 400 220" role="img" aria-label="Mapa del viaje">
+      <defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#ffffff0c"/></pattern></defs><rect width="400" height="220" fill="url(#g)"/>
+      <path d="M${ax} ${ay} Q${mx} ${my} ${bx} ${by}" fill="none" stroke="#4F8BFF55" stroke-width="6" stroke-linecap="round"/>
+      <path d="M${ax} ${ay} Q${mx} ${my} ${bx} ${by}" fill="none" stroke="#4F8BFF" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="${p} 1"/>
+      <circle cx="${ax}" cy="${ay}" r="7" fill="#fff"/><text x="${ax}" y="${ay + 22}" fill="#fff" font-size="12" text-anchor="middle" font-weight="700">${esc(r.from.replace('Ciudad de México', 'CDMX'))}</text>
+      <circle cx="${bx}" cy="${by}" r="7" fill="#B4E32F"/><text x="${bx}" y="${by - 14}" fill="#fff" font-size="12" text-anchor="middle" font-weight="700">${esc(r.to.replace('Ciudad de México', 'CDMX'))}</text>
+      <circle cx="${cx}" cy="${cy}" r="15" fill="#4F8BFF"/><text x="${cx}" y="${cy + 6}" font-size="17" text-anchor="middle">🚗</text></svg></div>
+    <div class="card" style="padding:16px"><div class="eta"><div><span class="hint">Llegada estimada</span><br><b>${p >= 1 ? '¡Llegaste!' : hhmm(r.eta)}</b></div><div style="text-align:right"><span class="hint">${Math.round(p * 100)}% del camino</span><br><span class="muted">con ${esc(r.driver)} · ${esc(r.car)}</span></div></div>
+      <div style="height:8px;border-radius:99px;background:#ffffff1f;margin-top:10px;overflow:hidden"><i style="display:block;height:100%;width:${p * 100}%;background:var(--ride)"></i></div>
+      <div class="shared" style="margin-top:12px">📍 Lo ven en NAVI SOS: ${fam.length ? fam.map(l => `<img src="${avatarSrc(l.phone, l.img)}" alt="" title="${esc(l.name)}">`).join('') + ' ' + esc(fam.map(l => l.name).join(', ')) : 'tu red de NAVI SOS'}</div>
+      <p class="hint" style="margin-top:6px">DEMO: el viaje avanza en ${DEMO_MIN} minutos para que veas cómo funciona.</p></div>
+    <div class="sosr"><a href="boton/?from=ride" style="background:#FF3B5C;color:#fff">🚨 SOS</a><a href="tel:911" style="background:#ffffff14">📞 911</a></div>
+    <button class="btn btn-lime wide" id="lvOk">✓ Llegué bien: terminar viaje</button></div>`;
+  $('lvX').onclick = () => { $('live').hidden = true; document.body.style.overflow = ''; clearInterval(liveTick); render(); };
+  $('lvOk').onclick = () => {
+    localStorage.setItem(LIVE_KEY, JSON.stringify({ ...r, active: false, ended: Date.now() }));
+    if (r.booking) RideStore.upd(d => { const b = d.bookings.find(x => x.id === r.booking); if (b) b.status = 'terminada'; });
+    else RideStore.upd(d => d.bookings.filter(x => x.trip === r.trip && x.status === 'confirmada').forEach(x => x.status = 'terminada'));
+    $('live').hidden = true; document.body.style.overflow = ''; clearInterval(liveTick);
+    toast('✅ Avisamos a tu familia que llegaste bien'); render();
+    if (r.booking) setTimeout(() => rate(r.booking), 400);
+  };
+  clearInterval(liveTick); liveTick = setInterval(() => { if (!$('live').hidden) paintLive(); }, 3000);
+}
+
+// lo que pasa en otra pestaña (otro cliente reserva tu viaje, el conductor acepta) se ve al momento
+addEventListener('storage', e => { if (e.key === RideStore.KEY && $('sheet').hidden && $('live').hidden) render(); });
+render();
+if (location.hash === '#mis' && liveData()) paintLive();
+</script>
+</body>
+</html>

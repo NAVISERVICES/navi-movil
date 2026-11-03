@@ -34,7 +34,7 @@
   .nb-wa a{color:#2BD67B;font-weight:700}`;
   document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
   const user = NaviAuth.current();
-  const inApp = /cuenta|movil|recargas|fit|pet|conecta|sos|agenda|juegos|videos|referidos/.test(location.pathname);
+  const inApp = /cuenta|movil|recargas|fit|pet|ride|conecta|sos|agenda|juegos|videos|referidos/.test(location.pathname);
   // en la página Empresas el chat es de NAVICom (B2B) y llega a la consola como requerimiento de empresa
   const b2b = /empresas/.test(location.pathname);
   const channel = b2b ? 'empresas' : user && inApp ? 'app' : 'web';

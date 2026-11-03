@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261103a"></script>
+<script src="auth.js?v=20261103b"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=sos.html');</script>
 <style>
 /* app de una columna, como en el teléfono; barra de pestañas fija abajo */
@@ -240,6 +240,7 @@ section[data-tab].on{display:block;animation:fade .3s ease}
     <h1>Inicio</h1>
     <div class="stack">
       <div class="card sos-live" id="sosLive" hidden></div>
+      <div class="card" id="rideLive" hidden style="border-color:#4F8BFF88;background:linear-gradient(135deg,#4F8BFF26,transparent)"></div>
       <div class="card trip" id="tripCard"></div>
       <div class="card sosbox">
         <div class="sosbtn" id="sosBtn" role="button" tabindex="0" aria-label="Botón SOS: mantén presionado">
@@ -562,6 +563,7 @@ if (user && !user.apps.includes('sos')) {
       + (BASE === 1 ? `<p class="muted">Tu plan incluye NAVI SOS Family: arma tu red con quien quieras verificando su número, sin importar su plan.</p>${members.length === 1 ? '<a class="btn btn-lime block" href="#red" style="margin-top:10px">+ Crear mi red</a>' : ''}` : '');
     renderWatch();
     renderSosLive();
+    renderRideLive();
     renderDemoSos();
     checkExpects();
     const ex = Object.values(S.expects).filter(e => !e.fired).length;
@@ -1213,6 +1215,21 @@ if (user && !user.apps.includes('sos')) {
     Object.assign(a, { active: false, ended: Date.now() });
     S.events.push({ t: Date.now(), txt: `✅ <b>${esc(a.name)}</b> terminó la alerta SOS: está bien` }); save(); checkSos(); renderHome();
   });
+  // Navi Ride: si alguien de la familia comparte un viaje en vivo, la red lo ve aquí con su hora estimada de llegada
+  function rideKey() { return 'navi.ride.live.' + user.owner; }
+  function renderRideLive() {
+    const c = $('rideLive'); let r = null;
+    try { r = JSON.parse(localStorage.getItem(rideKey())); } catch {}
+    if (!r || !r.active) { c.hidden = true; return; }
+    const p = Math.min(1, (Date.now() - r.start) / (r.eta - r.start)), mine = r.phone === members[me].phone;
+    c.hidden = false;
+    c.innerHTML = `<b style="font-size:17px">🚗 ${mine ? 'Compartes tu viaje' : `${esc(r.name)} va de viaje`} · Navi Ride</b>
+      <div class="muted">${esc(r.from)} → ${esc(r.to)} · con ${esc(r.driver)} (${esc(r.car)})</div>
+      <div style="height:8px;border-radius:99px;background:#ffffff1f;margin:10px 0 6px;overflow:hidden"><i style="display:block;height:100%;width:${Math.round(p * 100)}%;background:#4F8BFF;border-radius:99px"></i></div>
+      <div class="muted">${p >= 1 ? 'Debería haber llegado: si no te ha avisado, escríbele.' : `Llega aprox. a las ${hhmm(r.eta)} · ${Math.round(p * 100)}% del camino`}</div>
+      ${mine ? '<a class="btn btn-lime sm" href="ride.html#mis" style="margin-top:10px">Ver mi viaje</a>' : `<div class="qa"><a class="btn" style="background:#fff;color:var(--ink)" href="tel:${r.phone}">📞 Llamar</a></div>`}`;
+  }
+  setInterval(() => { if ((location.hash.slice(1) || 'inicio') === 'inicio') renderRideLive(); }, 15000);
   // DEMO en una sola pantalla: ver cómo le llega la alarma a la familia cuando otro integrante activa SOS
   function renderDemoSos() {
     const others = onMap().filter(m => m.i !== me), c = $('demoSos');
@@ -1232,6 +1249,7 @@ if (user && !user.apps.includes('sos')) {
   }
   // lo que hace otro integrante (activar SOS, ir para allá, terminar la alerta) llega al momento a esta pestaña
   addEventListener('storage', e => {
+    if (e.key === rideKey()) return renderRideLive();
     if (e.key !== KEY) return;
     reloadS(); syncExtra();
     if (!ov.hidden && S.sos?.phone === members[me].phone && S.sos.active) paintSent();

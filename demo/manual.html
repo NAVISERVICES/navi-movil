@@ -61,7 +61,7 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
       <a href="#inicio">1. Antes de empezar</a><a class="sub" href="#cuentas">Cuentas de prueba</a>
       <a href="#sitio">2. La página pública</a><a class="sub" href="#comprar">Comprar una línea</a><a class="sub" href="#porta">Portabilidad</a><a class="sub" href="#recargas">Recargas</a><a class="sub" href="#empresas">Empresas</a>
       <a href="#minavi">3. Mi Navi</a>
-      <a href="#apps">4. Las apps de Mi Navi</a><a class="sub" href="#sos">NAVI SOS Family</a><a class="sub" href="#boton">Botón SOS en la pantalla</a><a class="sub" href="#fit">NAVI Fit</a><a class="sub" href="#pet">Navi Pet</a><a class="sub" href="#conecta">Navi Conecta</a><a class="sub" href="#otras">Agenda, Referidos y más</a>
+      <a href="#apps">4. Las apps de Mi Navi</a><a class="sub" href="#sos">NAVI SOS Family</a><a class="sub" href="#boton">Botón SOS en la pantalla</a><a class="sub" href="#fit">NAVI Fit</a><a class="sub" href="#pet">Navi Pet</a><a class="sub" href="#ride">Navi Ride</a><a class="sub" href="#conecta">Navi Conecta</a><a class="sub" href="#otras">Agenda, Referidos y más</a>
       <a href="#atencion">5. Atención 24/7</a>
       <a href="#central">6. Navi Central</a><a class="sub" href="#desk">Front desk y Empresas B2B</a><a class="sub" href="#ficha">Clientes y ficha</a><a class="sub" href="#proactivo">Proactivo</a><a class="sub" href="#privacidad">Privacidad</a>
       <a href="#reglas">7. Reglas de negocio</a>
@@ -127,6 +127,7 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
         <tr><td>📶 Navi Móvil</td><td>Consumo de datos, llamadas y SMS, equipo y recargas</td><td>Todos</td></tr>
         <tr><td>🚨 NAVI SOS Family</td><td>Mapa familiar, zonas seguras, botón SOS</td><td>12 GB, 24 GB y Plan Familia</td></tr>
         <tr><td>💪 NAVI Fit</td><td>Reto de calistenia de 30 días con animaciones</td><td>Todos</td></tr>
+        <tr><td>🚗 Navi Ride</td><td>Viajes compartidos entre ciudades con clientes Navi; la familia sigue el viaje en NAVI SOS</td><td>Todos</td></tr>
         <tr><td>🐶 Navi Pet</td><td>Entrenamiento de cachorros y perros: plan de 4 semanas, clicker y rutina</td><td>Todos</td></tr>
         <tr><td>🔗 Navi Conecta</td><td>Red social de networking entre clientes</td><td>Todos</td></tr>
         <tr><td>📅 Agenda</td><td>Actividades con recordatorio; en familia es compartida</td><td>Todos</td></tr>
@@ -163,6 +164,13 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
         <li><b>Sesión guiada:</b> pasos del ejercicio, temporizador, <b>clicker</b> en el celular (botón “¡Sí!”) y conteo de intentos bien y mal. Al final se califica cómo le fue y suma puntos; con 8 puntos el truco queda como dominado.</li>
         <li><b>Rutina de hoy:</b> horarios sugeridos según la edad (comidas, paseos, salidas al baño, siestas), registro de baño con porcentaje de aciertos de 7 días y lista de socialización.</li>
         <li><b>Trucos:</b> los 17 ejercicios con su avance; cualquiera se puede practicar fuera del plan. En Plan Familia todos entrenan al mismo perro y se ve quién ha ayudado más.</li></ul>
+      <h3 id="ride">Navi Ride</h3>
+      <ul><li>Viajes compartidos entre ciudades (CDMX, Puebla, Querétaro, Cuernavaca, Toluca, Pachuca, Morelia y Guadalajara) solo entre clientes Navi, verificados por su línea. El número de cada quien nunca se muestra.</li>
+        <li><b>Buscar viaje:</b> origen, destino, día y pasajeros; cada viaje muestra horario, punto de encuentro, conductor con calificación, auto, lugares libres, preferencias (mascotas, música, no fumar, máx. 2 atrás) y si la reserva es inmediata o el conductor acepta.</li>
+        <li><b>Reservar:</b> precio por asiento más una cuota de servicio de Navi Ride del 10% que paga el pasajero. En la demo no hay cobro; en producción el pago se retiene y se libera al conductor al terminar. Cancelación: con más de 24 h se devuelve todo menos la cuota; con menos, la mitad de los asientos; si el conductor cancela, se devuelve todo.</li>
+        <li><b>Publicar viaje:</b> ruta, fecha, hora, punto de encuentro, lugares, auto y preferencias. El precio sugerido sale del costo estimado de gasolina y casetas, y hay un <b>precio máximo</b> para que solo se compartan gastos y nadie lucre. El conductor acepta o rechaza solicitudes en Mis viajes.</li>
+        <li><b>Viaje en vivo:</b> desde Mis viajes se inicia el viaje; se ve un mapa con el auto avanzando y la hora de llegada, y la familia lo ve al momento en <b>NAVI SOS</b> (tarjeta azul en Inicio). Tiene botón <b>SOS</b> y 911 a la mano. Con “Llegué bien” se avisa a la familia y se califica al conductor. En la demo el viaje avanza en 3 minutos.</li>
+        <li>Las reservas aparecen en Navi Central → Operaciones → Navi Ride.</li></ul>
       <h3 id="conecta">Navi Conecta</h3>
       <ul><li>Perfil personal (solo mayores de 18) o perfil familiar (lo crea el titular y usa solo su foto; los hijos nunca aparecen con nombre ni foto, solo como rangos de edad).</li>
         <li><b>Explorar</b> muestra perfiles ordenados por % de afinidad (intereses, zona, objetivo). Se toca <b>✕ Pasar</b> o <b>🤝 Conectar</b>.</li>
@@ -181,7 +189,9 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 
       <h2 id="central">6. Navi Central (consola interna)</h2>
       <p>En <a href="central/">central/</a>. Se entra con nombre y rol: <b>Asesor</b>, <b>Supervisor</b> o <b>Administrador</b> (en producción, con cuenta corporativa y verificación en dos pasos).</p>
-      <ul><li><b>Resumen:</b> clientes activos, líneas, ingreso mensual recurrente, conversaciones abiertas, tiempo de primera respuesta, % resuelto por el asistente, satisfacción y avisos pendientes. Abajo, “Lo urgente ahora”.</li></ul>
+      <ul><li><b>Resumen:</b> clientes activos, líneas, ingreso mensual recurrente, conversaciones abiertas, tiempo de primera respuesta, % resuelto por el asistente, satisfacción y avisos pendientes. Abajo, “Lo urgente ahora”.</li>
+        <li><b>Todo lleva a su detalle:</b> cada tarjeta y cada barra de las gráficas abre la sección con el filtro puesto. Clientes activos → Clientes solo activos; Ingreso mensual → Clientes ordenados por pago mensual; Requerimientos B2C → Front desk de personas; B2B → Empresas B2B; Resueltas por el asistente y Satisfacción → Front desk filtrado; Avisos → Proactivo. Las barras de Planes, Canales y Embudo filtran Clientes, Front desk y Empresas.</li>
+        <li><b>Clientes</b> tiene filtros de estado (activos, suspendidos), de plan y orden por mayor pago mensual, con totales de clientes, líneas e ingreso abajo de la tabla.</li></ul>
       <h3 id="desk">Front desk</h3>
       <ul><li>Bandeja de conversaciones de todos los canales (WhatsApp, chat web, app Mi Navi y Chat Empresas), con filtros (Abiertas, En espera, Mías, Resueltas). Las que esperan asesor van primero.</li>
         <li><b>Personas (B2C) y empresas (B2B):</b> arriba de la bandeja se elige Todos, 👤 Personas B2C o 🏢 Empresas B2B; cada conversación lleva su etiqueta. En una de empresa, el panel derecho muestra lo que capturó el asistente (empresa, contacto, líneas, interés, valor estimado), respuestas rápidas de ejecutivo y <b>Crear oportunidad</b>. Una conversación mal clasificada se pasa a B2B o B2C con un botón.</li>
@@ -195,7 +205,7 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
       <h3 id="proactivo">Proactivo</h3>
       <p>Reglas que detectan a quién buscar <b>antes</b> de que tenga un problema. Cada aviso trae un mensaje sugerido que se revisa y se envía por WhatsApp (uno por uno o a todos):</p>
       <ul><li>📶 Se están quedando sin datos (menos del 20%).</li><li>📅 Renuevan en 3 días o menos.</li><li>💳 Pago rechazado o pendiente.</li><li>🔁 Portabilidad detenida (NIP vencido o en proceso).</li><li>🎁 Su regalo de bienvenida está por terminar (meses 11 y 12): retención.</li><li>🚨 Tienen NAVI SOS y no lo han activado.</li><li>⭐ Calificaron mal la atención (1 o 2).</li></ul>
-      <p><b>Operaciones</b> lista pedidos, recargas, portabilidades y tickets. Supervisores y administradores pueden exportar a CSV.</p>
+      <p><b>Operaciones</b> lista pedidos, recargas, portabilidades, tickets y reservas de <b>Navi Ride</b>. Supervisores y administradores pueden exportar a CSV.</p>
       <h3 id="privacidad">Privacidad y auditoría</h3>
       <ul><li>Número, correo e IMEI aparecen <b>enmascarados</b>. Para ver uno completo hay que elegir un motivo, y queda en la <b>auditoría</b> con nombre, hora y motivo.</li>
         <li>Asesor: puede ver número y correo con motivo. Supervisor y administrador: también IMEI, exportar y ver la auditoría.</li>
@@ -210,7 +220,7 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
         <tr><th>Regalo de bienvenida</th><td>Portando desde Telcel, AT&amp;T, Movistar, Unefon o Virgin Mobile: 2 GB → el doble; 4, 12 y 24 GB → el triple, cada mes por 12 meses.</td></tr>
         <tr><th>Roaming</th><td>EE. UU. y Canadá hasta 15 días: 4 GB (plan 12 GB) y 8 GB (plan 24 GB), uso justo.</td></tr>
         <tr><th>NAVI SOS Family</th><td>12 GB, 24 GB y Plan Familia. Individuales de 12/24 GB arman su red verificando números.</td></tr>
-        <tr><th>NAVI Fit · Navi Pet · Navi Conecta</th><td>Todos los planes. Conecta solo para mayores de 18.</td></tr>
+        <tr><th>NAVI Fit · Navi Pet · Navi Ride · Navi Conecta</th><td>Todos los planes. Conecta solo para mayores de 18.</td></tr>
         <tr><th>Referidos</th><td>5 contrataciones con tu código = 1 mes gratis (mínimo 2 meses con tu plan).</td></tr>
         <tr><th>Operador</th><td>Navi es marca blanca de <b>JR Móvil</b> sobre la Red Compartida de Altán. Altas, recargas y portabilidades siguen los mismos pasos y datos que su plataforma.</td></tr>
       </tbody></table></div>

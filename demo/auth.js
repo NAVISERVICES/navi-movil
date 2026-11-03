@@ -17,6 +17,7 @@ const NAVI_APPS = [
   { id: 'referidos', name: 'Referidos',       icon: '🤝', color: '#2BD67B', desc: 'Comparte tu código: por cada 5 amigos que contraten, tú tienes un mes gratis.', href: 'referidos.html' },
   { id: 'conecta', name: 'Navi Conecta',      icon: '🔗', color: '#6FD3FF', desc: 'La red social de los clientes Navi: conecta con personas y familias verificadas.', href: 'conecta.html' },
   { id: 'fit',    name: 'NAVI Fit',          icon: '💪', color: '#FF7A45', desc: 'Reto de calistenia de 30 días en casa, sin aparatos, con entrenamientos guiados.', href: 'fit.html' },
+  { id: 'ride',   name: 'Navi Ride',         icon: '🚗', color: '#4F8BFF', desc: 'Viajes compartidos entre ciudades con clientes Navi verificados: comparten gastos y tu familia te sigue en vivo.', href: 'ride.html' },
   { id: 'pet',    name: 'Navi Pet',          icon: '🐶', color: '#FFB547', desc: 'Entrena a tu cachorro o perro: plan de 4 semanas, clicker, rutina diaria y avance de cada truco.', href: 'pet.html' },
   { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
     // app funcional dentro de la suite: usa la sesión de Mi Navi, sin volver a iniciar sesión
@@ -25,8 +26,8 @@ const NAVI_APPS = [
 ];
 
 // gratis para todo cliente Navi Móvil (Shop y Repair traen tráfico para vender en esas plataformas)
-// NAVI Fit, Navi Pet y Navi Conecta también son para todos los clientes, en cualquier plan
-const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos', 'fit', 'pet', 'conecta'];
+// NAVI Fit, Navi Pet, Navi Ride y Navi Conecta también son para todos los clientes, en cualquier plan
+const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos', 'fit', 'pet', 'ride', 'conecta'];
 // qué apps incluye cada plan: lo gratis + NAVI SOS en 12 GB, 24 GB y Plan Familia
 const PLAN_ACCESS = {
   2:  [...FREE_APPS],
@@ -351,7 +352,7 @@ const NaviAuth = (() => {
 // Cierre automático por inactividad en las páginas de Mi Navi: cuenta el uso (toques, teclas, scroll),
 // avisa 30 s antes y, si no hay respuesta, cierra la sesión y regresa a la pantalla de entrada.
 (() => {
-  const PRIVATE = /\/(cuenta|movil|recargas|sos|fit|pet|conecta|agenda|juegos|videos|referidos)\.html$|\/juegos\//;
+  const PRIVATE = /\/(cuenta|movil|recargas|sos|fit|pet|ride|conecta|agenda|juegos|videos|referidos)\.html$|\/juegos\//;
   const inSuite = () => PRIVATE.test(location.pathname);
   const start = () => {
     if (!document.body) return addEventListener('DOMContentLoaded', start, { once: true });
