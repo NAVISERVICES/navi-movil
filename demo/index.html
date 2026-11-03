@@ -463,6 +463,11 @@ section{position:relative}
 .sheet ol{margin:18px 0 22px;padding-left:22px;display:grid;gap:10px;font-size:15px}
 .sheet ol b{background:#eef0ff;padding:2px 8px;border-radius:8px}
 .sheet .btn{width:100%;justify-content:center}
+.sheet .box{max-height:calc(100dvh - 16px);overflow:auto}
+#sheetVid[hidden]{display:none}
+#sheetVid{margin:-8px 0 18px}
+#sheetVid .vbtn{width:100%;padding:11px;border-radius:99px;border:2px solid #e6e6f5;background:#f6f6ff;color:var(--ink);font-weight:800;cursor:pointer}
+#sheetVid video{display:block;margin:0 auto;height:min(52vh,420px);aspect-ratio:384/848;border-radius:18px;background:#000}
 .final .stores{margin-top:26px}
 .final .app-note{margin-top:12px;font-size:13px;color:var(--muted)}
 .calm .stores{justify-content:flex-start;margin-top:14px}
@@ -810,6 +815,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     <p>Queda en tu pantalla de inicio como cualquier app, sin pasar por la tienda.</p>
     <div id="sheetQr"></div>
     <ol id="sheetSteps"></ol>
+    <div id="sheetVid" hidden><button class="vbtn" type="button">▶ Ver el video: así se hace en iPhone</button></div>
     <button class="btn btn-lime" id="sheetInstall" hidden style="margin-bottom:10px">📲 Instalar ahora</button>
     <button class="btn btn-ink" id="sheetClose">Entendido</button>
   </div>
@@ -878,15 +884,20 @@ const APP_LINKS = {
   const steps = document.getElementById('sheetSteps');
   const openSheet = () => {
     steps.innerHTML = isIOS
-      ? '<li>Abre esta página en <b>Safari</b>.</li><li>Toca <b>Compartir</b> (el cuadro con la flecha ⬆).</li><li>Elige <b>Agregar a inicio</b> y luego <b>Agregar</b>.</li>'
+      ? '<li>Abre esta página en <b>Safari</b>.</li><li>Toca <b>•••</b> abajo a la derecha y luego <b>Compartir</b> ⬆.</li><li>Toca <b>Ver más</b> → <b>Agregar a inicio</b>.</li><li>Deja activado <b>Abrir como app web</b> y toca <b>Agregar</b>.</li>'
       : isAndroid
       ? '<li>Abre esta página en <b>Chrome</b>.</li><li>Toca el menú <b>⋮</b> arriba a la derecha.</li><li>Elige <b>Instalar app</b> o <b>Agregar a pantalla principal</b>.</li>'
       : '<li>Escanea el código con la cámara de tu celular y abre el enlace.</li><li><b>iPhone:</b> Safari → Compartir ⬆ → Agregar a inicio.</li><li><b>Android:</b> Chrome → menú ⋮ → Instalar app.</li>';
     document.getElementById('sheetQr').innerHTML = qr ? `<div class="qrbig">${qr}</div><p>navimovil.com/demo</p>` : '';
     document.getElementById('sheetInstall').hidden = !prompt;
+    // video guía grabado en iPhone (no aplica en Android)
+    const vid = document.getElementById('sheetVid');
+    vid.hidden = isAndroid;
+    vid.innerHTML = '<button class="vbtn" type="button">▶ Ver el video: así se hace en iPhone</button>';
+    vid.firstChild.onclick = () => { vid.innerHTML = '<video src="assets/guia-instalar.mp4" autoplay muted loop playsinline controls aria-label="Video: cómo poner Navi en la pantalla del iPhone"></video>'; };
     sheet.classList.add('open');
   };
-  const close = () => sheet.classList.remove('open');
+  const close = () => { sheet.classList.remove('open'); document.querySelector('#sheetVid video')?.pause(); };
   document.getElementById('sheetClose').addEventListener('click', close);
   sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
