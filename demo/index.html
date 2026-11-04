@@ -120,6 +120,10 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 .sun{position:absolute;inset:14% 8% 0;border-radius:50% 50% 0 0;background:radial-gradient(circle at 50% 35%,var(--lime-2),var(--lime) 60%);overflow:hidden}
 .sun::before{content:"";position:absolute;inset:-50%;background:repeating-conic-gradient(#ffffff26 0 8deg,transparent 8deg 20deg);animation:spin 40s linear infinite}
 @keyframes spin{to{transform:rotate(1turn)}}
+/* slogan en el arco verde, arriba de la familia y debajo de las tarjetas flotantes */
+.slogan{position:absolute;left:10%;right:10%;top:41%;margin:0;text-align:center;font-family:var(--display);font-weight:800;font-size:clamp(20px,3.3vw,34px);line-height:1.05;letter-spacing:-.01em;color:var(--ink);text-shadow:0 2px 0 #ffffff55;pointer-events:none}
+.slogan em{font-style:normal;display:inline-block;margin-top:4px;padding:2px 12px 4px;border-radius:12px;background:var(--ink);color:var(--lime);transform:rotate(-2deg)}
+@media (max-width:560px){.slogan{top:47%;left:2%;right:2%;font-size:15px;white-space:nowrap}.slogan br{display:none}.slogan em{margin:0 0 0 4px;padding:1px 8px 3px;border-radius:9px}}
 .orbit{position:absolute;inset:4%;border:2px dashed #ffffff30;border-radius:50%;animation:spin 60s linear infinite}
 .family{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end}
 /* familia: adultos atrás y más grandes, niños al frente y más bajitos; cada celular queda hacia un lado libre */
@@ -573,6 +577,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
     <div class="stage">
       <div class="orbit"></div>
       <div class="sun"></div>
+      <p class="slogan">La línea que cuida<br><em>a toda tu familia</em></p>
       <div class="family" id="family">
         <img src="assets/chayo.png" alt="Abuela Chayo">
         <img src="assets/beto.png" alt="Papá Beto">
