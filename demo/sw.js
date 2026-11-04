@@ -1,5 +1,5 @@
 // service worker: guarda la página para que abra rápido y funcione sin señal
-const CACHE = 'navi-v3';
+const CACHE = 'navi-v3'; // v3: personajes nuevos
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'assets/navi-logo.png', 'assets/icon-192.png',
   'assets/sofi.png', 'assets/beto.png', 'assets/chayo.png', 'assets/mama.png', 'assets/tono.png'];
 
