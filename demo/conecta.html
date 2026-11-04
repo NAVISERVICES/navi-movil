@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="suite.css?v=20261030d">
 <script src="auth.js?v=20261103b"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=conecta.html');</script>
+<script src="verify.js?v=1"></script>
 <style>
 :root{--cx:#6FD3FF}
 main{padding-bottom:90px}
@@ -296,6 +297,7 @@ function render() {
 }
 
 function viewNeedProfile() {
+  if (NaviVerify.minor(user.phone)) return gateMinor();
   $('view').innerHTML = `<section class="card gate"><div class="big">🔗</div><h2>Crea tu perfil para empezar</h2>
     <p class="muted">Cuéntale a otros clientes Navi qué te gusta y qué buscas. Solo verán tu nombre, zona e intereses: nunca tu número.</p>
     <div class="seg" style="justify-content:center;margin-top:18px">
@@ -314,7 +316,7 @@ function cardHTML(p, mine) {
     <div class="top">${aff != null ? `<div class="aff"><b>${aff}%</b><small>AFINIDAD</small></div>` : ''}<span class="kind">${p.kind === 'f' ? '👨‍👩‍👧 Familia' : '🙋 Persona'}</span>
       ${avatar(p)}${mine ? '' : '<button class="more" id="more" aria-label="Más opciones">⋯</button>'}</div>
     <div class="body">
-      <h2>${esc(p.name || 'Tu nombre')}${p.kind === 'p' && a ? `<span style="font-weight:600;font-size:22px;color:var(--muted)">${a}</span>` : ''}<span class="ver">✓ Cliente Navi</span></h2>
+      <h2>${esc(p.name || 'Tu nombre')}${p.kind === 'p' && a ? `<span style="font-weight:600;font-size:22px;color:var(--muted)">${a}</span>` : ''}<span class="ver">${p.seed || NaviVerify.ok(p.kind === 'f' ? p.owner : p.id) ? '✓ Identidad verificada' : '📶 Línea Navi'}</span></h2>
       <div class="meta">📍 ${esc(p.zona || 'Tu zona')}${p.kind === 'f' ? ` · ${p.members || '?'} integrantes` : ''}</div>
       ${p.goal ? `<div class="goal">${esc(p.goal)}</div>` : ''}
       ${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : ''}
@@ -349,7 +351,7 @@ function viewExplore() {
         <li>🤝<span>Si los dos tocan “Conectar”, quedan conectados y se abre el chat.</span></li>
         <li>🔒<span>Tu número nunca se muestra. Tú decides si lo compartes.</span></li></ul></section>
       <section class="card"><h3>Comunidad segura</h3><ul>
-        <li>✓<span>Todos son clientes Navi con línea verificada.</span></li>
+        <li>✓<span>Todos son clientes Navi con identidad verificada (INE y selfie).</span></li>
         <li>🔞<span>Solo mayores de 18. Los menores solo aparecen como edades dentro del perfil familiar.</span></li>
         <li>🚩<span>Bloquea o reporta con un toque desde ⋯.</span></li></ul></section>
       ${isFamTitular ? `<section class="card"><h3>Estás como</h3><div class="seg" style="margin:0"><button data-as="p" aria-pressed="${as === 'p'}">🙋 Yo</button><button data-as="f" aria-pressed="${as === 'f'}">👨‍👩‍👧 Mi familia</button></div></section>` : ''}
@@ -463,6 +465,7 @@ function chatView(p) {
 function viewProfile() {
   const kind = as;
   if (kind === 'f' && !isFamTitular) { setAs('p'); return viewProfile(); }
+  if (NaviVerify.minor(user.phone)) return gateMinor();
   const id = actingId(), cur = D.profiles[id];
   const base = Profiles.get(user.phone);
   const lines = kind === 'f' ? accountLines(user) : [];
@@ -510,6 +513,8 @@ function viewProfile() {
     if (p.ints.length < 3) return err.textContent = 'Elige al menos 3 intereses.';
     if (kind === 'f' && !p.stages.length) return err.textContent = 'Elige las edades de los hijos.';
     const isNew = !cur;
+    // publicar en Conecta pide identidad verificada (INE + selfie): así nadie se hace pasar por otra persona
+    if (isNew && !NaviVerify.ok(user.phone)) { err.textContent = ''; return NaviVerify.require(user, { why: 'publicar tu perfil en Navi Conecta', onOk: () => $('pf').requestSubmit() }); }
     D.profiles[id] = p; save();
     toast(isNew ? '¡Listo! Tu perfil ya está publicado' : 'Cambios guardados');
     if (isNew) { tab = 'explore'; render(); } else viewProfile();

@@ -633,6 +633,7 @@ function paintOrder() {
     O.chip && ['📦', 'Tu chip va en camino', `Te mandamos la guía de ${O.ship === 'exp' ? 'Express (1-2 días)' : 'Estándar (3-5 días)'} a ${order.mail}.`],
     O.esim && ['✉️', 'Tu eSIM llega por correo', `En cuanto se confirme el pago, te enviamos el código QR a ${order.mail}.`],
     ['📶', 'Activa tu línea', O.mode === 'porta' ? 'Funciona desde el primer día con un número provisional.' : 'Te damos tu número Navi nuevo al activarla.'],
+    !negocio() && ['🪪', 'Verifica tu identidad en Mi Navi', 'Tu CURP ya quedó validada. Al entrar a Mi Navi te pedimos tu INE y una selfie (2 minutos) y te regalamos 1 GB. Con eso usas Navi Ride y Navi Conecta.'],
     order.alta.referido && ['🤝', 'Código de referido aplicado', `Tu compra cuenta para ${refHolder()}${paid ? '.' : ' en cuanto se confirme tu pago.'} ¡Gracias por llegar recomendado!`],
     O.mode === 'porta' && ['🔁', 'Después, trae tu número', 'Con tu línea ya activa, pide tu NIP al 051 y captúralo en Portabilidad.'],
     bonusOk() && ['🎁', `Regalo de bienvenida: +${portaGift(O.gb)} GB al mes${O.kind === 'fam' ? ' por línea' : ''}`,

@@ -16,6 +16,7 @@
 <script src="auth.js?v=20261103b"></script>
 <script>if (!NaviAuth.current()) location.replace('login.html?next=ride.html');</script>
 <script src="ride-data.js?v=1"></script>
+<script src="verify.js?v=1"></script>
 <style>
 :root{--ride:#4F8BFF}
 main{padding-bottom:80px}
@@ -131,7 +132,7 @@ main{padding-bottom:80px}
     <div class="ico" style="background:#4F8BFF">🚗</div>
     <div><h1>Navi Ride</h1><p>Viajes compartidos entre ciudades con otros clientes Navi: comparten gastos de gasolina y casetas.</p></div>
   </div>
-  <div class="verif">✅ <span><b>Tu línea Navi verifica tu perfil.</b> Solo viajas con clientes Navi identificados por su línea. Tu número nunca se muestra: todo se habla dentro de la app.</span></div>
+  <div class="verif" id="verif"></div>
   <div class="tabs" id="tabs"></div>
   <div id="app"></div>
   <p class="legal">Navi Ride es para compartir gastos, no para lucrar: el precio por asiento no puede pasar del costo estimado de gasolina y casetas. En una emergencia llama al 911.</p>
@@ -160,7 +161,17 @@ const ST = { confirmada: ['Confirmada', 'ok'], pendiente: ['Esperando al conduct
 // ---------- pestañas ----------
 let tab = (location.hash.slice(1) || 'buscar');
 let q = { from: 'cdmx', to: 'pue', day: 0, pax: 1 };
+// sello de confianza: los conductores de ejemplo cuentan como verificados; los clientes demo según su verificación real
+const idTag = phone => phone ? NaviVerify.tag(phone) : '<span class="nv-tag ok">✓ Identidad verificada</span>';
+function paintVerif() {
+  const ok = NaviVerify.ok(user.phone), mn = NaviVerify.minor(user.phone);
+  $('verif').innerHTML = ok ? `✅ <span><b>Tu identidad está verificada${NaviVerify.driverOk(user.phone) ? ' y puedes conducir' : ''}.</b> Solo viajas con clientes Navi verificados con INE y selfie. Tu número nunca se muestra: todo se habla dentro de la app.</span>`
+    : mn ? `🔞 <span><b>Navi Ride es solo para mayores de 18.</b> Puedes ver los viajes, pero no reservar ni publicar.</span>`
+    : `🪪 <span><b>Para reservar o publicar, verifica tu identidad</b> (CURP, INE y selfie, 2 minutos). Todos en Navi Ride están verificados. 🎁 Te regalamos 1 GB.</span><button class="btn btn-ride sm" id="vGo" style="margin-left:auto">Verificarme</button>`;
+  $('vGo')?.addEventListener('click', () => NaviVerify.start(user, { onDone: () => { paintVerif(); render(); } }));
+}
 function render() {
+  paintVerif();
   const mineN = RideStore.bookings().filter(b => b.phone === user.phone && ['confirmada', 'pendiente'].includes(b.status)).length
     + RideStore.bookings().filter(b => b.status === 'pendiente' && RideStore.trip(b.trip)?.driverPhone === user.phone).length;
   $('tabs').innerHTML = [['buscar', '🔎 Buscar viaje'], ['publicar', '➕ Publicar viaje'], ['mis', `🧳 Mis viajes${mineN ? `<b>${mineN}</b>` : ''}`]].map(([k, n]) => `<button data-t="${k}" aria-pressed="${tab === k}">${n}</button>`).join('');
@@ -185,7 +196,7 @@ function buscar() {
     <div class="res">${q.from === q.to ? '<div class="empty">Elige una ciudad de destino distinta.</div>' : list.map(tripCard).join('') || `<div class="empty card">😕 No hay viajes ${dayTxt(days[q.day]).toLowerCase()} de ${C[q.from].n} a ${C[q.to].n}.<br>Prueba otro día, o <a class="lnk" href="#publicar" data-t2="publicar">publica tú el viaje</a> y comparte gastos.</div>`}</div></div>
     <div><section class="card"><h2>Rutas populares</h2><div class="chipsrow">${[['cdmx', 'pue'], ['cdmx', 'qro'], ['cdmx', 'cva'], ['cdmx', 'tol'], ['cdmx', 'pac'], ['cdmx', 'mor'], ['cdmx', 'gdl'], ['pue', 'cdmx']].map(([a, b]) => `<button data-r="${a}|${b}" aria-pressed="${q.from === a && q.to === b}">${C[a].n.replace('Ciudad de México', 'CDMX')} → ${C[b].n.replace('Ciudad de México', 'CDMX')}</button>`).join('')}</div></section>
       <section class="card"><h2>Viaja seguro</h2><div class="muted" style="display:grid;gap:8px;margin-top:8px">
-        <div>✅ Todos son clientes Navi verificados por su línea.</div><div>⭐ Calificaciones después de cada viaje.</div>
+        <div>✅ Todos verificaron su identidad con INE y selfie; los conductores, también su licencia.</div><div>⭐ Calificaciones después de cada viaje.</div>
         <div>🛡️ Comparte el viaje en vivo con tu familia en NAVI SOS y ten el botón SOS a la mano.</div><div>💳 El pago se libera al conductor hasta que termina el viaje.</div></div></section></div></div>`;
   $('qF').onchange = () => { q.from = $('qF').value; buscar(); };
   $('qT').onchange = () => { q.to = $('qT').value; buscar(); };
@@ -202,7 +213,7 @@ function tripCard(t) {
     <div class="tl"><time>${hhmm(t.at)}</time><i></i><span>${C[t.from].n}<small> · ${esc(t.meet)}</small></span><small>${Math.floor(rideMins(rideKm(t.from, t.to)) / 60)}h${String(rideMins(rideKm(t.from, t.to)) % 60).padStart(2, '0')}</small><span class="ln"></span><span></span><time>${hhmm(arrive(t))}</time><i></i><span>${C[t.to].n}</span></div>
     <div class="price"><b>${money(t.price)}</b><small>${full ? 'Lleno' : `${l} ${l === 1 ? 'lugar' : 'lugares'}`}</small></div>
     <div class="drv"><span class="av">${t.emo}</span><div><b>${esc(t.driver)}${mine ? ' (Tú)' : ''}</b><small>${typeof t.rating === 'number' ? `⭐ ${t.rating.toFixed(1)} · ${t.trips} viajes` : '🆕 Nuevo en Navi Ride'} · ${esc(t.car)}</small>
-      <div class="tags"><span class="v">✓ Cliente Navi</span>${t.instant ? '<span class="ok">⚡ Reserva inmediata</span>' : '<span>El conductor acepta</span>'}${t.prefs.pets ? '<span>🐾 Mascotas</span>' : ''}${t.prefs.back2 ? '<span>Máx. 2 atrás</span>' : ''}</div></div></div></button>`;
+      <div class="tags">${idTag(t.driverPhone)}${t.instant ? '<span class="ok">⚡ Reserva inmediata</span>' : '<span>El conductor acepta</span>'}${t.prefs.pets ? '<span>🐾 Mascotas</span>' : ''}${t.prefs.back2 ? '<span>Máx. 2 atrás</span>' : ''}</div></div></div></button>`;
 }
 
 // ---------- detalle y reserva ----------
@@ -214,7 +225,7 @@ function detail(id) {
   $('sheet').innerHTML = `<div><div style="display:flex;justify-content:space-between;align-items:start;gap:10px"><div><span class="hint">${dayTxt(t.at).toUpperCase()}</span><h2>${C[t.from].n} → ${C[t.to].n}</h2></div><button class="lnk" id="shX" style="font-size:20px;text-decoration:none">✕</button></div>
     <div class="route"><time>${hhmm(t.at)}</time><i></i><div><b>${C[t.from].n}</b><small>Punto de encuentro: ${esc(t.meet)}</small></div><span></span><span class="ln"></span><small style="align-self:center">${km} km · ${Math.floor(rideMins(km) / 60)} h ${rideMins(km) % 60} min</small><time>${hhmm(arrive(t))}</time><i></i><div><b>${C[t.to].n}</b><small>Llegada: ${esc(t.drop)}</small></div></div>
     <div class="drv" style="background:#ffffff0a;border-radius:16px;padding:12px"><span class="av">${t.emo}</span><div><b>${esc(t.driver)}</b><small>${typeof t.rating === 'number' ? `⭐ ${t.rating.toFixed(1)} · ${t.trips} viajes` : '🆕 Nuevo en Navi Ride'} · ${esc(t.car)}</small>
-      <div class="tags"><span class="v">✓ Línea Navi verificada</span><span class="v">✓ Identidad verificada</span></div></div></div>
+      <div class="tags">${idTag(t.driverPhone)}${!t.driverPhone || NaviVerify.driverOk(t.driverPhone) ? '<span class="nv-tag ok">🪪 Conductor verificado</span>' : ''}</div></div></div>
     <div class="tags" style="margin-top:10px">${t.instant ? '<span class="ok">⚡ Reserva inmediata</span>' : '<span class="w">El conductor acepta cada reserva</span>'}<span>${t.prefs.smoke ? '🚬 Se puede fumar' : '🚭 No fumar'}</span><span>${t.prefs.pets ? '🐾 Acepta mascotas' : 'Sin mascotas'}</span><span>${t.prefs.music ? '🎵 Con música' : '🤫 Viaje tranquilo'}</span>${t.prefs.back2 ? '<span>Máx. 2 personas atrás</span>' : ''}</div>
     ${t.notes ? `<p class="muted" style="margin-top:10px">“${esc(t.notes)}”</p>` : ''}
     ${revs.map(r => `<div class="rev"><b>⭐⭐⭐⭐⭐</b> ${esc(r)}</div>`).join('')}
@@ -227,12 +238,12 @@ function detail(id) {
         <p class="hint" style="margin-top:8px">DEMO sin cobro real. En producción el pago se retiene y se libera al conductor al terminar el viaje. Cancelando con más de 24 h te devolvemos todo menos la cuota.</p>`}</div>`;
   $('shX').onclick = closeSheet;
   if ($('goMine')) $('goMine').onclick = () => { closeSheet(); tab = 'mis'; render(); };
-  if ($('book')) $('book').onclick = () => {
+  if ($('book')) $('book').onclick = () => NaviVerify.require(user, { why: 'reservar en Navi Ride', onOk: () => {
     const b = RideStore.upd(d => { const b = { id: 'NR-' + String(Date.now()).slice(-6), trip: t.id, snap: t, phone: user.phone, name: me, seats: pax, sub, fee, total: sub + fee, status: t.instant ? 'confirmada' : 'pendiente', at: Date.now() }; d.bookings.unshift(b); return b; });
     closeSheet(); tab = 'mis'; history.replaceState(null, '', '#mis'); render();
     toast(t.instant ? `✅ Reservado con ${t.driver}. Folio ${b.id}` : `📨 Solicitud enviada a ${t.driver}`);
     if (!t.instant && t.seed) setTimeout(() => { autoAccept(true); if (tab === 'mis') render(); }, 5000);
-  };
+  } });
 }
 function closeSheet() { $('sheet').hidden = true; $('sheet').innerHTML = ''; }
 $('sheet').onclick = e => { if (e.target === $('sheet')) closeSheet(); };
@@ -274,6 +285,8 @@ function publicar() {
     if (f.from.value === f.to.value) return toast('Elige un destino distinto al origen');
     const at = new Date(`${f.date.value}T${f.time.value}`);
     if (!(at > Date.now() + 30 * 60e3)) return toast('La salida debe ser al menos en 30 minutos');
+    // para llevar pasajeros: identidad verificada + licencia y tarjeta de circulación
+    if (!NaviVerify.driverOk(user.phone)) return NaviVerify.require(user, { need: 'driver', why: 'publicar viajes en Navi Ride', onOk: () => f.requestSubmit() });
     const k = rideKm(f.from.value, f.to.value), s = +f.seats.value, price = Math.min(+f.price.value, rideMax(k, s));
     localStorage.setItem(ME_KEY, JSON.stringify({ ...M, car: f.car.value.trim() }));
     const t = { id: 'U' + Date.now().toString(36), from: f.from.value, to: f.to.value, at: +at, seats: s, price, instant: f.instant.checked, driver: me, driverPhone: user.phone, rating: null, trips: 0, car: f.car.value.trim(), emo: '🧑',
@@ -295,7 +308,7 @@ function mis() {
     <section class="card"><h2>Como conductor</h2>
       <div class="mine">${myTrips.map(t => { const rq = bs.filter(b => b.trip === t.id && b.status !== 'cancelada'); return `<div class="mt" ${t.canceled ? 'style="opacity:.5"' : ''}><div class="h"><b>${C[t.from].n} → ${C[t.to].n}</b><span class="tags">${t.canceled ? '<span class="bad">Cancelado</span>' : `<span class="v">${left(t)} de ${t.seats} libres</span>`}</span></div>
         <div class="muted">${dayTxt(t.at)} · ${hhmm(t.at)} · ${esc(t.meet)} · ${money(t.price)} por asiento</div>
-        ${rq.map(b => `<div class="req">👤 <span><b>${esc(b.name)}</b> · ${b.seats} ${b.seats === 1 ? 'lugar' : 'lugares'} <span class="tags" style="display:inline-flex;margin:0"><span class="v">✓ Cliente Navi</span></span></span><span class="sp">${b.status === 'pendiente' ? `<button class="y" data-acc="${b.id}">Aceptar</button><button data-rej="${b.id}">Rechazar</button>` : `<span class="tags"><span class="${ST[b.status][1]}">${ST[b.status][0]}</span></span>`}</span></div>`).join('') || '<span class="hint">Nadie ha reservado todavía.</span>'}
+        ${rq.map(b => `<div class="req">👤 <span><b>${esc(b.name)}</b> · ${b.seats} ${b.seats === 1 ? 'lugar' : 'lugares'} <span class="tags" style="display:inline-flex;margin:0">${idTag(b.phone)}</span></span><span class="sp">${b.status === 'pendiente' ? `<button class="y" data-acc="${b.id}">Aceptar</button><button data-rej="${b.id}">Rechazar</button>` : `<span class="tags"><span class="${ST[b.status][1]}">${ST[b.status][0]}</span></span>`}</span></div>`).join('') || '<span class="hint">Nadie ha reservado todavía.</span>'}
         ${t.canceled ? '' : `<div class="a">${rq.some(b => b.status === 'confirmada') ? `<button class="go" data-dlive="${t.id}">🚗 Iniciar viaje y compartir en vivo</button>` : ''}<button data-tcancel="${t.id}">Cancelar viaje</button></div>`}</div>`; }).join('') || '<div class="empty">No has publicado viajes. <a class="lnk" href="#publicar" id="toPub">Publica uno</a> y comparte gastos.</div>'}</div></section></div>`;
   const A = $('app');
   $('toSearch')?.addEventListener('click', e => { e.preventDefault(); tab = 'buscar'; render(); });
@@ -379,7 +392,7 @@ function paintLive() {
 }
 
 // lo que pasa en otra pestaña (otro cliente reserva tu viaje, el conductor acepta) se ve al momento
-addEventListener('storage', e => { if (e.key === RideStore.KEY && $('sheet').hidden && $('live').hidden) render(); });
+addEventListener('storage', e => { if ([RideStore.KEY, NaviVerify.KEY].includes(e.key) && $('sheet').hidden && $('live').hidden) render(); });
 render();
 if (location.hash === '#mis' && liveData()) paintLive();
 </script>
