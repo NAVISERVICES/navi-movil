@@ -124,10 +124,10 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 .family{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end}
 /* familia: adultos atrás y más grandes, niños al frente y más bajitos; cada celular queda hacia un lado libre */
 .family img{min-width:0;margin:0 -5%;cursor:pointer;transform-origin:bottom center;animation:bob 3.2s ease-in-out infinite;transition:filter .2s}
-.family img:nth-child(1){animation-delay:-.4s;width:33%;z-index:2}  /* Papá: celular a la izquierda, en la orilla */
-.family img:nth-child(2){animation-delay:-1.1s;width:24%;z-index:4} /* Toño, al frente */
-.family img:nth-child(3){animation-delay:-1.8s;width:27%;z-index:1} /* Abuela, al centro y atrás */
-.family img:nth-child(4){animation-delay:-2.4s;width:25%;z-index:4} /* Sofi, al frente */
+.family img:nth-child(1){animation-delay:-.4s;width:30%;z-index:1}  /* Abuela: celular a la izquierda, en la orilla */
+.family img:nth-child(2){animation-delay:-1.1s;width:33%;z-index:2} /* Papá: su celular cae delante de la abuela */
+.family img:nth-child(3){animation-delay:-1.8s;width:25%;z-index:4} /* Sofi, al frente: su celular delante de Papá */
+.family img:nth-child(4){animation-delay:-2.4s;width:24%;z-index:4} /* Toño, al frente: celular hacia Mamá */
 .family img:nth-child(5){animation-delay:-.8s;width:30%;z-index:2}  /* Mamá: celular a la derecha, en la orilla */
 .family img:hover,.family img.hop{animation:hop .6s cubic-bezier(.3,1.6,.5,1)}@keyframes bob{50%{transform:translateY(-8px) rotate(1deg)}}
 @keyframes hop{30%{transform:translateY(-40px) scale(1.05,0.95) rotate(-4deg)}60%{transform:translateY(0) scale(.95,1.05)}}
@@ -574,10 +574,10 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
       <div class="orbit"></div>
       <div class="sun"></div>
       <div class="family" id="family">
-        <img src="assets/beto.png" alt="Papá Beto">
-        <img src="assets/tono.png" alt="Toño">
         <img src="assets/chayo.png" alt="Abuela Chayo">
+        <img src="assets/beto.png" alt="Papá Beto">
         <img src="assets/sofi.png" alt="Sofi">
+        <img src="assets/tono.png" alt="Toño">
         <img src="assets/mama.png" alt="Mamá">
       </div>
       <div class="float-card gb-card">
