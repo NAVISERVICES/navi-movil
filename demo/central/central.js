@@ -517,7 +517,7 @@ function identidad() {
   const docs = (key, imgs) => `<div class="iddocs ${idShown.has(key) ? '' : 'blur'}">${imgs.map(([src, n]) => `<figure>${src ? `<img src="${src}" alt="">` : '<div class="ph">🪪</div>'}<figcaption>${n}</figcaption></figure>`).join('')}</div>`;
   const card = (x, i) => {
     const r = x.r, key = x.ph + ':' + x.kind, nm = x.synth ? x.synth.name : r.name || custById(x.ph)?.name || 'Cliente';
-    return `<div class="idcase"><div class="h"><b>${esc(Mask.name(nm))}</b><span class="pill warn">${x.kind === 'photo' ? 'Cambio de foto' : 'Selfie sin prueba de vida'}</span><span class="hint">${Mask.phone(x.ph)} · ${ago(x.kind === 'photo' ? r.photoReview.at : r.sent)}</span>${x.synth ? '' : ' <span class="pill lime">demo</span>'}</div>
+    return `<div class="idcase"><div class="h"><b>${esc(Mask.name(nm))}</b><span class="pill warn">${x.kind === 'photo' ? 'Cambio de foto' : 'Selfie sin prueba de vida'}</span><span class="hint">${Mask.phone(x.ph)} · ${ago(x.kind === 'photo' ? r.photoReview.at : r.sent)}${r.consent || x.synth ? ' · ✓ consentimiento de datos biométricos' : ''}</span>${x.synth ? '' : ' <span class="pill lime">demo</span>'}</div>
       ${x.kind === 'photo' ? docs(key, [[r.selfie, 'Foto actual'], [r.photoReview.img, 'Nueva selfie']]) : docs(key, [[r.ineF, 'INE frente'], [r.ineB, 'INE reverso'], [r.selfie, 'Selfie']])}
       <div class="acts" style="justify-content:flex-start">${idShown.has(key) ? '' : `<button class="btn btn-line xs" data-idshow="${i}">👁 Ver documentos</button>`}
         <button class="btn btn-lime xs" data-idok="${i}">✓ Aprobar</button><select class="inp" data-idwhy="${i}" style="width:auto;padding:6px 8px;font-size:12px">${ID_REASONS.map(t => `<option>${t}</option>`).join('')}</select><button class="btn btn-line xs" data-idno="${i}">✕ Rechazar</button></div></div>`;
@@ -570,9 +570,14 @@ function ops() {
     viajes: ['Navi Ride', ['Folio', 'Fecha del viaje', 'Pasajero', 'Ruta', 'Total (cuota)', 'Estado'], [
       ...RideStore.bookings().map(b => { const t = RideStore.trip(b.trip) || b.snap; return [b.id, t.at, Mask.name(b.name), `${RIDE_CITIES[t.from].n} → ${RIDE_CITIES[t.to].n}`, `${mxn(b.total)} (${mxn(b.fee)})`, b.status, 1]; }),
       ...rideSeeds().slice(0, 8).map((t, i) => { const sub = t.price * (1 + (i % 2)); return ['NR-' + String(518200 + i * 13), t.at, Mask.name(SYNTH[i + 5].name), `${RIDE_CITIES[t.from].n} → ${RIDE_CITIES[t.to].n}`, `${mxn(sub * 1.1)} (${mxn(sub * .1)})`, i === 3 ? 'pendiente' : 'confirmada']; })]],
+    // Navi Escudo: trámites sobre las líneas (portabilidad, reposición de chip, cambio de equipo) y números reportados
+    escudo: ['Seguridad de línea', ['Evento', 'Fecha', 'Línea', 'Trámite', 'Detalle', 'Estado'], [
+      ...(readLS('navi.escudo', {}).events || []).map(e => [e.id, e.at, Mask.phone(e.phone), { porta: 'Portabilidad', sim: 'Reposición de chip', imei: 'Cambio de equipo' }[e.type], e.by ? 'Respondió ' + e.by : 'Candado de línea', { bloqueado: 'bloqueado', autorizado: 'autorizado', pendiente: 'esperando al cliente', 'sin candado': 'pasó sin candado' }[e.status], 1]),
+      ...(readLS('navi.escudo', {}).reports || []).map((r, i) => ['RPT-' + (1000 + i), r.at, Mask.phone(r.num), 'Número reportado', r.cat, 'reportado']),
+      ...['5599990141', '5599990277', '5599990318'].map((n, i) => ['RPT-08' + i, Date.now() - (i + 1) * 9e6, Mask.phone(n), 'Número reportado', ['Extorsión', 'Falso secuestro', 'Fraude bancario'][i], 'en lista de alerta'])]],
   };
   const [, heads, rows] = T[opsTab];
-  const pill = s => `<span class="pill ${/pagad|aplicad|complet|confirm|termin/.test(s) ? 'ok' : /rechaz|cancel/.test(s) ? 'bad' : 'warn'}">${s}</span>`;
+  const pill = s => `<span class="pill ${/pagad|aplicad|complet|confirm|termin|autoriz/.test(s) ? 'ok' : /rechaz|cancel|bloquead|sin candado/.test(s) ? 'bad' : 'warn'}">${s}</span>`;
   shell(`<div class="seg" style="margin-bottom:12px">${Object.entries(T).map(([k, [n, , r]]) => `<button data-o="${k}" aria-pressed="${opsTab === k}">${n} · ${r.length}</button>`).join('')}</div>
     <div class="tw"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>
     ${rows.sort((a, b) => b[1] - a[1]).map(r => `<tr><td><b>${esc(r[0])}</b>${r[6] ? ' <span class="pill lime">demo</span>' : ''}</td><td>${new Date(r[1]).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })} ${hhmm(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td><td>${pill(r[5])}</td></tr>`).join('') || `<tr><td colspan="6" class="muted">Sin registros todavía.</td></tr>`}
