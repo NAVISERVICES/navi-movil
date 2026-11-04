@@ -3,6 +3,7 @@
 //  · Front desk: conversaciones de chat web, app, WhatsApp y Empresas con el asistente y los asesores,
 //    separadas en personas (B2C, Navi Móvil) y empresas (B2B, NAVICom)
 //  · Empresas B2B: embudo de oportunidades que llegan del formulario y del chat de la página Empresas
+//  · Verificaciones: revisión manual de identidad (INE + selfie) que no se aprobó sola
 //  · Proactivo: reglas que detectan a quién hay que buscar antes de que nos busque
 //  · Privacidad: datos enmascarados por defecto; ver un dato completo pide motivo y queda en auditoría
 // DEMO: lee los datos de este navegador y suma una cartera de ejemplo (clientes ficticios).
@@ -163,13 +164,13 @@ document.addEventListener('click', e => { const r = e.target.closest('[data-reve
 // ---------- estructura ----------
 let view = sessionStorage.getItem('central.view') || 'resumen', sel = null, inboxF = 'abiertas', segF = 'todos', q = '', opsTab = 'pedidos';
 let cliSt = 'todos', cliPlan = 'todos', cliSort = '', chF = '', deskX = '', stageF = ''; // filtros que llegan desde el Resumen
-const NAV = [['resumen', '📊', 'Resumen'], ['desk', '💬', 'Front desk'], ['empresas', '🏢', 'Empresas B2B'], ['clientes', '👥', 'Clientes'], ['proactivo', '⚡', 'Proactivo'], ['ops', '📦', 'Operaciones'], ['privacidad', '🔒', 'Privacidad']];
+const NAV = [['resumen', '📊', 'Resumen'], ['desk', '💬', 'Front desk'], ['empresas', '🏢', 'Empresas B2B'], ['clientes', '👥', 'Clientes'], ['identidad', '🪪', 'Verificaciones'], ['proactivo', '⚡', 'Proactivo'], ['ops', '📦', 'Operaciones'], ['privacidad', '🔒', 'Privacidad']];
 const openConvs = () => Desk.all().filter(c => c.status !== 'closed');
 function shell(inner, title, right = '') {
-  const w = Desk.all().filter(c => c.status === 'waiting').length, al = alerts().length, nl = Desk.leads().filter(l => l.stage === 'nuevo').length;
+  const w = Desk.all().filter(c => c.status === 'waiting').length, al = alerts().length, nl = Desk.leads().filter(l => l.stage === 'nuevo').length, iq = idQueue().length;
   $('root').innerHTML = `<div class="app"><aside class="side">
       <div class="brand"><img src="../assets/navi-logo.png" alt="Navi"><small>CENTRAL</small></div>
-      <nav>${NAV.map(([k, i, n]) => `<button data-v="${k}" aria-current="${view === k}">${i} ${n}${k === 'desk' && w ? `<b>${w}</b>` : ''}${k === 'proactivo' && al ? `<b>${al}</b>` : ''}${k === 'empresas' && nl ? `<b>${nl}</b>` : ''}</button>`).join('')}</nav>
+      <nav>${NAV.map(([k, i, n]) => `<button data-v="${k}" aria-current="${view === k}">${i} ${n}${k === 'desk' && w ? `<b>${w}</b>` : ''}${k === 'proactivo' && al ? `<b>${al}</b>` : ''}${k === 'empresas' && nl ? `<b>${nl}</b>` : ''}${k === 'identidad' && iq ? `<b>${iq}</b>` : ''}</button>`).join('')}</nav>
       <div class="who"><b>${esc(staff.name)}</b>${ROLES[staff.role].n}<br><a class="rv" id="logout" style="margin:0">Salir</a></div>
       <div class="foot">DEMO · datos de este navegador + cartera ficticia</div></aside>
     <main class="main"><div class="top"><h1>${title}</h1><div class="sp">${right}</div></div>${inner}</main></div>`;
@@ -178,7 +179,7 @@ function shell(inner, title, right = '') {
 }
 function route() {
   if (!staff) return login();
-  ({ resumen, desk, empresas, clientes, proactivo, ops, privacidad }[view] || resumen)();
+  ({ resumen, desk, empresas, clientes, identidad, proactivo, ops, privacidad }[view] || resumen)();
 }
 
 function login() {
@@ -493,6 +494,68 @@ function proactivo() {
   });
 }
 
+// ---------- Verificaciones de identidad (verify.js) ----------
+// Lo automático (cámara con prueba de vida) se aprueba solo; aquí llega lo que necesita ojos humanos:
+// selfies subidas sin prueba de vida y cambios de foto. Los documentos se ven borrosos hasta pedir verlos con motivo.
+const ID_REASONS = ['La selfie no coincide con la INE', 'Las fotos no se ven bien', 'La INE está vencida', 'Parece una foto de otra foto'];
+const synthIdDone = {}; // DEMO: decisiones sobre los casos de ejemplo (solo en esta sesión)
+const idShown = new Set();
+function idQueue() {
+  const real = Object.entries(NaviVerify.all()).flatMap(([ph, r]) => [
+    r.status === 'review' && { ph, r, kind: 'id' }, r.photoReview && { ph, r, kind: 'photo' }].filter(Boolean));
+  const ex = [SYNTH[8], SYNTH[17]].filter(c => !synthIdDone[c.id]).map((c, i) => ({ ph: c.phone, synth: c, kind: 'id', r: { status: 'review', name: c.name, method: 'manual', sent: Date.now() - (i ? 5.4e6 : 2.2e6) } }));
+  return [...real, ...ex];
+}
+function identidad() {
+  const V = NaviVerify, all = V.all();
+  const realPh = Object.keys(NAVI_ACCOUNTS).flatMap(k => accountLines(NaviAuth.find(k)).map(l => l.phone));
+  const st = ph => V.get(ph).status;
+  const synthOk = c => synthIdDone[c.id] === 'ok' || (!synthIdDone[c.id] && c !== SYNTH[8] && c !== SYNTH[17] && +c.phone.slice(-2) % 10 < 7);
+  const okN = realPh.filter(ph => st(ph) === 'ok').length + SYNTH.filter(synthOk).length;
+  const adults = realPh.filter(ph => st(ph) !== 'minor').length + SYNTH.length;
+  const q = idQueue(), drivers = realPh.filter(ph => V.driverOk(ph)).length + SYNTH.filter((c, i) => synthOk(c) && i % 6 === 0).length;
+  const docs = (key, imgs) => `<div class="iddocs ${idShown.has(key) ? '' : 'blur'}">${imgs.map(([src, n]) => `<figure>${src ? `<img src="${src}" alt="">` : '<div class="ph">🪪</div>'}<figcaption>${n}</figcaption></figure>`).join('')}</div>`;
+  const card = (x, i) => {
+    const r = x.r, key = x.ph + ':' + x.kind, nm = x.synth ? x.synth.name : r.name || custById(x.ph)?.name || 'Cliente';
+    return `<div class="idcase"><div class="h"><b>${esc(Mask.name(nm))}</b><span class="pill warn">${x.kind === 'photo' ? 'Cambio de foto' : 'Selfie sin prueba de vida'}</span><span class="hint">${Mask.phone(x.ph)} · ${ago(x.kind === 'photo' ? r.photoReview.at : r.sent)}</span>${x.synth ? '' : ' <span class="pill lime">demo</span>'}</div>
+      ${x.kind === 'photo' ? docs(key, [[r.selfie, 'Foto actual'], [r.photoReview.img, 'Nueva selfie']]) : docs(key, [[r.ineF, 'INE frente'], [r.ineB, 'INE reverso'], [r.selfie, 'Selfie']])}
+      <div class="acts" style="justify-content:flex-start">${idShown.has(key) ? '' : `<button class="btn btn-line xs" data-idshow="${i}">👁 Ver documentos</button>`}
+        <button class="btn btn-lime xs" data-idok="${i}">✓ Aprobar</button><select class="inp" data-idwhy="${i}" style="width:auto;padding:6px 8px;font-size:12px">${ID_REASONS.map(t => `<option>${t}</option>`).join('')}</select><button class="btn btn-line xs" data-idno="${i}">✕ Rechazar</button></div></div>`;
+  };
+  const recent = Object.entries(all).filter(([, r]) => ['ok', 'rejected'].includes(r.status) && !r.seed).sort((a, b) => (b[1].upd || 0) - (a[1].upd || 0));
+  shell(`<div class="kpis">
+      <div class="kpi"><small>Identidad verificada</small><b>${okN}</b><em>${Math.round(okN / adults * 100)}% de los adultos</em></div>
+      <div class="kpi"><small>En revisión</small><b>${q.length}</b><em>meta: menos de 24 h</em></div>
+      <div class="kpi"><small>Sin verificar</small><b>${adults - okN - q.filter(x => x.kind === 'id').length}</b><em>se les invita con 1 GB de regalo</em></div>
+      <div class="kpi"><small>Conductores Navi Ride</small><b>${drivers}</b><em>con licencia validada</em></div>
+    </div>
+    <div class="g2"><section class="card"><h3>⏳ Por revisar<span class="hint">lo automático se aprueba solo</span></h3>
+      <div class="list">${q.map(card).join('') || '<p class="muted">Nada pendiente ✨</p>'}</div></section>
+      <div style="display:grid;gap:14px;align-content:start"><section class="card"><h3>Últimas verificaciones</h3><div class="tw" style="border:0"><table><thead><tr><th>Cliente</th><th>Cómo</th><th>Estado</th></tr></thead><tbody>
+        ${recent.map(([ph, r]) => `<tr><td>${esc(Mask.name(r.name || custById(ph)?.name || ''))}<div class="hint">${Mask.phone(ph)}</div></td><td>${r.method === 'camera' ? '🤳 Cámara + prueba de vida' : r.method === 'sim' ? '🎬 Cámara (simulada)' : '👤 Revisión manual' + (r.by ? ' · ' + esc(r.by) : '')}</td><td><span class="pill ${r.status === 'ok' ? 'ok' : 'bad'}">${r.status === 'ok' ? 'Verificada' : 'Rechazada'}</span></td></tr>`).join('') || '<tr><td colspan="3" class="muted">Aún no hay verificaciones en este navegador.</td></tr>'}
+        </tbody></table></div></section>
+        <section class="priv"><b>Cómo funciona</b><ul><li>Nivel 1 · Línea Navi: automático. Nivel 2 · Identidad: CURP (RENAPO) + INE + selfie con prueba de vida. Nivel 3 · Confianza: antigüedad y pagos al corriente.</li><li>Los menores no se verifican con foto: los avala el titular del Plan Familia.</li><li>Los documentos se ven borrosos; verlos pide motivo y queda en la auditoría.</li><li>En producción: proveedor de verificación (Truora, Incode o MetaMap) y documentos cifrados.</li></ul></section></div></div>`, 'Verificaciones de identidad');
+  const act = (i, approve) => {
+    const x = q[i], why = document.querySelector(`[data-idwhy="${i}"]`).value;
+    if (x.synth) synthIdDone[x.synth.id] = approve ? 'ok' : 'no';
+    else if (x.kind === 'photo') V.decidePhoto(x.ph, approve);
+    else V.decide(x.ph, approve, staff.name, approve ? '' : why.toLowerCase());
+    Desk.audit({ by: staff.name, role: staff.role, cust: x.synth ? x.synth.client : clientCode(NaviAuth.find(x.ph) || { owner: x.ph }), name: Mask.name(x.synth ? x.synth.name : x.r.name || ''), field: `verificación ${approve ? 'aprobada' : 'rechazada'}`, why: approve ? 'Revisión de identidad' : why });
+    toast(approve ? '✓ Aprobada: el cliente ya tiene su sello y su 1 GB' : 'Rechazada: le pedimos repetirla'); identidad();
+  };
+  document.querySelectorAll('[data-idok]').forEach(b => b.onclick = () => act(+b.dataset.idok, true));
+  document.querySelectorAll('[data-idno]').forEach(b => b.onclick = () => act(+b.dataset.idno, false));
+  document.querySelectorAll('[data-idshow]').forEach(b => b.onclick = () => {
+    const x = q[+b.dataset.idshow];
+    $('ov').hidden = false;
+    $('ov').innerHTML = `<div><h3>Ver documentos de identidad</h3><p class="muted">Queda registrado en la auditoría con tu nombre, la hora y el motivo.</p>
+      <label>Motivo<select class="inp" id="why"><option>Revisar una verificación pendiente</option><option>Requerimiento legal o de autoridad</option></select></label>
+      <div class="acts"><button class="btn btn-line xs" id="rvNo">Cancelar</button><button class="btn btn-lime xs" id="rvOk">Ver documentos</button></div></div>`;
+    $('rvNo').onclick = () => $('ov').hidden = true;
+    $('rvOk').onclick = () => { Desk.audit({ by: staff.name, role: staff.role, cust: x.synth ? x.synth.client : '—', name: Mask.name(x.synth ? x.synth.name : x.r.name || ''), field: 'documentos de identidad', why: $('why').value }); idShown.add(x.ph + ':' + x.kind); $('ov').hidden = true; identidad(); };
+  });
+}
+
 // ---------- Operaciones ----------
 function ops() {
   const orders = readLS('navi.orders', []), tops = Topups.all(), portas = readLS('navi.portas', []), tks = Desk.tickets();
@@ -538,6 +601,7 @@ function privacidad() {
 
 // la consola se actualiza sola cuando un cliente escribe desde otra pestaña (chat web, Mi Navi o WhatsApp de prueba)
 addEventListener('storage', e => {
+  if (e.key === NaviVerify.KEY && staff && $('ov').hidden) return route(); // llegó una verificación nueva
   if (e.key !== Desk.KEY || !staff || !$('ov').hidden) return;
   if (document.activeElement?.id === 'cTxt' && $('cTxt').value) return; // no borrar lo que el asesor está escribiendo
   if (['desk', 'resumen', 'empresas'].includes(view)) route();
