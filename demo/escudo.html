@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Navi Escudo · Mi Navi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B0B4F">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="navi.css?v=20261030d">
+<link rel="stylesheet" href="suite.css?v=20261030d">
+<script src="auth.js?v=20261104a"></script>
+<script>if (!NaviAuth.current()) location.replace('login.html?next=escudo.html');</script>
+<script src="verify.js?v=2"></script>
+<style>
+:root{--esc:#9AA8FF}
+.card{background:var(--navy-2);border:1px solid #ffffff18;border-radius:var(--radius);padding:22px}
+.card + .card{margin-top:16px}
+.card h2{font-size:21px;margin-bottom:4px}
+.muted{color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:start}
+.tabs{display:flex;gap:6px;margin:0 0 18px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:none;padding:10px 16px;border-radius:99px;border:1px solid #ffffff26;font-weight:800;font-size:14px;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--esc);border-color:var(--esc);color:var(--ink)}
+.tabs b{background:#FF6FB1;color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;margin-left:4px}
+.ln{background:#ffffff0a;border-radius:18px;padding:14px;margin-top:12px}
+.ln .h{display:flex;gap:10px;align-items:center}
+.ln .h img{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.ln .h b{font-size:15px}
+.ln .h .st{margin-left:auto;font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;background:#FF6F8E26;color:#FF9EB0}
+.ln .h .st.on{background:#2BD67B26;color:#7BF0AE}
+.sw{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #ffffff10;font-size:14px}
+.sw:first-of-type{border-top:0}
+.sw span{flex:1}
+.sw small{display:block;color:var(--muted);font-size:12px}
+.sw input{width:22px;height:22px;accent-color:var(--esc);flex:none}
+.sim{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.sim button{padding:7px 11px;border-radius:12px;font-weight:800;font-size:12px;background:#ffffff12;border:1px dashed #ffffff30}
+.ev{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid #ffffff12;font-size:13px}
+.ev:first-child{border-top:0}
+.ev b{display:block;font-size:14px}
+.pill{font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;white-space:nowrap;margin-left:auto}
+.pill.ok{background:#2BD67B26;color:#7BF0AE}.pill.bad{background:#FF6F8E26;color:#FF9EB0}.pill.warn{background:#FFC22E26;color:#FFD66B}
+.inp{background:#ffffff10;border:2px solid #ffffff22;border-radius:12px;padding:11px 12px;color:var(--text);font:inherit;font-size:16px;width:100%;min-width:0}
+.inp:focus{outline:none;border-color:var(--esc)}
+.inp option{color:#000}
+.row{display:flex;gap:8px;margin-top:10px}
+.btn-esc{background:var(--esc);color:var(--ink);box-shadow:0 5px 0 #5C68C4}
+.res{margin-top:12px;border-radius:16px;padding:14px;font-size:14px}
+.res.bad{background:#FF6F8E1f;border:1px solid #FF6F8E66}
+.res.ok{background:#2BD67B14;border:1px solid #2BD67B55}
+.res b{font-size:16px;display:block;margin-bottom:4px}
+.call{display:flex;gap:10px;align-items:center;background:#FF6F8E14;border:1px solid #FF6F8E44;border-radius:14px;padding:10px 12px;margin-top:8px;font-size:13px}
+.call b{display:block;font-size:14px}
+.tips{display:grid;gap:8px;margin-top:8px;font-size:14px;color:var(--muted)}
+.tips a{color:var(--esc);font-weight:800}
+.alert{position:fixed;inset:0;z-index:95;background:#03031ae6;display:grid;place-items:center;padding:16px}
+.alert[hidden]{display:none}
+.alert > div{width:min(440px,100%);background:#2a0f2e;border:2px solid #FF6F8E;border-radius:24px;padding:22px;text-align:center}
+.alert .big{font-size:52px}
+.alert h2{font-size:22px;margin:6px 0}
+.alert .acts{display:grid;gap:8px;margin-top:16px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>MÓVIL</small></a>
+    <a class="btn btn-ghost sm back" href="cuenta.html">← <span>Mi Navi</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <div class="ico" style="background:#9AA8FF">🛡️</div>
+    <div><h1>Navi Escudo</h1><p>Que nadie se robe tu línea, y que no te agarren desprevenido con una extorsión.</p></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="app"></div>
+</main>
+<div class="alert" id="alert" hidden role="alertdialog" aria-modal="true"></div>
+
+<script>
+// Navi Escudo: seguridad que solo da el operador.
+//  · Candado de línea: portar a otra compañía, reponer el chip/eSIM o cambiar de equipo se avisa al momento y
+//    (con el candado puesto) se detiene hasta que el dueño de la línea —o el titular del Plan Familia— lo autorice con su identidad.
+//  · Anti extorsión: números reportados por la comunidad Navi; se revisa un número y se reporta uno nuevo.
+// DEMO: todo en este navegador y los trámites se simulan. En producción los eventos vienen de la plataforma de
+// JR Móvil (solicitudes de portabilidad y reposición de SIM, cambio de IMEI en la red) y las llamadas se etiquetan en la red.
+const $ = id => document.getElementById(id);
+const user = NaviAuth.current();
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const toast = t => { const e = document.createElement('div'); e.textContent = t; e.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#0B0B4F;font-weight:800;padding:10px 16px;border-radius:12px;z-index:99;max-width:calc(100% - 32px);text-align:center'; document.body.append(e); setTimeout(() => e.remove(), 2800); };
+const when = t => new Date(t).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const lines = accountLines(user), fam = user.plan.type === 'familia', boss = user.role === 'titular';
+const KEY = 'navi.escudo';
+const read = () => { try { return { lock: {}, events: [], reports: [], famAlert: {}, ...JSON.parse(localStorage.getItem(KEY)) }; } catch { return { lock: {}, events: [], reports: [], famAlert: {} }; } };
+const upd = fn => { const d = read(); const r = fn(d); localStorage.setItem(KEY, JSON.stringify(d)); return r; };
+// líneas que esta persona protege: el titular, todas las de la cuenta; un integrante, la suya
+const mine = boss ? lines : lines.filter(l => l.phone === user.phone);
+const L = p => lines.find(l => l.phone === p);
+const LOCKS = [['porta', '🔁 Portabilidad', 'Nadie se lleva tu número a otra compañía sin que lo autorices'], ['sim', '💳 Reposición de chip o eSIM', 'Para pedir un chip nuevo de tu número se pide tu identidad verificada'], ['imei', '📱 Cambio de equipo', 'Te avisamos si tu chip aparece en otro celular']];
+const lockOf = p => ({ porta: false, sim: false, imei: false, ...read().lock[p] });
+const locked = p => Object.values(lockOf(p)).some(Boolean);
+const TYPES = { porta: ['🔁', 'Pidieron portar', n => `Pidieron llevarse la línea de ${n} a Telcel desde una tienda.`], sim: ['💳', 'Pidieron reponer el chip', n => `Pidieron un chip nuevo para el número de ${n} en un centro de atención.`], imei: ['📱', 'El chip cambió de equipo', n => `El chip de ${n} se puso en otro celular (Samsung Galaxy A05).`] };
+
+// números reportados de ejemplo (ficticios, rango 55 9999 …)
+const SEED = [['5599990141', 'Extorsión', 87, 'Dice ser del cártel y pide depósito'], ['5599990277', 'Falso secuestro', 54, 'Simula a un familiar llorando'], ['5599990318', 'Fraude bancario', 41, 'Se hace pasar por el banco y pide el NIP'], ['5599990402', 'Premio falso', 23, 'Dice que ganaste un auto y pide pagar envío'], ['5599990555', 'Spam', 12, 'Ventas insistentes']];
+const reportsOf = num => { const r = read().reports.filter(x => x.num === num), s = SEED.find(x => x[0] === num); return { n: r.length + (s ? s[2] : 0), cat: s ? s[1] : r[0]?.cat, note: s ? s[3] : r[0]?.note, last: r[0]?.at }; };
+const fmtN = n => n.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+
+let tab = location.hash.slice(1) === 'extorsion' ? 'extorsion' : 'candado';
+function render() {
+  const pend = read().events.filter(e => e.owner === user.owner && e.status === 'pendiente' && (boss || e.phone === user.phone)).length;
+  $('tabs').innerHTML = [['candado', `🔒 Candado de línea${pend ? `<b>${pend}</b>` : ''}`], ['extorsion', '📞 Anti extorsión']].map(([k, n]) => `<button data-t="${k}" aria-pressed="${tab === k}">${n}</button>`).join('');
+  $('tabs').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; history.replaceState(null, '', '#' + tab); render(); });
+  (tab === 'candado' ? candado : extorsion)();
+  showPending();
+}
+
+// ---------- candado de línea ----------
+function candado() {
+  const evs = read().events.filter(e => e.owner === user.owner && (boss || e.phone === user.phone));
+  $('app').innerHTML = `<div class="layout"><section class="card"><h2>🔒 Candado de línea</h2>
+      <p class="muted">El robo de línea (portar o reponer tu chip para recibir tus códigos del banco) es de los fraudes más comunes. Con el candado, esos trámites se detienen hasta que tú los autorices.</p>
+      ${!boss && fam ? '<p class="hint" style="margin-top:8px">El candado de tu línea lo maneja el titular de tu Plan Familia. Si alguien intenta algo con tu número, a los dos les avisamos.</p>' : ''}
+      ${mine.map(l => { const k = lockOf(l.phone); return `<div class="ln"><div class="h"><img src="${avatarSrc(l.phone, l.img)}" alt=""><div><b>${esc(l.name)}</b><div class="hint">${fmtPhone(l.phone)}</div></div><span class="st ${locked(l.phone) ? 'on' : ''}">${locked(l.phone) ? '🔒 Protegida' : 'Sin candado'}</span></div>
+        ${LOCKS.map(([id, n, d]) => `<label class="sw"><span><b>${n}</b><small>${d}</small></span><input type="checkbox" data-lock="${l.phone}|${id}" ${k[id] ? 'checked' : ''} ${boss || !fam ? '' : 'disabled'}></label>`).join('')}
+        <div class="sim"><span class="hint" style="align-self:center">Probar (demo):</span>${Object.entries(TYPES).map(([t, [i, n]]) => `<button data-sim="${l.phone}|${t}">${i} ${n}</button>`).join('')}</div></div>`; }).join('')}
+      ${boss || !fam ? `<button class="btn btn-esc" id="all" style="width:100%;justify-content:center;margin-top:14px">🔒 Poner el candado completo a ${mine.length > 1 ? 'todas las líneas' : 'mi línea'}</button>` : ''}</section>
+    <div><section class="card"><h2>Historial</h2>${evs.map(e => { const [i, n] = TYPES[e.type]; return `<div class="ev"><span style="font-size:22px">${i}</span><div><b>${n} · ${esc(L(e.phone)?.name || '')}</b>${when(e.at)}${e.by ? ` · ${esc(e.by)}` : ''}</div><span class="pill ${e.status === 'bloqueado' ? 'ok' : e.status === 'autorizado' ? 'warn' : e.status === 'sin candado' ? 'bad' : 'warn'}">${{ bloqueado: '🛑 Bloqueado', autorizado: '✓ Autorizado', pendiente: '⏳ Esperando', 'sin candado': '⚠️ Pasó sin candado' }[e.status]}</span></div>`; }).join('') || '<p class="muted">Sin movimientos en tus líneas. 👍</p>'}</section>
+      <section class="card"><h2>Cómo funciona</h2><div class="tips"><div>1️⃣ Alguien pide portar tu número, reponer tu chip o mete tu chip en otro celular.</div><div>2️⃣ Te avisamos al momento${fam ? ' a ti y al titular' : ''}.</div><div>3️⃣ Con el candado puesto el trámite se detiene: solo pasa si lo autorizas con tu identidad verificada.</div><div>4️⃣ Si no fuiste tú, lo bloqueamos y te llama un asesor de Navi.</div></div></section></div></div>`;
+  const A = $('app');
+  A.querySelectorAll('[data-lock]').forEach(c => c.onchange = () => { const [p, id] = c.dataset.lock.split('|'); upd(d => { d.lock[p] = { ...lockOf(p), [id]: c.checked, at: Date.now() }; }); toast(c.checked ? '🔒 Candado activado' : 'Candado desactivado'); render(); });
+  $('all')?.addEventListener('click', () => { upd(d => mine.forEach(l => d.lock[l.phone] = { porta: true, sim: true, imei: true, at: Date.now() })); toast('🔒 Listo: tus líneas están protegidas'); render(); });
+  A.querySelectorAll('[data-sim]').forEach(b => b.onclick = () => { const [p, t] = b.dataset.sim.split('|'); simulate(p, t); });
+}
+// DEMO: llega un trámite sobre una línea de la cuenta
+function simulate(phone, type) {
+  const on = lockOf(phone)[type];
+  upd(d => { d.events.unshift({ id: 'EV' + Date.now().toString(36), owner: user.owner, phone, type, at: Date.now(), status: on ? 'pendiente' : 'sin candado' }); });
+  if (!on) toast(`⚠️ Sin candado este trámite habría pasado sin preguntarte. Actívalo para ${type === 'imei' ? 'que te avisemos' : 'detenerlo'}.`);
+  render();
+}
+// alerta: "¿Fuiste tú?" (la ve el dueño de la línea y el titular, también en otra pestaña)
+function showPending() {
+  const e = read().events.find(x => x.owner === user.owner && x.status === 'pendiente' && (boss || x.phone === user.phone));
+  if (!e) { $('alert').hidden = true; return; }
+  const l = L(e.phone), [i, n, d] = TYPES[e.type], self = e.phone === user.phone;
+  $('alert').hidden = false;
+  $('alert').innerHTML = `<div><div class="big">${i}</div><h2>⚠️ ${n}</h2><p class="muted">${esc(d(self ? 'tu número' : l.name))}<br>${when(e.at)}. El candado lo detuvo.</p>
+    <p style="margin-top:10px;font-weight:800">¿${self ? 'Fuiste tú' : `Lo pidió ${esc(l.name)}`}?</p>
+    <div class="acts"><button class="btn btn-lime" data-a="no">🛑 No ${self ? 'fui yo' : 'lo pidió'}: bloquear</button><button class="btn btn-ghost" data-a="si">Sí, autorizar con mi identidad</button></div>
+    <p class="hint" style="margin-top:10px">Si lo bloqueas, un asesor de Navi te llama para revisar tu línea.</p></div>`;
+  $('alert').querySelector('[data-a="no"]').onclick = () => { decide(e.id, 'bloqueado'); toast('🛑 Bloqueado. Un asesor de Navi te contactará.'); };
+  $('alert').querySelector('[data-a="si"]').onclick = () => { $('alert').hidden = true; NaviVerify.require(user, { why: 'autorizar este trámite', onOk: () => { decide(e.id, 'autorizado'); toast('✓ Autorizado con tu identidad verificada'); } }); };
+}
+function decide(id, status) {
+  upd(d => { const e = d.events.find(x => x.id === id); if (e) Object.assign(e, { status, by: user.me.name, done: Date.now() }); });
+  // si se bloquea, entra a Navi Central como ticket de seguridad para que un asesor llame
+  if (status === 'bloqueado' && typeof Desk !== 'undefined') { const e = read().events.find(x => x.id === id); Desk.ticket?.({ name: user.me.name, phone: e.phone, area: 'Seguridad de línea', prio: 'alta', txt: `${TYPES[e.type][1]} bloqueado por el cliente (Navi Escudo)` }); }
+  render();
+}
+
+// ---------- anti extorsión ----------
+function extorsion() {
+  const D = read(), calls = SEED.slice(0, 3).map((s, i) => ({ num: s[0], cat: s[1], n: reportsOf(s[0]).n, at: Date.now() - (i * 7 + 2) * 36e5 }));
+  $('app').innerHTML = `<div class="layout"><div><section class="card"><h2>¿Te llamó un número raro?</h2><p class="muted">Revisa si otros clientes Navi ya lo reportaron.</p>
+      <div class="row"><input class="inp" id="num" inputmode="numeric" maxlength="12" placeholder="55 1234 5678"><button class="btn btn-esc" id="chk">Revisar</button></div>
+      <div id="res"></div><p class="hint" style="margin-top:8px">Prueba con 55 9999 0141 (número de ejemplo reportado).</p></section>
+      <section class="card"><h2>Llamadas recientes de números reportados</h2><p class="muted">Cuando te llama un número reportado, en tu pantalla aparece “⚠️ Posible extorsión”.</p>
+        ${calls.map(c => `<div class="call"><span style="font-size:22px">⚠️</span><div><b>Posible ${esc(c.cat.toLowerCase())} · ${fmtN(c.num)}</b>${c.n} reportes · ${when(c.at)}</div></div>`).join('')}
+        <p class="hint" style="margin-top:8px">DEMO: llamadas de ejemplo. En producción la red etiqueta la llamada antes de que contestes.</p>
+        ${fam ? `<label class="sw" style="margin-top:8px;border-top:1px solid #ffffff10"><span><b>Avisar a mi familia</b><small>Si alguien de la familia recibe una llamada de un número reportado, los demás lo ven en NAVI SOS.</small></span><input type="checkbox" id="famA" ${D.famAlert[user.owner] ? 'checked' : ''} ${boss ? '' : 'disabled'}></label>` : ''}</section></div>
+    <div><section class="card"><h2>Reporta un número</h2><p class="muted">Tu reporte protege a toda la comunidad Navi. Tu número no se comparte.</p>
+      <input class="inp" id="rNum" inputmode="numeric" maxlength="12" placeholder="Número que te llamó" style="margin-top:10px">
+      <select class="inp" id="rCat" style="margin-top:8px">${['Extorsión', 'Falso secuestro', 'Fraude bancario', 'Premio falso', 'Spam'].map(c => `<option>${c}</option>`).join('')}</select>
+      <input class="inp" id="rNote" maxlength="80" placeholder="¿Qué te dijeron? (opcional)" style="margin-top:8px">
+      <button class="btn btn-esc" id="rep" style="width:100%;justify-content:center;margin-top:10px">Reportar</button></section>
+      <section class="card"><h2>Si te llaman para extorsionarte</h2><div class="tips">
+        <div>📵 <b>Cuelga.</b> No des nombres, direcciones ni datos de tu familia.</div>
+        <div>📲 Llama tú al familiar a su número de siempre, o búscalo en NAVI SOS.</div>
+        <div>🚫 Nunca deposites ni compres tarjetas de regalo por presión.</div>
+        <div>☎️ Denuncia: <a href="tel:089">089</a> (anónima) · Consejo Ciudadano <a href="tel:5555335533">55 5533 5533</a> · emergencias <a href="tel:911">911</a>.</div></div></section></div></div>`;
+  const clean = v => v.replace(/\D/g, '').slice(-10);
+  $('chk').onclick = () => {
+    const n = clean($('num').value); if (n.length < 10) return toast('Escribe los 10 dígitos');
+    const r = reportsOf(n);
+    $('res').innerHTML = r.n ? `<div class="res bad"><b>⚠️ ${r.n} ${r.n === 1 ? 'reporte' : 'reportes'} · ${esc(r.cat)}</b>${r.note ? esc(r.note) + '. ' : ''}No contestes ni devuelvas la llamada. Si ya hablaste con ellos, cuelga y llama a tu familia.</div>`
+      : `<div class="res ok"><b>✓ Sin reportes</b>Nadie de la comunidad Navi lo ha reportado. Aun así, si te pide dinero o datos, cuelga.</div>`;
+  };
+  $('rep').onclick = () => {
+    const n = clean($('rNum').value); if (n.length < 10) return toast('Escribe los 10 dígitos del número');
+    upd(d => { d.reports.unshift({ num: n, cat: $('rCat').value, note: $('rNote').value.trim(), by: user.phone, at: Date.now() }); });
+    toast('🙏 Gracias, reportado. Ya avisamos a la comunidad Navi.'); render();
+  };
+  $('famA')?.addEventListener('change', e => upd(d => { d.famAlert[user.owner] = e.target.checked; }));
+}
+
+addEventListener('storage', e => { if (e.key === KEY) render(); });
+render();
+</script>
+<script src="planes.js?v=20261101c"></script>
+<script src="desk.js?v=2"></script>
+<script src="asistente.js?v=5"></script>
+</body>
+</html>

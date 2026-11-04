@@ -19,7 +19,15 @@ const NaviVerify = (() => {
     PEGL900101HDFRMS03: 'Luis Pérez Gómez', RUMC920718MDFZNR05: 'Carla Ruiz Mendoza',
   };
   const SAMPLE = { '5500000004': 'GALJ850412HDFRPS09', '5500000005': 'LOHM870923MDFPRR02', '5500000001': 'RATS950315MDFMRF07', '5500000002': 'PEGL900101HDFRMS03', '5500000003': 'RUMC920718MDFZNR05' };
-  const CURP_RE = /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HMX](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
+  // la selfie y la INE son datos personales sensibles (biométricos): se piden con consentimiento expreso y por escrito
+  // (LFPDPPP). En producción el texto completo lo redacta el abogado y la versión aceptada queda guardada.
+  const AVISO_V = '2026-11';
+  const AVISO = `<b>Aviso de privacidad (resumen)</b><br>Responsable: Navi Móvil. Datos: CURP, imagen de tu INE y una selfie (dato biométrico sensible).
+    Para qué: solo verificar que eres tú y evitar fraudes y perfiles falsos en Navi. No se usan para publicidad ni se venden.
+    Con quién: el proveedor de verificación que valida contra RENAPO y el INE, y autoridades si la ley lo pide.
+    Tus derechos ARCO: acceder, corregir, cancelar u oponerte, y revocar este consentimiento escribiendo a privacidad@navimovil.com.
+    Al cancelar se borran tus documentos y pierdes el sello ✓.`;
+  const CURP_RE =/^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HMX](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
 
   const all = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
   const get = phone => {
@@ -92,6 +100,8 @@ const NaviVerify = (() => {
 .nv-big{font-size:56px;text-align:center;line-height:1;margin:6px 0}
 .nv-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px;background:#ffffff0c;border-radius:14px;padding:12px;margin:10px 0}.nv-kv span{color:#B9B7E6}.nv-kv b{text-align:right}
 .nv-priv{font-size:12px;color:#B9B7E6;background:#ffffff0a;border-radius:12px;padding:10px 12px;margin-top:12px}
+.nv-ok{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:#D9D7FF;background:#ffffff0a;border-radius:12px;padding:10px 12px;margin-top:4px;cursor:pointer}
+.nv-ok input{width:20px;height:20px;flex:none;accent-color:#B4E32F;margin-top:1px}.nv-ok a{color:#B4E32F;text-decoration:underline}
 .nv-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}`;
     document.head.append(s);
   };
@@ -169,9 +179,13 @@ const NaviVerify = (() => {
         <div><span>🪪</span><div><b>Tu INE, frente y reverso</b><small>Leemos los datos solos.</small></div></div>
         <div><span>🤳</span><div><b>Una selfie con prueba de vida</b><small>Parpadeas y giras la cabeza. Será tu foto de perfil.</small></div></div></div>
       <div class="nv-list" style="margin-top:0"><div style="background:#B4E32F1f"><span>🎁</span><div><b>Te regalamos 1 GB</b><small>Al terminar, directo a tu línea.</small></div></div></div>
-      <button class="nv-btn" data-go>Empezar</button><button class="nv-lnk" data-later>Después</button>
-      <div class="nv-priv">🔒 Tus documentos se guardan cifrados y nadie los ve. Los demás solo ven “${esc(firstName(user))} ✓ Identidad verificada”, nunca tu número, tu CURP ni tu INE.</div>`);
-    b.querySelector('[data-go]').onclick = () => curp(user, opts);
+      <label class="nv-ok"><input type="checkbox" id="nvConsent"><span>Autorizo a Navi Móvil a tratar mis <b>datos biométricos</b> (mi selfie y la foto de mi INE) y mi CURP solo para verificar mi identidad, conforme al <a href="#" id="nvAviso">aviso de privacidad</a>. Puedo pedir que se borren cuando quiera.</span></label>
+      <button class="nv-btn" data-go disabled>Empezar</button><button class="nv-lnk" data-later>Después</button>
+      <div class="nv-priv" id="nvAvisoTxt">🔒 Tus documentos se guardan cifrados y nadie los ve. Los demás solo ven “${esc(firstName(user))} ✓ Identidad verificada”, nunca tu número, tu CURP ni tu INE.</div>`);
+    const go = b.querySelector('[data-go]');
+    b.querySelector('#nvConsent').onchange = e => { go.disabled = !e.target.checked; };
+    b.querySelector('#nvAviso').onclick = e => { e.preventDefault(); b.querySelector('#nvAvisoTxt').innerHTML = AVISO; };
+    go.onclick = () => { set(user.phone, { consent: { at: Date.now(), v: AVISO_V } }); curp(user, opts); };
     b.querySelector('[data-later]').onclick = close;
   }
 

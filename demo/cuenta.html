@@ -15,8 +15,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
-<script src="auth.js?v=20261103b"></script>
-<script src="verify.js?v=1"></script>
+<script src="auth.js?v=20261104a"></script>
+<script src="verify.js?v=2"></script>
 <script>
   // sin sesión no hay suite: de vuelta al login
   if (!NaviAuth.current()) location.replace('login.html?next=cuenta.html');
@@ -126,6 +126,31 @@ main{padding:36px 0 80px}
 .fammem .nv-tag{margin-left:auto}
 .app .idreq{font-size:12px;font-weight:800;margin:-8px 0 14px;opacity:.85}
 @media (max-width:980px){.trust{grid-template-columns:1fr}}
+/* avisos y primeros pasos */
+.alertbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-radius:18px;padding:12px 16px;margin-bottom:12px;font-size:14px;font-weight:700;background:#FFC22E1f;border:1px solid #FFC22E66}
+.alertbar.red{background:#FF6F8E1f;border-color:#FF6F8E88}
+.alertbar a{margin-left:auto}
+.onb{background:linear-gradient(120deg,#7B5CFA33,#B4E32F1a);border:1px solid #B4E32F55;border-radius:var(--radius);padding:22px;margin-bottom:26px}
+.onb .hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.onb h2{font-size:24px}
+.onb .bar{height:8px;border-radius:99px;background:#ffffff1f;overflow:hidden;margin:12px 0}
+.onb .bar i{display:block;height:100%;background:var(--lime);border-radius:99px}
+.onb .steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.onb .st{display:flex;gap:10px;align-items:center;background:#ffffff0d;border:1px solid #ffffff18;border-radius:16px;padding:12px;font-size:13px;text-align:left;color:var(--text);cursor:pointer;font-family:inherit}
+.onb .st:hover{border-color:var(--lime)}
+.onb .st b{display:block;font-size:14px}
+.onb .st small{color:var(--muted)}
+.onb .st i{font-style:normal;font-size:24px}
+.onb .st.ok{opacity:.6}.onb .st.ok b{text-decoration:line-through}
+/* vista sencilla */
+body.simple main > :not(#simple):not(#alerts){display:none!important}
+#simple h1{font-size:44px;margin-bottom:6px}
+#simple .big{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+#simple .big a,#simple .big button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:170px;border-radius:28px;font:800 26px var(--display);color:var(--ink);text-align:center;border:0;cursor:pointer;padding:16px}
+#simple .big i{font-style:normal;font-size:54px}
+#simple .big small{font:600 16px var(--body);opacity:.8}
+#simple .gb{font-size:22px;color:var(--muted)}#simple .gb b{color:var(--lime);font-size:34px}
+@media (max-width:560px){#simple .big{grid-template-columns:1fr}#simple .big a,#simple .big button{min-height:120px}}
 @media (max-width:460px){.lv{grid-template-columns:1fr}}
 /* equipos */
 .devs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
@@ -264,6 +289,9 @@ main{padding:36px 0 80px}
       <div class="sess"><b>🔒 Mi sesión en este dispositivo</b>
         <div class="sessOpts" role="radiogroup" aria-label="Tipo de sesión"><button type="button" role="radio" data-sess="keep">🔓 Mantener abierta</button><button type="button" role="radio" data-sess="auto">⏱️ Cerrar tras 5 min sin uso</button></div>
         <small id="sessTxt"></small></div>
+      <div class="sess"><b>👵 Vista sencilla</b>
+        <div class="sessOpts" role="radiogroup" aria-label="Vista de Mi Navi"><button type="button" role="radio" data-view="full">Completa</button><button type="button" role="radio" data-view="simple">Sencilla</button></div>
+        <small>Letras grandes y solo lo esencial: pedir ayuda, recargar y ver tus datos. Ideal para los abuelos.</small></div>
     </form>
     <div class="fam pane" id="famBox" hidden>
       <p class="muted" id="famIntro">Cada quien edita su perfil desde su propia cuenta y aquí se ve al momento.</p>
@@ -286,6 +314,12 @@ main{padding:36px 0 80px}
       </div>
     </div>
   </div>
+
+  <!-- avisos (solicitudes de recarga, candado) y primeros pasos -->
+  <div id="alerts"></div>
+  <section class="onb" id="onb" hidden></section>
+  <!-- vista sencilla (letras grandes, solo lo esencial) -->
+  <section id="simple" hidden></section>
 
   <section class="plan">
     <div class="box lime">
@@ -506,6 +540,68 @@ if (user) {
   }));
   if (NaviVerify.ok(user.phone)) $('photoDel').remove();
 
+  // avisos: solicitudes de recarga de la familia (titular) y trámites que el candado detuvo (Navi Escudo)
+  const readEsc = () => { try { return JSON.parse(localStorage.getItem('navi.escudo')) || {}; } catch { return {}; } };
+  const paintAlerts = () => {
+    const reqs = user.role === 'titular' ? FamTop.reqs(user.owner).filter(r => r.status === 'pendiente') : [];
+    const evs = (readEsc().events || []).filter(e => e.owner === user.owner && e.status === 'pendiente' && (user.role === 'titular' || e.phone === user.phone));
+    const nm = p => lines.find(l => l.phone === p)?.name || '';
+    $('alerts').innerHTML = evs.map(e => `<div class="alertbar red">⚠️ <span>${{ porta: 'Pidieron portar', sim: 'Pidieron reponer el chip de', imei: 'Cambió de equipo' }[e.type]} ${e.phone === user.phone ? 'tu línea' : 'la línea de ' + esc(nm(e.phone))}. El candado lo detuvo.</span><a class="btn btn-lime sm" href="escudo.html">Revisar</a></div>`).join('')
+      + reqs.map(r => `<div class="alertbar">🙏 <span>${esc(nm(r.from))} te pidió una recarga de ${r.gb} GB</span><a class="btn btn-lime sm" href="recargas.html#req">Recargar</a></div>`).join('');
+  };
+
+  // primeros pasos: lo que hace que Navi cuide a la familia desde el primer día
+  const HIDE = 'navi.onb.hide.' + user.phone;
+  const paintOnb = () => {
+    let hide = false; try { hide = localStorage.getItem(HIDE) === '1'; } catch {}
+    const esc2 = readEsc(), lock = (esc2.lock || {})[user.phone] || {};
+    const installed = matchMedia('(display-mode: standalone)').matches || (() => { try { return localStorage.getItem('navi.installed') === '1'; } catch { return false; } })();
+    const steps = [
+      ['📲', 'Pon Mi Navi en tu pantalla', 'Ábrelo de un toque', installed, 'install'],
+      !NaviVerify.minor(user.phone) && ['🪪', 'Verifica tu identidad', '2 minutos · 🎁 1 GB de regalo', NaviVerify.ok(user.phone), 'verify'],
+      ['🛡️', 'Ponle candado a tu línea', 'Que nadie se robe tu número', Object.values(lock).some(v => v === true), 'escudo.html'],
+      user.apps.includes('sos') && ['🚨', 'Activa NAVI SOS', fam ? 'Tu familia en el mapa y el botón SOS' : 'Arma tu red de seguridad', !!localStorage.getItem('navi.sos.' + user.owner), 'sos.html'],
+      user.role === 'titular' && ['🔁', 'Activa la auto-recarga', fam ? 'Que a nadie se le acaben los datos' : 'Nunca te quedes sin datos', Object.values(FamTop.auto(user.owner)).some(a => a.on), 'recargas.html#req'],
+    ].filter(Boolean);
+    const done = steps.filter(s => s[3]).length;
+    $('onb').hidden = hide || done === steps.length;
+    if ($('onb').hidden) return;
+    $('onb').innerHTML = `<div class="hd"><h2>Tus primeros pasos con Navi</h2><span class="count"><b>${done}</b> de ${steps.length}</span></div>
+      <div class="bar"><i style="width:${done / steps.length * 100}%"></i></div>
+      <div class="steps">${steps.map(([i, t, d, ok, go]) => `<button class="st${ok ? ' ok' : ''}" data-step="${go}"><i>${ok ? '✅' : i}</i><span><b>${t}</b><small>${d}</small></span></button>`).join('')}</div>
+      <button class="link" id="onbHide" style="background:none;border:0;margin-top:12px">Ocultar por ahora</button>`;
+    $('onb').querySelectorAll('[data-step]').forEach(b => b.onclick = () => {
+      const g = b.dataset.step;
+      if (g === 'install') { try { localStorage.setItem('navi.installed', '1'); } catch {} document.querySelector('[data-install]')?.click(); paintOnb(); }
+      else if (g === 'verify') NaviVerify.start(user, { onDone: () => location.reload(), onPending: paintTrust });
+      else location.href = g;
+    });
+    $('onbHide').onclick = () => { try { localStorage.setItem(HIDE, '1'); } catch {} paintOnb(); };
+  };
+  document.querySelector('.install-cta')?.addEventListener('click', () => { try { localStorage.setItem('navi.installed', '1'); } catch {} });
+
+  // vista sencilla: letras grandes y cuatro botones (pedir ayuda, recargar, mis datos, ayuda)
+  const VIEW = 'navi.view.' + user.phone;
+  const paintView = () => {
+    let v = 'full'; try { v = localStorage.getItem(VIEW) || 'full'; } catch {}
+    document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-checked', b.dataset.view === v));
+    document.body.classList.toggle('simple', v === 'simple');
+    $('simple').hidden = v !== 'simple';
+    if (v !== 'simple') return;
+    const i = Math.max(0, lines.findIndex(l => l.phone === user.phone)), L = lines[i], left = L.gb + Topups.extra(L.phone) - L.gb * DEMO_USED[i];
+    $('simple').innerHTML = `<h1>¡Hola, ${esc(user.me.name)}!</h1><p class="gb">Te quedan <b>${left.toFixed(1)} GB</b> de internet</p>
+      <div class="big">
+        <a href="${user.apps.includes('sos') ? 'boton/' : 'tel:911'}" style="background:#FF3B5C;color:#fff"><i>🚨</i>Pedir ayuda<small>${user.apps.includes('sos') ? 'Avisa a tu familia dónde estás' : 'Llamar al 911'}</small></a>
+        <a href="${fam && user.role !== 'titular' ? 'recargas.html#req' : 'recargas.html'}" style="background:#7EE0FF"><i>⚡</i>Recargar<small>${fam && user.role !== 'titular' ? 'Pídele a tu familia o recarga tú' : 'En dos toques'}</small></a>
+        <a href="movil.html" style="background:var(--lime)"><i>📶</i>Mis datos<small>Cuánto me queda</small></a>
+        <a href="whatsapp.html" style="background:#FFC22E"><i>💬</i>Ayuda<small>Escríbenos, te contestamos</small></a></div>
+      <button class="btn btn-ghost" id="toFull">Volver a la vista completa</button>`;
+    $('toFull').onclick = () => { try { localStorage.setItem(VIEW, 'full'); } catch {} paintView(); };
+  };
+  document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { try { localStorage.setItem(VIEW, b.dataset.view); } catch {} paintView(); scrollTo(0, 0); }));
+  paintAlerts(); paintOnb(); paintView();
+  addEventListener('storage', e => { if (['navi.famtop', 'navi.escudo', NaviVerify.KEY].includes(e.key)) { paintAlerts(); paintOnb(); } });
+
   // equipos registrados (uno por línea). En Plan Familia el detalle de los equipos solo lo ve el titular.
   if (fam && !isOwner) $('devs').closest('section').remove();
   else {
@@ -592,7 +688,7 @@ if (user) {
 </script>
 <script src="planes.js?v=20261101c"></script>
 <script src="desk.js?v=2"></script>
-<script src="asistente.js?v=4"></script>
+<script src="asistente.js?v=5"></script>
 <script src="instalar.js?v=2"></script>
 </body>
 </html>

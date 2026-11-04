@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="navi.css?v=20261030d">
 <link rel="stylesheet" href="suite.css?v=20261030d">
-<script src="auth.js?v=20261103b"></script>
+<script src="auth.js?v=20261104a"></script>
 <!-- las recargas se hacen dentro de tu sesión de Navi (mismo flujo de la plataforma del operador) -->
 <script>if (!NaviAuth.current()) location.replace('login.html?next=recargas.html' + encodeURIComponent(location.hash));</script>
 <style>
@@ -107,6 +107,22 @@ main{padding-bottom:80px}
 .chipset span.lg img{height:22px;width:auto;max-width:90px;object-fit:contain}
 .chipset span.lg img[src*="amex"],.chipset span.lg img[src*="aurrera"]{height:30px}
 .done .chipset{justify-content:center;margin-top:12px}
+/* familia: solicitudes de recarga y auto-recarga */
+.fam .rq{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #ffffff12;font-size:14px}
+.fam .rq:first-of-type{border-top:0}
+.fam .rq img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.fam .rq .sp{margin-left:auto;display:flex;gap:6px}
+.fam .rq button,.fam .ask button{padding:7px 11px;border-radius:12px;font-weight:800;font-size:12px;background:#ffffff14}
+.fam .rq .y{background:var(--lime);color:var(--ink)}
+.fam .ask{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.fam .ask button{background:#ffffff14;border:1px solid #ffffff26}
+.fam h3{font-size:15px;margin:16px 0 6px}
+.auto{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #ffffff12;font-size:13px}
+.auto img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:50% 15%;background:var(--lav)}
+.auto select{background:#ffffff10;border:1px solid #ffffff26;border-radius:10px;color:var(--text);padding:5px 6px;font:inherit;font-size:12px}
+.auto select option{color:#000}
+.auto input[type=checkbox]{width:20px;height:20px;accent-color:var(--lime)}
+.auto .k{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 @media (max-width:860px){.grid2{grid-template-columns:1fr}}
 @media (max-width:520px){.packs{gap:8px}.pack{padding:14px}.pack b{font-size:26px}.pack .rec{position:static;display:inline-block;margin-bottom:8px}}
 @media print{header,.side,.acts,.title{display:none!important}body{background:#fff}.card{border:0;background:#fff;color:#000}}
@@ -151,6 +167,7 @@ main{padding-bottom:80px}
     </section>
 
     <aside class="side">
+      <div class="card fam" id="famCard" hidden></div>
       <div class="card hist" id="hist" hidden></div>
       <div class="card">
         <h2>Pagas con tarjeta, transferencia o en efectivo</h2>
@@ -283,6 +300,8 @@ function result(r) {
     $('retry').onclick = pay; $('toRev').onclick = review;
     return;
   }
+  // si venía de una solicitud de un integrante, queda atendida
+  if (R.req) { FamTop.setReq(R.req, { status: r.status === 'pagado' ? 'recargada' : 'en pago', folio: R.folio }); R.req = null; }
   // registro de la recarga con la oferta del operador (en producción la aplica la plataforma al confirmar el pago)
   Topups.add({ phone: R.phone, gb: T.gb, price: T.price, at: Date.now(), method: r.method, status: r.status === 'pagado' ? 'aplicada' : 'pendiente',
     folio: R.folio, ref: r.ref, offer: offerOf(T.gb, 'm'), tenant: OPERADOR.tenant, mail: $('mail').value.trim() || null, factura: $('fac').checked });
@@ -303,8 +322,48 @@ function result(r) {
     : `<div class="done pending"><div class="ok">⏳</div><h2>${r.method === 'efectivo' ? 'Tu código de pago' : 'Datos para transferir'}</h2>${pend[r.method]}
         <p class="muted" style="margin-top:10px">Folio ${R.folio} · línea ${fmtPhone(R.phone)}</p>
         <div class="acts"><a class="btn btn-ghost" href="recargas.html">Hacer otra recarga</a></div></div>`;
-  paintHist();
+  paintHist(); paintFam();
 }
+
+// ---------- familia: el integrante pide, el titular recarga; auto-recarga cuando una línea se queda sin datos ----------
+// DEMO: en este navegador (FamTop en auth.js). En producción: aviso push al titular y cobro con la tarjeta guardada en la pasarela.
+const isTit = user && user.role === 'titular', fam = user && user.plan.type === 'familia';
+function paintFam() {
+  if (!user) return;
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const lineOf = p => myLines.find(l => l.phone === p);
+  let h = '';
+  if (fam && !isTit) {
+    const mine = FamTop.reqs(user.owner).filter(r => r.from === user.phone).slice(0, 3);
+    const tit = lineOf(user.owner);
+    h += `<h2>¿Se te acaban los datos?</h2><p class="muted">Pídele a ${esc(tit?.name || 'tu titular')} que te recargue: le llega el aviso y lo paga con un toque.</p>
+      <div class="ask">${NAVI_TOPUPS.map(t => `<button data-ask="${t.gb}">🙏 Pedir ${t.gb} GB</button>`).join('')}</div>
+      ${mine.map(r => `<div class="rq"><span>${r.status === 'pendiente' ? '⏳' : r.status === 'rechazada' ? '✕' : '✅'}</span><div><b>${r.gb} GB</b><div class="hint" style="margin:0">${r.status === 'pendiente' ? 'Esperando a ' + esc(tit?.name || 'tu titular') : r.status === 'rechazada' ? 'Ahora no' : 'Te recargaron'} · ${new Date(r.at).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div></div></div>`).join('')}`;
+  }
+  if (isTit) {
+    const pend = FamTop.reqs(user.owner).filter(r => r.status === 'pendiente');
+    if (fam) h += `<h2 id="req">Solicitudes de tu familia</h2>${pend.map(r => { const l = lineOf(r.from); return `<div class="rq"><img src="${avatarSrc(r.from, l?.img)}" alt=""><div><b>${esc(l?.name)}</b> pide ${r.gb} GB<div class="hint" style="margin:0">${mxn(NAVI_TOPUPS.find(t => t.gb === r.gb).price)}</div></div><span class="sp"><button class="y" data-pay="${r.id}">Recargar</button><button data-no="${r.id}">Ahora no</button></span></div>`; }).join('') || '<p class="muted">Nadie te ha pedido recarga.</p>'}`;
+    const A = FamTop.auto(user.owner);
+    h += `<h3>🔁 Auto-recarga</h3><p class="muted" style="font-size:13px">Cuando a una línea le quede menos de 1 GB, la recargamos sola con tu tarjeta guardada (•••• 4242). Máximo 2 por mes por línea.</p>
+      ${myLines.map((l, i) => { const a = A[l.phone] || {}; return `<div class="auto"><img src="${avatarSrc(l.phone, l.img)}" alt=""><div><b>${esc(l.name)}</b><div class="k"><select data-agb="${l.phone}">${NAVI_TOPUPS.map(t => `<option value="${t.gb}" ${(a.gb || 4) === t.gb ? 'selected' : ''}>${t.gb} GB · ${mxn(t.price)}</option>`).join('')}</select>${a.on ? `<button class="lnk" data-atest="${l.phone}" style="font-size:12px;color:var(--lime);text-decoration:underline">Probar (demo)</button>` : ''}</div></div><input type="checkbox" data-aon="${l.phone}" ${a.on ? 'checked' : ''} aria-label="Auto-recarga de ${esc(l.name)}"></div>`; }).join('')}`;
+  }
+  $('famCard').hidden = !h; $('famCard').innerHTML = h;
+}
+$('famCard').addEventListener('click', e => {
+  const ask = e.target.closest('[data-ask]'), pay = e.target.closest('[data-pay]'), no = e.target.closest('[data-no]'), test = e.target.closest('[data-atest]');
+  if (ask) { FamTop.ask(user, +ask.dataset.ask); paintFam(); toastR(`🙏 Le avisamos a tu titular que necesitas ${ask.dataset.ask} GB`); }
+  if (no) { FamTop.setReq(no.dataset.no, { status: 'rechazada' }); paintFam(); }
+  if (pay) { const r = FamTop.reqs(user.owner).find(x => x.id === pay.dataset.pay); R.req = r.id; R.gb = r.gb; setNum(r.from); scrollTo({ top: 0, behavior: 'smooth' }); toastR('Elegimos la línea y el paquete: solo confirma el pago'); }
+  if (test) { const t = FamTop.fire(test.dataset.atest, user.owner); paintHist(); paintFam(); toastR(t ? `🔁 Auto-recarga: +${t.gb} GB a ${myLines.find(l => l.phone === t.phone).name}` : 'Ya van 2 auto-recargas este mes en esa línea'); }
+});
+$('famCard').addEventListener('change', e => {
+  const on = e.target.closest('[data-aon]'), gb = e.target.closest('[data-agb]');
+  if (on) FamTop.setAuto(user.owner, on.dataset.aon, { on: on.checked, gb: +$('famCard').querySelector(`[data-agb="${on.dataset.aon}"]`).value });
+  if (gb) FamTop.setAuto(user.owner, gb.dataset.agb, { gb: +gb.value });
+  paintFam();
+});
+const toastR = t => { const e = document.createElement('div'); e.textContent = t; e.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#0B0B4F;font-weight:800;padding:10px 16px;border-radius:12px;z-index:99;max-width:calc(100% - 32px);text-align:center'; document.body.append(e); setTimeout(() => e.remove(), 2800); };
+addEventListener('storage', e => { if (e.key === FamTop.KEY || e.key === 'navi.topups') { paintFam(); paintHist(); } });
 
 // ---------- historial (con sesión) y puntos de pago ----------
 function paintHist() {
@@ -328,10 +387,11 @@ $('posGroups').innerHTML = POS.map(([g, list]) => `<div><h3>${g}</h3><div class=
 const hm = location.hash.match(/^#l(\d)(?:-(\d+))?$/) || [];
 if (NAVI_TOPUPS.some(t => t.gb === +hm[2])) R.gb = +hm[2];
 const start = myLines[+hm[1] - 1] || (user ? myLines.find(l => l.phone === user.phone) : null);
-paintLines(); paintHist();
+paintLines(); paintHist(); paintFam();
+if (location.hash === '#req') setTimeout(() => $('famCard').scrollIntoView({ behavior: 'smooth' }), 300);
 if (start) { setNum(start.phone); $('numHint').textContent = myLines.length > 1 ? 'Toca la línea de tu familia que quieres recargar, o escribe otro número Navi.' : 'Es el número con el que entraste. Puedes escribir otro número Navi.'; }
 </script>
 <script src="desk.js?v=2"></script>
-<script src="asistente.js?v=4"></script>
+<script src="asistente.js?v=5"></script>
 </body>
 </html>

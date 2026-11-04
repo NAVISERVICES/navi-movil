@@ -19,7 +19,8 @@ const NAVI_APPS = [
   { id: 'fit',    name: 'NAVI Fit',          icon: '💪', color: '#FF7A45', desc: 'Reto de calistenia de 30 días en casa, sin aparatos, con entrenamientos guiados.', href: 'fit.html' },
   { id: 'ride',   name: 'Navi Ride',         icon: '🚗', color: '#4F8BFF', desc: 'Viajes compartidos entre ciudades con clientes Navi verificados: comparten gastos y tu familia te sigue en vivo.', href: 'ride.html' },
   { id: 'pet',    name: 'Navi Pet',          icon: '🐶', color: '#FFB547', desc: 'Entrena a tu cachorro o perro: plan de 4 semanas, clicker, rutina diaria y avance de cada truco.', href: 'pet.html' },
-  { id: 'sos',    name: 'NAVI SOS',           icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
+  { id: 'escudo', name: 'Navi Escudo',       icon: '🛡️', color: '#9AA8FF', desc: 'Candado contra robo de tu línea (portabilidad y chip) y alerta de números reportados por extorsión o fraude.', href: 'escudo.html' },
+  { id: 'sos',    name: 'NAVI SOS',          icon: '🚨', color: '#FF6FB1', desc: 'Botón SOS, ubicación en tiempo real y zonas seguras.',
     // app funcional dentro de la suite: usa la sesión de Mi Navi, sin volver a iniciar sesión
     // (prototipo de diseño en Figma: NAVI-SOS-Family-–-App-Android, nodo 4-415)
     href: 'sos.html' },
@@ -27,7 +28,8 @@ const NAVI_APPS = [
 
 // gratis para todo cliente Navi Móvil (Shop y Repair traen tráfico para vender en esas plataformas)
 // NAVI Fit, Navi Pet, Navi Ride y Navi Conecta también son para todos los clientes, en cualquier plan
-const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos', 'fit', 'pet', 'ride', 'conecta'];
+// Navi Escudo (seguridad de la línea) también es para todos: proteger la línea es parte de ser cliente Navi
+const FREE_APPS = ['recargas', 'movil', 'shop', 'repair', 'juegos', 'videos', 'agenda', 'referidos', 'fit', 'pet', 'ride', 'conecta', 'escudo'];
 // qué apps incluye cada plan: lo gratis + NAVI SOS en 12 GB, 24 GB y Plan Familia
 const PLAN_ACCESS = {
   2:  [...FREE_APPS],
@@ -246,6 +248,32 @@ const Topups = (() => {
     forPhone: phone => all().filter(t => t.phone === phone),
   };
 })();
+// Recargas en familia: el integrante pide y el titular paga; auto-recarga cuando una línea baja de 1 GB
+// DEMO: en este navegador. En producción: aviso push al titular y cobro con su tarjeta guardada en la pasarela.
+const FamTop = (() => {
+  const KEY = 'navi.famtop';
+  const all = () => { try { return JSON.parse(localStorage.getItem(KEY)) || { reqs: [], auto: {} }; } catch { return { reqs: [], auto: {} }; } };
+  const save = d => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
+  const upd = fn => { const d = all(); d.reqs = d.reqs || []; d.auto = d.auto || {}; const r = fn(d); save(d); return r; };
+  const AUTO_MAX = 2;
+  return {
+    KEY,
+    reqs: owner => all().reqs.filter(r => r.owner === owner),
+    ask: (user, gb) => upd(d => { const r = { id: 'RQ' + Date.now().toString(36), owner: user.owner, from: user.phone, gb, at: Date.now(), status: 'pendiente' }; d.reqs.unshift(r); return r; }),
+    setReq: (id, patch) => upd(d => { const r = d.reqs.find(x => x.id === id); if (r) Object.assign(r, patch, { upd: Date.now() }); }),
+    auto: owner => all().auto[owner] || {},
+    setAuto: (owner, phone, patch) => upd(d => { d.auto[owner] = d.auto[owner] || {}; d.auto[owner][phone] = { gb: 4, ...d.auto[owner][phone], ...patch }; }),
+    // DEMO: simula que la línea bajó de 1 GB y aplica la auto-recarga (máximo 2 por mes por línea)
+    fire: (phone, owner) => {
+      const a = (all().auto[owner] || {})[phone]; if (!a?.on) return null;
+      const month = new Date().toISOString().slice(0, 7);
+      if (Topups.forPhone(phone).filter(t => t.method === 'auto' && new Date(t.at).toISOString().slice(0, 7) === month).length >= AUTO_MAX) return null;
+      const T = NAVI_TOPUPS.find(t => t.gb === a.gb) || NAVI_TOPUPS[1];
+      return Topups.add({ phone, gb: T.gb, price: T.price, at: Date.now(), method: 'auto', status: 'aplicada', folio: 'AUTO-' + String(Date.now()).slice(-6) });
+    },
+  };
+})();
+
 const mxn = n => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // ficha compacta de una línea: foto del equipo, titular, plan, modelo y número
@@ -352,7 +380,7 @@ const NaviAuth = (() => {
 // Cierre automático por inactividad en las páginas de Mi Navi: cuenta el uso (toques, teclas, scroll),
 // avisa 30 s antes y, si no hay respuesta, cierra la sesión y regresa a la pantalla de entrada.
 (() => {
-  const PRIVATE = /\/(cuenta|movil|recargas|sos|fit|pet|ride|conecta|agenda|juegos|videos|referidos)\.html$|\/juegos\//;
+  const PRIVATE = /\/(cuenta|movil|recargas|sos|fit|pet|ride|conecta|escudo|agenda|juegos|videos|referidos)\.html$|\/juegos\//;
   const inSuite = () => PRIVATE.test(location.pathname);
   const start = () => {
     if (!document.body) return addEventListener('DOMContentLoaded', start, { once: true });
