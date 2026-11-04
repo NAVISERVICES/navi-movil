@@ -129,6 +129,8 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 .family img:nth-child(4){animation-delay:-2.4s;width:28%;z-index:2}
 .family img:nth-child(5){animation-delay:-.8s;width:31%}
 .family img:hover,.family img.hop{animation:hop .6s cubic-bezier(.3,1.6,.5,1)}
+/* personajes nuevos (ilustración con fondo): tarjetas con esquinas redondeadas, apenas encimadas */
+.family img:not([src*="chayo"]){margin:0 -2%;border-radius:22px 22px 0 0;border:3px solid #0B0B4F;border-bottom:0;box-shadow:0 -6px 24px #0006;background:#B4E32F}
 @keyframes bob{50%{transform:translateY(-8px) rotate(1deg)}}
 @keyframes hop{30%{transform:translateY(-40px) scale(1.05,0.95) rotate(-4deg)}60%{transform:translateY(0) scale(.95,1.05)}}
 .float-card{position:absolute;background:#fff;color:var(--ink);border-radius:18px;padding:14px 16px;box-shadow:0 20px 40px #0006;animation:floaty 5s ease-in-out infinite}
