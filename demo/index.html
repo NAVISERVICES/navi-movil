@@ -147,6 +147,18 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 .mini-stairs i:nth-child(1){height:40%}.mini-stairs i:nth-child(2){height:70%}.mini-stairs i:nth-child(3){height:100%}
 .mini-stairs i.on{background:var(--lime)}
 .who{display:flex;justify-content:space-between;font-size:10px;color:#6c6c99;margin-top:6px}
+/* tarjetas de historias: quién de la familia y qué le resolvió Navi */
+.story{display:flex;gap:10px;align-items:center;width:240px;padding:12px 14px}
+.story .av{width:42px;height:42px;flex:none;border-radius:50%;object-fit:cover;object-position:50% 12%;background:#e8f8c6;border:2px solid var(--lime)}
+.story b{display:block;font-size:13.5px;line-height:1.25}
+.story em{display:block;font-style:normal;font-size:11px;color:#6c6c99;margin-top:2px}
+.story .msg{transition:opacity .3s,transform .3s}
+.story.swap .msg,.story.swap .av{opacity:0;transform:translateY(6px)}
+.story .av{transition:opacity .3s,transform .3s}
+.story.sos{box-shadow:0 0 0 3px #FF3B5C,0 20px 40px #0006}
+.story.sos .av{border-color:#FF3B5C}.story.sos em{color:#E11D48;font-weight:700}
+.s1{top:2%;left:-4%}
+.s2{top:19%;right:-6%;animation-delay:-2s}
 .toast{top:30%;right:-6%;display:flex;gap:10px;align-items:center;font-size:13px;min-width:210px;animation-delay:-2s}
 .toast .ic{width:32px;height:32px;border-radius:10px;background:#e8f8c6;display:grid;place-items:center;font-size:16px}
 .toast b{display:block;font-size:13px}
@@ -497,7 +509,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
   .steps{grid-template-columns:1fr}
   .steps::before{display:none}
   footer .grid{grid-template-columns:1fr 1fr}
-  .toast{right:0}.gb-card{left:0}
+  .toast,.s2{right:0}.gb-card,.s1{left:0}
   .header-cta{margin-left:auto}
 }
 @media (max-width:560px){
@@ -508,6 +520,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
   .opts{gap:6px}.opts button{height:46px;font-size:15px}
   .gb-card{width:190px;padding:10px 12px}.gb-card strong{font-size:18px}
   .toast{min-width:0;top:22%}
+  /* historias en celular: más compactas, una arriba a la izquierda y otra más abajo a la derecha */
+  .story{width:min(62vw,220px);padding:9px 11px;gap:8px}
+  .story .av{width:34px;height:34px}
+  .story b{font-size:12px}.story em{font-size:10px}
+  .s1{top:0;left:0}.s2{top:24%;right:0}
   .builder{padding:22px;box-shadow:8px 8px 0 var(--lime)}
   .member{grid-template-columns:40px 1fr auto;row-gap:8px}
   .member .chips{grid-column:1/-1}
@@ -516,12 +533,20 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
   .header-cta{gap:6px!important}.header-cta .btn{padding:9px 12px;font-size:13px;white-space:nowrap}
   .hug{height:190px}.hug .who{margin:0 -20px}.hug .who img{height:130px}.hug .who:nth-child(2) img{height:142px}
   .switch .peek{display:none}
-  .marquee .track{font-size:20px}
+  /* celular: la cinta no corre; muestra los 6 beneficios completos en renglones, sin cortarse en las orillas */
+  .marquee .track{width:auto;animation:none;flex-wrap:wrap;justify-content:center;gap:4px 12px;padding:12px 34px;font-size:15px;white-space:normal;text-align:center}
+  .marquee .track span:nth-child(n+7){display:none}
+  .marquee .track span::after{margin-left:12px}
+  .marquee .track span:nth-child(6)::after{content:none}
   /* celular: paneles más juntos, sin que se peguen */
   .hero{padding:44px 0 64px}.stages{padding:60px 0 52px}.solo{padding:52px 0 60px}.family-plan,.calm{padding:60px 0}.switch{padding:60px 0 68px}.final{padding:60px 0}.sec-head{margin-bottom:28px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
+  /* sin animaciones la cinta no corre: se muestran los beneficios completos, sin cortes */
+  .marquee .track{width:auto;flex-wrap:wrap;justify-content:center;gap:4px 16px;padding:14px 34px;white-space:normal;text-align:center}
+  .marquee .track span:nth-child(n+7){display:none}
+  .marquee .track span:nth-child(6)::after{content:none}
   .reveal{opacity:1;transform:none}
   .rotator span.on{opacity:1}
 }
@@ -585,15 +610,14 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
         <img src="assets/tono.png" alt="Toño">
         <img src="assets/mama.png" alt="Mamá">
       </div>
-      <div class="float-card gb-card">
-        <small>PLAN FAMILIA · 4 LÍNEAS</small>
-        <strong id="heroDisc">-15% de descuento</strong>
-        <div class="mini-stairs" id="heroStairs"><i></i><i></i><i></i></div>
-        <div class="who"><span>2 líneas</span><span>3 líneas</span><span>4 líneas</span></div>
+      <!-- lo que hace diferente a Navi, contado por la familia (rotan en las dos tarjetas) -->
+      <div class="float-card story s1" id="story1">
+        <img class="av" src="assets/sofi.png" alt="">
+        <div class="msg"><b>Sofi llegó a la escuela</b><em>NAVI SOS · zona segura</em></div>
       </div>
-      <div class="float-card toast">
-        <div class="ic" id="toastIc">🏫</div>
-        <div class="msg" id="toastMsg"><b>Sofi llegó a la escuela</b><em>Hace 2 min</em></div>
+      <div class="float-card story s2" id="story2">
+        <img class="av" src="assets/beto.png" alt="">
+        <div class="msg"><b>Papá: hice una sola recarga para toda la familia</b><em>4 líneas recargadas</em></div>
       </div>
     </div>
   </div>
@@ -954,35 +978,33 @@ document.querySelectorAll('#family img').forEach(img => {
   });
 });
 
-// hero toast + data bar cycling
+// historias del hero: lo que hace diferente a Navi, contado por cada integrante.
+// Las dos tarjetas recorren la misma lista, desfasadas, para que nunca muestren la misma historia.
 (() => {
-  const msgs = [
-    ['🏫','Sofi llegó a la escuela','Hace 2 min'],
-    ['🏠','Toño llegó a casa','Zona segura · hace 1 min'],
-    ['🎉','Agregaste a Toño','Ahora pagan 15% menos'],
-    ['💚','Recarga familiar lista','4 líneas activas'],
+  const stories = [
+    ['sofi', 'Sofi llegó a la escuela', 'NAVI SOS · zona segura'],
+    ['chayo', 'SOS: la abuela tiene una emergencia', 'Toda la familia ya va en camino', true],
+    ['beto', 'Papá: hice una sola recarga para toda la familia', '4 líneas recargadas'],
+    ['mama', 'Mamá: llamada a mi hermana en USA', 'Hace 5 min'],
   ];
-  const box = document.getElementById('toastMsg'), ic = document.getElementById('toastIc');
-  const bars = [...document.querySelectorAll('#heroStairs i')];
-  const card = document.querySelector('.gb-card small'), disc = document.getElementById('heroDisc');
-  let k = 0, hl = 4;
-  const showLines = () => {
-    card.textContent = `PLAN FAMILIA · ${hl} LÍNEAS`;
-    disc.textContent = `-${Math.round(familyDiscount(hl) * 100)}% de descuento`;
-    bars.forEach((b, i) => b.classList.toggle('on', i + 2 <= hl));
+  const cards = [document.getElementById('story1'), document.getElementById('story2')];
+  const show = (card, s) => {
+    card.querySelector('.av').src = `assets/${s[0]}.png`;
+    card.querySelector('.msg').innerHTML = `<b>${s[1]}</b><em>${s[2]}</em>`;
+    card.classList.toggle('sos', !!s[3]);
   };
-  showLines();
+  let k = 0;
+  show(cards[0], stories[0]); show(cards[1], stories[2]);
   if (reduce) return;
   setInterval(() => {
-    k = (k + 1) % msgs.length;
-    box.classList.add('swap');
-    setTimeout(() => {
-      ic.textContent = msgs[k][0];
-      box.innerHTML = `<b>${msgs[k][1]}</b><em>${msgs[k][2]}</em>`;
-      box.classList.remove('swap');
-    }, 300);
-    hl = hl >= MAX_LINES ? 2 : hl + 1; showLines();
-  }, 3200);
+    k = (k + 1) % stories.length;
+    cards.forEach((c, i) => {
+      setTimeout(() => {
+        c.classList.add('swap');
+        setTimeout(() => { show(c, stories[(k + i * 2) % stories.length]); c.classList.remove('swap'); }, 300);
+      }, i * 600);
+    });
+  }, 3800);
 })();
 
 // tilt cards
