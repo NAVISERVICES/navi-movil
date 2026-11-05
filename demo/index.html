@@ -123,7 +123,7 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
 /* slogan en el arco verde, arriba de la familia y debajo de las tarjetas flotantes */
 .slogan{position:absolute;left:10%;right:10%;top:41%;margin:0;text-align:center;font-family:var(--display);font-weight:800;font-size:clamp(20px,3.3vw,34px);line-height:1.05;letter-spacing:-.01em;color:var(--ink);text-shadow:0 2px 0 #ffffff55;pointer-events:none}
 .slogan em{font-style:normal;display:inline-block;margin-top:4px;padding:2px 12px 4px;border-radius:12px;background:var(--ink);color:var(--lime);transform:rotate(-2deg)}
-@media (max-width:560px){.slogan{top:47%;left:2%;right:2%;font-size:15px;white-space:nowrap}.slogan br{display:none}.slogan em{margin:0 0 0 4px;padding:1px 8px 3px;border-radius:9px}}
+@media (max-width:560px){.slogan{top:31%;left:2%;right:2%;font-size:clamp(21px,6.4vw,26px)}.slogan em{margin-top:3px;padding:1px 10px 3px;border-radius:10px}}
 .orbit{position:absolute;inset:4%;border:2px dashed #ffffff30;border-radius:50%;animation:spin 60s linear infinite}
 .family{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end}
 /* familia: adultos atrás y más grandes, niños al frente y más bajitos; cada celular queda hacia un lado libre */
@@ -524,7 +524,8 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
   .story{width:min(62vw,220px);padding:9px 11px;gap:8px}
   .story .av{width:34px;height:34px}
   .story b{font-size:12px}.story em{font-size:10px}
-  .s1{top:0;left:0}.s2{top:24%;right:0}
+  /* una sola tarjeta centrada (recorre las 4 historias) para dejar espacio al slogan */
+  .s1{top:0;left:0;right:0;margin:0 auto;width:min(84vw,290px)}.s2{display:none}
   .builder{padding:22px;box-shadow:8px 8px 0 var(--lime)}
   .member{grid-template-columns:40px 1fr auto;row-gap:8px}
   .member .chips{grid-column:1/-1}
