@@ -350,7 +350,7 @@ section{position:relative}
 .members{display:grid;gap:8px}
 .member{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;background:#ffffff0d;border-radius:16px;padding:8px 10px;animation:pop .45s cubic-bezier(.3,1.6,.5,1) both}
 .member .av{width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--lav)}
-.member .av img{width:100%;transform:scale(1.9);transform-origin:50% 22%}
+.member .av img{width:100%;height:100%;object-fit:cover;object-position:50% 14%;border-radius:50%}
 .member .av.add{display:grid;place-items:center;background:var(--lime);color:var(--ink);font-weight:800}
 .member .nm{font-size:14px;font-weight:700;line-height:1.2}
 .member .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
@@ -397,7 +397,7 @@ section{position:relative}
 .z-home{left:8%;top:12%;width:30%;aspect-ratio:1;border-color:var(--lime);color:var(--lime);background:#b4e32f14}
 .z-school{right:8%;bottom:10%;width:34%;aspect-ratio:1;border-color:var(--pink);color:var(--pink);background:#ff6fb114}
 .pin{position:absolute;width:62px;height:62px;border-radius:50%;background:#fff;border:4px solid var(--lime);overflow:hidden;box-shadow:0 8px 20px #0007;transition:left 2.2s cubic-bezier(.6,0,.3,1),top 2.2s cubic-bezier(.6,0,.3,1)}
-.pin img{width:100%;height:auto;margin-top:2px;transform:scale(1.5);transform-origin:top center}
+.pin img{width:100%;height:100%;object-fit:cover;object-position:50% 14%}
 .pin.p2{border-color:var(--pink)}
 .notif{position:absolute;left:50%;top:6%;transform:translate(-50%,-20px);background:#fff;color:var(--ink);padding:10px 14px;border-radius:14px;font-size:13px;font-weight:700;opacity:0;transition:all .4s cubic-bezier(.3,1.6,.5,1);white-space:nowrap;box-shadow:0 10px 30px #0006}
 .notif.show{opacity:1;transform:translate(-50%,0)}
@@ -1111,7 +1111,7 @@ document.querySelectorAll('.tilt').forEach(c => {
 // plan builder
 (() => {
   const members = [
-    { name: 'Tú', role: 'Titular', img: 'beto' },
+    { name: 'Papá', role: 'Titular', img: 'beto' },
     { name: 'Mamá', role: 'Línea 2', img: 'mama' },
     { name: 'Sofi', role: 'Línea 3', img: 'sofi' },
     { name: 'Toño', role: 'Línea 4', img: 'tono' },
