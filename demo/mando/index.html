@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--bg:#08083F;--bg2:#0E0E55;--card:#13136A;--line:#ffffff17;--line2:#ffffff26;--text:#F4F3FF;--muted:#B0AEE0;--lime:#B4E32F;--ink:#06062E;--purple:#7B5CFA;--pink:#FF6FB1;--red:#FF4D6D;--cyan:#7EE0FF;--yellow:#FFC22E;--display:"Bricolage Grotesque",system-ui,sans-serif;--body:"DM Sans",system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -20,11 +21,9 @@ button{cursor:pointer;border:0;background:none}
 a{color:inherit;text-decoration:none}
 h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
 .app{display:grid;grid-template-columns:78px 1fr;grid-template-rows:58px 1fr;height:100vh;height:100dvh}
-/* barra superior */
 .top{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);background:#06063A}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:19px}
 .brand img{height:26px}
-.brand span{color:var(--lime)}
 .brand small{font-family:var(--body);font-weight:500;font-size:12px;color:var(--muted);border-left:1px solid var(--line2);padding-left:10px;margin-left:2px}
 .top .sp{flex:1}
 .clock{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
@@ -38,7 +37,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
 .btn.red{background:var(--red);border-color:var(--red);color:#fff}
 .btn.sm{padding:6px 10px;font-size:12.5px;border-radius:10px}
 .btn.ghost{background:none}
-/* navegación lateral */
+.btn.done{background:#b4e32f22;border-color:#b4e32f66;color:var(--lime)}
 nav.side{background:#06063A;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;padding:10px 8px;overflow-y:auto}
 nav.side button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;border-radius:14px;color:var(--muted);font-size:11px;font-weight:700;position:relative}
 nav.side button i{font-style:normal;font-size:20px;line-height:1}
@@ -51,7 +50,6 @@ main{overflow:auto;position:relative}
 .vh h2{font-size:24px}
 .vh p{color:var(--muted);font-size:13px;width:100%;margin-top:-6px}
 .vh .sp{flex:1}
-/* tarjetas e indicadores */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
 .kpi small{display:block;color:var(--muted);font-size:12px}
@@ -79,30 +77,39 @@ table.t th{text-align:left;color:var(--muted);font-weight:700;font-size:12px;pad
 table.t td{padding:9px 10px;border-bottom:1px solid #ffffff0a;vertical-align:middle}
 table.t tr:hover td{background:#ffffff06}
 .empty{color:var(--muted);text-align:center;padding:26px 10px;font-size:13px}
-/* mapa */
-.map{position:relative;border-radius:18px;overflow:hidden;background:#0A0A48 url(../assets/mapa-cdmx.jpg) center/cover;border:1px solid var(--line);min-height:300px}
-.map::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0A0A4888,#0A0A48bb);pointer-events:none}
-.map svg.mo{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.map .zone{stroke-width:.25;vector-effect:non-scaling-stroke}
-.mk{position:absolute;transform:translate(-50%,-50%);transition:left 2s linear,top 2s linear;z-index:3;cursor:pointer}
-.mk .av{border:2.5px solid #0A0A48;box-shadow:0 4px 12px #0007}
-.mk .av::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;opacity:0;animation:ping 2.2s infinite}
-.mk.sos .av::after{opacity:1;animation:ping 1s infinite;color:var(--red)}
-.mk.sel .av{outline:3px solid #fff;outline-offset:2px}
-.mk span.nm{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:4px;font-size:11px;font-weight:700;background:#06062Ee6;border-radius:7px;padding:2px 7px;white-space:nowrap;pointer-events:none}
-.mk.dim{opacity:.35}
+.seg{display:inline-flex;background:#06062Ee6;border:1px solid var(--line2);border-radius:12px;padding:3px;gap:2px}
+.seg button{padding:6px 11px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--lime);color:var(--ink)}
+/* mapa real (Leaflet) */
+.map{position:relative;border-radius:18px;overflow:hidden;background:#0E0E55;border:1px solid var(--line);min-height:300px}
+.map .lf{position:absolute;inset:0;background:#0E0E55}
+.dark-tiles{filter:invert(1) hue-rotate(200deg) brightness(.82) saturate(.55) contrast(.95)}
+.leaflet-container{font-family:var(--body);background:#0E0E55}
+.leaflet-control-zoom a{background:#14146A!important;color:#fff!important;border-color:var(--line2)!important}
+.leaflet-control-scale-line{background:#06062Ecc;color:#fff;border-color:#fff8}
+.leaflet-control-attribution{background:#06062Ecc!important;color:#B0AEE0!important;font-size:10px}
+.leaflet-control-attribution a{color:#E9E5FF!important}
+.mkw{transition:transform 2s linear}
+.zooming .mkw{transition:none!important}
+.mkw .av{border:2.5px solid #0A0A48;box-shadow:0 4px 12px #0007}
+.mkw .av::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;opacity:0;animation:ping 2.2s infinite}
+.mkw.sos .av::after{opacity:1;animation:ping 1s infinite;color:var(--red)}
+.mkw.sel .av{outline:3px solid #fff;outline-offset:2px}
+.mkw .nm{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:4px;font-size:11px;font-weight:700;background:#06062Ee6;color:#fff;border-radius:7px;padding:2px 7px;white-space:nowrap;pointer-events:none}
+.mkw .gp{position:absolute;right:-6px;top:-6px;font-size:11px;background:#06062E;border-radius:50%;width:17px;height:17px;display:grid;place-items:center}
+.mkw.dim{opacity:.35}
 @keyframes ping{0%{transform:scale(.8);opacity:.8}100%{transform:scale(1.7);opacity:0}}
-.pin{position:absolute;transform:translate(-50%,-100%);z-index:2;font-size:11px;font-weight:800;background:#fff;color:var(--ink);border-radius:8px 8px 8px 2px;padding:2px 6px;white-space:nowrap;cursor:pointer;box-shadow:0 3px 10px #0006}
-.pin.alta{background:var(--pink);color:#fff}.pin.nueva{outline:2px dashed var(--yellow)}
-.zl{position:absolute;transform:translate(-50%,-50%);font-size:10.5px;font-weight:700;color:#fff;background:#06062Ebb;border-radius:6px;padding:1px 6px;pointer-events:none;white-space:nowrap;z-index:1}
-.cp{position:absolute;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:5px;background:var(--purple);border:2px solid #fff;z-index:2;font-size:0}
-.mapctl{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:5}
-.mapctl button,.mapctl select{background:#06062Ee6;border:1px solid var(--line2);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700}
-.mapctl button.on{background:var(--lime);color:var(--ink);border-color:var(--lime)}
-.legend{position:absolute;left:12px;bottom:12px;display:flex;gap:10px;flex-wrap:wrap;background:#06062Ee6;border-radius:10px;padding:6px 10px;font-size:11px;z-index:5}
+.pinw .pin{display:inline-block;transform:translate(-50%,-100%);font-size:11px;font-weight:800;background:#fff;color:var(--ink);border-radius:8px 8px 8px 2px;padding:2px 6px;white-space:nowrap;box-shadow:0 3px 10px #0006}
+.pinw .pin.alta{background:var(--pink);color:#fff}.pinw .pin.nueva{outline:2px dashed var(--yellow)}
+.zlw span{display:inline-block;transform:translate(-50%,-50%);font-size:10.5px;font-weight:700;color:#fff;background:#06062Ebb;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.cpw span{display:block;width:16px;height:16px;border-radius:5px;background:var(--purple);border:2px solid #fff}
+.mapctl{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:800;max-width:calc(100% - 70px)}
+.mapctl>button,.mapctl>select{background:#06062Ee6;border:1px solid var(--line2);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700}
+.mapctl>button.on{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.legend{position:absolute;left:12px;bottom:12px;display:flex;gap:10px;flex-wrap:wrap;background:#06062Ee6;border-radius:10px;padding:6px 10px;font-size:11px;z-index:800}
 .legend span{display:flex;align-items:center;gap:5px}
-.map.picking{cursor:crosshair}
-/* en vivo */
+.map.picking .dark-tiles{filter:invert(1) hue-rotate(200deg) brightness(.82) saturate(.55) contrast(.95)}
+.leaflet-container{cursor:crosshair}
 .live{display:grid;grid-template-columns:1fr 360px;gap:14px;height:calc(100dvh - 58px);padding:14px}
 .lcol{display:flex;flex-direction:column;gap:12px;min-height:0}
 .lcol .kpis{margin:0;grid-template-columns:repeat(5,1fr)}
@@ -111,7 +118,7 @@ table.t tr:hover td{background:#ffffff06}
 .ptt{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 12px}
 .ptt .ch{min-width:170px}
 .ptt .ch small{display:block;color:var(--muted);font-size:11px}
-.ptt .ch select{background:none;border:0;font-weight:800;font-size:15px;font-family:var(--display);outline:none;max-width:190px}
+.ptt .ch select{background:none;border:0;font-weight:800;font-size:15px;font-family:var(--display);outline:none;max-width:200px}
 .ptt .ch select option{background:#14146A}
 .pttb{width:150px;height:52px;border-radius:16px;background:var(--lime);color:var(--ink);font-family:var(--display);font-weight:800;font-size:15px;user-select:none;-webkit-user-select:none;touch-action:none;box-shadow:0 6px 0 #6f8f12;transition:transform .08s,box-shadow .08s}
 .pttb.on{background:var(--red);color:#fff;transform:translateY(4px);box-shadow:0 2px 0 #9b1f36}
@@ -145,11 +152,10 @@ table.t tr:hover td{background:#ffffff06}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
 .stats div{background:#ffffff0a;border-radius:10px;padding:6px;text-align:center}
 .stats small{display:block;font-size:10.5px;color:var(--muted)}
-.stats b{font-size:13.5px}
+.stats b{font-size:13px}
 .acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .acts .btn{flex-direction:column;gap:2px;font-size:11px;padding:8px 4px}
 .acts .btn i{font-style:normal;font-size:16px}
-/* órdenes */
 .kan{display:grid;grid-template-columns:repeat(4,minmax(230px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}
 .col{background:#ffffff06;border:1px solid var(--line);border-radius:18px;padding:10px;min-height:300px}
 .col h4{font-size:13px;display:flex;align-items:center;gap:8px;margin:2px 4px 10px}
@@ -178,16 +184,20 @@ table.t tr:hover td{background:#ffffff06}
 .sug .i{flex:1}
 .sug small{color:var(--muted);font-size:11.5px;display:block}
 .best{background:var(--lime);color:var(--ink)}
-/* mensajes */
-.chat{display:grid;grid-template-columns:280px 1fr;gap:12px;height:calc(100dvh - 58px - 100px)}
-.convs{overflow-y:auto;display:flex;flex-direction:column;gap:4px}
-.cv{display:flex;align-items:center;gap:10px;padding:9px;border-radius:13px;cursor:pointer;text-align:left;width:100%}
+.res{max-height:170px;overflow-y:auto;margin-top:6px}
+.res button{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:10px;font-size:12.5px;border:1px solid var(--line);margin-bottom:4px}
+.res button:hover,.res button.on{border-color:var(--lime);background:#b4e32f12}
+.chat{display:grid;grid-template-columns:290px 1fr;gap:12px;height:calc(100dvh - 58px - 100px)}
+.convs{overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.convs h5{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 6px 4px;display:flex;align-items:center}
+.convs h5 button{margin-left:auto;font-size:11.5px;color:var(--lime);font-weight:800;letter-spacing:0;text-transform:none}
+.cv{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:13px;cursor:pointer;text-align:left;width:100%}
 .cv:hover{background:#ffffff0a}.cv.on{background:#ffffff16}
 .cv .i{flex:1;min-width:0}.cv b{font-size:13.5px;display:block}
 .cv small{color:var(--muted);font-size:11.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cv em{font-style:normal;background:var(--lime);color:var(--ink);font-size:11px;font-weight:800;border-radius:9px;min-width:19px;height:19px;display:grid;place-items:center;padding:0 5px}
 .thread{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;min-height:0}
-.thread .th{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.thread .th{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .bub{max-width:70%;padding:8px 12px;border-radius:14px 14px 14px 4px;background:#ffffff12;font-size:13.5px}
 .bub.me{align-self:flex-end;background:var(--purple);border-radius:14px 14px 4px 14px}
@@ -198,43 +208,55 @@ table.t tr:hover td{background:#ffffff06}
 .comp{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);align-items:center}
 .quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 10px}
 .quick button{font-size:12px;background:#ffffff0d;border:1px solid var(--line);border-radius:99px;padding:4px 10px}
-/* alertas */
-.al{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:5px solid;border-radius:16px;padding:13px 16px;margin-bottom:10px}
+.mem{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:300px;overflow-y:auto}
+.mem label{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:10px;border:1px solid var(--line);font-size:12.5px;cursor:pointer}
+.mem label:has(input:checked){border-color:var(--lime);background:#b4e32f12}
+.mem h6{grid-column:1/-1;font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center}
+.mem h6 button{margin-left:auto;color:var(--lime);font-size:11.5px;font-weight:800}
+.al{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:5px solid;border-radius:16px;padding:13px 16px;margin-bottom:10px;flex-wrap:wrap}
 .al .ic{font-size:26px}
-.al .i{flex:1}
+.al .i{flex:1;min-width:240px}
 .al .i b{font-size:15px;display:block}
 .al .i small{color:var(--muted)}
-.al .a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-/* reportes */
+.al .a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:520px}
+.proto{width:100%;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;padding-top:10px;border-top:1px dashed var(--line2)}
+.proto b{width:100%;font-size:12px;color:var(--muted)}
+.proto button{font-size:12px;border:1px solid var(--line2);border-radius:99px;padding:5px 10px;text-align:left}
+.proto button.on{background:#b4e32f22;border-color:#b4e32f88;color:var(--lime)}
+.evac{background:linear-gradient(135deg,#ff4d6d33,#ff7a4522);border:1px solid #ff4d6d88;border-radius:18px;padding:16px;margin-bottom:16px}
+.evac h3{font-size:19px;display:flex;align-items:center;gap:8px}
+.roll{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px}
+.roll div{display:flex;align-items:center;gap:8px;background:#06062E99;border-radius:12px;padding:8px 10px;font-size:12.5px}
+.roll div b{flex:1}
 .hb{display:flex;align-items:center;gap:10px;font-size:12.5px;margin:7px 0}
-.hb span{width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb span{width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hb .bar{flex:1;height:10px}
-.hb b{width:44px;text-align:right}
+.hb b{width:54px;text-align:right}
 .sum{background:linear-gradient(135deg,#7b5cfa33,#b4e32f1a);border:1px solid #b4e32f44;border-radius:18px;padding:16px;font-size:14px;line-height:1.6}
 .sum b{color:var(--lime)}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .r3{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
-/* modal */
-.ov{position:fixed;inset:0;background:#02021ccc;backdrop-filter:blur(3px);display:grid;place-items:center;z-index:50;padding:16px;animation:fi .15s}
+.ov{position:fixed;inset:0;background:#02021ccc;backdrop-filter:blur(3px);display:grid;place-items:center;z-index:1500;padding:16px;animation:fi .15s}
 @keyframes fi{from{opacity:0}}
 .md{background:#11115F;border:1px solid var(--line2);border-radius:22px;width:min(560px,100%);max-height:90dvh;overflow-y:auto;padding:20px;box-shadow:0 30px 80px #0009}
-.md.wide{width:min(760px,100%)}
+.md.wide{width:min(780px,100%)}
 .md .mh{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .md .mh h3{font-size:20px}
 .md .mh button{margin-left:auto;font-size:22px;color:var(--muted)}
 .md .mf{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .sosov{background:#3a0010ee}
 .sosov .md{border:2px solid var(--red);background:#2a0614;text-align:center;animation:shake .5s 2}
+.sosov.silent .md{border-color:var(--yellow);background:#2a1a06}
 .sosov .big{font-size:60px;line-height:1}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.toast{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;flex-direction:column;gap:8px}
+.toast{position:fixed;right:18px;bottom:18px;z-index:1600;display:flex;flex-direction:column;gap:8px}
 .toast div{background:#fff;color:var(--ink);font-weight:700;border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px #0007;animation:fi .2s;max-width:340px;font-size:13px}
 .demo{font-size:11.5px;color:var(--muted);background:#ffffff0a;border:1px dashed var(--line2);border-radius:10px;padding:6px 10px}
-@media (max-width:1100px){.live{grid-template-columns:1fr;height:auto}.lcol .map{min-height:420px}.rside .list{max-height:420px}.lcol .kpis{grid-template-columns:repeat(3,1fr)}.r2,.r3{grid-template-columns:1fr}}
+@media (max-width:1100px){.live{grid-template-columns:1fr;height:auto}.lcol .map{min-height:440px}.rside .list{max-height:420px}.lcol .kpis{grid-template-columns:repeat(3,1fr)}.r2,.r3{grid-template-columns:1fr}}
 @media (max-width:760px){
   body{overflow:auto}
   .app{grid-template-columns:1fr;grid-template-rows:54px auto 1fr;height:auto;min-height:100dvh}
-  nav.side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px;position:sticky;top:0;z-index:20}
+  nav.side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px;position:sticky;top:0;z-index:1000}
   nav.side button{min-width:68px}
   main{overflow:visible}
   .brand small,.clock,.top .hide-m{display:none}
@@ -242,9 +264,8 @@ table.t tr:hover td{background:#ffffff06}
   .live{padding:12px 12px 90px}
   .lcol .kpis{grid-template-columns:repeat(2,1fr)}
   .ptt{flex-wrap:wrap}.pttb{flex:1}
-  .chat{grid-template-columns:1fr;height:auto}.convs{max-height:200px}.thread{min-height:460px}
-  .grid2{grid-template-columns:1fr}
-  .al{flex-wrap:wrap}.al .a{width:100%;justify-content:flex-start}
+  .chat{grid-template-columns:1fr;height:auto}.convs{max-height:260px}.thread{min-height:460px}
+  .grid2,.mem{grid-template-columns:1fr}
   .tw{overflow-x:auto}
 }
 </style>
@@ -264,12 +285,13 @@ table.t tr:hover td{background:#ffffff06}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="mando.js?v=1"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="mando.js?v=2"></script>
 <script>
 const M = Mando, E = M.esc, $ = id => document.getElementById(id);
 let S = M.load();
 let view = (location.hash.slice(1) || 'vivo');
-const ui = { sel: null, side: 'equipo', grp: 'all', show: { ord: true, zon: true, trail: true }, conv: 'all', pttCh: 'all', ordQ: '', ordG: 'all', pick: null, seenSos: new Set(), talking: false };
+const ui = { sel: null, side: 'equipo', grp: 'all', site: 'city', show: { ord: true, zon: true, trail: true }, conv: 'all', pttCh: 'all', ordQ: '', ordG: 'all', pick: null, seenSos: new Set(), talking: false };
 try { Object.assign(ui.show, JSON.parse(localStorage.getItem('navi.mando.ui') || '{}')); } catch (e) {}
 
 const VIEWS = [
@@ -278,16 +300,21 @@ const VIEWS = [
 ];
 const op = id => S.ops.find(p => p.id === id);
 const grp = id => S.groups.find(g => g.id === id);
+const chatG = id => S.chats.find(c => c.id === id);
+const siteN = id => M.site(S, id);
 const stc = p => (M.STATUS[p.status] || M.STATUS.fuera).c;
 const avatar = (p, cls) => p ? `<span class="av ${cls || ''}" style="background:${stc(p)};color:${stc(p)}"><span style="color:var(--ink)">${E(p.ini)}</span></span>` : '<span class="av s" style="background:#ffffff22">—</span>';
 const openOrders = () => S.orders.filter(o => !['completada', 'cancelada'].includes(o.status));
 const today = ts => new Date(ts).toDateString() === new Date().toDateString();
-const unread = () => S.msgs.filter(m => m.from !== 'consola' && (m.to === 'consola' || m.to.startsWith('g')) && !m.reads.includes('consola'));
+const isGps = p => p.gps && Date.now() - p.gps < 120000;
+const where = p => { const st = siteN(p.site), a = M.areaAt(S, p.site, p.x, p.y); return st.icon + ' ' + (a ? a.name : st.kind === 'indoor' ? st.name : 'En calle'); };
+const unread = () => S.msgs.filter(m => m.from !== 'consola' && m.to !== 'all' && !m.reads.includes('consola'));
 const openAlerts = () => S.alerts.filter(a => a.status !== 'cerrada');
 function toast(t) { const d = document.createElement('div'); d.textContent = t; $('toast').appendChild(d); setTimeout(() => d.remove(), 3800); }
+const siteSeg = (cur, attr) => `<div class="seg" ${attr}>${S.sites.map(s => `<button data-site="${s.id}" class="${cur === s.id ? 'on' : ''}">${s.icon} ${E(s.kind === 'indoor' ? s.name.split(' · ')[0] : 'Ciudad')} <span style="opacity:.7">${S.ops.filter(p => p.site === s.id && p.status !== 'fuera').length}</span></button>`).join('')}</div>`;
 
 function nav() {
-  const na = openAlerts().length, nm = unread().length, nu = S.orders.filter(o => o.status === 'nueva').length;
+  const na = openAlerts().length + (S.evac ? 1 : 0), nm = unread().length, nu = S.orders.filter(o => o.status === 'nueva').length;
   const badge = { alertas: na, mensajes: nm, ordenes: nu };
   $('nav').innerHTML = VIEWS.map(([k, i, t]) => `<button class="${k === view ? 'on' : ''}" data-v="${k}"><i>${i}</i>${t}${badge[k] ? `<em>${badge[k]}</em>` : ''}</button>`).join('');
   $('bellN').hidden = !na; $('bellN').textContent = na;
@@ -298,52 +325,88 @@ $('bell').onclick = () => go('alertas');
 function go(v) { view = v; location.hash = v; ui.pick = null; render(); $('main').scrollTop = 0; }
 window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (v && v !== view && VIEWS.some(x => x[0] === v)) { view = v; render(); } });
 
-// ---------- mapa (lo usan En vivo, Geocercas y Rondines) ----------
-function mapShell(id, extra) { return `<div class="map" id="${id}"><svg class="mo" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="lay"></div>${extra || ''}</div>`; }
+// ---------- mapa: calles reales en la ciudad, plano en metros en el almacén ----------
+const LL = (sid, x, y) => { const st = siteN(sid); return st.kind === 'indoor' ? [st.h - y, x] : M.toLL(x, y); };
+const XY = (sid, ll) => { const st = siteN(sid); return st.kind === 'indoor' ? { x: +ll.lng.toFixed(1), y: +(st.h - ll.lat).toFixed(1) } : M.fromLL(ll.lat, ll.lng); };
+const radM = (sid, r) => siteN(sid).kind === 'indoor' ? r : r * 310;
+function mapShell(id, extra) { return `<div class="map" id="${id}"><div class="lf"></div>${extra || ''}</div>`; }
+function lmap(el, sid) {
+  if (el._L && el._sid === sid) return el._L;
+  if (el._L) { el._L.remove(); el._L = null; el._mk = {}; }
+  const st = siteN(sid), box = el.querySelector('.lf');
+  let m;
+  if (st.kind === 'indoor') {
+    m = L.map(box, { crs: L.CRS.Simple, minZoom: 1, maxZoom: 6, zoomSnap: .25, zoomControl: false, attributionControl: false });
+    const b = [[0, 0], [st.h, st.w]];
+    L.imageOverlay(M.planSVG(st), b).addTo(m);
+    m.fitBounds(b, { padding: [14, 14] }); m.setMaxBounds([[-25, -25], [st.h + 25, st.w + 25]]);
+  } else {
+    m = L.map(box, { zoomControl: false }).setView([19.42, -99.16], 12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, className: 'dark-tiles', attribution: '© OpenStreetMap' }).addTo(m);
+  }
+  L.control.zoom({ position: 'topright' }).addTo(m);
+  L.control.scale({ position: 'bottomright', imperial: false }).addTo(m);
+  el._L = m; el._sid = sid; el._g = L.layerGroup().addTo(m); el._mk = {};
+  m.on('zoomstart', () => el.classList.add('zooming'));
+  m.on('zoomend', () => setTimeout(() => el.classList.remove('zooming'), 80));
+  m.on('click', e => el._onMap && el._onMap(XY(sid, e.latlng)));
+  if (window.ResizeObserver) new ResizeObserver(() => m.invalidateSize()).observe(box);
+  setTimeout(() => m.invalidateSize(), 60);
+  return m;
+}
+function fitOps(el, sid) {
+  const m = el._L, pts = S.ops.filter(p => p.site === sid && p.status !== 'fuera').map(p => LL(sid, p.x, p.y));
+  if (!m) return;
+  if (siteN(sid).kind === 'indoor') { const st = siteN(sid); m.fitBounds([[0, 0], [st.h, st.w]], { padding: [14, 14] }); }
+  else if (pts.length) m.fitBounds(pts, { padding: [50, 50], maxZoom: 15 });
+}
 function drawMap(el, o) {
   if (!el) return;
-  const svg = el.querySelector('svg.mo'), lay = el.querySelector('.lay');
-  let h = '';
-  if (o.zones) S.zones.forEach(z => {
+  const sid = o.site, m = lmap(el, sid), g = el._g;
+  el._onMap = o.onMap || null;
+  g.clearLayers();
+  if (o.zones) S.zones.filter(z => z.site === sid).forEach(z => {
     const c = z.type === 'restringida' ? '#FF4D6D' : z.type === 'base' ? '#B4E32F' : '#9B80FF';
-    h += `<ellipse class="zone" cx="${z.x}" cy="${z.y}" rx="${z.r}" ry="${z.r * 1.6}" fill="${c}22" stroke="${c}" stroke-dasharray="1.2 .8"/>`;
+    L.circle(LL(sid, z.x, z.y), { radius: radM(sid, z.r), color: c, weight: 2, dashArray: '6 5', fillColor: c, fillOpacity: .12, interactive: false }).addTo(g);
+    L.marker(LL(sid, z.x, z.y), { icon: L.divIcon({ className: 'zlw', html: `<span>${E(z.name)}${z.allow ? ' 🔒' : ''}</span>`, iconSize: [0, 0] }), interactive: false }).addTo(g);
   });
-  if (o.trail) { const p = op(o.trail); if (p && p.trail.length > 1) h += `<polyline points="${p.trail.map(t => t.join(',')).join(' ')} ${p.x},${p.y}" fill="none" stroke="#B4E32F" stroke-width=".5" stroke-dasharray="1 .7" vector-effect="non-scaling-stroke" style="stroke-width:2.5px"/>`; }
-  if (o.routes) S.routes.forEach(r => { const pts = r.points.map(id => S.points.find(c => c.id === id)).filter(Boolean); if (pts.length > 1) h += `<polyline points="${pts.map(c => c.x + ',' + c.y).join(' ')} ${pts[0].x},${pts[0].y}" fill="none" stroke="#9B80FF" vector-effect="non-scaling-stroke" style="stroke-width:2px" stroke-dasharray="1.5 1"/>`; });
-  if (o.pickAt) h += `<ellipse cx="${o.pickAt.x}" cy="${o.pickAt.y}" rx="${o.pickAt.r}" ry="${o.pickAt.r * 1.6}" fill="#B4E32F33" stroke="#B4E32F" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>`;
-  svg.innerHTML = h;
-  // capas fijas: nombres de zonas, pines de órdenes, puntos de rondín
-  let fx = '';
-  if (o.zones) S.zones.forEach(z => fx += `<span class="zl" style="left:${z.x}%;top:${z.y - z.r * 1.6 - 1.5}%">${E(z.name)}</span>`);
-  if (o.orders) openOrders().forEach(x => fx += `<span class="pin ${x.prio} ${x.status}" data-o="${x.id}" style="left:${x.x}%;top:${x.y}%" title="${E(x.title + ' · ' + x.client)}">${E(x.folio)}</span>`);
-  if (o.points) S.points.forEach(c => fx += `<span class="cp" style="left:${c.x}%;top:${c.y}%" title="${E(c.code + ' ' + c.name)}"></span><span class="zl" style="left:${c.x}%;top:${c.y + 3.2}%">${E(c.code)}</span>`);
-  let fixed = lay.querySelector('.fx'); if (!fixed) { fixed = document.createElement('div'); fixed.className = 'fx'; lay.appendChild(fixed); }
-  fixed.innerHTML = fx;
-  // marcadores con movimiento suave (se reutilizan para que se deslicen)
-  el._mk = el._mk || {};
+  if (o.trail) { const p = op(o.trail); if (p && p.site === sid && p.trail.length > 1) L.polyline(p.trail.map(t => LL(sid, t[0], t[1])).concat([LL(sid, p.x, p.y)]), { color: '#B4E32F', weight: 3, dashArray: '4 6', interactive: false }).addTo(g); }
+  if (o.routes) S.routes.filter(r => r.site === sid).forEach(r => { const pts = r.points.map(id => S.points.find(c => c.id === id)).filter(Boolean); if (pts.length > 1) L.polyline(pts.concat([pts[0]]).map(c => LL(sid, c.x, c.y)), { color: '#9B80FF', weight: 2, dashArray: '5 5', interactive: false }).addTo(g); });
+  if (o.pickAt) L.circle(LL(sid, o.pickAt.x, o.pickAt.y), { radius: radM(sid, o.pickAt.r), color: '#B4E32F', weight: 2, fillOpacity: .2 }).addTo(g);
+  if (o.orders) openOrders().filter(x => x.site === sid).forEach(x => {
+    const mk = L.marker(LL(sid, x.x, x.y), { icon: L.divIcon({ className: 'pinw', html: `<span class="pin ${x.prio} ${x.status}" title="${E(x.title + ' · ' + x.client)}">${E(x.folio)}</span>`, iconSize: [0, 0] }) }).addTo(g);
+    mk.on('click', () => o.onOrder && o.onOrder(x.id));
+  });
+  if (o.points) S.points.filter(c => c.site === sid).forEach(c => {
+    L.marker(LL(sid, c.x, c.y), { icon: L.divIcon({ className: 'cpw', html: '<span></span>', iconSize: [16, 16], iconAnchor: [8, 8] }), title: c.code + ' ' + c.name }).addTo(g);
+    L.marker(LL(sid, c.x, c.y), { icon: L.divIcon({ className: 'zlw', html: `<span style="transform:translate(-50%,10px)">${E(c.code)}</span>`, iconSize: [0, 0] }), interactive: false }).addTo(g);
+  });
+  // operadores: se reutilizan para que se deslicen suavemente
   const seen = {};
-  if (o.ops) S.ops.filter(p => p.status !== 'fuera').forEach(p => {
+  if (o.ops) S.ops.filter(p => p.status !== 'fuera' && p.site === sid).forEach(p => {
     seen[p.id] = 1;
-    let m = el._mk[p.id];
-    if (!m) { m = document.createElement('div'); m.className = 'mk'; m.dataset.p = p.id; lay.appendChild(m); el._mk[p.id] = m; m.style.left = p.x + '%'; m.style.top = p.y + '%'; }
-    m.className = 'mk' + (p.status === 'sos' ? ' sos' : '') + (ui.sel === p.id ? ' sel' : '') + (o.grp && o.grp !== 'all' && p.group !== o.grp ? ' dim' : '');
-    m.innerHTML = avatar(p) + `<span class="nm">${E(p.name.split(' ')[0])}</span>`;
-    requestAnimationFrame(() => { m.style.left = p.x + '%'; m.style.top = p.y + '%'; });
+    const cls = 'mkw' + (p.status === 'sos' ? ' sos' : '') + (ui.sel === p.id ? ' sel' : '') + (o.grp && o.grp !== 'all' && p.group !== o.grp ? ' dim' : '');
+    const html = avatar(p) + `<span class="nm">${E(p.name.split(' ')[0])}</span>` + (isGps(p) ? '<span class="gp" title="GPS real">📡</span>' : '');
+    let mk = el._mk[p.id];
+    if (!mk) { mk = L.marker(LL(sid, p.x, p.y), { zIndexOffset: 500 }).addTo(m); mk.on('click', () => o.onOp && el._onOp && el._onOp(p.id)); el._mk[p.id] = mk; }
+    if (mk._key !== cls + html) { mk.setIcon(L.divIcon({ className: cls, html, iconSize: [34, 34], iconAnchor: [17, 17] })); mk._key = cls + html; }
+    mk.setLatLng(LL(sid, p.x, p.y));
   });
-  Object.keys(el._mk).forEach(id => { if (!seen[id]) { el._mk[id].remove(); delete el._mk[id]; } });
+  el._onOp = o.onOp || null;
+  Object.keys(el._mk).forEach(id => { if (!seen[id]) { m.removeLayer(el._mk[id]); delete el._mk[id]; } });
+  if (!el._fit && o.fit) { el._fit = 1; fitOps(el, sid); }
 }
-const mapXY = (el, e) => { const r = el.getBoundingClientRect(); return { x: +((e.clientX - r.left) / r.width * 100).toFixed(1), y: +((e.clientY - r.top) / r.height * 100).toFixed(1) }; };
 
 // ---------- EN VIVO ----------
 function vVivo() {
   return `<div class="live">
     <div class="lcol">
       <div class="kpis" id="lk"></div>
-      ${mapShell('lmap', `<div class="mapctl"><select id="fG"><option value="all">Todos los grupos</option>${S.groups.map(g => `<option value="${g.id}" ${ui.grp === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</select>
-        <button data-t="ord" class="${ui.show.ord ? 'on' : ''}">Órdenes</button><button data-t="zon" class="${ui.show.zon ? 'on' : ''}">Geocercas</button><button data-t="trail" class="${ui.show.trail ? 'on' : ''}">Recorrido</button></div>
-        <div class="legend">${['disponible', 'encamino', 'ensitio', 'pausa', 'sos'].map(k => `<span><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</span>`).join('')}</div>`)}
+      ${mapShell('lmap', `<div class="mapctl">${siteSeg(ui.site, 'id="siteS"')}<select id="fG"><option value="all">Todos los departamentos</option>${S.groups.map(g => `<option value="${g.id}" ${ui.grp === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</select>
+        <button data-t="ord" class="${ui.show.ord ? 'on' : ''}">Órdenes</button><button data-t="zon" class="${ui.show.zon ? 'on' : ''}">Geocercas</button><button data-t="trail" class="${ui.show.trail ? 'on' : ''}">Recorrido</button><button id="fit">⌖ Centrar</button></div>
+        <div class="legend">${['disponible', 'encamino', 'ensitio', 'pausa', 'sos'].map(k => `<span><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</span>`).join('')}<span>📡 GPS real</span></div>`)}
       <div class="ptt">
-        <div class="ch"><small>Canal de radio</small><select id="pttCh"><option value="all">📢 Todos</option>${S.groups.map(g => `<option value="${g.id}" ${ui.pttCh === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}${S.ops.map(p => `<option value="${p.id}" ${ui.pttCh === p.id ? 'selected' : ''}>🔒 ${E(p.name)}</option>`).join('')}</select></div>
+        <div class="ch"><small>Canal de radio</small><select id="pttCh"><option value="all">📢 Todos</option><optgroup label="Departamentos">${S.groups.map(g => `<option value="${g.id}" ${ui.pttCh === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</optgroup><optgroup label="Grupos">${S.chats.map(c => `<option value="${c.id}" ${ui.pttCh === c.id ? 'selected' : ''}>${E(c.name)}</option>`).join('')}</optgroup><optgroup label="Privado">${S.ops.map(p => `<option value="${p.id}" ${ui.pttCh === p.id ? 'selected' : ''}>🔒 ${E(p.name)}</option>`).join('')}</optgroup></select></div>
         <button class="pttb" id="pttB">🎙️ Mantén para hablar</button>
         <div class="pttlog" id="pttLog"></div>
       </div>
@@ -362,26 +425,26 @@ function liveRefresh() {
     ['Órdenes abiertas', oo.length, '', ''], ['Por asignar', S.orders.filter(o => o.status === 'nueva').length, '', S.orders.some(o => o.status === 'nueva') ? 'warn' : ''],
     ['Alertas', openAlerts().length, '', openAlerts().length ? 'bad' : 'good']
   ].map(([t, n, e, c]) => `<div class="kpi ${c}"><small>${t}</small><b>${n}<em>${e}</em></b></div>`).join('');
-  drawMap($('lmap'), { zones: ui.show.zon, orders: ui.show.ord, ops: true, trail: ui.show.trail && ui.sel, grp: ui.grp });
-  // panel lateral
+  const seg = $('siteS'); if (seg) seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.site === ui.site));
+  drawMap($('lmap'), { site: ui.site, zones: ui.show.zon, orders: ui.show.ord, ops: true, trail: ui.show.trail && ui.sel, grp: ui.grp, fit: true,
+    onOp: id => { ui.sel = id; ui.side = 'equipo'; liveRefresh(); }, onOrder: id => orderModal(id) });
   if (ui.side === 'equipo') {
-    const list = S.ops.filter(p => ui.grp === 'all' || p.group === ui.grp).sort((a, b) => (b.status === 'sos') - (a.status === 'sos') || (a.status === 'fuera') - (b.status === 'fuera'));
+    const list = S.ops.filter(p => ui.grp === 'all' || p.group === ui.grp).sort((a, b) => (b.status === 'sos') - (a.status === 'sos') || (a.site !== ui.site) - (b.site !== ui.site) || (a.status === 'fuera') - (b.status === 'fuera'));
     $('side').innerHTML = list.map(p => {
       const o = S.orders.find(x => x.id === p.order);
-      return `<button class="op ${ui.sel === p.id ? 'sel' : ''}" data-p="${p.id}">${avatar(p)}<span class="i"><b>${E(p.name)}</b><small><i class="dot" style="background:${stc(p)}"></i> ${M.STATUS[p.status].t}${o ? ' · ' + E(o.folio) : ''} · ${E(grp(p.group)?.name || '')}</small></span><span class="r">🔋${p.bat}%<br>${'▮'.repeat(p.sig)}${'▯'.repeat(4 - p.sig)}</span></button>`;
+      return `<button class="op ${ui.sel === p.id ? 'sel' : ''}" data-p="${p.id}">${avatar(p)}<span class="i"><b>${E(p.name)}</b><small><i class="dot" style="background:${stc(p)}"></i> ${M.STATUS[p.status].t}${o ? ' · ' + E(o.folio) : ''} · ${E(grp(p.group)?.name || '')}</small><small>${p.status === 'fuera' ? '' : E(where(p))}</small></span><span class="r">🔋${p.bat}%<br>${isGps(p) ? '📡' : ''}${'▮'.repeat(p.sig)}${'▯'.repeat(4 - p.sig)}</span></button>`;
     }).join('');
   } else {
     $('side').innerHTML = S.events.slice(-60).reverse().map(e => `<div class="ev"><time>${M.fmtT(e.at)}</time><span><b>${E(op(e.opId)?.name.split(' ')[0] || 'Consola')}</b> ${E(e.txt)}</span></div>`).join('') || '<div class="empty">Sin actividad</div>';
   }
-  // detalle del operador seleccionado
   const p = op(ui.sel);
-  if (!p) { $('det').innerHTML = `<div class="det"><b style="font-family:var(--display)">Mesa de control</b><p class="muted" style="font-size:12.5px;margin-top:4px">Toca a un operador en el mapa o en la lista para ver su estado, hablarle o asignarle una orden.</p></div>`; }
+  if (!p) { $('det').innerHTML = `<div class="det"><b style="font-family:var(--display)">Mesa de control</b><p class="muted" style="font-size:12.5px;margin-top:4px">Cambia entre la ciudad y el almacén arriba del mapa. Toca a un operador para ver su estado, hablarle o asignarle una orden.</p></div>`; }
   else {
-    const o = S.orders.find(x => x.id === p.order);
-    const pct = Math.min(100, p.gb / p.gbMax * 100);
+    const o = S.orders.find(x => x.id === p.order), pct = Math.min(100, p.gb / p.gbMax * 100), ind = siteN(p.site).kind === 'indoor';
     $('det').innerHTML = `<div class="det">
       <div class="hd">${avatar(p)}<div><b>${E(p.name)}</b><small>${E(p.role)} · ${E(grp(p.group)?.name || '')} · visto ${M.ago(p.seen)}</small></div><button class="x" data-x>×</button></div>
-      <div class="stats"><div><small>Estado</small><b style="color:${stc(p)}">${M.STATUS[p.status].t}</b></div><div><small>Batería</small><b>${p.bat}%</b></div><div><small>Hoy</small><b>${p.km.toFixed(1)} km</b></div><div><small>Turno</small><b>${p.shift ? M.fmtT(p.shift.at) : '—'}</b></div></div>
+      <div style="font-size:12.5px;margin-bottom:8px">📍 ${E(where(p))}${isGps(p) ? ` · <span style="color:var(--cyan)">📡 GPS real ±${Math.round(p.acc || 10)} m</span>` : ind ? ' <span class="muted">· ubicación por área</span>' : ''}</div>
+      <div class="stats"><div><small>Estado</small><b style="color:${stc(p)}">${M.STATUS[p.status].t}</b></div><div><small>Batería</small><b>${p.bat}%</b></div><div><small>Hoy</small><b>${ind ? Math.round(p.km * 1000) + ' m' : p.km.toFixed(1) + ' km'}</b></div><div><small>Turno</small><b>${p.shift ? M.fmtT(p.shift.at) : '—'}</b></div></div>
       <div style="font-size:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between"><span class="muted">Línea Navi ${p.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</span><span>${p.gb.toFixed(1)} / ${p.gbMax} GB</span></div><div class="bar" style="margin-top:4px"><i style="width:${pct}%;${pct > 85 ? 'background:var(--yellow)' : ''}"></i></div></div>
       ${o ? `<div class="oc" data-o="${o.id}" style="margin-bottom:10px"><div class="h">${E(o.folio)} · ${M.ORDER_ST[o.status]}<span class="chip prio-${o.prio}">${o.prio}</span></div><b>${E(o.title)}</b><small>${E(o.client)} · ${E(o.addr)}</small></div>` : ''}
       ${p.solo ? '<div class="chip" style="margin-bottom:10px;background:#ff7a4533">🧍 Modo trabajo solo activo</div>' : ''}
@@ -396,32 +459,27 @@ function pttLog() {
   el.innerHTML = (ui.talking ? `<div class="vz talk"><span class="wave"><i></i><i></i><i></i><i></i></span> Transmitiendo…</div>` : '') +
     (v.map(m => `<div class="vz">${m.audio ? `<button data-play="${m.id}">▶</button>` : '🔈'}<span><b>${E(m.from === 'consola' ? 'Consola' : op(m.from)?.name.split(' ')[0])}</b> → ${E(chName(m.to))} · ${m.secs}s · ${M.fmtT(m.at)}</span></div>`).join('') || '<span class="muted" style="font-size:12px">Sin transmisiones todavía. Mantén presionado el botón para hablar con el canal.</span>');
 }
-const chName = to => to === 'all' ? 'Todos' : to === 'consola' ? 'Consola' : grp(to)?.name || op(to)?.name || to;
+const chName = to => to === 'all' ? 'Todos' : to === 'consola' ? 'Consola' : grp(to)?.name || chatG(to)?.name || op(to)?.name || to;
 function playVoice(id) { const m = S.msgs.find(x => x.id === id); if (m && m.audio) new Audio(m.audio).play().catch(() => {}); }
 function bindVivo() {
-  const m = $('lmap');
-  m.onclick = e => {
-    const mk = e.target.closest('.mk'), pin = e.target.closest('.pin');
-    if (mk) { ui.sel = mk.dataset.p; ui.side = 'equipo'; liveRefresh(); }
-    else if (pin) orderModal(pin.dataset.o);
-  };
+  $('siteS').onclick = e => { const b = e.target.closest('[data-site]'); if (!b) return; ui.site = b.dataset.site; $('lmap')._fit = 0; liveRefresh(); };
+  $('fit').onclick = () => fitOps($('lmap'), ui.site);
   $('fG').onchange = e => { ui.grp = e.target.value; liveRefresh(); };
-  m.querySelectorAll('.mapctl button').forEach(b => b.onclick = () => { ui.show[b.dataset.t] = !ui.show[b.dataset.t]; b.classList.toggle('on'); try { localStorage.setItem('navi.mando.ui', JSON.stringify(ui.show)); } catch (e) {} liveRefresh(); });
+  document.querySelectorAll('#lmap .mapctl button[data-t]').forEach(b => b.onclick = () => { ui.show[b.dataset.t] = !ui.show[b.dataset.t]; b.classList.toggle('on'); try { localStorage.setItem('navi.mando.ui', JSON.stringify(ui.show)); } catch (e) {} liveRefresh(); });
   document.querySelector('.rside .tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; ui.side = b.dataset.s; document.querySelectorAll('.rside .tabs button').forEach(x => x.classList.toggle('on', x === b)); liveRefresh(); };
-  $('side').onclick = e => { const b = e.target.closest('[data-p]'); if (b) { ui.sel = b.dataset.p; liveRefresh(); } };
+  $('side').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; ui.sel = b.dataset.p; const p = op(ui.sel); if (p.status !== 'fuera' && p.site !== ui.site) { ui.site = p.site; $('lmap')._fit = 0; } liveRefresh(); if (p.status !== 'fuera') $('lmap')._L.panTo(LL(p.site, p.x, p.y)); };
   $('det').onclick = e => {
     if (e.target.closest('[data-x]')) { ui.sel = null; return liveRefresh(); }
     const oc = e.target.closest('[data-o]'); if (oc) return orderModal(oc.dataset.o);
     const a = e.target.closest('[data-a]')?.dataset.a;
     if (a === 'msg') { ui.conv = ui.sel; go('mensajes'); }
     if (a === 'ptt') { ui.pttCh = ui.sel; $('pttCh').value = ui.sel; toast('Canal privado con ' + op(ui.sel).name + '. Mantén el botón para hablar.'); }
-    if (a === 'asig') newOrderModal({ opId: ui.sel });
+    if (a === 'asig') newOrderModal({ opId: ui.sel, site: op(ui.sel).site });
   };
   $('pttCh').onchange = e => ui.pttCh = e.target.value;
   $('pttLog').onclick = e => { const b = e.target.closest('[data-play]'); if (b) playVoice(b.dataset.play); };
   bindPtt($('pttB'), () => ui.pttCh);
 }
-// botón de radio: mantener presionado (mouse, dedo o barra espaciadora)
 function bindPtt(btn, ch) {
   let down = false;
   const start = async e => { e && e.preventDefault(); if (down) return; down = true; ui.talking = true; btn.classList.add('on'); btn.textContent = '🔴 Hablando… suelta para enviar'; pttLog(); await M.Ptt.start(); };
@@ -443,7 +501,7 @@ function ocard(o) {
   const p = op(o.opId), left = slaLeft(o), pct = Math.max(0, Math.min(100, (Date.now() - o.created) / (o.due - o.created) * 100));
   const done = o.status === 'completada';
   return `<div class="oc ${o.late && !done ? 'late' : ''}" data-o="${o.id}">
-    <div class="h">${E(o.folio)} · ${M.ORDER_ST[o.status]}<span class="chip prio-${o.prio}">${o.prio}</span></div>
+    <div class="h">${siteN(o.site).icon} ${E(o.folio)} · ${M.ORDER_ST[o.status]}<span class="chip prio-${o.prio}">${o.prio}</span></div>
     <b>${E(o.title)}</b><small>${E(o.client)}</small><small>📍 ${E(o.addr)}</small>
     <div class="f">${avatar(p, 's')}<span>${p ? E(p.name.split(' ')[0]) : '<span style="color:var(--yellow)">Sin asignar</span>'}</span>
     ${done ? `<span style="margin-left:auto;color:var(--lime)">✓ ${M.fmtT(o.done)}</span>` : `<div class="bar"><i style="width:${pct}%;background:${left < 0 ? 'var(--red)' : left < 15 ? 'var(--yellow)' : 'var(--lime)'}"></i></div><span style="color:${left < 0 ? 'var(--red)' : 'var(--muted)'}">${left < 0 ? 'Vencida ' + (-left) + 'm' : left + ' min'}</span>`}</div>
@@ -451,12 +509,12 @@ function ocard(o) {
 }
 function vOrdenes() {
   const q = ui.ordQ.toLowerCase();
-  const f = S.orders.filter(o => (!q || (o.folio + o.title + o.client + o.addr).toLowerCase().includes(q)) && (ui.ordG === 'all' || op(o.opId)?.group === ui.ordG || (!o.opId && ui.ordG === 'none')));
+  const f = S.orders.filter(o => (!q || (o.folio + o.title + o.client + o.addr).toLowerCase().includes(q)) && (ui.ordG === 'all' || o.site === ui.ordG || op(o.opId)?.group === ui.ordG || (!o.opId && ui.ordG === 'none')));
   const cols = [['Por asignar', f.filter(o => o.status === 'nueva'), '#FFC22E'], ['Asignadas', f.filter(o => ['asignada', 'aceptada'].includes(o.status)), '#9B80FF'], ['En curso', f.filter(o => ['encamino', 'ensitio'].includes(o.status)), '#7EE0FF'], ['Completadas hoy', f.filter(o => o.status === 'completada' && today(o.done)).sort((a, b) => b.done - a.done), '#B4E32F']];
   const comp = S.orders.filter(o => o.status === 'completada' && today(o.done)), onTime = comp.filter(o => o.done <= o.due).length;
   return `<div class="view">
     <div class="vh"><h2>Órdenes de trabajo</h2><span class="sp"></span><button class="btn" id="tplB">🧩 Plantillas</button><button class="btn lime" id="newO">＋ Nueva orden</button>
-    <p>Crea, asigna y sigue cada orden con su tiempo límite. El operador la recibe en su app y la cierra con fotos, checklist y firma.</p></div>
+    <p>En la calle o dentro del almacén. El operador la recibe en su app y la cierra con fotos, checklist y firma.</p></div>
     <div class="kpis">
       <div class="kpi ${cols[0][1].length ? 'warn' : ''}"><small>Por asignar</small><b>${S.orders.filter(o => o.status === 'nueva').length}</b></div>
       <div class="kpi"><small>En curso</small><b>${S.orders.filter(o => ['asignada', 'aceptada', 'encamino', 'ensitio'].includes(o.status)).length}</b></div>
@@ -464,8 +522,8 @@ function vOrdenes() {
       <div class="kpi good"><small>Completadas hoy</small><b>${comp.length}</b></div>
       <div class="kpi"><small>A tiempo</small><b>${comp.length ? Math.round(onTime / comp.length * 100) : 100}<em>%</em></b></div>
     </div>
-    <div class="vh" style="margin-bottom:12px"><input class="f" id="oq" placeholder="Buscar folio, cliente o dirección" value="${E(ui.ordQ)}" style="max-width:300px">
-      <select class="f" id="og" style="max-width:210px"><option value="all">Todos los grupos</option>${S.groups.map(g => `<option value="${g.id}" ${ui.ordG === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}<option value="none" ${ui.ordG === 'none' ? 'selected' : ''}>Sin asignar</option></select></div>
+    <div class="vh" style="margin-bottom:12px"><input class="f" id="oq" placeholder="Buscar folio, cliente o ubicación" value="${E(ui.ordQ)}" style="max-width:300px">
+      <select class="f" id="og" style="max-width:230px"><option value="all">Todo</option><optgroup label="Sitio">${S.sites.map(s => `<option value="${s.id}" ${ui.ordG === s.id ? 'selected' : ''}>${s.icon} ${E(s.name)}</option>`).join('')}</optgroup><optgroup label="Departamento">${S.groups.map(g => `<option value="${g.id}" ${ui.ordG === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</optgroup><option value="none" ${ui.ordG === 'none' ? 'selected' : ''}>Sin asignar</option></select></div>
     <div class="kan">${cols.map(([t, l, c]) => `<div class="col"><h4><i class="dot" style="background:${c}"></i>${t}<b>${l.length}</b></h4>${l.map(ocard).join('') || '<div class="empty">—</div>'}</div>`).join('')}</div>
   </div>`;
 }
@@ -478,37 +536,69 @@ function bindOrdenes() {
 }
 function modal(html, cls) {
   const ov = document.createElement('div'); ov.className = 'ov ' + (cls || '');
-  ov.innerHTML = `<div class="md ${cls === 'wide' ? 'wide' : ''}">${html}</div>`;
+  ov.innerHTML = `<div class="md ${/wide/.test(cls || '') ? 'wide' : ''}">${html}</div>`;
   ov.onclick = e => { if (e.target === ov || e.target.closest('[data-close]')) ov.remove(); };
   document.body.appendChild(ov); return ov;
 }
-function suggestHTML(x, y, pre) {
-  const list = M.nearest(S, x, y).slice(0, 5);
-  return list.map((r, i) => {
-    const d = M.km(r.d), eta = Math.max(3, Math.round(d / 25 * 60 + 2));
-    return `<label class="sug"><input type="radio" name="asg" value="${r.p.id}" ${(pre ? pre === r.p.id : i === 0) ? 'checked' : ''}>${avatar(r.p, 's')}<span class="i"><b>${E(r.p.name)}</b><small>${M.STATUS[r.p.status].t} · ${d.toFixed(1)} km · llega en ~${eta} min${r.busy ? ' · ya tiene una orden' : ''}</small></span>${i === 0 ? '<span class="chip best">Recomendado</span>' : ''}</label>`;
-  }).join('') + `<label class="sug"><input type="radio" name="asg" value="" ${pre === '' ? 'checked' : ''}><span class="i"><b>Dejar por asignar</b><small>Queda en la columna "Por asignar"</small></span></label>`;
+function suggestHTML(sid, x, y, pre) {
+  const list = M.nearest(S, sid, x, y).slice(0, 5);
+  return (list.map((r, i) => `<label class="sug"><input type="radio" name="asg" value="${r.p.id}" ${(pre ? pre === r.p.id : i === 0) ? 'checked' : ''}>${avatar(r.p, 's')}<span class="i"><b>${E(r.p.name)}</b><small>${E(grp(r.p.group)?.name || '')} · ${M.STATUS[r.p.status].t} · ${M.fmtD(r.d, S, sid)} · llega en ~${M.eta(r.d, S, sid)} min${r.busy ? ' · ya tiene una orden' : ''}</small></span>${i === 0 ? '<span class="chip best">Recomendado</span>' : ''}</label>`).join('') || '<div class="muted" style="font-size:12.5px;margin-bottom:6px">No hay operadores en turno en este sitio.</div>') +
+    `<label class="sug"><input type="radio" name="asg" value="" ${pre === '' || !list.length ? 'checked' : ''}><span class="i"><b>Dejar por asignar</b><small>Queda en la columna "Por asignar"</small></span></label>`;
 }
-function newOrderModal({ opId }) {
+// buscador de direcciones reales (OpenStreetMap)
+async function geocode(q) {
+  const u = 'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=mx&accept-language=es&viewbox=-99.36,19.60,-98.94,19.18&q=' + encodeURIComponent(q);
+  const r = await fetch(u); if (!r.ok) throw new Error('geo'); return r.json();
+}
+function newOrderModal({ opId, site }) {
+  let sid = site || 'city', loc = null;
   const ov = modal(`<div class="mh"><h3>Nueva orden</h3><button data-close>×</button></div>
     <div class="grid2">
-      <label class="l full">Tipo de trabajo<select class="f" id="nT">${S.templates.map(t => `<option value="${t.id}">${E(t.name)} · ${t.sla} min</option>`).join('')}</select></label>
-      <label class="l">Cliente<input class="f" id="nC" placeholder="Ej. Farmacias del Norte"></label>
+      <label class="l full">¿Dónde es el trabajo?<div>${siteSeg(sid, 'id="nS"')}</div></label>
+      <label class="l full">Tipo de trabajo<select class="f" id="nT"></select></label>
+      <label class="l">Cliente o referencia<input class="f" id="nC" placeholder="Ej. Farmacias del Norte · Pedido #58300"></label>
       <label class="l">Prioridad<select class="f" id="nP"><option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option></select></label>
-      <label class="l full">Dirección<select class="f" id="nA">${M.PLACES.map((p, i) => `<option value="${i}">${E(p.n)}</option>`).join('')}</select></label>
+      <div class="full" id="nLoc"></div>
       <label class="l full">Indicaciones para el operador<textarea class="f" id="nN" rows="2" placeholder="Ej. Preguntar por la gerente, horario de 9 a 14 h"></textarea></label>
     </div>
-    <div style="margin-top:14px"><b style="font-size:13px">¿Quién la atiende?</b> <span class="muted" style="font-size:12px">· ordenados por cercanía y carga de trabajo</span><div id="sugL" style="margin-top:8px"></div></div>
-    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="nOk">Crear orden</button></div>`);
-  const sug = () => { const p = M.PLACES[$('nA').value]; $('sugL').innerHTML = suggestHTML(p.x, p.y, opId); };
-  $('nA').onchange = () => { opId = undefined; sug(); }; sug();
+    <div style="margin-top:14px"><b style="font-size:13px">¿Quién la atiende?</b> <span class="muted" style="font-size:12px">· por cercanía y carga de trabajo, en el mismo sitio</span><div id="sugL" style="margin-top:8px"></div></div>
+    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="nOk">Crear orden</button></div>`, 'wide');
+  const sug = () => { $('sugL').innerHTML = loc ? suggestHTML(sid, loc.x, loc.y, opId) : '<div class="muted" style="font-size:12.5px">Elige la ubicación para ver sugerencias.</div>'; };
+  const paint = () => {
+    const st = siteN(sid), kind = st.kind;
+    $('nT').innerHTML = S.templates.filter(t => t.site === 'any' || t.site === kind).map(t => `<option value="${t.id}">${E(t.name)} · ${t.sla} min</option>`).join('');
+    ov.querySelectorAll('#nS button').forEach(b => b.classList.toggle('on', b.dataset.site === sid));
+    if (kind === 'indoor') {
+      $('nLoc').innerHTML = `<label class="l">Área del almacén<select class="f" id="nA">${st.areas.map(a => `<option value="${a.id}">${E(a.name)}</option>`).join('')}</select></label>`;
+      const setA = () => { const a = st.areas.find(z => z.id === $('nA').value); loc = { n: a.name, x: a.x + a.w / 2, y: a.y + a.h / 2 }; sug(); };
+      $('nA').onchange = () => { opId = undefined; setA(); }; setA();
+    } else {
+      $('nLoc').innerHTML = `<label class="l">Dirección<div style="display:flex;gap:6px"><input class="f" id="nQ" placeholder="Calle, número y colonia (CDMX)"><button class="btn" id="nGo">🔎 Buscar</button></div></label>
+        <div class="res" id="nR">${M.PLACES.map((p, i) => `<button data-i="${i}">📍 ${E(p.n)}</button>`).join('')}</div>`;
+      const pick = (b, l) => { ov.querySelectorAll('#nR button').forEach(x => x.classList.toggle('on', x === b)); loc = l; opId = undefined; sug(); };
+      $('nR').onclick = e => { const b = e.target.closest('button'); if (!b) return; pick(b, b.dataset.i != null ? M.PLACES[+b.dataset.i] : JSON.parse(b.dataset.l)); };
+      const search = async () => {
+        const q = $('nQ').value.trim(); if (q.length < 4) return;
+        $('nR').innerHTML = '<div class="muted" style="padding:8px;font-size:12.5px">Buscando…</div>';
+        try {
+          const r = await geocode(q);
+          $('nR').innerHTML = r.map(x => { const xy = M.fromLL(+x.lat, +x.lon); return `<button data-l='${E(JSON.stringify({ n: x.display_name.split(',').slice(0, 3).join(','), x: xy.x, y: xy.y }))}'>📍 ${E(x.display_name.split(',').slice(0, 4).join(','))}</button>`; }).join('') || '<div class="muted" style="padding:8px;font-size:12.5px">Sin resultados. Prueba con calle, número y colonia.</div>';
+        } catch (e) { $('nR').innerHTML = '<div class="muted" style="padding:8px;font-size:12.5px">No se pudo buscar ahora. Elige una dirección frecuente.</div>'; }
+      };
+      $('nGo').onclick = search; $('nQ').onkeydown = e => { if (e.key === 'Enter') search(); };
+      loc = null; const first = $('nR').querySelector('button'); if (first) pick(first, M.PLACES[0]);
+    }
+  };
+  ov.querySelector('#nS').onclick = e => { const b = e.target.closest('[data-site]'); if (!b) return; sid = b.dataset.site; opId = undefined; paint(); };
+  paint();
   $('nOk').onclick = () => {
-    const T = S.templates.find(t => t.id === $('nT').value), P = M.PLACES[$('nA').value];
+    if (!loc) return toast('Elige la ubicación del trabajo');
+    const T = S.templates.find(t => t.id === $('nT').value);
     const who = (ov.querySelector('input[name=asg]:checked') || {}).value || null;
-    const client = $('nC').value.trim() || 'Cliente sin nombre';
+    const client = $('nC').value.trim() || 'Sin referencia';
     const folio = M.update(s => {
       const t = Date.now(), f = 'OT-' + (s.folio++);
-      const o = { id: M.uid('o'), folio: f, tpl: T.id, title: T.name, client, addr: P.n, x: P.x, y: P.y, prio: $('nP').value, sla: T.sla, status: who ? 'asignada' : 'nueva', opId: who, created: t, due: t + T.sla * M.MIN,
+      const o = { id: M.uid('o'), folio: f, tpl: T.id, site: sid, title: T.name, client, addr: loc.n, x: loc.x, y: loc.y, prio: $('nP').value, sla: T.sla, status: who ? 'asignada' : 'nueva', opId: who, created: t, due: t + T.sla * M.MIN,
         checklist: T.checklist.map(c => ({ t: c, done: false })), needPhoto: T.needPhoto, needSign: T.needSign, photo: null, sign: null, notes: $('nN').value.trim(), hist: [{ at: t, txt: 'Orden creada por Mesa de control' }] };
       if (who) { o.hist.push({ at: t, txt: 'Asignada a ' + s.ops.find(p => p.id === who).name }); M.event(s, who, 'Recibió ' + f, 'orden'); }
       s.orders.push(o); return f;
@@ -519,15 +609,15 @@ function newOrderModal({ opId }) {
 function orderModal(id) {
   const o = S.orders.find(x => x.id === id); if (!o) return;
   const p = op(o.opId), open = !['completada', 'cancelada'].includes(o.status), dn = o.checklist.filter(c => c.done).length;
-  const ov = modal(`<div class="mh"><div><span class="muted" style="font-size:12px">${E(o.folio)} · creada ${M.fmtT(o.created)}</span><h3>${E(o.title)}</h3></div><button data-close>×</button></div>
+  const ov = modal(`<div class="mh"><div><span class="muted" style="font-size:12px">${siteN(o.site).icon} ${E(o.folio)} · creada ${M.fmtT(o.created)}</span><h3>${E(o.title)}</h3></div><button data-close>×</button></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"><span class="chip">${M.ORDER_ST[o.status]}</span><span class="chip prio-${o.prio}">Prioridad ${o.prio}</span>${o.late && open ? '<span class="chip" style="background:#ff4d6d33;color:#ff9fb1">Vencida</span>' : ''}${open ? `<span class="chip">⏱️ ${slaLeft(o) >= 0 ? 'Quedan ' + slaLeft(o) + ' min' : 'Vencida hace ' + (-slaLeft(o)) + ' min'}</span>` : ''}</div>
     <div class="grid2">
-      <div><span class="muted" style="font-size:12px">Cliente</span><div><b>${E(o.client)}</b></div><div style="font-size:13px">📍 ${E(o.addr)}</div>${o.notes ? `<div style="font-size:12.5px;margin-top:6px" class="muted">“${E(o.notes)}”</div>` : ''}</div>
+      <div><span class="muted" style="font-size:12px">Cliente / referencia</span><div><b>${E(o.client)}</b></div><div style="font-size:13px">📍 ${E(siteN(o.site).name)} · ${E(o.addr)}</div>${o.notes ? `<div style="font-size:12.5px;margin-top:6px" class="muted">“${E(o.notes)}”</div>` : ''}</div>
       <div><span class="muted" style="font-size:12px">Responsable</span><div style="display:flex;align-items:center;gap:8px;margin-top:3px">${avatar(p, 's')}<b>${p ? E(p.name) : 'Sin asignar'}</b></div></div>
       <div><span class="muted" style="font-size:12px">Checklist · ${dn}/${o.checklist.length}</span>${o.checklist.map(c => `<div class="ck">${c.done ? '✅' : '⬜'} ${E(c.t)}</div>`).join('')}</div>
       <div><span class="muted" style="font-size:12px">Historial</span><div class="tl">${o.hist.map(h => `<div><time>${M.fmtT(h.at)}</time>${E(h.txt)}</div>`).join('')}</div></div>
-      ${o.photo || o.sign ? `<div class="full"><span class="muted" style="font-size:12px">Evidencia</span><div class="evid">${o.photo ? `<img src="${o.photo}" alt="Foto de evidencia">` : ''}${o.sign ? `<img src="${o.sign}" alt="Firma del cliente">` : ''}</div>${o.rating ? `<div style="margin-top:6px">Calificación del cliente: ${'⭐'.repeat(o.rating)}</div>` : ''}</div>` : (o.needPhoto || o.needSign ? `<div class="full muted" style="font-size:12.5px">Requiere: ${[o.needPhoto && 'foto', o.needSign && 'firma del cliente'].filter(Boolean).join(' y ')}</div>` : '')}
-      ${open ? `<div class="full"><b style="font-size:13px">${p ? 'Reasignar' : 'Asignar'}</b><div style="margin-top:8px">${suggestHTML(o.x, o.y, o.opId || '')}</div></div>` : ''}
+      ${o.photo || o.sign ? `<div class="full"><span class="muted" style="font-size:12px">Evidencia</span><div class="evid">${o.photo ? `<img src="${o.photo}" alt="Foto de evidencia">` : ''}${o.sign ? `<img src="${o.sign}" alt="Firma del cliente">` : ''}</div>${o.rating ? `<div style="margin-top:6px">Calificación: ${'⭐'.repeat(o.rating)}</div>` : ''}</div>` : (o.needPhoto || o.needSign ? `<div class="full muted" style="font-size:12.5px">Requiere: ${[o.needPhoto && 'foto', o.needSign && 'firma del cliente'].filter(Boolean).join(' y ')}</div>` : '')}
+      ${open ? `<div class="full"><b style="font-size:13px">${p ? 'Reasignar' : 'Asignar'}</b><div style="margin-top:8px">${suggestHTML(o.site, o.x, o.y, o.opId || '')}</div></div>` : ''}
     </div>
     <div class="mf">${open ? `<button class="btn red" id="oCan">Cancelar orden</button>${p ? `<button class="btn" id="oMsg">💬 Escribir a ${E(p.name.split(' ')[0])}</button>` : ''}<button class="btn lime" id="oAsg">Guardar asignación</button>` : '<button class="btn" data-close>Cerrar</button>'}</div>`, 'wide');
   if (!open) return;
@@ -547,28 +637,29 @@ function orderModal(id) {
   };
 }
 function tplModal() {
+  const lbl = { outdoor: '🏙️ Ciudad', indoor: '🏭 Almacén', any: 'Ambos' };
   const ov = modal(`<div class="mh"><h3>Plantillas de trabajo</h3><button data-close>×</button></div>
-    <p class="muted" style="font-size:13px;margin-bottom:12px">Cada plantilla define el tiempo límite, el checklist y la evidencia que el operador debe entregar.</p>
-    ${S.templates.map(t => `<div class="card" style="margin-bottom:8px;padding:12px"><b>${E(t.name)}</b> <span class="muted" style="font-size:12px">· ${t.sla} min · ${t.checklist.length} pasos${t.needPhoto ? ' · 📷 foto' : ''}${t.needSign ? ' · ✍️ firma' : ''}</span></div>`).join('')}
+    <p class="muted" style="font-size:13px;margin-bottom:12px">Cada plantilla define dónde aplica, el tiempo límite, el checklist y la evidencia que el operador debe entregar.</p>
+    ${S.templates.map(t => `<div class="card" style="margin-bottom:8px;padding:12px"><b>${E(t.name)}</b> <span class="muted" style="font-size:12px">· ${lbl[t.site] || ''} · ${t.sla} min · ${t.checklist.length} pasos${t.needPhoto ? ' · 📷 foto' : ''}${t.needSign ? ' · ✍️ firma' : ''}</span></div>`).join('')}
     <div class="card" style="margin-top:14px"><h3>Nueva plantilla</h3><div class="grid2">
-      <label class="l">Nombre<input class="f" id="tN" placeholder="Ej. Cobranza en sitio"></label>
+      <label class="l">Nombre<input class="f" id="tN" placeholder="Ej. Inventario cíclico"></label>
+      <label class="l">¿Dónde aplica?<select class="f" id="tW"><option value="any">Ciudad y almacén</option><option value="outdoor">Solo ciudad</option><option value="indoor">Solo almacén</option></select></label>
       <label class="l">Tiempo límite (min)<input class="f" id="tS" type="number" value="60" min="5"></label>
-      <label class="l full">Checklist (un paso por línea)<textarea class="f" id="tC" rows="3" placeholder="Confirmar monto&#10;Entregar recibo"></textarea></label>
+      <label class="l full">Checklist (un paso por línea)<textarea class="f" id="tC" rows="3" placeholder="Contar piezas&#10;Registrar diferencias"></textarea></label>
       <label class="ck"><input type="checkbox" id="tP" checked> Pedir foto</label><label class="ck"><input type="checkbox" id="tF"> Pedir firma</label>
     </div><div class="mf"><button class="btn lime" id="tOk">Agregar plantilla</button></div></div>`);
   $('tOk').onclick = () => {
     const n = $('tN').value.trim(); if (!n) return $('tN').focus();
-    M.update(s => s.templates.push({ id: M.uid('t'), name: n, sla: Math.max(5, +$('tS').value || 60), needPhoto: $('tP').checked, needSign: $('tF').checked, checklist: $('tC').value.split('\n').map(x => x.trim()).filter(Boolean) }));
+    M.update(s => s.templates.push({ id: M.uid('t'), name: n, site: $('tW').value, sla: Math.max(5, +$('tS').value || 60), needPhoto: $('tP').checked, needSign: $('tF').checked, checklist: $('tC').value.split('\n').map(x => x.trim()).filter(Boolean) }));
     ov.remove(); toast('✓ Plantilla "' + n + '" lista'); tplModal();
   };
 }
 
 // ---------- RONDINES ----------
 function vRondines() {
-  const t = Date.now();
   return `<div class="view">
     <div class="vh"><h2>Rondines y patrullaje</h2><span class="sp"></span><button class="btn lime" id="addCp">＋ Punto de control</button>
-    <p>Puntos con código QR o etiqueta NFC. El guardia los registra desde su app y aquí ves el cumplimiento en tiempo real.</p></div>
+    <p>Puntos con código QR o etiqueta NFC dentro del almacén o en la calle. El guardia los registra desde su app y aquí ves el cumplimiento.</p></div>
     <div class="r3">
       <div>${S.routes.map(r => {
         const g = op(r.opId), cur = S.rounds.filter(x => x.route === r.id).sort((a, b) => b.start - a.start);
@@ -577,88 +668,101 @@ function vRondines() {
         return `<div class="card" style="margin-bottom:12px"><h3>🛡️ ${E(r.name)}<small>cada ${r.every} min</small></h3>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${avatar(g, 's')}<b>${E(g?.name || '—')}</b><span class="chip" style="margin-left:auto">Cumplimiento ${comp}%</span></div>
           <div class="muted" style="font-size:12px;margin-bottom:6px">${last && !last.end ? 'Ronda en curso · inició ' + M.fmtT(last.start) : 'Última ronda ' + (last ? M.fmtT(last.start) : '—')}</div>
-          <div style="display:grid;grid-template-columns:repeat(${r.points.length},1fr);gap:6px">${r.points.map(pid => { const c = S.points.find(x => x.id === pid), h = last && last.hits.find(x => x.p === pid); return `<div style="text-align:center;padding:10px 4px;border-radius:12px;background:${h ? '#b4e32f22' : '#ffffff0a'};border:1px solid ${h ? '#b4e32f66' : 'var(--line)'}"><div style="font-size:18px">${h ? '✅' : '⏳'}</div><b style="font-size:12px">${E(c?.code)}</b><div class="muted" style="font-size:11px">${h ? M.fmtT(h.at) : 'pendiente'}</div></div>`; }).join('')}</div>
+          <div style="display:grid;grid-template-columns:repeat(${Math.min(5, r.points.length)},1fr);gap:6px">${r.points.map(pid => { const c = S.points.find(x => x.id === pid), h = last && last.hits.find(x => x.p === pid); return `<div style="text-align:center;padding:10px 4px;border-radius:12px;background:${h ? '#b4e32f22' : '#ffffff0a'};border:1px solid ${h ? '#b4e32f66' : 'var(--line)'}"><div style="font-size:18px">${h ? '✅' : '⏳'}</div><b style="font-size:12px">${E(c?.code)}</b><div class="muted" style="font-size:11px">${h ? M.fmtT(h.at) : 'pendiente'}</div></div>`; }).join('')}</div>
           <div class="bar" style="margin-top:12px"><i style="width:${hits / r.points.length * 100}%"></i></div>
           <div class="muted" style="font-size:12px;margin-top:10px">Rondas completas hoy: ${done.filter(x => today(x.start)).length} · ${hits}/${r.points.length} puntos en la ronda actual</div></div>`;
       }).join('')}
       <div class="card"><h3>Puntos de control</h3><div class="tw"><table class="t"><tr><th>Código</th><th>Nombre</th><th>Método</th><th>Último registro</th></tr>
         ${S.points.map(c => { const h = S.rounds.flatMap(r => r.hits).filter(x => x.p === c.id).sort((a, b) => b.at - a.at)[0]; return `<tr><td><b>${E(c.code)}</b></td><td>${E(c.name)}</td><td><span class="chip">${c.method === 'NFC' ? '📶 NFC' : '▦ QR'}</span></td><td class="muted">${h ? M.ago(h.at) : '—'}</td></tr>`; }).join('')}</table></div></div>
       </div>
-      <div>${mapShell('rmap')}<div class="card" style="margin-top:12px"><h3>Cómo funciona</h3><div style="font-size:13px;line-height:1.7" class="muted">1. Pega el código QR o la etiqueta NFC en cada punto.<br>2. El guardia abre <b style="color:#fff">Rondín</b> en su app y escanea al pasar.<br>3. Si se salta un punto o se pasa del tiempo, te llega una alerta.</div></div></div>
+      <div>${mapShell('rmap')}<div class="card" style="margin-top:12px"><h3>Cómo funciona</h3><div style="font-size:13px;line-height:1.7" class="muted">1. Pega el código QR o la etiqueta NFC en cada punto.<br>2. El guardia abre <b style="color:#fff">Rondín</b> en su app y escanea al pasar.<br>3. Si se salta un punto o se pasa del tiempo, te llega una alerta.<br>4. Para agregar un punto, toca <b style="color:#fff">＋ Punto de control</b> y luego el plano.</div></div></div>
     </div></div>`;
 }
 function bindRondines() {
-  const m = $('rmap'); m.style.minHeight = '380px'; drawMap(m, { points: true, routes: true, ops: true });
-  $('addCp').onclick = () => {
+  const r = S.routes[0], m = $('rmap'); m.style.minHeight = '400px';
+  const draw = () => drawMap(m, { site: r.site, points: true, routes: true, ops: true, zones: false, onMap: ui.pick ? onPick : null });
+  const onPick = xy => {
     const ov = modal(`<div class="mh"><h3>Nuevo punto de control</h3><button data-close>×</button></div><div class="grid2">
       <label class="l">Nombre<input class="f" id="cN" placeholder="Ej. Puerta trasera"></label>
       <label class="l">Método<select class="f" id="cM"><option>QR</option><option>NFC</option></select></label></div>
-      <p class="muted" style="font-size:12.5px;margin-top:10px">Se agrega a la ruta "${E(S.routes[0].name)}" junto a los demás puntos.</p>
+      <p class="muted" style="font-size:12.5px;margin-top:10px">Se agrega a la ruta "${E(r.name)}"${siteN(r.site).kind === 'indoor' ? ' en el área ' + E(M.areaAt(S, r.site, xy.x, xy.y)?.name || 'pasillo') : ''}.</p>
       <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="cOk">Agregar</button></div>`);
     $('cOk').onclick = () => {
       const n = $('cN').value.trim(); if (!n) return $('cN').focus();
-      M.update(s => { const c = { id: M.uid('cp'), code: 'P-0' + (s.points.length + 1), name: n, method: $('cM').value, x: 54 + Math.random() * 10, y: 40 + Math.random() * 10 }; s.points.push(c); s.routes[0].points.push(c.id); });
-      ov.remove(); toast('✓ Punto agregado');
+      M.update(s => { const c = { id: M.uid('cp'), site: r.site, code: 'P-' + String(s.points.length + 1).padStart(2, '0'), name: n, method: $('cM').value, x: xy.x, y: xy.y }; s.points.push(c); s.routes[0].points.push(c.id); });
+      ui.pick = null; m.classList.remove('picking'); ov.remove(); toast('✓ Punto agregado');
     };
   };
+  draw();
+  $('addCp').onclick = () => { ui.pick = { r: 1 }; m.classList.add('picking'); draw(); toast('Toca el plano donde va el punto'); };
 }
 
 // ---------- GEOCERCAS ----------
 function vGeocercas() {
-  const ev = S.events.filter(e => e.type === 'geocerca').slice(-30).reverse();
+  const st = siteN(ui.site), ev = S.events.filter(e => e.type === 'geocerca' && op(e.opId)?.site === ui.site).slice(-30).reverse();
   return `<div class="view">
-    <div class="vh"><h2>Geocercas</h2><span class="sp"></span><button class="btn lime" id="addZ">${ui.pick ? 'Toca el mapa para ubicarla…' : '＋ Nueva geocerca'}</button>
-    <p>Zonas en el mapa que avisan cuando alguien entra o sale: almacenes, clientes o zonas prohibidas.</p></div>
+    <div class="vh"><h2>Geocercas</h2>${siteSeg(ui.site, 'id="gS"')}<span class="sp"></span><button class="btn lime" id="addZ">${ui.pick ? 'Toca el mapa para ubicarla…' : '＋ Nueva geocerca'}</button>
+    <p>${st.kind === 'indoor' ? 'Dentro del almacén las zonas se miden en metros. Puedes limitar una zona a ciertos departamentos (ej. cuarto de máquinas solo Mantenimiento).' : 'En la ciudad: almacenes, clientes o zonas prohibidas. Avisan cuando alguien entra o sale.'}</p></div>
     <div class="r3">
       <div>${mapShell('gmap')}</div>
       <div>
-        <div class="card" style="margin-bottom:12px"><h3>Zonas</h3>${S.zones.map(z => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ffffff0a">
+        <div class="card" style="margin-bottom:12px"><h3>Zonas · ${E(st.name)}</h3>${S.zones.filter(z => z.site === ui.site).map(z => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ffffff0a;flex-wrap:wrap">
           <i class="dot" style="width:12px;height:12px;background:${z.type === 'restringida' ? 'var(--red)' : z.type === 'base' ? 'var(--lime)' : '#9B80FF'}"></i>
-          <div style="flex:1"><b>${E(z.name)}</b><div class="muted" style="font-size:11.5px">${{ base: 'Base', permitida: 'Zona permitida', restringida: 'Zona restringida' }[z.type]} · ${(z.r * .25 * 1000).toFixed(0)} m</div></div>
+          <div style="flex:1;min-width:150px"><b>${E(z.name)}</b><div class="muted" style="font-size:11.5px">${{ base: 'Base', permitida: 'Zona permitida', restringida: 'Zona restringida' }[z.type]} · radio ${Math.round(radM(ui.site, z.r))} m${z.allow ? ' · 🔒 solo ' + z.allow.map(g => E(grp(g)?.name)).join(', ') : ''}</div></div>
           <label class="ck" style="font-size:11.5px"><input type="checkbox" data-z="${z.id}" data-k="enter" ${z.enter ? 'checked' : ''}>Entrada</label>
           <label class="ck" style="font-size:11.5px"><input type="checkbox" data-z="${z.id}" data-k="exit" ${z.exit ? 'checked' : ''}>Salida</label>
-          <button class="btn sm ghost" data-del="${z.id}" title="Eliminar">🗑️</button></div>`).join('')}</div>
+          <button class="btn sm ghost" data-del="${z.id}" title="Eliminar">🗑️</button></div>`).join('') || '<div class="empty">Sin zonas en este sitio</div>'}</div>
         <div class="card"><h3>Movimientos recientes</h3>${ev.map(e => `<div class="ev"><time>${M.fmtT(e.at)}</time><span><b>${E(op(e.opId)?.name || '')}</b> ${E(e.txt)}</span></div>`).join('') || '<div class="empty">Sin movimientos todavía</div>'}</div>
       </div>
     </div></div>`;
 }
 function bindGeocercas() {
-  const m = $('gmap'); m.style.minHeight = '460px';
-  drawMap(m, { zones: true, ops: true, pickAt: ui.pick && ui.pick.x != null ? ui.pick : null });
-  m.classList.toggle('picking', !!ui.pick);
-  $('addZ').onclick = () => { ui.pick = { r: 6 }; render(); toast('Toca el mapa donde va el centro de la geocerca'); };
-  m.onclick = e => {
-    if (!ui.pick) return;
-    Object.assign(ui.pick, mapXY(m, e)); drawMap(m, { zones: true, ops: true, pickAt: ui.pick });
-    const ov = modal(`<div class="mh"><h3>Nueva geocerca</h3><button data-close>×</button></div><div class="grid2">
-      <label class="l full">Nombre<input class="f" id="zN" placeholder="Ej. Sucursal Norte"></label>
-      <label class="l">Tipo<select class="f" id="zT"><option value="permitida">Zona permitida (avisa si sale)</option><option value="restringida">Zona restringida (avisa si entra)</option><option value="base">Base / almacén</option></select></label>
-      <label class="l">Tamaño<input type="range" id="zR" min="3" max="14" value="${ui.pick.r}"></label></div>
+  const m = $('gmap'), st = siteN(ui.site), ind = st.kind === 'indoor'; m.style.minHeight = '470px';
+  const draw = () => drawMap(m, { site: ui.site, zones: true, ops: true, pickAt: ui.pick && ui.pick.x != null ? ui.pick : null, onMap: ui.pick ? onPick : null });
+  const onPick = xy => {
+    Object.assign(ui.pick, xy); draw();
+    const ov = modal(`<div class="mh"><h3>Nueva geocerca · ${E(st.name)}</h3><button data-close>×</button></div><div class="grid2">
+      <label class="l full">Nombre<input class="f" id="zN" placeholder="${ind ? 'Ej. Área de químicos' : 'Ej. Sucursal Norte'}"></label>
+      <label class="l">Tipo<select class="f" id="zT"><option value="restringida">Zona restringida (avisa si entra)</option><option value="permitida">Zona permitida (avisa si sale)</option><option value="base">Base / punto de reunión</option></select></label>
+      <label class="l">Radio: <span id="zRv"></span><input type="range" id="zR" min="${ind ? 2 : 1}" max="${ind ? 30 : 15}" step="${ind ? 1 : .5}" value="${ui.pick.r}"></label>
+      <div class="full" id="zAl"><span class="muted" style="font-size:12.5px;font-weight:700">¿Quién sí puede entrar? (vacío = nadie sin aviso)</span><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${S.groups.map(g => `<label class="chip" style="padding:6px 10px"><input type="checkbox" value="${g.id}"> ${E(g.name)}</label>`).join('')}</div></div></div>
       <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="zOk">Guardar</button></div>`);
-    $('zR').oninput = e => { ui.pick.r = +e.target.value; drawMap(m, { zones: true, ops: true, pickAt: ui.pick }); };
+    const rv = () => $('zRv').textContent = Math.round(radM(ui.site, ui.pick.r)) + ' m'; rv();
+    $('zR').oninput = e => { ui.pick.r = +e.target.value; rv(); draw(); };
+    $('zT').onchange = () => $('zAl').style.display = $('zT').value === 'restringida' ? '' : 'none';
     ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('[data-close]')) { ui.pick = null; render(); } });
     $('zOk').onclick = () => {
       const n = $('zN').value.trim() || 'Geocerca ' + (S.zones.length + 1), tp = $('zT').value;
-      M.update(s => s.zones.push({ id: M.uid('z'), name: n, x: ui.pick.x, y: ui.pick.y, r: ui.pick.r, type: tp, enter: tp !== 'permitida', exit: tp !== 'restringida' }));
-      ui.pick = null; ov.remove(); toast('✓ Geocerca "' + n + '" activa');
+      const allow = tp === 'restringida' ? [...ov.querySelectorAll('#zAl input:checked')].map(i => i.value) : [];
+      M.update(s => s.zones.push(Object.assign({ id: M.uid('z'), site: ui.site, name: n, x: ui.pick.x, y: ui.pick.y, r: ui.pick.r, type: tp, enter: tp !== 'permitida', exit: tp !== 'restringida' }, allow.length ? { allow } : {})));
+      ui.pick = null; ov.remove(); toast('✓ Geocerca "' + n + '" activa'); render();
     };
   };
+  draw(); m.classList.toggle('picking', !!ui.pick);
+  $('gS').onclick = e => { const b = e.target.closest('[data-site]'); if (b) { ui.site = b.dataset.site; ui.pick = null; render(); } };
+  $('addZ').onclick = () => { ui.pick = { r: ind ? 8 : 4 }; render(); toast('Toca el mapa donde va el centro de la geocerca'); };
   document.querySelectorAll('[data-z]').forEach(c => c.onchange = () => M.update(s => { s.zones.find(z => z.id === c.dataset.z)[c.dataset.k] = c.checked; }));
   document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { if (confirm('¿Eliminar la geocerca?')) M.update(s => { s.zones = s.zones.filter(z => z.id !== b.dataset.del); }); });
 }
 
-// ---------- MENSAJES ----------
-function convOf(m) { if (m.to === 'all') return 'all'; if (m.to.startsWith('g')) return m.to; return m.from === 'consola' ? m.to : m.from; }
+// ---------- MENSAJES: difusión, departamentos, grupos de chat y personas ----------
+function convOf(m) { if (m.to === 'all' || m.to.startsWith('g') || m.to.startsWith('c')) return m.to; return m.from === 'consola' ? m.to : m.from; }
+function convsHTML() {
+  const row = (id, ic, n, sub) => {
+    const ms = S.msgs.filter(m => convOf(m) === id), last = ms[ms.length - 1];
+    const un = ms.filter(m => m.from !== 'consola' && !m.reads.includes('consola')).length;
+    return `<button class="cv ${ui.conv === id ? 'on' : ''}" data-c="${id}">${typeof ic === 'string' ? `<span class="av" style="background:${sub || '#ffffff18'};font-size:15px">${ic}</span>` : avatar(ic)}<span class="i"><b>${E(n)}</b><small>${last ? (last.kind === 'voz' ? '🎙️ Mensaje de voz' : (last.from !== 'consola' && last.to !== last.from ? (op(last.from)?.name.split(' ')[0] || '') + ': ' : '') + E(last.txt)) : 'Sin mensajes'}</small></span>${un ? `<em>${un}</em>` : ''}</button>`;
+  };
+  return row('all', '📢', 'Difusión a todos') +
+    `<h5>Departamentos</h5>` + S.groups.map(g => row(g.id, '🏢', g.name, g.color + '55')).join('') +
+    `<h5>Grupos de chat <button id="newC">＋ Nuevo</button></h5>` + S.chats.map(c => row(c.id, '👥', c.name, c.color + '55')).join('') +
+    `<h5>Personas</h5>` + S.ops.map(p => row(p.id, p, p.name)).join('');
+}
 function vMensajes() {
-  const convs = [['all', '📢', 'Difusión a todos'], ...S.groups.map(g => [g.id, '👥', g.name]), ...S.ops.map(p => [p.id, p, p.name])];
   return `<div class="view">
-    <div class="vh"><h2>Mensajes y difusión</h2><p>Chat por grupo o persona, avisos a todos con confirmación de lectura y mensajes de voz del radio.</p></div>
+    <div class="vh"><h2>Mensajes y difusión</h2><p>Chat por departamento, grupos de trabajo que tú armas, mensajes directos, avisos a todos con confirmación de lectura y voz del radio.</p></div>
     <div class="chat">
-      <div class="convs">${convs.map(([id, ic, n]) => {
-        const ms = S.msgs.filter(m => convOf(m) === id), last = ms[ms.length - 1];
-        const un = ms.filter(m => m.from !== 'consola' && !m.reads.includes('consola')).length;
-        return `<button class="cv ${ui.conv === id ? 'on' : ''}" data-c="${id}">${typeof ic === 'string' ? `<span class="av" style="background:#ffffff18;font-size:16px">${ic}</span>` : avatar(ic)}<span class="i"><b>${E(n)}</b><small>${last ? (last.kind === 'voz' ? '🎙️ Mensaje de voz' : E(last.txt)) : 'Sin mensajes'}</small></span>${un ? `<em>${un}</em>` : ''}</button>`;
-      }).join('')}</div>
+      <div class="convs">${convsHTML()}</div>
       <div class="thread"><div class="th" id="thH"></div><div class="msgs" id="msgs"></div>
         <div class="quick">${['¿Cuál es tu ubicación?', 'Confirma cuando llegues', 'Regresa a base', 'Buen trabajo 👏'].map(q => `<button>${q}</button>`).join('')}</div>
         <div class="comp"><input class="f" id="mIn" placeholder="Escribe un mensaje…" autocomplete="off"><button class="btn lime" id="mSend">Enviar</button></div></div>
@@ -666,22 +770,46 @@ function vMensajes() {
 }
 function thread() {
   const id = ui.conv, el = $('msgs'); if (!el) return;
-  const name = id === 'all' ? 'Difusión a todos' : grp(id)?.name || op(id)?.name;
-  const members = id === 'all' ? S.ops.filter(p => p.status !== 'fuera') : id.startsWith('g') ? S.ops.filter(p => p.group === id) : [op(id)];
-  $('thH').innerHTML = `<b style="font-family:var(--display);font-size:16px">${E(name)}</b><span class="muted" style="font-size:12px">${id.startsWith('p') ? M.STATUS[op(id).status].t : members.length + ' integrantes'}</span>`;
+  const c = chatG(id), name = id === 'all' ? 'Difusión a todos' : grp(id)?.name || c?.name || op(id)?.name;
+  const mem = M.members(S, id);
+  $('thH').innerHTML = `<b style="font-family:var(--display);font-size:16px">${E(name)}</b><span class="muted" style="font-size:12px">${id.startsWith('p') ? M.STATUS[op(id).status].t + ' · ' + E(grp(op(id).group)?.name || '') : (c ? E(c.dept) + ' · ' : id.startsWith('g') ? 'Departamento · ' : '') + mem.length + ' integrantes'}</span>${c ? '<button class="btn sm" id="editC" style="margin-left:auto">👥 Integrantes</button>' : ''}`;
+  if (c) $('editC').onclick = () => chatModal(c.id);
   const ms = S.msgs.filter(m => convOf(m) === id);
   const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
   el.innerHTML = ms.map(m => {
     const me = m.from === 'consola', who = me ? '' : `<span class="who">${E(op(m.from)?.name || '')}</span>`;
     const body = m.kind === 'voz' ? (m.audio ? `🎙️ ${m.secs}s<audio controls preload="none" src="${m.audio}"></audio>` : `🎙️ Mensaje de voz · ${m.secs}s`) : E(m.txt);
-    const rd = me && id !== 'consola' ? ` · ${id.startsWith('p') ? (m.reads.includes(id) ? '✓✓ Visto' : '✓ Enviado') : '✓✓ Visto por ' + m.reads.filter(r => r !== 'consola').length + '/' + members.length}` : '';
+    const rd = me ? ` · ${id.startsWith('p') ? (m.reads.includes(id) ? '✓✓ Visto' : '✓ Enviado') : '✓✓ Visto por ' + m.reads.filter(r => r !== 'consola').length + '/' + mem.length}` : '';
     return `<div class="bub ${m.kind === 'difusion' ? 'dif' : me ? 'me' : ''}">${m.kind === 'difusion' ? '<b>📢 Aviso general</b><br>' : who}${body}<small>${M.fmtT(m.at)}${rd}</small></div>`;
   }).join('') || '<div class="empty">Escribe el primer mensaje</div>';
   if (atBottom || !el._init) { el.scrollTop = el.scrollHeight; el._init = 1; }
   if (ms.some(m => m.from !== 'consola' && !m.reads.includes('consola'))) M.update(s => s.msgs.forEach(m => { if (convOf(m) === id && !m.reads.includes('consola')) m.reads.push('consola'); }));
 }
+function chatModal(cid) {
+  const c = cid ? chatG(cid) : null, sel = new Set(c ? c.members : []);
+  const depts = ['Operaciones', 'Logística', 'Administración', ...S.groups.map(g => g.name)];
+  const ov = modal(`<div class="mh"><h3>${c ? 'Integrantes del grupo' : 'Nuevo grupo de chat'}</h3><button data-close>×</button></div>
+    <div class="grid2"><label class="l">Nombre del grupo<input class="f" id="gN" value="${E(c?.name || '')}" placeholder="Ej. Inventario de fin de mes"></label>
+    <label class="l">Área o departamento<select class="f" id="gD">${[...new Set(depts)].map(d => `<option ${c?.dept === d ? 'selected' : ''}>${E(d)}</option>`).join('')}</select></label></div>
+    <p class="muted" style="font-size:12.5px;margin:12px 0 4px">Elige a los integrantes. Puedes agregar a todo un departamento de un toque.</p>
+    <div class="mem">${S.groups.map(g => `<h6><i class="dot" style="background:${g.color};margin-right:6px"></i>${E(g.name)}<button data-all="${g.id}">Agregar todos</button></h6>` + S.ops.filter(p => p.group === g.id).map(p => `<label><input type="checkbox" value="${p.id}" ${sel.has(p.id) ? 'checked' : ''}>${avatar(p, 's')}${E(p.name)}</label>`).join('')).join('')}</div>
+    <div class="mf">${c ? '<button class="btn red" id="gDel">Eliminar grupo</button>' : ''}<button class="btn" data-close>Cancelar</button><button class="btn lime" id="gOk">${c ? 'Guardar' : 'Crear grupo'}</button></div>`, 'wide');
+  ov.querySelectorAll('[data-all]').forEach(b => b.onclick = () => S.ops.filter(p => p.group === b.dataset.all).forEach(p => ov.querySelector(`.mem input[value="${p.id}"]`).checked = true));
+  if (c) $('gDel').onclick = () => { if (!confirm('¿Eliminar el grupo "' + c.name + '"? Los mensajes se borran.')) return; M.update(s => { s.chats = s.chats.filter(x => x.id !== c.id); s.msgs = s.msgs.filter(m => m.to !== c.id); }); ui.conv = 'all'; ov.remove(); render(); };
+  $('gOk').onclick = () => {
+    const n = $('gN').value.trim(); if (!n) return $('gN').focus();
+    const mem = [...ov.querySelectorAll('.mem input:checked')].map(i => i.value); if (!mem.length) return toast('Agrega al menos un integrante');
+    const id = M.update(s => {
+      if (c) { const x = s.chats.find(q => q.id === c.id); Object.assign(x, { name: n, dept: $('gD').value, members: mem }); return x.id; }
+      const x = { id: 'c' + Date.now().toString(36), name: n, dept: $('gD').value, members: mem, color: ['#9B80FF', '#7EE0FF', '#FFC22E', '#FF6FB1', '#B4E32F'][s.chats.length % 5] };
+      s.chats.push(x); s.msgs.push({ id: M.uid('m'), from: 'consola', to: x.id, kind: 'text', txt: 'Se creó el grupo "' + n + '". Aquí coordinamos.', at: Date.now(), reads: ['consola'] }); return x.id;
+    });
+    ui.conv = id; ov.remove(); toast(c ? '✓ Grupo actualizado' : '✓ Grupo "' + n + '" creado · ya aparece en la app de sus integrantes'); render();
+  };
+}
 function bindMensajes() {
-  document.querySelector('.convs').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { ui.conv = b.dataset.c; render(); } };
+  const cv = document.querySelector('.convs');
+  cv.onclick = e => { if (e.target.closest('#newC')) return chatModal(); const b = e.target.closest('[data-c]'); if (b) { ui.conv = b.dataset.c; render(); } };
   const send = t => {
     t = (t || '').trim(); if (!t) return;
     M.update(s => s.msgs.push({ id: M.uid('m'), from: 'consola', to: ui.conv, kind: ui.conv === 'all' ? 'difusion' : 'text', txt: t, at: Date.now(), reads: ['consola'] }));
@@ -693,56 +821,102 @@ function bindMensajes() {
   thread();
 }
 
-// ---------- ALERTAS ----------
+// ---------- ALERTAS · SOS empresarial · evacuación ----------
+function sosInfo(a) { return a.type === 'sos' ? (M.SOS_KINDS[a.kind] || M.SOS_KINDS.otro) : null; }
+function protoHTML(a) {
+  const K = sosInfo(a); if (!K) return '';
+  return `<div class="proto"><b>Protocolo · ${E(K.t)}${a.silent ? ' · 🔇 alerta silenciosa: no llamar al operador' : ''}</b>${K.steps.map((s, i) => `<button data-step="${a.id}:${i}" class="${(a.steps || []).includes(i) ? 'on' : ''}">${(a.steps || []).includes(i) ? '✓' : '○'} ${E(s)}</button>`).join('')}</div>`;
+}
+function evacHTML() {
+  const ev = S.evac; if (!ev) return '';
+  const ppl = S.ops.filter(p => p.site === ev.site && p.status !== 'fuera');
+  const safe = ppl.filter(p => ev.safe[p.id]), help = ppl.filter(p => ev.help[p.id]), none = ppl.filter(p => !ev.safe[p.id] && !ev.help[p.id]);
+  return `<div class="evac"><h3>🚨 Evacuación en curso · ${E(siteN(ev.site).name)}<span class="muted" style="font-family:var(--body);font-size:12px;font-weight:500;margin-left:auto">desde ${M.fmtT(ev.at)} · ${E(ev.reason)}</span></h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="chip" style="background:#b4e32f33">✅ A salvo ${safe.length}</span><span class="chip" style="background:#ff4d6d44">🆘 Necesitan ayuda ${help.length}</span><span class="chip">⏳ Sin respuesta ${none.length}</span><span class="sp" style="flex:1"></span><button class="btn sm" id="evMark">Marcar a salvo (en persona)</button><button class="btn sm lime" id="evEnd">Terminar evacuación</button></div>
+    <div class="roll">${[...help, ...none, ...safe].map(p => `<div>${avatar(p, 's')}<b>${E(p.name)}</b>${ev.help[p.id] ? '🆘' : ev.safe[p.id] ? '✅ ' + M.fmtT(ev.safe[p.id]) : `<a class="btn sm" href="tel:${p.phone}">📞</a>`}</div>`).join('')}</div></div>`;
+}
 function vAlertas() {
   const open = openAlerts().sort((a, b) => (b.type === 'sos') - (a.type === 'sos') || b.at - a.at), closed = S.alerts.filter(a => a.status === 'cerrada').slice(-20).reverse();
   return `<div class="view">
-    <div class="vh"><h2>Alertas</h2><span class="sp"></span><button class="btn" id="simA">Simular alerta</button><p>SOS, trabajador sin respuesta, geocercas, batería baja y órdenes vencidas. Cada alerta queda registrada con quién la atendió.</p></div>
-    ${open.map(a => { const T = M.ALERT_T[a.type], p = op(a.opId); return `<div class="al" style="border-left-color:${T.c}"><span class="ic">${T.i}</span>
-      <div class="i"><b>${T.t}${p ? ' · ' + E(p.name) : ''}</b><small>${E(a.txt)} · ${M.ago(a.at)}${a.status === 'atendida' ? ' · <b style="color:var(--lime)">En atención por Mesa de control</b>' : ''}</small></div>
-      <div class="a">${p ? `<a class="btn sm" href="tel:${p.phone}">📞 Llamar</a><button class="btn sm" data-loc="${p.id}">🛰️ Ver en mapa</button>` : ''}${a.type === 'sos' && p ? `<button class="btn sm" data-help="${a.id}">🚓 Enviar al más cercano</button>` : ''}${a.status === 'abierta' ? `<button class="btn sm lime" data-ack="${a.id}">Atender</button>` : ''}<button class="btn sm" data-close-a="${a.id}">Cerrar</button></div></div>`; }).join('') || '<div class="card empty">✅ Sin alertas abiertas</div>'}
+    <div class="vh"><h2>Alertas y emergencias</h2><span class="sp"></span><button class="btn" id="simA">Simular alerta</button>${S.evac ? '' : '<button class="btn red" id="evac">🚨 Evacuar un sitio</button>'}<p>SOS por tipo de emergencia con su protocolo, accesos no autorizados, trabajador sin respuesta, geocercas, batería y órdenes vencidas. Todo queda registrado.</p></div>
+    ${evacHTML()}
+    ${open.map(a => { const T = M.ALERT_T[a.type], K = sosInfo(a), p = op(a.opId); return `<div class="al" style="border-left-color:${a.silent ? 'var(--yellow)' : T.c}"><span class="ic">${K ? K.i : T.i}</span>
+      <div class="i"><b>${K ? 'SOS · ' + E(K.t) : T.t}${p ? ' · ' + E(p.name) : ''}</b><small>${E(a.where || a.txt)} · ${M.ago(a.at)}${p ? ' · ' + E(grp(p.group)?.name || '') : ''}${a.status === 'atendida' ? ' · <b style="color:var(--lime)">En atención</b>' : ''}</small></div>
+      <div class="a">${p ? `${a.silent ? '' : `<a class="btn sm" href="tel:${p.phone}">📞 Llamar</a>`}<button class="btn sm" data-loc="${p.id}">🛰️ Ver en mapa</button>` : ''}${K && p ? `<button class="btn sm" data-help="${a.id}">🏃 Enviar al más cercano</button><button class="btn sm" data-dept="${a.id}">🏢 Avisar a ${E(grp(p.group)?.name || 'su depto.')}</button><a class="btn sm" href="tel:911">🚓 911</a>${a.kind === 'incendio' && !S.evac ? `<button class="btn sm red" data-ev="${p.site}">Evacuar sitio</button>` : ''}` : ''}${a.status === 'abierta' ? `<button class="btn sm lime" data-ack="${a.id}">Atender</button>` : ''}<button class="btn sm" data-close-a="${a.id}">Cerrar</button></div>
+      ${protoHTML(a)}</div>`; }).join('') || (S.evac ? '' : '<div class="card empty">✅ Sin alertas abiertas</div>')}
     <div class="card" style="margin-top:16px"><h3>Historial</h3><div class="tw"><table class="t"><tr><th>Hora</th><th>Tipo</th><th>Operador</th><th>Detalle</th><th>Cierre</th></tr>
-      ${closed.map(a => `<tr><td>${M.fmtT(a.at)}</td><td>${M.ALERT_T[a.type].i} ${M.ALERT_T[a.type].t}</td><td>${E(op(a.opId)?.name || '—')}</td><td class="muted">${E(a.txt)}</td><td class="muted">${E(a.note || '')} ${a.closed ? '· ' + Math.max(1, Math.round((a.closed - a.at) / M.MIN)) + ' min' : ''}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Sin historial</td></tr>'}</table></div></div>
+      ${closed.map(a => { const K = sosInfo(a); return `<tr><td>${M.fmtT(a.at)}</td><td>${K ? K.i + ' ' + E(K.t) : M.ALERT_T[a.type].i + ' ' + M.ALERT_T[a.type].t}</td><td>${E(op(a.opId)?.name || '—')}</td><td class="muted">${E(a.where || a.txt)}</td><td class="muted">${E(a.note || '')} ${a.closed ? '· ' + Math.max(1, Math.round((a.closed - a.at) / M.MIN)) + ' min' : ''}${K ? ' · protocolo ' + (a.steps || []).length + '/' + K.steps.length : ''}</td></tr>`; }).join('') || '<tr><td colspan="5" class="empty">Sin historial</td></tr>'}</table></div></div>
   </div>`;
 }
 function closeAlert(id) {
-  const ov = modal(`<div class="mh"><h3>Cerrar alerta</h3><button data-close>×</button></div><label class="l">¿Qué pasó?<select class="f" id="cA"><option>Resuelta: el operador está bien</option><option>Falsa alarma</option><option>Se envió apoyo</option><option>Se canalizó al 911</option></select></label>
+  const ov = modal(`<div class="mh"><h3>Cerrar alerta</h3><button data-close>×</button></div><label class="l">¿Qué pasó?<select class="f" id="cA"><option>Resuelta: el operador está bien</option><option>Falsa alarma</option><option>Se envió apoyo</option><option>Se canalizó al 911</option><option>Atendida por brigada interna</option></select></label>
+    <label class="l" style="margin-top:10px">Notas del incidente<textarea class="f" id="cNo" rows="2" placeholder="Qué pasó, quién atendió, acciones tomadas"></textarea></label>
     <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="cOk">Cerrar alerta</button></div>`);
-  $('cOk').onclick = () => { M.update(s => { const a = s.alerts.find(x => x.id === id); a.status = 'cerrada'; a.note = $('cA').value; a.closed = Date.now(); const p = s.ops.find(x => x.id === a.opId); if (a.type === 'sos' && p && p.status === 'sos') p.status = 'disponible'; if (a.type === 'hombre' && p) p.soloOk = Date.now(); M.event(s, a.opId, 'Alerta cerrada: ' + a.note, 'alerta'); }); ov.remove(); };
+  $('cOk').onclick = () => { M.update(s => { const a = s.alerts.find(x => x.id === id); a.status = 'cerrada'; a.note = $('cA').value + ($('cNo').value.trim() ? ' — ' + $('cNo').value.trim() : ''); a.closed = Date.now(); const p = s.ops.find(x => x.id === a.opId); if (a.type === 'sos' && p && p.status === 'sos') p.status = 'disponible'; if (a.type === 'hombre' && p) p.soloOk = Date.now(); M.event(s, a.opId, 'Alerta cerrada: ' + a.note, 'alerta'); }); ov.remove(); };
 }
+function step(aid, i) { M.update(s => { const a = s.alerts.find(x => x.id === aid); a.steps = a.steps || []; if (a.steps.includes(i)) a.steps = a.steps.filter(x => x !== i); else a.steps.push(i); if (a.status === 'abierta') a.status = 'atendida'; }); }
 function sendHelp(aid) {
   M.update(s => {
     const a = s.alerts.find(x => x.id === aid), p = s.ops.find(x => x.id === a.opId);
-    const n = M.nearest(s, p.x, p.y, q => q.id !== p.id)[0]; if (!n) return;
+    const n = M.nearest(s, p.site, p.x, p.y, q => q.id !== p.id)[0]; if (!n) { toast('No hay compañeros en turno en ese sitio'); return; }
     n.p.status = 'encamino'; n.p.target = { x: p.x, y: p.y }; a.status = 'atendida';
-    s.msgs.push({ id: M.uid('m'), from: 'consola', to: n.p.id, kind: 'text', txt: '🆘 Apoya a ' + p.name + ' de inmediato. Su ubicación ya está en tu mapa.', at: Date.now(), reads: ['consola'] });
+    s.msgs.push({ id: M.uid('m'), from: 'consola', to: n.p.id, kind: 'text', txt: '🆘 Apoya a ' + p.name + ' de inmediato (' + (a.where || '') + '). Su ubicación ya está en tu mapa.', at: Date.now(), reads: ['consola'] });
     M.event(s, n.p.id, 'Va en apoyo de ' + p.name, 'alerta');
-    toast('🚓 ' + n.p.name + ' va en camino (' + M.km(n.d).toFixed(1) + ' km)');
+    toast('🏃 ' + n.p.name + ' va en camino (' + M.fmtD(n.d, s, p.site) + ')');
   });
+}
+function notifyDept(aid) {
+  M.update(s => { const a = s.alerts.find(x => x.id === aid), p = s.ops.find(x => x.id === a.opId), K = M.SOS_KINDS[a.kind] || M.SOS_KINDS.otro;
+    s.msgs.push({ id: M.uid('m'), from: 'consola', to: p.group, kind: 'text', txt: '⚠️ ' + K.t + ': ' + p.name + ' en ' + (a.where || '') + '. Sigan indicaciones de la central.', at: Date.now(), reads: ['consola'] }); a.status = 'atendida'; });
+  toast('🏢 Aviso enviado al departamento');
+}
+function startEvac(sid, reason) {
+  M.update(s => { s.evac = { site: sid, at: Date.now(), reason: reason || 'Evacuación', safe: {}, help: {} }; s.msgs.push({ id: M.uid('m'), from: 'consola', to: 'all', kind: 'difusion', txt: '🚨 EVACUACIÓN en ' + M.site(s, sid).name + ': diríjanse al punto de reunión y confirmen en la app que están a salvo.', at: Date.now(), reads: ['consola'] }); M.event(s, null, 'Inició evacuación de ' + M.site(s, sid).name, 'alerta'); });
+  M.beep(true); toast('🚨 Evacuación enviada a todos los teléfonos del sitio');
+}
+function evacModal() {
+  const ov = modal(`<div class="mh"><h3>🚨 Evacuar un sitio</h3><button data-close>×</button></div>
+    <p style="font-size:13.5px">A todos los operadores del sitio les aparece una alerta a pantalla completa y deben confirmar <b>"Estoy a salvo"</b> o <b>"Necesito ayuda"</b>. Aquí ves el pase de lista en vivo.</p>
+    <div class="grid2" style="margin-top:12px"><label class="l">Sitio<select class="f" id="eS">${S.sites.map(s => `<option value="${s.id}" ${s.kind === 'indoor' ? 'selected' : ''}>${s.icon} ${E(s.name)} · ${S.ops.filter(p => p.site === s.id && p.status !== 'fuera').length} personas</option>`).join('')}</select></label>
+    <label class="l">Motivo<select class="f" id="eR"><option>Incendio</option><option>Sismo</option><option>Fuga de gas</option><option>Amenaza de seguridad</option><option>Simulacro</option></select></label></div>
+    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn red" id="eOk">Enviar evacuación</button></div>`);
+  $('eOk').onclick = () => { startEvac($('eS').value, $('eR').value); ov.remove(); };
 }
 function bindAlertas() {
   const main = $('main');
   main.querySelectorAll('[data-ack]').forEach(b => b.onclick = () => M.update(s => { s.alerts.find(a => a.id === b.dataset.ack).status = 'atendida'; }));
   main.querySelectorAll('[data-close-a]').forEach(b => b.onclick = () => closeAlert(b.dataset.closeA));
   main.querySelectorAll('[data-help]').forEach(b => b.onclick = () => sendHelp(b.dataset.help));
-  main.querySelectorAll('[data-loc]').forEach(b => b.onclick = () => { ui.sel = b.dataset.loc; go('vivo'); });
+  main.querySelectorAll('[data-dept]').forEach(b => b.onclick = () => notifyDept(b.dataset.dept));
+  main.querySelectorAll('[data-step]').forEach(b => b.onclick = () => { const [a, i] = b.dataset.step.split(':'); step(a, +i); });
+  main.querySelectorAll('[data-ev]').forEach(b => b.onclick = () => startEvac(b.dataset.ev, 'Incendio'));
+  main.querySelectorAll('[data-loc]').forEach(b => b.onclick = () => { ui.sel = b.dataset.loc; ui.site = op(ui.sel).site; go('vivo'); });
+  if ($('evac')) $('evac').onclick = evacModal;
+  if ($('evEnd')) $('evEnd').onclick = () => { if (!confirm('¿Terminar la evacuación?')) return; M.update(s => { const ev = s.evac; M.event(s, null, 'Terminó evacuación de ' + M.site(s, ev.site).name + ' · ' + Object.keys(ev.safe).length + ' a salvo', 'alerta'); s.evac = null; s.msgs.push({ id: M.uid('m'), from: 'consola', to: 'all', kind: 'difusion', txt: '✅ Terminó la evacuación. Pueden regresar a sus actividades.', at: Date.now(), reads: ['consola'] }); }); };
+  if ($('evMark')) $('evMark').onclick = () => {
+    const ppl = S.ops.filter(p => p.site === S.evac.site && p.status !== 'fuera' && !S.evac.safe[p.id]);
+    const ov = modal(`<div class="mh"><h3>Marcar a salvo</h3><button data-close>×</button></div><p class="muted" style="font-size:13px;margin-bottom:10px">Para quien se reportó en persona con el brigadista.</p><div class="mem">${ppl.map(p => `<label><input type="checkbox" value="${p.id}">${avatar(p, 's')}${E(p.name)}</label>`).join('') || '<div class="empty">Todos están a salvo</div>'}</div><div class="mf"><button class="btn lime" id="mkOk">Guardar</button></div>`);
+    $('mkOk').onclick = () => { const ids = [...ov.querySelectorAll('input:checked')].map(i => i.value); M.update(s => ids.forEach(id => { s.evac.safe[id] = Date.now(); delete s.evac.help[id]; })); ov.remove(); };
+  };
   $('simA').onclick = () => {
     const ov = modal(`<div class="mh"><h3>Simular alerta</h3><button data-close>×</button></div><div class="grid2">
-      <label class="l">Tipo<select class="f" id="sT"><option value="sos">SOS</option><option value="hombre">Trabajador sin respuesta</option><option value="bateria">Batería baja</option></select></label>
-      <label class="l">Operador<select class="f" id="sP">${S.ops.filter(p => p.status !== 'fuera').map(p => `<option value="${p.id}">${E(p.name)}</option>`).join('')}</select></label></div>
-      <p class="muted" style="font-size:12.5px;margin-top:10px">En la operación real, la alerta la manda la app del operador (botón SOS o verificación de trabajo solo).</p>
+      <label class="l">Tipo<select class="f" id="sT">${Object.entries(M.SOS_KINDS).map(([k, v]) => `<option value="sos:${k}">${v.i} SOS · ${E(v.t)}</option>`).join('')}<option value="hombre">🧍 Trabajador sin respuesta</option><option value="bateria">🔋 Batería baja</option></select></label>
+      <label class="l">Operador<select class="f" id="sP">${S.ops.filter(p => p.status !== 'fuera').map(p => `<option value="${p.id}">${siteN(p.site).icon} ${E(p.name)}</option>`).join('')}</select></label></div>
+      <p class="muted" style="font-size:12.5px;margin-top:10px">En la operación real, la alerta la manda la app del operador.</p>
       <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn red" id="sOk">Disparar</button></div>`);
-    $('sOk').onclick = () => { const t = $('sT').value, pid = $('sP').value; M.update(s => { const p = s.ops.find(x => x.id === pid); if (t === 'sos') p.status = 'sos'; M.alert(s, t, pid, { sos: 'Presionó el botón SOS', hombre: 'No respondió la verificación de "trabajo solo"', bateria: 'Batería al ' + p.bat + '%' }[t]); }); ov.remove(); };
+    $('sOk').onclick = () => { const t = $('sT').value, pid = $('sP').value; M.update(s => { if (t.startsWith('sos:')) M.sos(s, pid, t.slice(4)); else { const p = s.ops.find(x => x.id === pid); M.alert(s, t, pid, t === 'hombre' ? 'No respondió la verificación de "trabajo solo"' : 'Batería al ' + p.bat + '%'); } }); ov.remove(); };
   };
 }
-// alerta SOS a pantalla completa, venga de donde venga
+// SOS a pantalla completa, venga de donde venga (el de asalto llega sin sonido)
 function sosWatch() {
   openAlerts().filter(a => a.type === 'sos' && a.status === 'abierta' && !ui.seenSos.has(a.id)).forEach(a => {
-    ui.seenSos.add(a.id); const p = op(a.opId); M.beep(true);
-    const ov = modal(`<div class="big">🆘</div><h3 style="font-size:26px;margin:10px 0 4px">SOS de ${E(p?.name || '')}</h3><p class="muted">${E(a.txt)} · ${M.fmtT(a.at)}</p>
+    ui.seenSos.add(a.id); const p = op(a.opId), K = sosInfo(a); M.beep(!a.silent);
+    const ov = modal(`<div class="big">${K.i}</div><h3 style="font-size:26px;margin:10px 0 4px">${E(K.t)}</h3><p style="font-size:15px"><b>${E(p?.name || '')}</b> · ${E(grp(p?.group)?.name || '')}</p><p class="muted">${E(a.where || '')} · ${M.fmtT(a.at)}</p>
+      ${a.silent ? '<p style="margin-top:8px;color:var(--yellow);font-weight:700">🔇 Alerta silenciosa: no llames al operador. Llama al 911 y sigue su ubicación.</p>' : ''}
       ${mapShell('smap')}
-      <div class="mf" style="justify-content:center"><a class="btn" href="tel:${p?.phone}">📞 Llamar</a><button class="btn" id="sH">🚓 Enviar al más cercano</button><button class="btn red" id="sAck">Atender ahora</button></div>`, 'sosov');
-    const sm = ov.querySelector('#smap'); sm.style.minHeight = '200px'; sm.style.margin = '14px 0'; ui.sel = a.opId; drawMap(sm, { ops: true, zones: true });
+      <div class="mf" style="justify-content:center">${a.silent ? '<a class="btn red" href="tel:911">🚓 Llamar al 911</a>' : `<a class="btn" href="tel:${p?.phone}">📞 Llamar</a>`}<button class="btn" id="sH">🏃 Enviar al más cercano</button><button class="btn lime" id="sAck">Atender con protocolo</button></div>`, 'sosov' + (a.silent ? ' silent' : ''));
+    const sm = ov.querySelector('#smap'); sm.style.minHeight = '230px'; sm.style.margin = '14px 0'; ui.sel = a.opId;
+    setTimeout(() => { drawMap(sm, { site: p.site, ops: true, zones: true }); sm._L.setView(LL(p.site, p.x, p.y), siteN(p.site).kind === 'indoor' ? 3 : 15); }, 30);
     ov.querySelector('#sAck').onclick = () => { M.update(s => { s.alerts.find(x => x.id === a.id).status = 'atendida'; }); ov.remove(); go('alertas'); };
     ov.querySelector('#sH').onclick = () => { sendHelp(a.id); ov.remove(); };
   });
@@ -751,33 +925,39 @@ function sosWatch() {
 // ---------- REPORTES ----------
 function vReportes() {
   const comp = S.orders.filter(o => o.status === 'completada' && today(o.done)), onT = comp.filter(o => o.done <= o.due);
-  const kmT = S.ops.reduce((a, p) => a + p.km, 0), gbT = S.ops.reduce((a, p) => a + p.gb, 0);
+  const kmC = S.ops.filter(p => p.site === 'city').reduce((a, p) => a + p.km, 0), mA = S.ops.filter(p => p.site !== 'city').reduce((a, p) => a + p.km * 1000, 0), gbT = S.ops.reduce((a, p) => a + p.gb, 0);
   const cl = S.alerts.filter(a => a.closed), resp = cl.length ? Math.round(cl.reduce((a, x) => a + (x.closed - x.at), 0) / cl.length / M.MIN) : 0;
-  const per = S.ops.map(p => ({ p, n: comp.filter(o => o.opId === p.id).length, km: p.km })).sort((a, b) => b.n - a.n || b.km - a.km);
-  const maxN = Math.max(1, ...per.map(x => x.n)), maxK = Math.max(1, ...per.map(x => x.km));
+  const per = S.ops.map(p => ({ p, n: comp.filter(o => o.opId === p.id).length })).sort((a, b) => b.n - a.n);
+  const maxN = Math.max(1, ...per.map(x => x.n));
+  const byDept = S.groups.map(g => ({ g, n: comp.filter(o => op(o.opId)?.group === g.id).length, open: openOrders().filter(o => op(o.opId)?.group === g.id).length }));
+  const maxD = Math.max(1, ...byDept.map(x => x.n + x.open));
   const top = per[0], late = openOrders().filter(o => o.late), nu = S.orders.filter(o => o.status === 'nueva');
   return `<div class="view">
-    <div class="vh"><h2>Reportes</h2><span class="sp"></span><button class="btn" data-csv="orders">⬇ Órdenes (CSV)</button><button class="btn" data-csv="events">⬇ Actividad (CSV)</button><p>Indicadores del día de tu operación. Se exportan a Excel con un clic.</p></div>
+    <div class="vh"><h2>Reportes</h2><span class="sp"></span><button class="btn" data-csv="orders">⬇ Órdenes (CSV)</button><button class="btn" data-csv="events">⬇ Actividad (CSV)</button><button class="btn" data-csv="alerts">⬇ Incidentes (CSV)</button><p>Indicadores del día por sitio y departamento. Se exportan a Excel con un clic.</p></div>
     <div class="sum" style="margin-bottom:16px">✨ <b>Resumen del turno:</b> llevas <b>${comp.length} órdenes completadas</b>, ${comp.length ? Math.round(onT.length / comp.length * 100) : 100}% a tiempo. ${top && top.n ? `Destaca <b>${E(top.p.name)}</b> con ${top.n}. ` : ''}${late.length ? `Hay <b>${late.length} orden(es) vencida(s)</b>: ${late.map(o => E(o.folio)).join(', ')}. ` : 'Ninguna orden vencida. '}${nu.length ? `Faltan por asignar <b>${nu.length}</b>. ` : ''}${openAlerts().length ? `Tienes <b>${openAlerts().length} alerta(s)</b> abiertas.` : 'Sin alertas abiertas.'}</div>
     <div class="kpis">
       <div class="kpi good"><small>Órdenes completadas</small><b>${comp.length}</b></div>
       <div class="kpi"><small>Cumplimiento a tiempo</small><b>${comp.length ? Math.round(onT.length / comp.length * 100) : 100}<em>%</em></b></div>
-      <div class="kpi"><small>Kilómetros recorridos</small><b>${kmT.toFixed(0)}<em>km</em></b></div>
+      <div class="kpi"><small>Recorrido en ciudad</small><b>${kmC.toFixed(0)}<em>km</em></b></div>
+      <div class="kpi"><small>Recorrido en almacén</small><b>${(mA / 1000).toFixed(1)}<em>km</em></b></div>
       <div class="kpi"><small>Respuesta a alertas</small><b>${resp || '—'}<em>${resp ? 'min' : ''}</em></b></div>
       <div class="kpi"><small>Datos usados (líneas Navi)</small><b>${gbT.toFixed(1)}<em>GB</em></b></div>
     </div>
     <div class="r2">
-      <div class="card"><h3>Órdenes completadas por operador</h3>${per.map(x => `<div class="hb"><span>${E(x.p.name)}</span><div class="bar"><i style="width:${x.n / maxN * 100}%"></i></div><b>${x.n}</b></div>`).join('')}</div>
-      <div class="card"><h3>Kilómetros por operador</h3>${per.slice().sort((a, b) => b.km - a.km).map(x => `<div class="hb"><span>${E(x.p.name)}</span><div class="bar"><i style="width:${x.km / maxK * 100}%;background:var(--cyan)"></i></div><b>${x.km.toFixed(0)}</b></div>`).join('')}</div>
+      <div class="card"><h3>Órdenes por departamento<small>completadas · abiertas</small></h3>${byDept.map(x => `<div class="hb"><span>${E(x.g.name)}</span><div class="bar" style="display:flex"><i style="width:${x.n / maxD * 100}%"></i><i style="width:${x.open / maxD * 100}%;background:var(--purple);border-radius:0"></i></div><b>${x.n} · ${x.open}</b></div>`).join('')}</div>
+      <div class="card"><h3>Órdenes completadas por operador</h3>${per.map(x => `<div class="hb"><span>${siteN(x.p.site).icon} ${E(x.p.name)}</span><div class="bar"><i style="width:${x.n / maxN * 100}%"></i></div><b>${x.n}</b></div>`).join('')}</div>
     </div>
-    <div class="card"><h3>Detalle de órdenes de hoy</h3><div class="tw"><table class="t"><tr><th>Folio</th><th>Trabajo</th><th>Cliente</th><th>Operador</th><th>Estado</th><th>Creada</th><th>Cierre</th><th>A tiempo</th></tr>
-      ${S.orders.slice().reverse().map(o => `<tr><td><b>${E(o.folio)}</b></td><td>${E(o.title)}</td><td>${E(o.client)}</td><td>${E(op(o.opId)?.name || '—')}</td><td>${M.ORDER_ST[o.status]}</td><td>${M.fmtT(o.created)}</td><td>${o.done ? M.fmtT(o.done) : '—'}</td><td>${o.status === 'completada' ? (o.done <= o.due ? '✅' : '⚠️') : o.late ? '⚠️' : '—'}</td></tr>`).join('')}</table></div></div>
+    <div class="card"><h3>Detalle de órdenes de hoy</h3><div class="tw"><table class="t"><tr><th>Folio</th><th>Sitio</th><th>Trabajo</th><th>Cliente</th><th>Operador</th><th>Estado</th><th>Creada</th><th>Cierre</th><th>A tiempo</th></tr>
+      ${S.orders.slice().reverse().map(o => `<tr><td><b>${E(o.folio)}</b></td><td>${siteN(o.site).icon}</td><td>${E(o.title)}</td><td>${E(o.client)}</td><td>${E(op(o.opId)?.name || '—')}</td><td>${M.ORDER_ST[o.status]}</td><td>${M.fmtT(o.created)}</td><td>${o.done ? M.fmtT(o.done) : '—'}</td><td>${o.status === 'completada' ? (o.done <= o.due ? '✅' : '⚠️') : o.late ? '⚠️' : '—'}</td></tr>`).join('')}</table></div></div>
   </div>`;
 }
 function csv(kind) {
+  const d = ts => ts ? new Date(ts).toLocaleString('es-MX') : '';
   const rows = kind === 'orders'
-    ? [['Folio', 'Trabajo', 'Cliente', 'Dirección', 'Prioridad', 'Operador', 'Estado', 'Creada', 'Cierre', 'A tiempo']].concat(S.orders.map(o => [o.folio, o.title, o.client, o.addr, o.prio, op(o.opId)?.name || '', M.ORDER_ST[o.status], new Date(o.created).toLocaleString('es-MX'), o.done ? new Date(o.done).toLocaleString('es-MX') : '', o.status === 'completada' ? (o.done <= o.due ? 'Sí' : 'No') : '']))
-    : [['Hora', 'Operador', 'Tipo', 'Detalle']].concat(S.events.map(e => [new Date(e.at).toLocaleString('es-MX'), op(e.opId)?.name || 'Consola', e.type, e.txt]));
+    ? [['Folio', 'Sitio', 'Trabajo', 'Cliente', 'Ubicación', 'Prioridad', 'Operador', 'Departamento', 'Estado', 'Creada', 'Cierre', 'A tiempo']].concat(S.orders.map(o => [o.folio, siteN(o.site).name, o.title, o.client, o.addr, o.prio, op(o.opId)?.name || '', grp(op(o.opId)?.group)?.name || '', M.ORDER_ST[o.status], d(o.created), d(o.done), o.status === 'completada' ? (o.done <= o.due ? 'Sí' : 'No') : '']))
+    : kind === 'alerts'
+    ? [['Hora', 'Tipo', 'Operador', 'Departamento', 'Ubicación', 'Estado', 'Cierre', 'Notas', 'Pasos del protocolo']].concat(S.alerts.map(a => { const K = sosInfo(a); return [d(a.at), K ? 'SOS · ' + K.t : M.ALERT_T[a.type].t, op(a.opId)?.name || '', grp(op(a.opId)?.group)?.name || '', a.where || a.txt, a.status, d(a.closed), a.note || '', K ? (a.steps || []).map(i => K.steps[i]).join(' | ') : '']; }))
+    : [['Hora', 'Operador', 'Tipo', 'Detalle']].concat(S.events.map(e => [d(e.at), op(e.opId)?.name || 'Consola', e.type, e.txt]));
   const txt = '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'navi-mando-' + kind + '.csv'; a.click();
 }
@@ -785,22 +965,24 @@ function csv(kind) {
 // ---------- EQUIPO ----------
 function vEquipo() {
   return `<div class="view">
-    <div class="vh"><h2>Equipo y líneas</h2><span class="sp"></span><button class="btn" id="addG">＋ Grupo</button><button class="btn lime" id="inv">📲 Invitar operador</button>
-    <p>Tus operadores, sus grupos de radio y sus líneas Navi. Cada operador entra a la app con el código de tu empresa.</p></div>
+    <div class="vh"><h2>Equipo, departamentos y líneas</h2><span class="sp"></span><button class="btn" id="addG">＋ Departamento</button><button class="btn lime" id="inv">📲 Invitar operador</button>
+    <p>Cada operador pertenece a un departamento (su canal de radio y chat) y trabaja en un sitio: la ciudad o el almacén.</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">${S.groups.map(g => `<span class="chip" style="padding:7px 12px;font-size:12.5px"><i class="dot" style="background:${g.color}"></i>${E(g.name)} · ${S.ops.filter(p => p.group === g.id).length}</span>`).join('')}</div>
-    <div class="card"><div class="tw"><table class="t"><tr><th>Operador</th><th>Grupo</th><th>Estado</th><th>Línea Navi</th><th>Datos del mes</th><th>Batería</th><th>Visto</th></tr>
+    <div class="card"><div class="tw"><table class="t"><tr><th>Operador</th><th>Departamento</th><th>Sitio</th><th>Estado</th><th>Línea Navi</th><th>Datos del mes</th><th>Batería</th></tr>
       ${S.ops.map(p => { const pct = Math.min(100, p.gb / p.gbMax * 100); return `<tr><td><div style="display:flex;align-items:center;gap:10px">${avatar(p, 's')}<div><b>${E(p.name)}</b><div class="muted" style="font-size:11.5px">${E(p.role)}</div></div></div></td>
         <td><select class="f" data-g="${p.id}" style="padding:5px 8px;font-size:12.5px">${S.groups.map(g => `<option value="${g.id}" ${p.group === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</select></td>
-        <td><span class="chip"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</span></td>
+        <td><select class="f" data-s="${p.id}" style="padding:5px 8px;font-size:12.5px">${S.sites.map(s => `<option value="${s.id}" ${p.site === s.id ? 'selected' : ''}>${s.icon} ${E(s.kind === 'indoor' ? 'Almacén' : 'Ciudad')}</option>`).join('')}</select></td>
+        <td><span class="chip"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</span>${isGps(p) ? ' <span title="GPS real">📡</span>' : ''}</td>
         <td>${p.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</td>
-        <td style="min-width:150px"><div style="font-size:12px">${p.gb.toFixed(1)} / ${p.gbMax} GB</div><div class="bar"><i style="width:${pct}%;${pct > 85 ? 'background:var(--yellow)' : ''}"></i></div></td>
-        <td>${p.bat}%</td><td class="muted">${p.status === 'fuera' ? 'Fuera de turno' : M.ago(p.seen)}</td></tr>`; }).join('')}</table></div></div>
+        <td style="min-width:140px"><div style="font-size:12px">${p.gb.toFixed(1)} / ${p.gbMax} GB</div><div class="bar"><i style="width:${pct}%;${pct > 85 ? 'background:var(--yellow)' : ''}"></i></div></td>
+        <td>${p.bat}%</td></tr>`; }).join('')}</table></div></div>
     <div class="card" style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><b>¿Una línea se está quedando sin datos?</b><div class="muted" style="font-size:13px">Recarga desde aquí o activa la recarga automática para todo tu equipo.</div></div><a class="btn lime" href="../recargas.html">Recargar líneas</a><button class="btn" id="rst">↺ Reiniciar demo</button></div>
   </div>`;
 }
 function bindEquipo() {
   document.querySelectorAll('[data-g]').forEach(s => s.onchange = () => M.update(st => { st.ops.find(p => p.id === s.dataset.g).group = s.value; }));
-  $('addG').onclick = () => { const n = prompt('Nombre del grupo de radio'); if (n && n.trim()) M.update(s => s.groups.push({ id: 'g' + Date.now().toString(36), name: n.trim(), color: ['#FFC22E', '#9B80FF', '#FF7A45'][s.groups.length % 3] })); };
+  document.querySelectorAll('[data-s]').forEach(s => s.onchange = () => M.update(st => { const p = st.ops.find(x => x.id === s.dataset.s), si = M.site(st, s.value); p.site = s.value; p.trail = []; p.target = null; p.gps = null; if (si.kind === 'indoor') { p.x = 13; p.y = 6; } else { p.x = 37.5; p.y = 43; } p.trail = [[p.x, p.y]]; }));
+  $('addG').onclick = () => { const n = prompt('Nombre del departamento (también será su canal de radio y su chat)'); if (n && n.trim()) M.update(s => s.groups.push({ id: 'g' + Date.now().toString(36), name: n.trim(), color: ['#9B80FF', '#7EE0FF', '#FFC22E', '#FF6FB1'][s.groups.length % 4] })); };
   $('rst').onclick = () => { if (confirm('¿Reiniciar los datos de ejemplo?')) { S = M.reset(); ui.sel = null; render(); toast('Demo reiniciada'); } };
   $('inv').onclick = () => {
     const url = new URL('app/', location.href).href;
@@ -817,34 +999,35 @@ const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rondines:
 function render() {
   if (!R[view]) view = 'vivo';
   nav();
+  // los mapas se conservan entre refrescos para no recargar las calles
+  const keep = {}; $('main').querySelectorAll('.map[id]').forEach(m => { if (m._L) keep[m.id] = m; });
   $('main').innerHTML = R[view][0]();
+  Object.keys(keep).forEach(id => { const n = document.getElementById(id); if (n) { n.replaceWith(keep[id]); const ex = n.querySelectorAll(':scope > :not(.lf)'); keep[id].querySelectorAll(':scope > :not(.lf)').forEach(x => x.remove()); ex.forEach(x => keep[id].appendChild(x)); keep[id]._L.invalidateSize(); } else keep[id]._L.remove(); });
   R[view][1]();
   if (view === 'vivo') liveRefresh();
 }
-// cuando cambian los datos (simulación o la app del operador)
 let lastMsgCount = S.msgs.length;
-function refresh(fromOther) {
+function refresh() {
   nav(); sosWatch();
   const nm = S.msgs.length;
   if (nm > lastMsgCount) {
     S.msgs.slice(lastMsgCount).filter(m => m.from !== 'consola').forEach(m => {
       if (m.kind === 'voz') { toast('🎙️ ' + (op(m.from)?.name || '') + ' habló por radio'); if (m.audio) playVoice(m.id); }
-      else if (view !== 'mensajes' || ui.conv !== convOf(m)) { toast('💬 ' + (op(m.from)?.name || '') + ': ' + m.txt); M.beep(); }
+      else if (view !== 'mensajes' || ui.conv !== convOf(m)) { toast('💬 ' + (op(m.from)?.name || '') + (m.to.startsWith('p') || m.to === 'consola' ? '' : ' en ' + chName(m.to)) + ': ' + m.txt); M.beep(); }
     });
   }
   lastMsgCount = nm;
   if (view === 'vivo') return liveRefresh();
-  if (view === 'mensajes') { thread(); const c = document.querySelector('.convs'); if (c) { const st = c.scrollTop; const tmp = document.createElement('div'); tmp.innerHTML = vMensajes(); c.innerHTML = tmp.querySelector('.convs').innerHTML; c.scrollTop = st; } return; }
-  if (document.querySelector('.ov')) return; // no tocar la vista con un formulario abierto
+  if (view === 'mensajes') { thread(); const c = document.querySelector('.convs'); if (c) { const st = c.scrollTop; c.innerHTML = convsHTML(); c.scrollTop = st; } return; }
+  if (document.querySelector('.ov')) return;
   const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && $('main').contains(a)) return;
-  if (view === 'geocercas' && ui.pick) return;
+  if (ui.pick) return;
   const st = $('main').scrollTop; render(); $('main').scrollTop = st;
 }
-// cualquier cambio (propio, de la simulación o de la app) refresca; la simulación en vistas que no son el mapa, cada 10 s
 let fromTick = false, ticks = 0, pend = false;
 M.on(s => {
   S = s;
-  if (fromTick && view !== 'vivo' && ticks % 5) return;
+  if (fromTick && view !== 'vivo' && ticks % 5) { sosWatch(); return; }
   if (pend) return; pend = true;
   queueMicrotask(() => { pend = false; refresh(); });
 });
