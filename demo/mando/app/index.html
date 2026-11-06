@@ -153,12 +153,15 @@ video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object
 <body>
 <div class="phone" id="ph"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../mando.js?v=2"></script>
+<script src="../mando.js?v=4"></script>
 <script>
 const M = Mando, E = M.esc;
+// empresa del operador (en la demo hay tres clientes; en producción la da el código)
+(() => { let c = new URLSearchParams(location.search).get('cliente'); try { c = c || localStorage.getItem('navi.mando.app.cliente'); } catch (e) {} M.useClient(c || 'mixto'); })();
 let S = M.load();
 const ph = document.getElementById('ph');
-let meId = null; try { meId = localStorage.getItem('navi.mando.me'); } catch (e) {}
+const meKey = () => 'navi.mando.me' + (M.client() === 'mixto' ? '' : ':' + M.client());
+let meId = null; try { meId = localStorage.getItem(meKey()); } catch (e) {}
 const ui = { tab: 'inicio', order: null, chat: null, photo: null, sig: null, lastOrders: null, lastMsgs: S.msgs.length, scanStream: null, gpsErr: null, evacSeen: null };
 const me = () => S.ops.find(p => p.id === meId);
 const site = () => M.site(S, me().site);
@@ -183,16 +186,23 @@ function login() {
   ph.innerHTML = `<div class="login"><img src="../../assets/navi-logo.png" alt="Navi">
     <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: órdenes, radio, chat por departamento y botón de emergencia.</p>
     <label class="muted" style="font-size:13px;font-weight:700">Código de empresa<input class="f" id="code" placeholder="${E(S.code)}" autocapitalize="characters" style="margin-top:6px"></label>
+    <div class="chips" id="cls">${Object.entries(M.CLIENTS).map(([k, c]) => `<button data-cl="${k}" class="${k === M.client() ? 'on' : ''}">${c.icon} ${E(c.name.split(',')[0])}</button>`).join('')}</div>
+    <div class="muted" style="font-size:12px;margin-top:-6px">${E(M.CLIENTS[M.client()].tipo)} · ${E(M.CLIENTS[M.client()].desc)} · código ${E(S.code)}</div>
     <div class="muted" style="font-size:13px;font-weight:700">¿Quién eres? <span style="font-weight:500">(demo)</span></div>
     <div class="opl">${S.ops.map(p => `<button data-p="${p.id}"><span class="av" style="background:${stc(p)}">${E(p.ini)}</span><span>${E(p.name)}<small>${M.site(S, p.site).icon} ${E(grpN(p.group))}</small></span></button>`).join('')}</div>
     <button class="btn lime" id="go">Entrar</button>
     <p class="muted" style="font-size:12px;text-align:center">Tu empresa te da el código. En la demo puedes dejarlo vacío.</p></div>`;
   ph.querySelector('.opl').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; pick = b.dataset.p; ph.querySelectorAll('.opl button').forEach(x => x.classList.toggle('on', x === b)); };
+  const switchTo = k => { M.useClient(k); try { localStorage.setItem('navi.mando.app.cliente', k); } catch (e) {} S = M.load(); ui.lastMsgs = S.msgs.length; login(); };
+  ph.querySelector('#cls').onclick = e => { const b = e.target.closest('[data-cl]'); if (b && b.dataset.cl !== M.client()) switchTo(b.dataset.cl); };
+  const code = document.getElementById('code');
+  code.oninput = () => { const k = M.clientByCode(code.value); if (k && k !== M.client()) { const v = code.value; switchTo(k); const c2 = document.getElementById('code'); c2.value = v; toast('Empresa: ' + M.CLIENTS[k].name.split(',')[0]); } };
   document.getElementById('go').onclick = () => {
     const c = document.getElementById('code').value.trim().toUpperCase();
     if (c && c !== S.code) return toast('Ese código no corresponde a ninguna empresa');
     if (!pick) return toast('Elige tu nombre');
-    meId = pick; try { localStorage.setItem('navi.mando.me', meId); } catch (e) {}
+    try { localStorage.setItem('navi.mando.app.cliente', M.client()); } catch (e) {}
+    meId = pick; try { localStorage.setItem(meKey(), meId); } catch (e) {}
     ui.lastOrders = null; render(); if (me().shift) startGps();
   };
 }
@@ -232,7 +242,7 @@ function scrInicio() {
   const doneT = myOrders().filter(o => o.status === 'completada' && today(o.done)).length;
   const pct = Math.min(100, p.gb / p.gbMax * 100);
   return `<div class="card" style="background:${p.shift ? 'linear-gradient(135deg,#1d1d8f,#13136A)' : 'linear-gradient(135deg,#7B5CFA,#4B32C9)'}">
-      ${p.shift ? `<h3>🟢 Turno activo<small>desde ${M.fmtT(p.shift.at)}</small></h3><div class="chips">${['disponible', 'pausa'].map(k => `<button data-st="${k}" class="${p.status === k ? 'on' : ''}"><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</button>`).join('')}</div>${gpsHTML()}`
+      ${p.shift ? `<h3>🟢 Turno activo<small>desde ${M.fmtT(p.shift.at)}</small></h3><div class="chips">${['disponible', 'receso', 'pausa'].map(k => `<button data-st="${k}" class="${p.status === k ? 'on' : ''}"><i class="dot" style="background:${M.STATUS[k].c}"></i>${k === 'receso' ? '🍽️ Receso' : M.STATUS[k].t}</button>`).join('')}</div>${recesoHTML()}${gpsHTML()}`
         : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para recibir órdenes y aparecer en el mapa de tu central${indoor() ? '' : ' (te pediremos tu ubicación)'}.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
     </div>
     <div class="stats"><div><small>Hoy</small><b>${doneT}</b><small>órdenes</small></div><div><small>Recorrido</small><b>${indoor() ? Math.round(p.km * 1000) : p.km.toFixed(0)}</b><small>${indoor() ? 'm' : 'km'}</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
@@ -371,7 +381,7 @@ function bind() {
     if (t.closest('#omap')) return;
     const o = t.closest('[data-o]'); if (o && !t.closest('[data-next]')) { if (ui.order !== o.dataset.o) { ui.photo = null; ui.sig = null; } ui.order = o.dataset.o; ui.tab = 'ordenes'; return render(); }
     const nx = t.closest('[data-next]'); if (nx) return nextStep(nx.dataset.next, nx.dataset.to);
-    const st = t.closest('[data-st]'); if (st) { M.update(s => { const p = s.ops.find(x => x.id === meId); p.status = st.dataset.st; M.event(s, meId, 'Cambió su estado a ' + M.STATUS[p.status].t, 'estado'); }); return render(); }
+    const st = t.closest('[data-st]'); if (st) return setStatus(st.dataset.st);
     const ck = t.closest('[data-ck]'); if (ck && !ck.disabled) { M.update(s => { const c = s.orders.find(x => x.id === ui.order).checklist[+ck.dataset.ck]; c.done = !c.done; }); return render(); }
     const r = t.closest('[data-r]'); if (r) { M.update(s => { s.orders.find(x => x.id === ui.order).rating = +r.dataset.r; }); return render(); }
     const pl = t.closest('[data-play]'); if (pl) return play(pl.dataset.play);
@@ -389,7 +399,7 @@ function bind() {
     if (a === 'clr') initSig(true);
     if (a === 'solo') { M.update(s => { const p = s.ops.find(x => x.id === meId); p.solo = !p.solo; p.soloOk = Date.now(); p.soloAsk = null; M.event(s, meId, p.solo ? 'Activó modo trabajo solo' : 'Desactivó modo trabajo solo', 'estado'); }); render(); }
     if (a === 'install') installSheet();
-    if (a === 'logout') { if (confirm('¿Cerrar sesión?')) { stopGps(); meId = null; try { localStorage.removeItem('navi.mando.me'); } catch (e) {} render(); } }
+    if (a === 'logout') { if (confirm('¿Cerrar sesión?')) { stopGps(); meId = null; try { localStorage.removeItem(meKey()); } catch (e) {} render(); } }
     if (a === 'rondin') { ui.tab = 'rondin'; render(); }
     if (a === 'backmas') { stopScan(); ui.tab = 'mas'; render(); }
     if (a === 'startr') { M.update(s => { s.rounds.push({ id: M.uid('rd'), route: s.routes.find(x => x.opId === meId).id, opId: meId, start: Date.now(), hits: [] }); M.event(s, meId, 'Inició rondín', 'rondin'); }); render(); }
@@ -449,14 +459,42 @@ function initSig(clear) {
 function sheet(html) { const ov = document.createElement('div'); ov.className = 'ov'; ov.innerHTML = `<div class="sheet">${html}<button class="btn" data-x style="margin-top:10px">Cerrar</button></div>`; ov.onclick = e => { if (e.target === ov || e.target.closest('[data-x]')) { stopScan(); ov.remove(); } }; ph.appendChild(ov); return ov; }
 function statusSheet() {
   const ov = sheet(`<h3>Tu estado</h3><p class="muted" style="font-size:13.5px;margin-bottom:12px">Tu central lo ve al instante.</p>
-    ${['disponible', 'pausa', 'encamino', 'ensitio'].map(k => `<button class="li" data-set="${k}"><i class="dot" style="width:14px;height:14px;background:${M.STATUS[k].c}"></i><span><b>${M.STATUS[k].t}</b></span></button>`).join('')}`);
-  ov.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { M.update(s => { const p = s.ops.find(x => x.id === meId); p.status = b.dataset.set; if (!p.shift) p.shift = { at: Date.now() }; M.event(s, meId, 'Cambió su estado a ' + M.STATUS[p.status].t, 'estado'); }); ov.remove(); render(); });
+    ${['disponible', 'receso', 'pausa', 'encamino', 'ensitio'].map(k => `<button class="li" data-set="${k}"><i class="dot" style="width:14px;height:14px;background:${M.STATUS[k].c}"></i><span><b>${M.STATUS[k].t}</b>${k === 'receso' ? '<small>Comida o descanso · tiempo de ' + (S.breakMin || 45) + ' min</small>' : ''}</span></button>`).join('')}`);
+  ov.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { ov.remove(); setStatus(b.dataset.set); });
+}
+// receso: si es del almacén se ubica en el comedor; al regresar vuelve a donde estaba
+function recesoHTML() {
+  const p = me(); if (p.status !== 'receso') return '';
+  const m = Math.max(0, Math.round((Date.now() - (p.recesoAt || Date.now())) / M.MIN)), lim = S.breakMin || 45, over = m > lim;
+  return `<div class="loc" style="flex-wrap:wrap;background:${over ? '#ffc22e26' : '#e58bff1f'}">🍽️<b>En receso desde ${p.recesoAt ? M.fmtT(p.recesoAt) : '—'} · ${m} de ${lim} min${over ? ' ⚠️' : ''}</b>
+    <div class="bar" style="width:100%"><i style="width:${Math.min(100, m / lim * 100)}%;background:${over ? 'var(--yellow)' : '#E58BFF'}"></i></div>
+    <button class="btn lime" data-st="disponible" style="margin-top:4px">▶ Regresar a trabajar</button></div>`;
+}
+function setStatus(k) {
+  M.update(s => {
+    const p = s.ops.find(x => x.id === meId), st = M.site(s, p.site), com = (st.areas || []).find(a => /comedor/i.test(a.name)), now = Date.now();
+    if (!p.shift) p.shift = { at: now };
+    if (k === p.status) return;
+    if (k === 'receso') {
+      p.recesoAt = now; p.recesoAuto = false;
+      if (com) { p.preBreak = { x: p.x, y: p.y }; p.x = com.x + com.w * .4; p.y = com.y + com.h * .55; p.target = null; p.locAt = now; p.trail.push([p.x, p.y]); }
+      M.event(s, meId, 'Salió a receso' + (com ? ' · comedor' : ''), 'estado');
+    } else if (p.status === 'receso') {
+      M.event(s, meId, 'Regresó de receso · ' + Math.max(1, Math.round((now - (p.recesoAt || now)) / M.MIN)) + ' min', 'estado');
+      const inCom = com && (M.areaAt(s, p.site, p.x, p.y) || {}).name === com.name;
+      if (inCom) { const b = p.preBreak && (M.areaAt(s, p.site, p.preBreak.x, p.preBreak.y) || {}).name !== com.name ? p.preBreak : { x: 13, y: 12 }; p.x = b.x; p.y = b.y; p.locAt = now; p.trail.push([p.x, p.y]); }
+      p.recesoAt = null; p.recesoAuto = false;
+    } else M.event(s, meId, 'Cambió su estado a ' + M.STATUS[k].t, 'estado');
+    p.status = k;
+  });
+  if (k === 'receso') toast('🍽️ Buen provecho. Tu central te ve en receso.');
+  render();
 }
 // dentro del almacén el GPS no llega: el operador indica su área (en producción, balizas o el QR del área)
 function areaSheet() {
   const st = site(), cur = here();
   const ov = sheet(`<h3>¿En qué área estás?</h3><p class="muted" style="font-size:13.5px;margin-bottom:12px">Dentro del almacén el GPS no es preciso. Escanea el código del área o elígela.</p>
-    <div class="areas">${st.areas.map(a => `<button data-ar="${a.id}" class="${a.name === cur ? 'on' : ''}"><i class="dot" style="background:${a.c}"></i>${E(a.name)}</button>`).join('')}</div>`);
+    <div class="areas">${st.areas.filter(M.isWork).map(a => `<button data-ar="${a.id}" class="${a.name === cur ? 'on' : ''}"><i class="dot" style="background:${a.c}"></i>${E(a.name)}</button>`).join('')}</div>`);
   ov.querySelectorAll('[data-ar]').forEach(b => b.onclick = () => {
     M.update(s => { const p = s.ops.find(x => x.id === meId), a = M.site(s, p.site).areas.find(z => z.id === b.dataset.ar); p.x = a.x + a.w / 2; p.y = a.y + a.h / 2; p.target = null; p.locAt = Date.now(); p.trail.push([p.x, p.y]); M.event(s, meId, 'Se ubicó en ' + a.name, 'estado'); });
     ov.remove(); toast('📍 Ubicación actualizada'); render();
@@ -582,7 +620,7 @@ function notify() {
   });
   ui.lastMsgs = S.msgs.length;
 }
-function heartbeat() { try { return +localStorage.getItem('navi.mando.hb') || 0; } catch (e) { return 0; } }
+function heartbeat() { try { return +localStorage.getItem(M.hbKey()) || 0; } catch (e) { return 0; } }
 let pend = false;
 M.on(s => { S = s; if (pend) return; pend = true; queueMicrotask(() => { pend = false; if (!meId || !me()) return; notify(); const a = document.activeElement; if (a && a.id === 'mIn') { const m = document.getElementById('msgs'); if (m) { const tmp = document.createElement('div'); tmp.innerHTML = scrChat(); m.innerHTML = tmp.querySelector('#msgs').innerHTML; document.getElementById('scr').scrollTop = 1e6; markRead(); } return; } if (ui.drawing || ph.querySelector('.ov') || ph.querySelector('.ptt.on')) { checkPrompts(); return; } render(); }); });
 setInterval(() => {
