@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Entrar · NAVI Mando</title>
-<meta name="theme-color" content="#03060F">
+<meta name="theme-color" content="#0B0B4F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,11 +19,28 @@
 .side h1{font-size:clamp(34px,4.2vw,56px);margin:auto 0 18px;max-width:540px}
 .side h1 em{font-style:normal;color:var(--lime)}
 .side p{color:#ECE8FF;max-width:460px}
-.giros{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:26px 0 auto;max-width:520px}
-.giros div{background:#ffffff1a;border:1px solid #ffffff30;border-radius:16px;padding:12px 14px;animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
-.giros div:nth-child(2){animation-delay:.08s}.giros div:nth-child(3){animation-delay:.16s}.giros div:nth-child(4){animation-delay:.24s}
-.giros b{display:block;font-size:15px}.giros small{font-size:12.5px;color:#ECE8FF}
+/* lado de marca, como en Mi Navi */
+.suite{display:flex;gap:10px;margin:24px 0 0;flex-wrap:wrap;max-width:520px}
+.suite span{display:flex;align-items:center;gap:8px;background:#ffffff1f;border:1px solid #ffffff30;padding:8px 14px;border-radius:99px;font-size:14px;font-weight:700;animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+.suite span:nth-child(2){animation-delay:.06s}.suite span:nth-child(3){animation-delay:.12s}.suite span:nth-child(4){animation-delay:.18s}.suite span:nth-child(5){animation-delay:.24s}.suite span:nth-child(6){animation-delay:.3s}
 @keyframes pop{from{transform:scale(0) translateY(20px)}}
+.crew{display:flex;align-items:flex-end;margin:30px 0 -40px;justify-content:center;position:relative}
+.crew::before{content:"";position:absolute;left:50%;bottom:-120px;width:420px;height:300px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 50% 30%,var(--lime-2),var(--lime) 65%)}
+.crew img{position:relative;height:200px;animation:bob 4s ease-in-out infinite}
+.crew .bubble{position:absolute;left:calc(50% + 70px);bottom:150px;background:#fff;color:var(--ink);font-weight:700;font-size:14px;border-radius:16px 16px 16px 4px;padding:10px 14px;box-shadow:0 10px 24px #0004;white-space:nowrap}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* lista de usuarios para elegir y entrar */
+.users{display:grid;gap:8px;margin-bottom:6px}
+.user{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:18px;border:2px solid #ffffff1f;background:#ffffff0a;transition:border-color .2s,transform .2s,background .2s}
+.user:hover,.user:focus-visible{border-color:var(--lime);background:#b4e32f12;transform:translateY(-2px)}
+.user .av{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);background:var(--lime)}
+.user .av.mesa{background:#7EE0FF}
+.user span{flex:1;min-width:0}
+.user b{display:block;font-size:15px}
+.user small{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user em{font-style:normal;font-size:20px;color:var(--lime)}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12.5px;margin:18px 0 4px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:#ffffff22}
 .main{display:flex;flex-direction:column;padding:32px 40px}
 .main .top{display:flex;justify-content:space-between;align-items:center}
 .main .top a.back{font-size:14px;color:var(--muted)}
@@ -85,9 +102,9 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
   .main{padding:20px 16px}
   .card{padding:30px 0 40px}
 }
-@media (max-width:420px){.demo div,.giros{grid-template-columns:1fr}.code{gap:6px}}
+@media (max-width:900px){.side{padding-bottom:0}}
+@media (max-width:420px){.code{gap:6px}.crew img{height:160px}.crew .bubble{left:auto;right:8px;bottom:170px}}
 </style>
-<link rel="stylesheet" href="tech.css?v=1">
 </head>
 <body>
 <div class="msg" id="msg" role="status" aria-live="polite">
@@ -98,10 +115,11 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
 
 <div class="page">
   <section class="side">
-    <a class="logo" href="../empresas.html#mando"><img src="../assets/navi-logo.png" alt="Navi"><small>MANDO</small></a>
-    <h1>La consola de <em>tu operación</em>, solo para clientes Navi</h1>
-    <p>Entra con el usuario que Navi le dio a tu empresa. Sin contraseñas: te mandamos un código por correo o por SMS, como prefieras. Verás solo a tu equipo, tus órdenes y el manual de procesos.</p>
-    <div class="giros" id="giros"></div>
+    <a class="logo" href="../empresas.html"><img src="../assets/navi-logo.png" alt="Navi"><small>EMPRESAS</small></a>
+    <h1>Una consola, <em>toda tu operación</em></h1>
+    <p>Inicia sesión con el usuario que Navi le dio a tu empresa. Sin contraseñas: te mandamos un código por correo o por SMS, como prefieras.</p>
+    <div class="suite"><span>🛰️ Mapa en vivo</span><span>📋 Órdenes</span><span>🛣️ Rutas</span><span>🎙️ Radio PTT</span><span>🆘 SOS</span><span>🛡️ Rondines</span></div>
+    <div class="crew"><img src="../assets/beto.png" alt=""><span class="bubble">¡Bienvenido a NAVI Mando! 👋</span></div>
   </section>
 
   <section class="main">
@@ -109,16 +127,14 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
     <div class="card">
       <!-- paso 1: quién eres -->
       <form class="step on" id="s1" novalidate>
-        <h2>Entra a NAVI Mando</h2>
-        <p class="sub">Consola central para la mesa de control y el administrador de tu empresa.</p>
-        <label for="user">Usuario, correo o celular</label>
+        <h2>Inicia sesión</h2>
+        <p class="sub">Elige tu usuario para entrar a NAVI Mando.</p>
+        <div class="users" id="users" role="list"></div>
+        <div class="or">o escribe tu usuario</div>
+        <label for="user" style="margin-top:6px">Usuario, correo o celular</label>
         <div class="in"><input id="user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="nombre@tuempresa.com"></div>
         <p class="err" id="err1"></p>
         <button class="btn btn-lime" type="submit">Continuar →</button>
-        <div class="demo">
-          <p>Modo demostración · toca un usuario para llenarlo:</p>
-          <div id="demo"></div>
-        </div>
         <p class="note">¿Eres operador en campo? Entra desde la <a href="app/">📱 app del operador</a>.<br>¿Aún no eres cliente? <a href="../empresas.html#contacto">Solicita una demo</a></p>
       </form>
 
@@ -171,13 +187,15 @@ if (qs.has('manual')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expire
 const steps = ['s1', 'sVia', 's2', 's3'];
 const go = id => steps.forEach(s => $(s).classList.toggle('on', s === id));
 
-$('giros').innerHTML = Object.values(M.CLIENTS).map(c => `<div><b>${c.icon} ${E(c.tipo)}</b><small>${E(c.desc)}</small></div>`).join('');
-$('demo').innerHTML = A.USERS.map(u => { const c = M.CLIENTS[u.client];
-  return `<button type="button" data-u="${E(u.email)}"><i>${c.icon}</i><span>${E(c.name)}<small>${E(u.user)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span></button>`; }).join('');
-$('demo').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
+// usuarios para elegir: se toca uno y pasa directo a elegir correo o SMS
+// (demo: en producción aquí solo aparecen los usuarios que ya entraron antes en este equipo)
+const ini = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
+$('users').innerHTML = A.USERS.map(u => { const c = M.CLIENTS[u.client];
+  return `<button type="button" class="user" role="listitem" data-u="${E(u.email)}"><span class="av ${u.admin ? '' : 'mesa'}">${E(ini(u.name))}</span><span><b>${E(u.name)}</b><small>${c.icon} ${E(c.name)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span><em>›</em></button>`; }).join('');
+$('users').addEventListener('click', e => {
+  const b = e.target.closest('[data-u]'); if (!b) return;
   $('user').value = b.dataset.u; $('err1').textContent = '';
-  $('s1').querySelector('[type=submit]').focus();
+  $('s1').requestSubmit();
 });
 $('user').addEventListener('input', () => $('err1').textContent = '');
 
