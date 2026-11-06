@@ -58,7 +58,10 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 .code input:focus{border-color:var(--lime);transform:translateY(-3px)}
 .code.bad input{border-color:#FF6F8E;animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.links{display:flex;justify-content:space-between;font-size:14px;margin-top:18px;color:var(--muted)}
+.links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;margin-top:18px;color:var(--muted)}
+.mode:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.sms [hidden],.links [hidden]{display:none!important}
+.sms i{font-style:normal;font-size:24px;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#ECEBFA;flex:none}
 .links button{color:var(--lime);font-weight:700}
 .links button:disabled{color:var(--muted);cursor:default;font-weight:400}
 .demo{margin-top:34px;padding-top:22px;border-top:1px dashed #ffffff30}
@@ -116,8 +119,8 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 <body>
 
 <div class="sms" id="sms" role="status" aria-live="polite">
-  <img src="assets/icon-192.png" alt="">
-  <div><b>Navi</b><span>Tu código de acceso es <em id="smsCode"></em></span></div>
+  <img src="assets/icon-192.png" alt="" id="smsImg"><i id="mailIcon" hidden>✉️</i>
+  <div><b id="smsFrom">Navi</b><span>Tu código de acceso es <em id="smsCode"></em></span></div>
   <small>ahora</small>
 </div>
 
@@ -139,7 +142,7 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
       <!-- paso 1: número -->
       <form class="step on" id="s1" novalidate>
         <h2>Entra a Mi Navi</h2>
-        <p class="sub">Te mandamos un código por SMS. Sin contraseñas.</p>
+        <p class="sub">Te mandamos un código por SMS o por correo, como prefieras. Sin contraseñas.</p>
         <label for="phone">Tu número Navi</label>
         <div class="phone"><b>+52</b><input id="phone" inputmode="numeric" autocomplete="tel-national" placeholder="55 1234 5678" maxlength="12"></div>
         <p class="err" id="err1"></p>
@@ -152,16 +155,29 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
         <p class="join">¿Aún no eres Navi? <a href="index.html#individuales">Elige tu plan</a></p>
       </form>
 
+      <!-- paso 1b: el cliente decide por dónde recibir su código -->
+      <div class="step" id="sVia">
+        <h2>¿Cómo quieres tu código?</h2>
+        <p class="sub">Elige dónde te lo mandamos.</p>
+        <div class="modes" role="radiogroup" aria-label="Medio para recibir el código">
+          <button type="button" class="mode" role="radio" aria-checked="false" data-via="sms"><i>💬</i><span><b>Por SMS</b><small id="toSms"></small></span></button>
+          <button type="button" class="mode" role="radio" aria-checked="false" data-via="email"><i>✉️</i><span><b>Por correo</b><small id="toEmail"></small></span></button>
+        </div>
+        <p class="err" id="errV"></p>
+        <button class="btn btn-lime" id="sendGo" type="button" disabled>Enviarme el código →</button>
+        <div class="links"><button type="button" id="back1">← Cambiar número</button></div>
+      </div>
+
       <!-- paso 2: código -->
       <form class="step" id="s2" novalidate>
         <h2>Escribe tu código</h2>
-        <p class="sub">Lo enviamos al <b id="sentTo"></b></p>
+        <p class="sub">Lo enviamos <span id="sentTo"></span></p>
         <div class="code" id="code">
           <input inputmode="numeric" aria-label="Dígito 1" autocomplete="one-time-code"><input inputmode="numeric" aria-label="Dígito 2"><input inputmode="numeric" aria-label="Dígito 3"><input inputmode="numeric" aria-label="Dígito 4"><input inputmode="numeric" aria-label="Dígito 5"><input inputmode="numeric" aria-label="Dígito 6">
         </div>
         <p class="err" id="err2"></p>
         <button class="btn btn-lime" id="verify" type="submit" disabled>Entrar</button>
-        <div class="links"><button type="button" id="change">← Cambiar número</button><button type="button" id="resend" disabled></button></div>
+        <div class="links"><button type="button" id="change">← Cambiar número</button><button type="button" id="other"></button><button type="button" id="resend" disabled></button></div>
       </form>
 
       <!-- paso 3: cómo quiere su sesión en este dispositivo -->
@@ -187,11 +203,11 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
   </section>
 </div>
 
-<script src="auth.js?v=20261104a"></script>
+<script src="auth.js?v=20261106a"></script>
 <script src="instalar.js?v=2"></script>
 <script>
 const $ = id => document.getElementById(id);
-const steps = ['s1', 's2', 'sMode', 's3'];
+const steps = ['s1', 'sVia', 's2', 'sMode', 's3'];
 const go = id => steps.forEach(s => $(s).classList.toggle('on', s === id));
 const next = new URLSearchParams(location.search).get('next') || 'cuenta.html';
 
@@ -218,12 +234,19 @@ $('demo').addEventListener('click', e => {
   phone.value = fmt(b.dataset.num); phone.focus();
 });
 
-// paso 1 → enviar código
-let number = '', code = '', timer = 0;
+// paso 1 → enviar código por el medio que elija el cliente (SMS o correo)
+let number = '', code = '', timer = 0, via = null;
 const sms = $('sms');
 const sendCode = () => {
   code = String(Math.floor(100000 + Math.random() * 900000));
   $('smsCode').textContent = code;
+  // demo: así se vería el SMS o el correo que le llega
+  const mail = via === 'email';
+  $('smsImg').hidden = mail; $('mailIcon').hidden = !mail;
+  $('smsFrom').textContent = mail ? 'Correo de Navi · ' + maskMail(loginMail(number)) : 'Navi';
+  $('sentTo').innerHTML = mail ? `a tu correo <b>${maskMail(loginMail(number))}</b>` : `por SMS al <b>+52 ${fmt(number)}</b>`;
+  $('other').hidden = !loginMail(number);
+  $('other').textContent = mail ? '💬 Mejor por SMS' : '✉️ Mejor por correo';
   sms.classList.remove('show'); void sms.offsetWidth; sms.classList.add('show');
   clearTimeout(sms.t); sms.t = setTimeout(() => sms.classList.remove('show'), 7000);
   let left = 30; const r = $('resend');
@@ -236,11 +259,29 @@ $('s1').addEventListener('submit', e => {
   number = digits(phone.value);
   if (number.length !== 10) { $('err1').textContent = 'Escribe tu número a 10 dígitos.'; return; }
   if (!NaviAuth.find(number)) { $('err1').innerHTML = 'Ese número no tiene un plan Navi. <a href="index.html#individuales">Elige uno aquí</a>.'; return; }
-  $('sentTo').textContent = '+52 ' + fmt(number);
+  // el cliente decide: SMS a su número o correo (si tiene uno guardado)
+  const mail = loginMail(number), bm = document.querySelector('#sVia [data-via="email"]');
+  $('toSms').textContent = '+52 ' + fmt(number);
+  $('toEmail').textContent = mail ? maskMail(mail) : 'Agrega tu correo en Mi perfil para usar esta opción';
+  bm.disabled = !mail;
+  via = null; document.querySelectorAll('#sVia .mode').forEach(b => b.setAttribute('aria-checked', 'false'));
+  $('sendGo').disabled = true; $('errV').textContent = '';
+  go('sVia');
+});
+document.querySelectorAll('#sVia .mode').forEach(b => b.addEventListener('click', () => {
+  if (b.disabled) return;
+  via = b.dataset.via;
+  document.querySelectorAll('#sVia .mode').forEach(x => x.setAttribute('aria-checked', x === b));
+  $('sendGo').disabled = false; $('errV').textContent = '';
+}));
+const toCode = () => {
   go('s2'); boxes.forEach(b => b.value = ''); $('verify').disabled = true; $('err2').textContent = '';
   sendCode();
   setTimeout(() => boxes[0].focus(), 50);
-});
+};
+$('sendGo').addEventListener('click', () => { if (!via) { $('errV').textContent = 'Elige SMS o correo.'; return; } toCode(); });
+$('back1').addEventListener('click', () => { go('s1'); phone.focus(); });
+$('other').addEventListener('click', () => { via = via === 'email' ? 'sms' : 'email'; toCode(); });
 
 // paso 2 → cajitas del código
 const boxes = [...document.querySelectorAll('#code input')];
@@ -271,20 +312,20 @@ $('s2').addEventListener('submit', e => {
   e.preventDefault();
   if (typed() !== code) {
     const c = $('code'); c.classList.remove('bad'); void c.offsetWidth; c.classList.add('bad');
-    $('err2').textContent = 'Ese código no coincide. Revisa tu SMS.';
+    $('err2').textContent = 'Ese código no coincide. Revisa tu ' + (via === 'email' ? 'correo.' : 'SMS.');
     boxes.forEach(b => b.value = ''); boxes[0].focus(); $('verify').disabled = true;
     return;
   }
   // código correcto: antes de entrar, el cliente elige cómo quiere su sesión
   sms.classList.remove('show');
   clearInterval(timer);
-  mode = null; document.querySelectorAll('.mode').forEach(b => b.setAttribute('aria-checked', 'false')); $('modeGo').disabled = true;
+  mode = null; document.querySelectorAll('#sMode .mode').forEach(b => b.setAttribute('aria-checked', 'false')); $('modeGo').disabled = true;
   go('sMode');
 });
 let mode = null;
-document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('#sMode .mode').forEach(b => b.addEventListener('click', () => {
   mode = b.dataset.m;
-  document.querySelectorAll('.mode').forEach(x => x.setAttribute('aria-checked', x === b));
+  document.querySelectorAll('#sMode .mode').forEach(x => x.setAttribute('aria-checked', x === b));
   $('modeGo').disabled = false; $('errM').textContent = '';
 }));
 $('modeGo').addEventListener('click', () => {

@@ -119,3 +119,78 @@ form.lead-f .fine{color:var(--muted)!important}
 /* pie */
 footer.bz{border-top-color:var(--line2)!important;font-family:var(--mono);font-size:12px!important}
 footer.bz a{color:var(--cyan)!important}
+
+/* ===== Versión intermedia (elegida): marca Navi + toque tech =====
+   - Verde lima de Navi como color principal (botones y acentos); cian solo para datos y mapas.
+   - Títulos con la letra de Navi Móvil (Bricolage Grotesque), en mayúsculas y minúsculas.
+   - Orbitron solo en cosas cortas: números, etiquetas y el nombre de NAVI Mando. */
+
+:root{
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"DM Sans",system-ui,sans-serif;
+  --brand:#B4E32F;
+  --brand-glow:0 0 20px #B4E32F55,0 0 40px #B4E32F22;
+}
+body{font-family:var(--body)}
+
+/* títulos: letra de Navi, sin mayúsculas forzadas */
+h1,h2,h3,.hero h1,.sh h2,.vc h3,.panel h3,.flow b,.mside h3,.advisor h2,form.lead-f h3{
+  font-family:var(--display)!important;text-transform:none!important;letter-spacing:-.015em!important;font-weight:800
+}
+.hero h1{font-size:clamp(40px,5.6vw,68px)!important;line-height:1!important}
+.sh h2{font-size:clamp(30px,3.8vw,46px)!important}
+.vc h3{font-size:21px!important}.panel h3{font-size:20px!important}
+.flow b{font-size:20px!important}
+.mside h3{font-size:26px!important}
+.advisor h2{font-size:clamp(30px,3.6vw,44px)!important}
+form.lead-f h3{font-size:24px!important}
+.hero h1 em,.advisor h2 em,.mside h3 em{background:linear-gradient(100deg,#B4E32F 10%,#22F0FF 90%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.hero h1 em path{stroke:var(--brand)!important;filter:drop-shadow(0 0 6px #B4E32F)}
+
+/* Orbitron solo en lo corto y técnico */
+.kpi b,.c-top b,.mshot .bar3 b,header.top nav a.nv-new{font-family:"Orbitron",var(--body)!important}
+
+/* acentos de marca: verde lima */
+.eyebrow{color:var(--brand)!important;text-shadow:0 0 10px #B4E32F66}
+.vc .cap,.panel h3 small{color:var(--brand)!important}
+.tile svg,.chips svg{color:var(--brand)!important;filter:drop-shadow(0 0 5px #B4E32F66)}
+.flow .bub svg{color:var(--brand)!important;filter:drop-shadow(0 0 6px #B4E32F)}
+.flow::before{background:repeating-linear-gradient(90deg,var(--brand) 0 8px,transparent 8px 16px)!important;box-shadow:0 0 8px #B4E32F88}
+.logo small{color:var(--brand)!important}
+header.top nav a:hover{color:var(--brand)!important;text-shadow:0 0 10px #B4E32F88}
+header.top nav a.nv-new{color:var(--brand)!important}
+.vc:hover,.tile:hover{border-color:var(--brand)!important;box-shadow:0 0 0 1px #B4E32F55,0 0 18px #B4E32F33!important}
+.vc.hl{border-color:var(--brand)!important;background:linear-gradient(160deg,#16260F,#0E1430)!important;box-shadow:0 0 0 1px #B4E32F55,0 0 24px #B4E32F2a!important}
+.vc.hl .art{background:radial-gradient(circle at 50% 120%,#B4E32F55,transparent 65%),#0F1A0A!important}
+
+/* botones y llamados a la acción en lima sólido con brillo */
+.btn-lime,.btn.lime,header.top .cta,.nb-fab,.nb-hd .av,.nb-f button,.nb-m.me,.mptt b,.mphone .p,.mgrid .nv span:first-child,.flow div:last-child .bub,header.top nav a.nv-new::after{
+  background:var(--brand)!important;color:#06062E!important;box-shadow:var(--brand-glow)!important
+}
+.btn-lime,header.top .cta{text-transform:none!important;letter-spacing:0!important;font-family:var(--body)!important;font-weight:800}
+.btn-lime:hover,header.top .cta:hover{filter:brightness(1.08);box-shadow:0 0 28px #B4E32F88,0 0 60px #B4E32F33!important}
+.btn-ghost:hover{color:var(--brand)!important;border-color:var(--brand)!important;box-shadow:0 0 14px #B4E32F44}
+.flow div:last-child .bub svg{color:#06062E!important;filter:none}
+.unit.l{background:var(--brand)!important;color:var(--brand)!important}
+
+/* datos y mapas se quedan en cian (la parte "tech") */
+.c-top .live{color:var(--brand)!important;text-shadow:0 0 8px #B4E32F}
+.c-top .live::before{background:var(--brand)!important}
+
+/* asesor: se queda, con un halo que lo integra al fondo oscuro */
+.advisor{background:radial-gradient(circle at 78% 92%,#B4E32F40,transparent 45%),linear-gradient(160deg,#1A1240,#0A1226)!important;border-color:#B4E32F44!important;box-shadow:0 0 0 1px #B4E32F33,0 0 36px #B4E32F1f!important}
+.advisor img{filter:drop-shadow(0 0 22px #B4E32F55) drop-shadow(0 16px 24px #0008)!important}
+.advisor .bubble{border-color:var(--brand)!important;box-shadow:0 0 16px #B4E32F44!important}
+.advisor .mail svg{color:var(--brand)!important}
+
+/* formulario */
+form.lead-f .btn{background:var(--brand)!important;color:#06062E!important;border-color:transparent!important;box-shadow:var(--brand-glow)!important;font-weight:800}
+.fgrid input:focus,.fgrid textarea:focus{border-color:var(--brand)!important;box-shadow:0 0 0 3px #B4E32F22,0 0 16px #B4E32F33!important}
+.chipset input{accent-color:var(--brand)!important}
+.chipset label:has(input:checked){border-color:var(--brand)!important;background:#B4E32F1a!important}
+footer.bz a{color:var(--brand)!important}
+
+@media (max-width:560px){
+  .hero h1{font-size:clamp(34px,10vw,46px)!important}
+  .sh h2,.advisor h2{font-size:clamp(26px,8vw,34px)!important}
+}

@@ -315,6 +315,13 @@ const readPhoto = (file, size = 256) => new Promise((resolve, reject) => {
 });
 
 const fmtPhone = p => '+52 ' + p.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+
+// Correo para recibir el código de acceso: el que la persona guardó en Mi perfil o, en la demo, uno de ejemplo
+// (example.com es un dominio reservado para ejemplos). Toño no tiene correo para mostrar el caso "solo SMS".
+const DEMO_MAILS = { '5500000001': 'sofia.ramirez@example.com', '5500000002': 'luis.perez@example.com', '5500000003': 'carla.ruiz@example.com',
+  '5500000004': 'beto.garcia@example.com', '5500000005': 'lupita.garcia@example.com', '5500000006': 'sofi.garcia@example.com' };
+const loginMail = phone => Profiles.get(phone).mail || DEMO_MAILS[phone] || null;
+const maskMail = e => e.replace(/^(.{2})[^@]*(@.*)$/, '$1•••••$2');
 const fmtImei = i => i.replace(/(\d{2})(\d{6})(\d{6})(\d)/, '$1 $2 $3 $4');
 const maskImei = i => '•• •••••• ••' + i.slice(10, 14) + ' ' + i.slice(14);
 
