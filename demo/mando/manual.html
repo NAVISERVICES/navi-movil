@@ -5,14 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Manual de procesos · NAVI Mando</title>
-<meta name="theme-color" content="#0B0B4F">
+<meta name="theme-color" content="#03060F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../navi.css?v=20261030d">
 <link rel="stylesheet" href="../suite.css?v=20261030d">
+<script src="mando.js?v=6"></script>
+<script>
+// el manual es solo para clientes: hace falta sesión de la consola o de la app del operador
+(function () {
+  if (!Mando.Auth.any()) { location.replace('login.html?manual=1&next=' + encodeURIComponent('index.html#manual')); return; }
+  document.documentElement.classList.add('ok');
+  if (new URLSearchParams(location.search).has('embed')) document.documentElement.classList.add('embed');
+})();
+</script>
 <style>
+html:not(.ok) body{visibility:hidden}
+html.embed header.top{display:none}
+html.embed .toc{top:16px;max-height:calc(100vh - 32px)}
+html.embed main.wrap{padding-top:22px}
+html.embed .hero-m .acts a{display:none}
 .doc{display:grid;grid-template-columns:260px 1fr;gap:36px;align-items:start}
 @media (max-width:900px){.doc{grid-template-columns:1fr}.toc{position:static!important;max-height:none!important}}
 .toc{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;background:var(--navy-2);border:1px solid #ffffff18;border-radius:20px;padding:16px}
@@ -66,6 +80,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
 .kpi span{font-size:13px;color:var(--muted)}
 @media print{header.top,.toc,.hero-m .acts{display:none}.doc{display:block}body{background:#fff;color:#000}article p,article li,td{color:#222}td b{color:#000}.hero-m{border:1px solid #999}.flow .st,.tw,.cards div,.kpi div{background:#fff;color:#222;border-color:#999}.flow .st b{color:#000}article h2{page-break-after:avoid}}
 </style>
+<link rel="stylesheet" href="tech.css?v=1">
 </head>
 <body>
 <header class="top">
@@ -110,13 +125,15 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       </table></div>
 
       <h3 id="tipos">Tipos de cliente</h3>
-      <p>Todo cliente se configura como uno de estos tres casos. En la demo hay una empresa de cada uno y se cambia con el selector <b>Demo</b> arriba de la consola.</p>
+      <p>Cada cliente tiene un perfil según su giro de negocio. El perfil define sus departamentos, puestos, tipos de orden, rondines y mapas. Cada empresa entra con <b>su propio usuario</b> y solo ve sus datos: para ver otra empresa hay que cerrar sesión y entrar con el usuario de esa empresa.</p>
       <div class="tw"><table>
-        <tr><th>Tipo</th><th>Cómo se ubica al personal</th><th>Medidas</th><th>Demo</th></tr>
-        <tr><td><b>🏭 Solo interior</b><br>almacén, CEDIS, planta, plaza</td><td>Por área del plano (el operador la elige o la toma al escanear un punto). En producción: balizas Bluetooth o QR por área.</td><td>Metros</td><td><a href="index.html?cliente=indoor">Distribuidora Vallejo</a> · NAVI-1100</td></tr>
-        <tr><td><b>🏙️ Solo exterior</b><br>reparto, técnicos, custodia</td><td>GPS real del celular durante el turno.</td><td>Kilómetros</td><td><a href="index.html?cliente=outdoor">TecnoServicios Express</a> · NAVI-2200</td></tr>
-        <tr><td><b>🔀 Mixto</b><br>calle + almacén</td><td>GPS en la calle y área dentro del almacén; la consola cambia entre ambos mapas.</td><td>Km afuera, metros adentro</td><td><a href="index.html?cliente=mixto">Logística Demo</a> · NAVI-4821</td></tr>
+        <tr><th>Perfil</th><th>Departamentos y trabajo típico</th><th>Cómo se ubica al personal</th><th>Demo</th></tr>
+        <tr><td><b>🛡️ Seguridad privada</b></td><td>Guardias intramuros, patrullaje, custodia de traslados y supervisión. Órdenes: atención de alarma, custodia de traslado, control de acceso y rondas.</td><td>Área del plano en el sitio del cliente + GPS en patrullaje y traslados</td><td>Prosegur Seguridad · NAVI-5500<br><code>prosegur.seguridad</code></td></tr>
+        <tr><td><b>🚚 Transporte y reparto</b></td><td>Choferes de reparto, supervisión y mecánicos de ruta, custodia de carga. Órdenes: entrega, recolección de carga, revisión de unidad.</td><td>GPS real del celular durante el turno (km)</td><td>DHL Transporte · NAVI-2200<br><code>dhl.transporte</code></td></tr>
+        <tr><td><b>🏭 Almacén / CEDIS</b></td><td>CEDIS, almacén o planta: surtido, montacargas, mantenimiento y seguridad interna.</td><td>Área del plano (metros). En producción: balizas Bluetooth o QR por área.</td><td>Amazon Almacén · NAVI-1100<br><code>amazon.almacen</code></td></tr>
+        <tr><td><b>🔀 Logística mixta</b></td><td>Combina calle y almacén: reparto y técnicos en la ciudad + almacén central.</td><td>GPS afuera y área adentro; la consola cambia entre ambos mapas</td><td>Mercado Libre Logística · NAVI-4821<br><code>mercadolibre.mixta</code></td></tr>
       </table></div>
+      <div class="tip"><b>Acceso.</b> Consola: usuario y contraseña que Navi entrega al administrador del cliente. App del operador: código de empresa + celular Navi + PIN. En la demo la contraseña de la consola es <code>Mando2026</code> y el PIN de los operadores es <code>1234</code>.</div>
 
       <h2 id="impl">2. Implementación del cliente</h2>
       <p>Se hace una sola vez al arrancar con un cliente (y se ajusta cuando cambie su operación). Orden recomendado:</p>
@@ -124,11 +141,12 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
 
       <h3 id="p-alta">P1 · Alta de la empresa <span class="who w-adm">ADMIN</span></h3>
       <ol class="steps">
-        <li>Definir con el cliente su tipo de operación: solo interior, solo exterior o mixta.</li>
-        <li>Navi asigna el <b>código de empresa</b> (ej. NAVI-4821). Con ese código entran los operadores a la app y cada empresa ve solo sus datos.</li>
+        <li>Definir con el cliente su perfil por giro: seguridad, transporte, operativa o mixta.</li>
+        <li>Navi asigna el <b>código de empresa</b> (ej. NAVI-4821). Con ese código, su celular y su PIN entran los operadores a la app y cada empresa ve solo sus datos.</li>
+        <li>Navi crea el <b>usuario de la consola</b> para el administrador y la mesa de control del cliente.</li>
         <li>Confirmar las líneas Navi del equipo (una por operador) y el plan de datos.</li>
       </ol>
-      <div class="tip">En la demo las tres empresas ya existen. En producción el alta la hace Navi desde su panel interno.</div>
+      <div class="tip">En la demo las cuatro empresas ya existen, una por perfil. En producción el alta la hace Navi desde su panel interno.</div>
 
       <h3 id="p-layout">P2 · Layout del almacén <span class="who w-adm">ADMIN</span></h3>
       <p>Cada cliente tiene almacenes distintos, por eso se dibujan en <b>🏗️ Layout</b>. Clientes solo de exterior se saltan este paso.</p>
@@ -355,7 +373,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>Mapas y direcciones</td><td>OpenStreetMap</td><td>Proveedor de mapas contratado</td></tr>
         <tr><td>Radio</td><td>Notas de voz que se reproducen al llegar</td><td>Audio en vivo</td></tr>
         <tr><td>Rondines</td><td>QR con la cámara si el navegador lo permite; NFC simulado</td><td>QR y NFC reales</td></tr>
-        <tr><td>Clientes</td><td>Tres empresas de ejemplo (selector Demo)</td><td>Cada cliente con su código, usuarios y permisos</td></tr>
+        <tr><td>Clientes y acceso</td><td>Cuatro empresas de ejemplo, una por perfil, cada una con su usuario demo; la sesión se valida en el navegador</td><td>Cada cliente con su código, usuarios y permisos validados por el servidor de Navi</td></tr>
       </table></div>
       <div class="warn">En la demo, si alguien cambia layouts u órdenes, esos cambios solo existen en su navegador. Para empezar de cero: Equipo → <b>↺ Reiniciar demo</b>.</div>
 
@@ -377,5 +395,9 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
     </article>
   </div>
 </main>
+<script>
+// dentro de la consola: los enlaces a otras páginas abren arriba, los del índice se quedan en el manual
+if (document.documentElement.classList.contains('embed')) document.querySelectorAll('a[href]').forEach(a => { if (!a.getAttribute('href').startsWith('#')) a.target = '_top'; });
+</script>
 </body>
 </html>

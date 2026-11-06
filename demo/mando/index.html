@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>NAVI Mando · Consola</title>
-<meta name="theme-color" content="#08083F">
+<meta name="theme-color" content="#03060F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -251,8 +251,13 @@ table.t tr:hover td{background:#ffffff06}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .toast{position:fixed;right:18px;bottom:18px;z-index:1600;display:flex;flex-direction:column;gap:8px}
 .toast div{background:#fff;color:var(--ink);font-weight:700;border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px #0007;animation:fi .2s;max-width:340px;font-size:13px}
-.cli{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);background:#ffffff0a;border:1px dashed var(--line2);border-radius:12px;padding:4px 6px 4px 10px}
-.cli select{background:#14146A;border:1px solid var(--line2);border-radius:9px;padding:5px 8px;font-weight:700;font-size:12.5px;color:#fff;outline:none}
+.me{display:flex;align-items:center;gap:9px;font-size:12px;background:#ffffff0a;border:1px solid var(--line2);border-radius:12px;padding:4px 5px 4px 10px}
+.me b{display:block;font-size:12.5px;line-height:1.2}
+.me small{display:block;color:var(--muted);font-size:11px;line-height:1.2}
+.me button{font-size:12px;font-weight:700;color:var(--muted);border:1px solid var(--line2);border-radius:9px;padding:5px 9px}
+.me button:hover{color:#fff;border-color:var(--lime)}
+.manv{height:100%;display:flex}
+.manv iframe{flex:1;width:100%;border:0;min-height:calc(100dvh - 58px);background:#0B0B4F}
 /* editor de layout */
 .lyw{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
 .lyc{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line2);background:#0E0E55;user-select:none;touch-action:none}
@@ -287,15 +292,16 @@ table.t tr:hover td{background:#ffffff06}
   .tw{overflow-x:auto}
 }
 </style>
+<link rel="stylesheet" href="tech.css?v=1">
 </head>
 <body>
 <div class="app">
   <header class="top">
     <a class="brand" href="../empresas.html#mando" title="Volver a Empresas"><img src="../assets/navi-logo.png" alt="Navi">Mando<small id="emp"></small></a>
     <span class="sp"></span>
-    <label class="cli hide-m" title="Cliente de demo">Demo<select id="cli"></select></label>
+    <div class="me" id="me"></div>
     <span class="clock" id="clock"></span>
-    <a class="bell" href="manual.html" target="_blank" rel="noopener" title="Manual de procesos">📘</a>
+    <button class="bell" id="manBtn" title="Manual de procesos">📘</button>
     <button class="bell" id="bell" title="Alertas">🔔<b id="bellN" hidden></b></button>
     <a class="btn sm lime" href="app/" target="_blank" rel="noopener">📱 <span class="hide-m">App del operador</span></a>
   </header>
@@ -305,11 +311,13 @@ table.t tr:hover td{background:#ffffff06}
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="mando.js?v=4"></script>
+<script src="mando.js?v=6"></script>
 <script>
 const M = Mando, E = M.esc, $ = id => document.getElementById(id);
-// cliente de demo: ?cliente=indoor|outdoor|mixto o el último elegido
-(() => { let c = new URLSearchParams(location.search).get('cliente'); try { c = c || localStorage.getItem('navi.mando.cliente'); if (c) localStorage.setItem('navi.mando.cliente', c); } catch (e) {} M.useClient(c || 'mixto'); })();
+// solo entran clientes con usuario: la empresa la define la sesión, no se cambia desde adentro
+const SES = M.Auth.current();
+if (!SES) { location.replace('login.html?next=' + encodeURIComponent('index.html' + location.hash)); throw new Error('sin sesión'); }
+M.useClient(SES.client);
 let S = M.load();
 let view = (location.hash.slice(1) || 'vivo');
 const ui = { sel: null, side: 'equipo', grp: 'all', site: 'city', show: { ord: true, zon: true, trail: true }, conv: 'all', pttCh: 'all', ordQ: '', ordG: 'all', pick: null, seenSos: new Set(), talking: false };
@@ -317,7 +325,7 @@ try { Object.assign(ui.show, JSON.parse(localStorage.getItem('navi.mando.ui') ||
 
 const VIEWS = [
   ['vivo', '🛰️', 'En vivo'], ['ordenes', '📋', 'Órdenes'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
-  ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo'], ['layout', '🏗️', 'Layout']
+  ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo'], ['layout', '🏗️', 'Layout'], ['manual', '📘', 'Manual']
 ];
 const op = id => S.ops.find(p => p.id === id);
 const grp = id => S.groups.find(g => g.id === id);
@@ -341,12 +349,18 @@ function nav() {
   $('nav').innerHTML = VIEWS.map(([k, i, t]) => `<button class="${k === view ? 'on' : ''}" data-v="${k}"><i>${i}</i>${t}${badge[k] ? `<em>${badge[k]}</em>` : ''}</button>`).join('');
   $('bellN').hidden = !na; $('bellN').textContent = na;
   $('emp').textContent = S.empresa;
-  const cs = $('cli');
-  if (cs && !cs.options.length) {
-    cs.innerHTML = Object.entries(M.CLIENTS).map(([k, c]) => `<option value="${k}" ${k === M.client() ? 'selected' : ''}>${c.icon} ${E(c.tipo)} · ${E(c.name.split(',')[0])}</option>`).join('');
-    cs.onchange = () => { try { localStorage.setItem('navi.mando.cliente', cs.value); } catch (e) {} location.href = location.pathname + '?cliente=' + cs.value + location.hash; };
+  const me = $('me');
+  if (!me.childElementCount) {
+    const c = M.CLIENTS[SES.client];
+    me.title = c.tipo + ' · ' + c.name;
+    me.innerHTML = `<span class="hide-m"><b>${E(SES.name)}</b><small>${c.icon} ${E(c.tipo)} · ${E(SES.role)}</small></span><button id="refr" title="Refrescar la consola">⟳</button><button id="salir">⏻ Salir</button>`;
+    $('refr').onclick = () => location.reload();
+    $('salir').onclick = () => { if (confirm('¿Cerrar tu sesión de NAVI Mando?')) { M.Auth.logout(); location.replace('login.html?salir=1'); } };
+    $('manBtn').onclick = () => { view = 'manual'; location.hash = 'manual'; render(); };
   }
 }
+// manual de procesos dentro de la consola (solo con sesión de cliente)
+const vManual = () => `<div class="manv"><iframe src="manual.html?embed=1" title="Manual de procesos de NAVI Mando"></iframe></div>`;
 $('nav').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); };
 $('bell').onclick = () => go('alertas');
 function go(v) { view = v; location.hash = v; ui.pick = null; render(); $('main').scrollTop = 0; }
@@ -1063,7 +1077,7 @@ function lyArea() { return ui.lay.draft && ui.lay.draft.areas.find(a => a.id ===
 let lyRaf = 0;
 function lyDraw(img) {
   const d = ui.lay.draft, svg = $('lySvg'); if (!svg) return;
-  if (img !== false) { cancelAnimationFrame(lyRaf); lyRaf = requestAnimationFrame(() => { $('lyImg').src = M.planSVG(d); }); }
+  if (img !== false) { cancelAnimationFrame(lyRaf); lyRaf = requestAnimationFrame(() => { const im = $('lyImg'); if (im) im.src = M.planSVG(d); }); }
   svg.setAttribute('viewBox', `0 0 ${d.w} ${d.h}`); $('lyC').style.aspectRatio = d.w + '/' + d.h;
   const hs = Math.max(1.6, d.w / 60);
   svg.innerHTML = d.areas.map(a => `<g class="lya ${ui.lay.sel === a.id ? 'on' : ''}" data-a="${a.id}"><rect class="b" x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx=".4"/>${ui.lay.sel === a.id ? `<rect class="h" x="${a.x + a.w - hs / 2}" y="${a.y + a.h - hs / 2}" width="${hs}" height="${hs}" rx=".3"/>` : ''}</g>`).join('');
@@ -1178,7 +1192,7 @@ function bindLayout() {
 }
 
 // ---------- render general ----------
-const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rondines: [vRondines, bindRondines], geocercas: [vGeocercas, bindGeocercas], mensajes: [vMensajes, bindMensajes], alertas: [vAlertas, bindAlertas], reportes: [vReportes, () => document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv))], equipo: [vEquipo, bindEquipo], layout: [vLayout, bindLayout] };
+const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rondines: [vRondines, bindRondines], geocercas: [vGeocercas, bindGeocercas], mensajes: [vMensajes, bindMensajes], alertas: [vAlertas, bindAlertas], reportes: [vReportes, () => document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv))], equipo: [vEquipo, bindEquipo], layout: [vLayout, bindLayout], manual: [vManual, () => {}] };
 function render() {
   if (!R[view]) view = 'vivo';
   if (!S.sites.some(s => s.id === ui.site)) ui.site = S.sites[0].id;
@@ -1203,7 +1217,7 @@ function refresh() {
   lastMsgCount = nm;
   if (view === 'vivo') return liveRefresh();
   if (view === 'mensajes') { thread(); const c = document.querySelector('.convs'); if (c) { const st = c.scrollTop; c.innerHTML = convsHTML(); c.scrollTop = st; } return; }
-  if (document.querySelector('.ov') || view === 'layout') return;
+  if (document.querySelector('.ov') || view === 'layout' || view === 'manual') return;
   const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && $('main').contains(a)) return;
   if (ui.pick) return;
   const st = $('main').scrollTop; render(); $('main').scrollTop = st;

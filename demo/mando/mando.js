@@ -6,7 +6,7 @@
 // cerrado como un almacén (plano en metros). Cada sitio tiene su propia escala.
 (function () {
   const KEY = 'navi.mando';
-  const V = 7;
+  const V = 9;
   const now = () => Date.now();
   const MIN = 60000;
   const uid = p => (p || 'x') + Math.random().toString(36).slice(2, 8);
@@ -205,29 +205,96 @@
     return { v: V, empresa: 'Logística Demo, S.A. de C.V.', code: 'NAVI-4821', breakMin: 45, sites, groups, chats, ops, templates, orders, zones, points, routes, rounds, msgs, alerts, events, folio: 1048 };
   }
 
-  // ---------- clientes de demo: solo interior, solo exterior y mixto ----------
+  // ---------- clientes de demo: un perfil por giro de negocio ----------
+  // seguridad (guardias, patrullaje y custodia) · transporte (choferes en la calle)
+  // operativa (CEDIS / almacén) · mixta (calle + almacén)
   const CLIENTS = {
-    mixto:   { name: 'Logística Demo, S.A. de C.V.', code: 'NAVI-4821', tipo: 'Mixto', icon: '🔀', desc: 'Reparto y técnicos en la ciudad + almacén central' },
-    indoor:  { name: 'Distribuidora Vallejo, S.A. de C.V.', code: 'NAVI-1100', tipo: 'Solo interior', icon: '🏭', desc: 'Centro de distribución: surtido, montacargas, mantenimiento y seguridad' },
-    outdoor: { name: 'TecnoServicios Express, S.A. de C.V.', code: 'NAVI-2200', tipo: 'Solo exterior', icon: '🏙️', desc: 'Técnicos, reparto y custodia en la calle' }
+    // nombre = cliente potencial + la capacidad que se le demuestra
+    seguridad:  { name: 'Prosegur Seguridad', code: 'NAVI-5500', tipo: 'Seguridad privada', icon: '🛡️', desc: 'Guardias intramuros, patrullaje y custodia de traslados' },
+    transporte: { name: 'DHL Transporte', code: 'NAVI-2200', tipo: 'Transporte y reparto', icon: '🚚', desc: 'Choferes de reparto, supervisión de ruta y custodia de carga' },
+    operativa:  { name: 'Amazon Almacén', code: 'NAVI-1100', tipo: 'Almacén / CEDIS', icon: '🏭', desc: 'Centro de distribución: surtido, montacargas, mantenimiento y seguridad' },
+    mixta:      { name: 'Mercado Libre Logística', code: 'NAVI-4821', tipo: 'Logística mixta', icon: '🔀', desc: 'Reparto en la ciudad + almacén central en una sola consola' }
   };
-  let CID = 'mixto';
-  const keyOf = () => KEY + (CID === 'mixto' ? '' : ':' + CID);
+  let CID = 'mixta';
+  const keyOf = () => KEY + ':' + CID;
   function seedFor(cid) {
-    const s = seed(), t = now(), C = CLIENTS[cid] || CLIENTS.mixto;
+    const s = seed(), t = now(), C = CLIENTS[cid] || CLIENTS.mixta;
     s.client = cid; s.empresa = C.name; s.code = C.code;
-    if (cid === 'mixto') return s;
+    if (cid === 'mixta') return s;
     const keepGroups = ids => { s.groups = s.groups.filter(g => ids.includes(g.id)); };
+    const nameGroups = m => s.groups.forEach(g => { if (m[g.id]) g.name = m[g.id]; });
     const cleanMsgs = () => { const ok = to => to === 'all' || to === 'consola' || s.groups.some(g => g.id === to) || s.chats.some(c => c.id === to) || s.ops.some(p => p.id === to); s.msgs = s.msgs.filter(m => ok(m.to) && (m.from === 'consola' || s.ops.some(p => p.id === m.from))); };
     const mkOrder = (folio, tpl, site, P, client, prio, status, opId, ago) => {
-      const T = s.templates.find(x => x.id === tpl);
+      const T = s.templates.find(x => x.id === tpl), done = status === 'completada';
       const o = { id: uid('o'), folio, tpl, site, title: T.name, client, addr: P.n, x: P.x, y: P.y, prio, sla: T.sla, status, opId, created: t - ago * MIN, due: t - ago * MIN + T.sla * MIN,
-        checklist: T.checklist.map(c => ({ t: c, done: false })), needPhoto: T.needPhoto, needSign: T.needSign, photo: null, sign: null, notes: '', rating: null, hist: [{ at: t - ago * MIN, txt: 'Orden creada por Mesa de control' }] };
+        checklist: T.checklist.map(c => ({ t: c, done })), needPhoto: T.needPhoto, needSign: T.needSign, photo: null, sign: null, notes: '', rating: null, hist: [{ at: t - ago * MIN, txt: 'Orden creada por Mesa de control' }] };
       if (opId) o.hist.push({ at: t - (ago - 2) * MIN, txt: 'Asignada a ' + s.ops.find(p => p.id === opId).name });
+      if (done) { o.done = t - (ago - T.sla * .6) * MIN; o.hist.push({ at: o.done, txt: 'Completada con evidencia' }); }
       s.orders.push(o); return o;
     };
-    if (cid === 'indoor') {
-      const st = s.sites.find(x => x.id === 'alm'); st.name = 'CEDIS Vallejo · Nave 1';
+    // cambia el tipo de trabajo de una orden ya creada
+    const retpl = (o, tpl, client) => {
+      const T = s.templates.find(x => x.id === tpl), done = o.status === 'completada';
+      Object.assign(o, { tpl, title: T.name, sla: T.sla, due: o.created + T.sla * MIN, needPhoto: T.needPhoto, needSign: T.needSign, checklist: T.checklist.map(c => ({ t: c, done })) });
+      if (client) o.client = client;
+    };
+    // deja al operador trabajando en su orden (en camino o en sitio)
+    const link = o => {
+      const p = s.ops.find(x => x.id === o.opId); if (!p || ['completada', 'cancelada'].includes(o.status)) return;
+      p.order = o.id;
+      if (o.status === 'encamino') { p.status = 'encamino'; p.target = { x: o.x, y: o.y }; }
+      if (o.status === 'ensitio') { p.status = 'ensitio'; p.target = null; p.x = o.x + .5; p.y = o.y + .5; p.trail = [[p.x, p.y]]; }
+    };
+    if (cid === 'seguridad') {
+      // guardias en el CEDIS de un cliente + patrullaje y custodia de traslados en la ciudad
+      const st = s.sites.find(x => x.id === 'alm'); st.name = 'CEDIS cliente · Vallejo';
+      const ctr = id => { const a = st.areas.find(z => z.id === id); return { n: a.name, x: a.x + a.w / 2, y: a.y + a.h / 2 }; };
+      const conv = { p1: ['g1', 'Custodio'], p2: ['g1', 'Custodio'], p8: ['g1', 'Custodio'], p3: ['g2', 'Patrullera'], p4: ['g2', 'Patrullero'], p5: ['g5', 'Guardia'], p6: ['g5', 'Guardia'], p7: ['g4', 'Supervisora de turno'], p9: ['g5', 'Guardia de acceso'], p10: ['g5', 'Guardia'] };
+      s.ops.forEach(p => { const c = conv[p.id]; Object.assign(p, { group: c[0], role: c[1], order: null, target: null }); if (['encamino', 'ensitio'].includes(p.status)) p.status = 'disponible'; });
+      keepGroups(['g1', 'g2', 'g4', 'g5']);
+      nameGroups({ g1: 'Custodia de traslados', g2: 'Patrullaje', g4: 'Supervisión', g5: 'Guardias intramuros' });
+      s.templates = s.templates.filter(x => x.id === 't6').concat([
+        { id: 't9', name: 'Atención de alarma', site: 'any', sla: 20, needPhoto: true, needSign: false, checklist: ['Confirmar llegada con monitoreo', 'Revisar accesos y perímetro', 'Hablar con el responsable del sitio', 'Reportar novedad'] },
+        { id: 't10', name: 'Custodia de traslado', site: 'outdoor', sla: 90, needPhoto: true, needSign: true, checklist: ['Verificar unidad y sellos', 'Confirmar ruta con la central', 'Acompañar hasta el destino', 'Entrega con firma'] },
+        { id: 't11', name: 'Control de acceso', site: 'indoor', sla: 15, needPhoto: true, needSign: false, checklist: ['Identificar a la persona', 'Confirmar autorización con el cliente', 'Registrar en bitácora', 'Entregar gafete o negar acceso'] }
+      ]);
+      s.orders = [];
+      [
+        mkOrder('OT-1041', 't10', 'city', PLACES[5], 'Farmacias del Norte · traslado de valores', 'alta', 'encamino', 'p2', 25),
+        mkOrder('OT-1042', 't9', 'city', PLACES[1], 'Café La Esquina · alarma de intrusión', 'alta', 'ensitio', 'p3', 12),
+        mkOrder('OT-1043', 't6', 'city', PLACES[3], 'Corporativo Santa Fe · ronda perimetral', 'media', 'encamino', 'p4', 20),
+        mkOrder('OT-1044', 't10', 'city', PLACES[0], 'Boutique Masaryk · traslado de efectivo', 'media', 'asignada', 'p1', 8),
+        mkOrder('OT-1045', 't9', 'city', PLACES[6], 'Abarrotes Ermita · botón de pánico', 'alta', 'nueva', null, 3),
+        mkOrder('OT-1046', 't6', 'alm', ctr('a5'), 'CEDIS cliente · revisión de racks', 'media', 'ensitio', 'p9', 14),
+        mkOrder('OT-1047', 't11', 'alm', ctr('a1'), 'Proveedor sin cita en recepción', 'media', 'nueva', null, 4),
+        mkOrder('OT-1038', 't10', 'city', PLACES[7], 'Papelería Centro · traslado', 'media', 'completada', 'p1', 180),
+        mkOrder('OT-1039', 't9', 'city', PLACES[4], 'Oficinas Del Valle · alarma', 'alta', 'completada', 'p3', 240),
+        mkOrder('OT-1040', 't6', 'alm', ctr('a4'), 'CEDIS cliente · ronda de racks', 'media', 'completada', 'p9', 150)
+      ].forEach(link);
+      s.zones = s.zones.filter(z => z.id !== 'z5');
+      s.zones.find(z => z.id === 'z1').name = 'Base operativa';
+      s.zones.find(z => z.id === 'z4').allow = ['g4'];
+      s.routes[0].name = 'Rondín nocturno · CEDIS cliente';
+      [[7, 'P-06', 'Sucursal Centro'], [9, 'P-07', 'Sucursal Narvarte'], [1, 'P-08', 'Sucursal Roma'], [0, 'P-09', 'Sucursal Polanco']].forEach(([i, code, name], k) => s.points.push({ id: 'cp' + (k + 6), site: 'city', code, name, x: PLACES[i].x, y: PLACES[i].y, method: 'QR' }));
+      s.routes.push({ id: 'r2', site: 'city', name: 'Patrullaje de sucursales', points: ['cp6', 'cp7', 'cp8', 'cp9'], opId: 'p4', every: 180 });
+      s.rounds.push({ id: uid('rd'), route: 'r2', opId: 'p4', start: t - 90 * MIN, hits: [{ p: 'cp6', at: t - 85 * MIN }, { p: 'cp7', at: t - 62 * MIN }] });
+      s.chats = [
+        { id: 'c1', name: 'Supervisores', dept: 'Operaciones', members: ['p7', 'p3', 'p1'], color: '#9B80FF' },
+        { id: 'c2', name: 'Turno noche · CEDIS cliente', dept: 'Guardias', members: ['p5', 'p6', 'p9', 'p10', 'p7'], color: '#FFC22E' },
+        { id: 'c3', name: 'Traslados del día', dept: 'Custodia', members: ['p1', 'p2', 'p8', 'p7'], color: '#FF6FB1' }
+      ];
+      s.msgs = [
+        { id: uid('m'), from: 'consola', to: 'all', kind: 'difusion', txt: 'Buen día equipo. Reporte de novedades cada hora por radio y uniforme completo en todo el turno.', at: t - 200 * MIN, reads: ['p1', 'p2', 'p3', 'p4', 'p5', 'p7', 'p9'] },
+        { id: uid('m'), from: 'p2', to: 'g1', kind: 'text', txt: 'Salimos con el traslado hacia Lindavista', at: t - 24 * MIN, reads: ['consola'] },
+        { id: uid('m'), from: 'p3', to: 'consola', kind: 'text', txt: 'Llegué a Café La Esquina, reviso la alarma', at: t - 11 * MIN, reads: ['consola'] },
+        { id: uid('m'), from: 'consola', to: 'p3', kind: 'text', txt: 'Enterada. Si hay intrusión no entres sola, te mando apoyo.', at: t - 10 * MIN, reads: ['p3'] },
+        { id: uid('m'), from: 'p9', to: 'g5', kind: 'text', txt: 'Proveedor sin cita en recepción, lo retengo en caseta', at: t - 4 * MIN, reads: [] },
+        { id: uid('m'), from: 'p7', to: 'c2', kind: 'text', txt: 'Diego, ya pasó tu hora de comida, regresa a tu punto', at: t - 3 * MIN, reads: ['consola'] }
+      ];
+      s.folio = 1048;
+    }
+    if (cid === 'operativa') {
+      const st = s.sites.find(x => x.id === 'alm'); st.name = 'Amazon CEDIS · Vallejo';
       s.sites = [st];
       const ctr = id => { const a = st.areas.find(z => z.id === id); return { n: a.name, x: a.x + a.w / 2, y: a.y + a.h / 2 }; };
       // el personal de calle pasa a ser personal del CEDIS
@@ -250,32 +317,47 @@
       s.msgs.push({ id: uid('m'), from: 'p4', to: 'c3', kind: 'text', txt: 'Andén A2 listo para cargar el camión de las 3', at: t - 5 * MIN, reads: ['consola'] });
       s.folio = 1050;
     }
-    if (cid === 'outdoor') {
+    if (cid === 'transporte') {
       const st = s.sites.find(x => x.id === 'city'); s.sites = [st];
       // el personal del almacén pasa a ser personal de calle
-      const conv = { p5: ['g5', 'Custodia', 7], p6: ['g5', 'Custodia', 9], p7: ['g2', 'Supervisora de campo', 4], p9: ['g1', 'Repartidora', 8], p10: ['g2', 'Técnico', 10] };
+      const conv = { p5: ['g5', 'Custodio de carga', 7], p6: ['g5', 'Custodio de carga', 9], p7: ['g2', 'Supervisora de ruta', 4], p9: ['g1', 'Chofer', 8], p10: ['g2', 'Mecánico de ruta', 10] };
       s.ops.forEach(p => { const c = conv[p.id]; if (!c) return; const P = PLACES[c[2]]; Object.assign(p, { site: 'city', group: c[0], role: c[1], x: P.x + .6, y: P.y + .4, trail: [[P.x + .6, P.y + .4]], target: null, order: null, km: +(Math.random() * 25 + 5).toFixed(1), status: p.status === 'receso' ? 'receso' : 'disponible', recesoAuto: false, recesoAt: p.status === 'receso' ? t - 20 * MIN : null }); });
       s.events = s.events.filter(e => !conv[e.opId]);
       s.orders = s.orders.filter(o => o.site === 'city');
-      s.templates = s.templates.filter(x => x.site !== 'indoor');
+      // choferes, supervisión de ruta y custodia de carga
+      Object.assign(s.ops.find(p => p.id === 'p1'), { role: 'Chofer' });
+      Object.assign(s.ops.find(p => p.id === 'p2'), { role: 'Chofer' });
+      Object.assign(s.ops.find(p => p.id === 'p8'), { role: 'Chofer' });
+      Object.assign(s.ops.find(p => p.id === 'p3'), { role: 'Supervisora de ruta' });
+      Object.assign(s.ops.find(p => p.id === 'p4'), { role: 'Mecánico de ruta' });
+      s.templates = s.templates.filter(x => ['t1', 't6'].includes(x.id)).concat([
+        { id: 't7', name: 'Recolección de carga', site: 'outdoor', sla: 90, needPhoto: true, needSign: true, checklist: ['Confirmar folio con el remitente', 'Contar bultos', 'Fotografiar la carga', 'Firma de quien entrega'] },
+        { id: 't8', name: 'Revisión de unidad', site: 'outdoor', sla: 45, needPhoto: true, needSign: false, checklist: ['Llantas y presión', 'Luces y frenos', 'Nivel de combustible', 'Registrar kilometraje'] }
+      ]);
+      s.orders.forEach(o => { if (o.tpl === 't2') retpl(o, 't7'); if (o.tpl === 't3') retpl(o, 't8', 'Unidad T-14 · ponchadura'); });
       s.zones = s.zones.filter(z => z.site === 'city');
-      keepGroups(['g1', 'g2', 'g5']); s.groups.find(g => g.id === 'g5').name = 'Custodia';
-      const o1 = mkOrder('OT-1048', 't2', 'city', PLACES[11], 'Consultorio Tlalpan', 'media', 'asignada', 'p10', 6);
+      s.zones.find(z => z.id === 'z1').name = 'Patio de unidades';
+      keepGroups(['g1', 'g2', 'g5']);
+      nameGroups({ g1: 'Choferes de reparto', g2: 'Supervisión y mecánicos', g5: 'Custodia de carga' });
+      const o1 = mkOrder('OT-1048', 't8', 'city', PLACES[11], 'Unidad T-09 · falla de frenos', 'alta', 'asignada', 'p10', 6);
       mkOrder('OT-1049', 't1', 'city', PLACES[2], 'Librería Coyoacán', 'baja', 'nueva', null, 3);
       s.ops.find(p => p.id === 'p10').order = o1.id;
-      // ronda de supervisión por sucursales en la calle
-      s.points = [[7, 'P-01', 'Sucursal Centro'], [9, 'P-02', 'Sucursal Narvarte'], [1, 'P-03', 'Sucursal Roma'], [0, 'P-04', 'Sucursal Polanco']].map(([i, code, name], k) => ({ id: 'cp' + (k + 1), site: 'city', code, name, x: PLACES[i].x, y: PLACES[i].y, method: 'QR' }));
-      s.routes = [{ id: 'r1', site: 'city', name: 'Ronda de supervisión de sucursales', points: ['cp1', 'cp2', 'cp3', 'cp4'], opId: 'p5', every: 180 }];
+      // ronda de supervisión por las bases en la calle
+      s.points = [[7, 'P-01', 'Base Centro'], [9, 'P-02', 'Base Narvarte'], [1, 'P-03', 'Base Roma'], [0, 'P-04', 'Base Polanco']].map(([i, code, name], k) => ({ id: 'cp' + (k + 1), site: 'city', code, name, x: PLACES[i].x, y: PLACES[i].y, method: 'QR' }));
+      s.routes = [{ id: 'r1', site: 'city', name: 'Ronda de supervisión de bases', points: ['cp1', 'cp2', 'cp3', 'cp4'], opId: 'p5', every: 180 }];
       s.rounds = [{ id: uid('rd'), route: 'r1', opId: 'p5', start: t - 60 * MIN, hits: [{ p: 'cp1', at: t - 55 * MIN }, { p: 'cp2', at: t - 30 * MIN }] }];
       s.chats = [
         { id: 'c1', name: 'Supervisores', dept: 'Operaciones', members: ['p7', 'p3', 'p1'], color: '#9B80FF' },
         { id: 'c3', name: 'Coordinación de entregas', dept: 'Logística', members: ['p1', 'p2', 'p8', 'p9', 'p7'], color: '#B4E32F' },
-        { id: 'c4', name: 'Custodia zona centro', dept: 'Custodia', members: ['p5', 'p6', 'p7'], color: '#FF6FB1' }
+        { id: 'c4', name: 'Custodia de carga', dept: 'Custodia', members: ['p5', 'p6', 'p7'], color: '#FF6FB1' }
       ];
+      s.msgs = s.msgs.filter(m => !/wifi|Enterada|Pedido|andén/.test(m.txt || ''));
+      s.msgs.find(m => m.kind === 'difusion').txt = 'Buen día choferes. Hoy hay lluvia en la tarde: manejen con precaución y respeten los límites.';
+      s.msgs.push({ id: uid('m'), from: 'p9', to: 'c3', kind: 'text', txt: 'Ya cargué en el patio, salgo a Aeropuerto', at: t - 8 * MIN, reads: ['consola'] });
       s.folio = 1050;
     }
     s.alerts = s.alerts.filter(a => s.ops.some(p => p.id === a.opId));
-    s.events = s.events.filter(e => s.ops.some(p => p.id === e.opId && (cid !== 'indoor' || e.type !== 'geocerca')));
+    s.events = s.events.filter(e => s.ops.some(p => p.id === e.opId && (cid !== 'operativa' || e.type !== 'geocerca')));
     cleanMsgs();
     return s;
   }
@@ -677,9 +759,54 @@
     return a;
   }
 
-  window.Mando = { SOS_KINDS, sos, KEY, STATUS, ORDER_ST, ALERT_T, PLACES, SCALE, BOX, toLL, fromLL, load, save, update, on, tick, nearest, advance, event, alert, orderHist, uid, dist, km, fmtD, eta, site, scale, areaAt, members, forMe, planSVG, fmtT, ago, esc, Ptt, beep, MIN,
+  // ---------- acceso por usuario ----------
+  // Solo entran clientes de Navi. Cada usuario pertenece a UNA empresa: al entrar ve sus datos y
+  // no puede cambiarse a otra empresa sin salir. En producción esto lo valida el servidor.
+  const USERS = [
+    { user: 'prosegur.seguridad',   pass: 'Mando2026', name: 'Ricardo Salas',  role: 'Gerente de operaciones',   client: 'seguridad' },
+    { user: 'dhl.transporte',       pass: 'Mando2026', name: 'Laura Benítez',  role: 'Jefa de tráfico',          client: 'transporte' },
+    { user: 'amazon.almacen',       pass: 'Mando2026', name: 'Jorge Medina',   role: 'Gerente de CEDIS',         client: 'operativa' },
+    { user: 'mercadolibre.mixta',   pass: 'Mando2026', name: 'Patricia Ochoa', role: 'Directora de operaciones', client: 'mixta' }
+  ];
+  const OP_PIN = '1234';  // demo: todos los operadores entran con este PIN
+  const SKEY = 'navi.mando.sesion', OKEY = 'navi.mando.app.sesion';
+  const rd = k => { try { return JSON.parse(sessionStorage.getItem(k) || localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  const wr = (k, v, keep) => { try { sessionStorage.removeItem(k); localStorage.removeItem(k); if (v) (keep ? localStorage : sessionStorage).setItem(k, JSON.stringify(v)); } catch (e) {} };
+  // datos de una empresa sin cambiar la empresa activa ni avisar a la pantalla
+  const peek = cid => { let st = null; try { st = JSON.parse(localStorage.getItem(KEY + ':' + cid) || 'null'); } catch (e) {} return st && st.v === V ? st : seedFor(cid); };
+  const Auth = {
+    USERS, OP_PIN,
+    demoOps(cid) { return peek(cid).ops; },
+    // consola: usuario y contraseña
+    login(user, pass, keep) {
+      const u = USERS.find(x => x.user === String(user || '').trim().toLowerCase() && x.pass === pass);
+      if (!u) return null;
+      const s = { kind: 'consola', user: u.user, name: u.name, role: u.role, client: u.client, at: now() };
+      wr(SKEY, s, keep); return s;
+    },
+    current() { const s = rd(SKEY); return s && CLIENTS[s.client] ? s : null; },
+    logout() { wr(SKEY, null); },
+    // app del operador: código de empresa + celular + PIN
+    loginOp(code, phone, pin) {
+      const cid = Object.keys(CLIENTS).find(k => CLIENTS[k].code === String(code || '').trim().toUpperCase());
+      if (!cid) return { err: 'Ese código no corresponde a ninguna empresa cliente de Navi.' };
+      const st = peek(cid);
+      const num = String(phone || '').replace(/\D/g, '').slice(-10);
+      const p = st.ops.find(x => x.phone === num);
+      if (!p) return { err: 'Ese celular no está registrado en ' + CLIENTS[cid].name.split(',')[0] + '.' };
+      if (String(pin || '') !== OP_PIN) return { err: 'PIN incorrecto.' };
+      const s = { kind: 'operador', client: cid, opId: p.id, name: p.name, at: now() };
+      wr(OKEY, s, true); return { ok: s };
+    },
+    currentOp() { const s = rd(OKEY); return s && CLIENTS[s.client] ? s : null; },
+    logoutOp() { wr(OKEY, null); },
+    // el manual de procesos es solo para clientes con sesión (consola u operador)
+    any() { return this.current() || this.currentOp(); }
+  };
+
+  window.Mando = { Auth, SOS_KINDS, sos, KEY, STATUS, ORDER_ST, ALERT_T, PLACES, SCALE, BOX, toLL, fromLL, load, save, update, on, tick, nearest, advance, event, alert, orderHist, uid, dist, km, fmtD, eta, site, scale, areaAt, members, forMe, planSVG, fmtT, ago, esc, Ptt, beep, MIN,
     AREA_T, aType, isWork, CLIENTS,
-    useClient(cid) { CID = CLIENTS[cid] ? cid : 'mixto'; return CID; },
+    useClient(cid) { CID = CLIENTS[cid] ? cid : 'mixta'; return CID; },
     client() { return CID; },
     clientByCode(code) { return Object.keys(CLIENTS).find(k => CLIENTS[k].code === String(code || '').trim().toUpperCase()); },
     hbKey() { return 'navi.mando.hb:' + CID; },
