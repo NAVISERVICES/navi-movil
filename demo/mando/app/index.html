@@ -77,6 +77,17 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
 .ck{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#ffffff08;margin-bottom:6px;font-size:14.5px;width:100%;text-align:left}
 .ck span{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);display:grid;place-items:center;flex:none;font-size:14px}
 .ck.on span{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.tw-off,.tw-pend,.tw-ok{display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:10px 12px;margin:8px 0 10px;font-size:13px;line-height:1.45}
+.tw-off b,.tw-pend b,.tw-ok b{display:block}
+.tw-off{background:#ff4d6d26;border:1px solid #ff4d6d88}.tw-pend{background:#ffc22e1f;border:1px solid #ffc22e77}.tw-ok{background:#b4e32f1f;border:1px solid #b4e32f77}
+.card.trip.off{border-color:#ff4d6d99}
+.tr-ft{font-size:14px;margin-bottom:2px}
+.mots{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.mots button,.li.opt{border:1px solid var(--line2)}
+.mots button{display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;font-size:12.5px;font-weight:700;text-align:left;background:#ffffff08}
+.mots button i{font-style:normal;font-size:20px}
+.mots button.on,.li.opt.on{border-color:var(--lime);background:#b4e32f1c}
+.li.opt i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#ffc22e33;color:var(--yellow,#FFC22E);font-size:15px;font-weight:800}
 .omap{height:190px;border-radius:16px;overflow:hidden;margin:10px 0;background:#0E0E55}
 .dark-tiles{filter:invert(1) hue-rotate(200deg) brightness(.82) saturate(.55) contrast(.95)}
 .leaflet-container{background:#0E0E55;font-family:var(--body)}
@@ -154,7 +165,7 @@ video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object
 <body>
 <div class="phone" id="ph"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../mando.js?v=6"></script>
+<script src="../mando.js?v=7"></script>
 <script>
 const M = Mando, E = M.esc;
 // el operador entra con su usuario (código de empresa + celular + PIN); la empresa la fija su sesión
@@ -262,11 +273,69 @@ function scrInicio() {
       ${p.shift ? `<h3>🟢 Turno activo<small>desde ${M.fmtT(p.shift.at)}</small></h3><div class="chips">${['disponible', 'receso', 'pausa'].map(k => `<button data-st="${k}" class="${p.status === k ? 'on' : ''}"><i class="dot" style="background:${M.STATUS[k].c}"></i>${k === 'receso' ? '🍽️ Receso' : M.STATUS[k].t}</button>`).join('')}</div>${recesoHTML()}${gpsHTML()}`
         : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para recibir órdenes y aparecer en el mapa de tu central${indoor() ? '' : ' (te pediremos tu ubicación)'}.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
     </div>
+    ${tripHTML()}
     <div class="stats"><div><small>Hoy</small><b>${doneT}</b><small>órdenes</small></div><div><small>Recorrido</small><b>${indoor() ? Math.round(p.km * 1000) : p.km.toFixed(0)}</b><small>${indoor() ? 'm' : 'km'}</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
     ${cur ? `<div class="card"><h3>📋 Tu siguiente orden<small>${E(cur.folio)}</small></h3>${orderCard(cur)}${nextBtn(cur)}</div>` : `<div class="card"><h3>📋 Sin órdenes pendientes</h3><p class="muted" style="font-size:14px">Cuando tu central te asigne una, te llega aquí con aviso.</p></div>`}
     ${dif ? `<div class="card" style="border-color:#b4e32f55"><h3>📢 Aviso de tu empresa<small>${M.fmtT(dif.at)}</small></h3><p style="font-size:14px">${E(dif.txt)}</p></div>` : ''}
     <div class="card"><h3>📶 Tu línea Navi<small>${p.gb.toFixed(1)} de ${p.gbMax} GB</small></h3><div class="bar"><i style="width:${pct}%"></i></div><p class="muted" style="font-size:12.5px;margin-top:8px">La app consume muy pocos datos. Si te quedas sin datos, avisa a tu central para que recargue tu línea.</p></div>
     ${p.shift ? '<button class="btn" data-a="endshift" style="margin-top:4px">⏹ Terminar turno</button>' : ''}`;
+}
+// ---------- viaje con ruta asignada ----------
+function tripHTML() {
+  const t = M.activeTrip(S, meId); if (!t) return '';
+  const p = me(), r = t.req, pend = r && r.status === 'pendiente', left = M.tripLeft(t, p), pct = M.tripPct(t, p);
+  const last = !pend && r && r.dec && Date.now() - r.dec < 15 * M.MIN ? r : null;
+  // navegación externa siguiendo los puntos de la ruta autorizada
+  const way = t.path.slice(t.seg + 1, -1).slice(0, 8).map(q => M.toLL(q[0], q[1]).map(v => v.toFixed(5)).join(',')).join('|');
+  const end = M.toLL(...t.path[t.path.length - 1]).map(v => v.toFixed(5)).join(',');
+  return `<div class="card trip ${t.off ? 'off' : ''}"><h3>🚚 Tu viaje ${E(t.folio)}<small>Unidad ${E(t.unit)}</small></h3>
+    ${t.off ? `<div class="tw-off">⚠️<span><b>Estás fuera de tu ruta.</b>Tu central ya fue avisada. Regresa a la ruta o pide autorización para cambiarla.</span></div>` : ''}
+    <div class="tr-ft"><b>${E(t.from)}</b> → <b>🏁 ${E(t.to)}</b></div><div class="muted" style="font-size:12.5px">${E(t.cargo)}</div>
+    <div class="omap" id="tmap" data-t="${t.id}${t.path.length}"></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="muted" style="font-size:12.5px;margin:6px 0 4px">${pct}% · faltan ${(left * M.SCALE.outdoor.km).toFixed(1)} km${t.alt ? ' · 🔀 ' + E(t.alt) + ' (autorizada)' : ''}</div>
+    ${pend ? `<div class="tw-pend">⏳<span><b>Esperando autorización del administrador</b>Pediste la ruta ${E(r.pick)} por: ${E((M.DESVIO_MOT[r.motivo] || M.DESVIO_MOT.otro).t)}. Sigue en tu ruta actual hasta que te respondan.</span></div>`
+      : last ? (last.status === 'aprobada' ? `<div class="tw-ok">✅<span><b>${E(last.by)} autorizó tu ruta alterna.</b>Sigue la línea verde del mapa.</span></div>` : `<div class="tw-off">❌<span><b>${E(last.by)} no autorizó el cambio.</b>${E(last.resp || 'Sigue tu ruta original.')}</span></div>`) : ''}
+    <div class="row" style="margin-top:8px">${pend ? '' : '<button class="btn" style="flex:1" data-a="altruta">🔀 Pedir ruta alterna</button>'}<a class="btn" style="flex:1" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${end}${way ? '&waypoints=' + encodeURIComponent(way) : ''}&travelmode=driving">🧭 Navegar mi ruta</a></div>
+  </div>`;
+}
+function tripMap() {
+  const el = document.getElementById('tmap'); if (!el) return;
+  const t = M.activeTrip(S, meId); if (!t) return;
+  if (!el._L) {
+    el._L = L.map(el, { zoomControl: false, attributionControl: false });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, className: 'dark-tiles' }).addTo(el._L);
+    el._g = L.layerGroup().addTo(el._L);
+    el._L.fitBounds(t.path.concat(t.base || []).map(q => M.toLL(q[0], q[1])), { padding: [18, 18] });
+    setTimeout(() => el._L.invalidateSize(), 50);
+  }
+  const g = el._g, P = q => M.toLL(q[0], q[1]), p = me(), r = t.req;
+  const mpp = 156543.03 * Math.cos(19.42 * Math.PI / 180) / 2 ** el._L.getZoom();
+  g.clearLayers();
+  if (t.base) L.polyline(t.base.map(P), { color: '#8A8FB0', weight: 3, opacity: .5, dashArray: '2 8' }).addTo(g);
+  L.polyline(t.path.map(P), { color: t.off ? '#FF4D6D' : '#22F0FF', weight: Math.max(8, 2 * (t.tol || 1.2) * 310 / mpp), opacity: .16, lineCap: 'round', lineJoin: 'round' }).addTo(g);
+  L.polyline(t.path.map(P), { color: t.alt ? '#B4E32F' : '#22F0FF', weight: 4 }).addTo(g);
+  if (r && r.status === 'pendiente') r.opts.forEach(x => L.polyline(x.path.map(P), { color: '#FFC22E', weight: 3, dashArray: '7 7', opacity: x.id === r.pick ? .95 : .35 }).addTo(g));
+  L.marker(P(t.path[t.path.length - 1]), { icon: L.divIcon({ className: '', html: '<div class="dpin">🏁</div>', iconSize: [28, 28], iconAnchor: [14, 28] }) }).addTo(g);
+  L.marker(M.toLL(p.x, p.y), { icon: L.divIcon({ className: '', html: '<div class="mepin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(g);
+}
+function altSheet() {
+  const t = M.activeTrip(S, meId); if (!t) return;
+  const opts = M.altOptions(S, t); let mot = null, pick = 'A';
+  const ov = sheet(`<h3>🔀 Pedir ruta alterna</h3><p class="muted" style="font-size:13.5px;margin-bottom:12px">La autoriza el administrador de tu central. <b style="color:#fff">No cambies de ruta hasta que te respondan</b>, salvo que corras peligro (en ese caso usa 🆘).</p>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px">¿Qué pasa?</div>
+    <div class="mots">${Object.entries(M.DESVIO_MOT).map(([k, v]) => `<button data-m="${k}"><i>${v.i}</i>${E(v.t)}</button>`).join('')}</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px">¿Por dónde quieres ir?</div>
+    ${opts.map(o => `<button class="li opt ${o.id === pick ? 'on' : ''}" data-p="${o.id}"><i>${o.id}</i><span><b>${E(o.name)}</b><small>${o.km} km · ~${o.min} min al destino</small></span></button>`).join('')}
+    <input class="f" id="altN" placeholder="Detalle (opcional): ej. choque en Viaducto" style="margin:4px 0 10px">
+    <button class="btn lime" id="altGo" disabled>Enviar solicitud</button>`);
+  ov.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mot = b.dataset.m; ov.querySelectorAll('[data-m]').forEach(x => x.classList.toggle('on', x === b)); ov.querySelector('#altGo').disabled = false; });
+  ov.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { pick = b.dataset.p; ov.querySelectorAll('[data-p]').forEach(x => x.classList.toggle('on', x === b)); });
+  ov.querySelector('#altGo').onclick = () => {
+    if (!mot) return;
+    M.update(s => M.tripReq(s, t.id, mot, ov.querySelector('#altN').value.trim(), pick));
+    ov.remove(); vib(60); toast('⏳ Solicitud enviada. Espera la autorización de tu administrador.'); render();
+  };
 }
 function orderCard(o) {
   const left = Math.round((o.due - Date.now()) / M.MIN);
@@ -374,7 +443,7 @@ function render() {
   const p = me(), nU = unread(), nO = openMine().filter(o => o.status === 'asignada').length;
   const body = { inicio: scrInicio, ordenes: scrOrdenes, radio: scrRadio, chat: scrChat, mas: scrMas, rondin: scrRondin }[ui.tab]();
   const scr = ph.querySelector('.scr'), st = scr ? scr.scrollTop : 0;
-  const keepMap = ph.querySelector('#omap');
+  const keepMap = ph.querySelector('#omap'), keepT = ph.querySelector('#tmap');
   ph.innerHTML = `<header class="hd">${avatar(p)}<div class="who"><b>${E(p.name)}</b><small>${E(grpN(p.group))} · ${site().icon} ${E(indoor() ? here() : S.empresa)}</small></div><button class="stb" data-a="status"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</button><button class="hb" data-a="refresh" title="Refrescar la app" aria-label="Refrescar la app">⟳</button><button class="hb out" data-a="logout" title="Salir" aria-label="Cerrar sesión">⏻</button></header>
     <div class="scr" id="scr">${body}</div>
     ${ui.tab === 'chat' && ui.chat ? '<div class="comp"><input class="f" id="mIn" placeholder="Escribe un mensaje…" autocomplete="off"><button class="btn lime sm" id="mSend">Enviar</button></div>' : ''}
@@ -383,6 +452,8 @@ function render() {
   const s2 = document.getElementById('scr'); s2.scrollTop = st;
   // el mapa de la orden se conserva entre refrescos
   const nm = ph.querySelector('#omap'); if (nm && keepMap && keepMap._L && keepMap.dataset.o === nm.dataset.o) { nm.replaceWith(keepMap); keepMap._L.invalidateSize(); moveMe(); } else orderMap();
+  const nt = ph.querySelector('#tmap'); if (nt && keepT && keepT._L && keepT.dataset.t === nt.dataset.t) { nt.replaceWith(keepT); keepT._L.invalidateSize(); }
+  tripMap();
   if (ui.tab === 'chat' && ui.chat) { s2.scrollTop = s2.scrollHeight; markRead(); }
   bind();
   checkPrompts();
@@ -396,7 +467,7 @@ function bind() {
   ph.querySelector('.tabbar').onclick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.order = null; if (ui.tab === 'chat') ui.chat = null; render(); };
   ph.onclick = e => {
     const t = e.target;
-    if (t.closest('#omap')) return;
+    if (t.closest('#omap') || t.closest('#tmap')) return;
     const o = t.closest('[data-o]'); if (o && !t.closest('[data-next]')) { if (ui.order !== o.dataset.o) { ui.photo = null; ui.sig = null; } ui.order = o.dataset.o; ui.tab = 'ordenes'; return render(); }
     const nx = t.closest('[data-next]'); if (nx) return nextStep(nx.dataset.next, nx.dataset.to);
     const st = t.closest('[data-st]'); if (st) return setStatus(st.dataset.st);
@@ -423,6 +494,7 @@ function bind() {
     if (a === 'backmas') { stopScan(); ui.tab = 'mas'; render(); }
     if (a === 'startr') { M.update(s => { s.rounds.push({ id: M.uid('rd'), route: s.routes.find(x => x.opId === meId).id, opId: meId, start: Date.now(), hits: [] }); M.event(s, meId, 'Inició rondín', 'rondin'); }); render(); }
     if (a === 'scan') scanSheet();
+    if (a === 'altruta') altSheet();
   };
   const f = document.getElementById('ph1'); if (f) f.onchange = () => photoIn(f.files[0]);
   if (document.getElementById('sig')) initSig();
@@ -633,6 +705,10 @@ function notify() {
   const as = myOrders().filter(o => o.status === 'asignada').map(o => o.id);
   if (ui.lastOrders) as.filter(id => !ui.lastOrders.includes(id)).forEach(id => { const o = S.orders.find(x => x.id === id); toast('📋 Nueva orden: ' + o.title + ' · ' + o.client); vib([120, 60, 120]); M.beep(); });
   ui.lastOrders = as;
+  // aviso al chofer si se sale de su ruta
+  const tr = M.activeTrip(S, meId);
+  if (tr && tr.off && !ui.wasOff) { toast('⚠️ Te saliste de tu ruta. Tu central ya fue avisada.'); vib([300, 120, 300]); M.beep(true); }
+  ui.wasOff = !!(tr && tr.off);
   S.msgs.slice(ui.lastMsgs).filter(m => M.forMe(S, m, meId) || (m.to === p.group && m.from !== meId)).forEach(m => {
     if (m.kind === 'voz') { toast('🎙️ ' + (m.from === 'consola' ? 'Central' : (S.ops.find(x => x.id === m.from) || {}).name || 'Compañero') + ' habló por radio'); if (m.audio) play(m.id); }
     else if (!(ui.tab === 'chat' && ui.chat && inChat(m, ui.chat))) { const c = myChats().find(x => inChat(m, x[0])); toast('💬 ' + (m.from === 'consola' ? 'Central' : ((S.ops.find(x => x.id === m.from) || {}).name || '').split(' ')[0]) + (c && c[0] !== 'consola' ? ' en ' + c[2] : '') + ': ' + m.txt); vib(60); }
