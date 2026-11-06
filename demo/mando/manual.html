@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../navi.css?v=20261030d">
 <link rel="stylesheet" href="../suite.css?v=20261030d">
-<script src="mando.js?v=7"></script>
+<script src="mando.js?v=8"></script>
 <script>
 // el manual es solo para clientes: hace falta sesión de la consola o de la app del operador
 (function () {
@@ -133,7 +133,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td><b>🏭 Almacén / CEDIS</b></td><td>CEDIS, almacén o planta: surtido, montacargas, mantenimiento y seguridad interna.</td><td>Área del plano (metros). En producción: balizas Bluetooth o QR por área.</td><td>Amazon Almacén · NAVI-1100<br><code>amazon.almacen</code></td></tr>
         <tr><td><b>🔀 Logística mixta</b></td><td>Combina calle y almacén: reparto y técnicos en la ciudad + almacén central.</td><td>GPS afuera y área adentro; la consola cambia entre ambos mapas</td><td>Mercado Libre Logística · NAVI-4821<br><code>mercadolibre.mixta</code></td></tr>
       </table></div>
-      <div class="tip"><b>Acceso.</b> Consola: usuario y contraseña que Navi entrega al administrador del cliente. App del operador: código de empresa + celular Navi + PIN. En la demo la contraseña de la consola es <code>Mando2026</code> y el PIN de los operadores es <code>1234</code>.</div>
+      <div class="tip"><b>Acceso.</b> Consola: sin contraseñas. Cada usuario entra con su usuario, correo o celular y elige si recibe su código de 6 dígitos <b>por correo o por SMS</b>; el código vence en 10 minutos. Navi da de alta a los usuarios al contratar y su enlace de acceso es privado (no aparece en la página de Empresas). App del operador: código de empresa + celular Navi + PIN. En la demo el código aparece en pantalla y el PIN de los operadores es <code>1234</code>.</div>
 
       <h2 id="impl">2. Implementación del cliente</h2>
       <p>Se hace una sola vez al arrancar con un cliente (y se ajusta cuando cambie su operación). Orden recomendado:</p>

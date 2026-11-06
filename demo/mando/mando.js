@@ -931,17 +931,23 @@
     } else if (!off && tr.off) { tr.off = false; event(s, p.id, 'Regresó a su ruta · ' + tr.folio, 'ruta'); }
   }
 
-  // ---------- acceso por usuario ----------
+  // ---------- acceso por usuario con código (sin contraseñas) ----------
   // Solo entran clientes de Navi. Cada usuario pertenece a UNA empresa: al entrar ve sus datos y
-  // no puede cambiarse a otra empresa sin salir. En producción esto lo valida el servidor.
+  // no puede cambiarse a otra empresa sin salir. Entra con su usuario, correo o celular y recibe un
+  // código de 6 dígitos por correo o por SMS, como prefiera. En producción el código lo genera,
+  // envía y valida el servidor; aquí se muestra en pantalla para la demo.
   const USERS = [
     // admin: true = administrador de la consola (autoriza cambios de ruta); false = monitorista de la mesa de control
-    { user: 'prosegur.seguridad',   pass: 'Mando2026', name: 'Ricardo Salas',  role: 'Gerente de operaciones',   client: 'seguridad',  admin: true },
-    { user: 'dhl.transporte',       pass: 'Mando2026', name: 'Laura Benítez',  role: 'Jefa de tráfico',          client: 'transporte', admin: true },
-    { user: 'dhl.mesa',             pass: 'Mando2026', name: 'Óscar Ruiz',     role: 'Monitorista · mesa de control', client: 'transporte', admin: false },
-    { user: 'amazon.almacen',       pass: 'Mando2026', name: 'Jorge Medina',   role: 'Gerente de CEDIS',         client: 'operativa',  admin: true },
-    { user: 'mercadolibre.mixta',   pass: 'Mando2026', name: 'Patricia Ochoa', role: 'Directora de operaciones', client: 'mixta',      admin: true }
+    // correos en example.com (dominio reservado para ejemplos) y celulares ficticios
+    { user: 'prosegur.seguridad', email: 'ricardo.salas@example.com',   phone: '5590000101', name: 'Ricardo Salas',  role: 'Gerente de operaciones',   client: 'seguridad',  admin: true },
+    { user: 'dhl.transporte',     email: 'laura.benitez@example.com',   phone: '5590000201', name: 'Laura Benítez',  role: 'Jefa de tráfico',          client: 'transporte', admin: true },
+    { user: 'dhl.mesa',           email: 'oscar.ruiz@example.com',      phone: '5590000202', name: 'Óscar Ruiz',     role: 'Monitorista · mesa de control', client: 'transporte', admin: false },
+    { user: 'amazon.almacen',     email: 'jorge.medina@example.com',    phone: '5590000301', name: 'Jorge Medina',   role: 'Gerente de CEDIS',         client: 'operativa',  admin: true },
+    { user: 'mercadolibre.mixta', email: 'patricia.ochoa@example.com',  phone: '5590000401', name: 'Patricia Ochoa', role: 'Directora de operaciones', client: 'mixta',      admin: true }
   ];
+  const CKEY = 'navi.mando.codigo', CODE_TTL = 10 * MIN;
+  const maskMail = e => e.replace(/^(.{2})[^@]*(@.*)$/, '$1•••••$2');
+  const maskPhone = p => '+52 •• •••• ' + p.slice(-4);
   const OP_PIN = '1234';  // demo: todos los operadores entran con este PIN
   const SKEY = 'navi.mando.sesion', OKEY = 'navi.mando.app.sesion';
   const rd = k => { try { return JSON.parse(sessionStorage.getItem(k) || localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
@@ -951,9 +957,33 @@
   const Auth = {
     USERS, OP_PIN,
     demoOps(cid) { return peek(cid).ops; },
-    // consola: usuario y contraseña
-    login(user, pass, keep) {
-      const u = USERS.find(x => x.user === String(user || '').trim().toLowerCase() && x.pass === pass);
+    // consola: busca al usuario por usuario, correo o celular
+    find(id) {
+      const s = String(id || '').trim().toLowerCase(), d = s.replace(/\D/g, '').slice(-10);
+      return USERS.find(x => x.user === s || x.email === s || (d.length === 10 && x.phone === d)) || null;
+    },
+    // a dónde puede llegar su código (enmascarado para no exponer el dato completo)
+    channels(id) { const u = this.find(id); return u ? { email: maskMail(u.email), sms: maskPhone(u.phone) } : null; },
+    // genera el código y lo "envía" por el medio que eligió el usuario: 'email' o 'sms'
+    sendCode(id, via) {
+      const u = this.find(id); if (!u || !['email', 'sms'].includes(via)) return null;
+      const code = String(100000 + Math.floor(Math.random() * 900000));
+      try { sessionStorage.setItem(CKEY, JSON.stringify({ u: u.user, code, via, at: now() })); } catch (e) {}
+      return { code, via, to: via === 'email' ? maskMail(u.email) : maskPhone(u.phone) };
+    },
+    // revisa el código; si es correcto abre la sesión
+    verify(id, code, keep) {
+      const u = this.find(id); let p = null;
+      try { p = JSON.parse(sessionStorage.getItem(CKEY) || 'null'); } catch (e) {}
+      if (!u || !p || p.u !== u.user) return { err: 'Pide un código nuevo.' };
+      if (now() - p.at > CODE_TTL) return { err: 'El código venció (dura 10 minutos). Pide uno nuevo.' };
+      if (String(code) !== p.code) return { err: 'Ese código no coincide. Revisa tu ' + (p.via === 'email' ? 'correo' : 'SMS') + '.' };
+      try { sessionStorage.removeItem(CKEY); } catch (e) {}
+      return { ok: this.login(u.user, keep) };
+    },
+    // abre la sesión (se llama después de validar el código)
+    login(user, keep) {
+      const u = this.find(user);
       if (!u) return null;
       const s = { kind: 'consola', user: u.user, name: u.name, role: u.role, client: u.client, admin: !!u.admin, at: now() };
       wr(SKEY, s, keep); return s;

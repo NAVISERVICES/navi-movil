@@ -31,16 +31,34 @@
 .card{margin:auto;width:min(420px,100%);padding:40px 0}
 .card h2{font-size:34px;margin-bottom:8px}
 .card .sub{color:var(--muted);margin-bottom:24px}
+.step{display:none}.step.on{display:block;animation:slide .45s cubic-bezier(.2,1,.3,1)}
+@keyframes slide{from{opacity:0;transform:translateX(24px)}}
 label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 8px}
 .in{display:flex;align-items:center;background:#fff;border-radius:18px;border:3px solid transparent;transition:border-color .2s,box-shadow .2s}
 .in:focus-within{border-color:var(--lime);box-shadow:0 0 0 6px #b4e32f30}
 .in input{flex:1;border:0;outline:0;background:none;color:var(--ink);font-size:18px;font-weight:700;padding:14px 16px;min-width:0}
-.in button{color:var(--ink);opacity:.6;padding:0 14px;font-size:13px;font-weight:700}
+.err{min-height:22px;color:#FF9DB0;font-size:14px;margin:10px 0 6px}
+.card .btn-lime{width:100%;margin-top:6px}
+/* medio para recibir el código */
+.vias{display:grid;gap:10px}
+.via{display:flex;gap:14px;align-items:center;text-align:left;padding:16px;border-radius:18px;border:2px solid #ffffff26;background:#ffffff0a;transition:border-color .2s,background .2s,transform .2s}
+.via:hover{border-color:#ffffff55;transform:translateY(-2px)}
+.via[aria-checked="true"]{border-color:var(--lime);background:#b4e32f14;box-shadow:0 0 0 4px #b4e32f22}
+.via i{font-style:normal;font-size:28px;line-height:1}
+.via b{display:block;font-size:16px}
+.via small{display:block;font-size:13px;color:var(--muted);margin-top:3px;font-family:var(--mono,monospace)}
+/* cajitas del código */
+.code{display:flex;gap:8px;justify-content:space-between}
+.code input{width:100%;aspect-ratio:1/1.15;max-width:58px;text-align:center;font-family:var(--display);font-size:28px;font-weight:800;border-radius:14px;border:3px solid #ffffff30;background:#ffffff12;outline:0;color:#fff;transition:border-color .2s,transform .2s}
+.code input:focus{border-color:var(--lime);transform:translateY(-3px)}
+.code.bad input{border-color:#FF6F8E;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;margin-top:18px;color:var(--muted)}
+.links button{color:var(--lime);font-weight:700}
+.links button:disabled{color:var(--muted);cursor:default;font-weight:400}
 .keep{display:flex;gap:10px;align-items:flex-start;margin:16px 0 4px;font-size:14px;color:#DCD9FF;cursor:pointer}
 .keep input{width:18px;height:18px;accent-color:var(--lime);margin-top:2px}
 .keep small{display:block;color:var(--muted);font-size:12px}
-.err{min-height:22px;color:#FF9DB0;font-size:14px;margin:10px 0 6px}
-.card .btn-lime{width:100%;margin-top:6px}
 .demo{margin-top:30px;padding-top:22px;border-top:1px dashed #ffffff30}
 .demo p{font-size:13px;color:var(--muted);margin-bottom:10px}
 .demo div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -51,9 +69,15 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
 .note{margin-top:22px;font-size:13px;color:var(--muted);text-align:center}
 .note a{color:var(--lime);font-weight:700}
 .expired{background:#FFC22E1a;border:1px solid #FFC22E66;border-radius:14px;padding:10px 12px;font-size:14px;margin-bottom:18px}
-.done{text-align:center;display:none}
-.done.on{display:block}
+.done{text-align:center}
 .done .ok{width:96px;height:96px;margin:0 auto 20px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-size:48px;font-weight:800;animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
+/* aviso de demostración: así llegaría el correo o el SMS */
+.msg{position:fixed;top:16px;left:50%;width:min(380px,100% - 32px);transform:translate(-50%,-140%);background:#fffffff2;color:var(--ink);border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 20px 50px #0008;z-index:60;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.msg.show{transform:translate(-50%,0)}
+.msg i{font-style:normal;font-size:26px;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#ECEBFA;flex:none}
+.msg b{font-size:14px}.msg span{display:block;font-size:13px;color:#444}
+.msg em{font-style:normal;font-weight:800;letter-spacing:.12em;color:var(--purple)}
+.msg small{margin-left:auto;align-self:flex-start;font-size:11px;color:#888}
 @media (max-width:900px){
   .page{grid-template-columns:1fr}
   .side{padding:28px 20px;order:2}
@@ -61,39 +85,71 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
   .main{padding:20px 16px}
   .card{padding:30px 0 40px}
 }
-@media (max-width:420px){.demo div,.giros{grid-template-columns:1fr}}
+@media (max-width:420px){.demo div,.giros{grid-template-columns:1fr}.code{gap:6px}}
 </style>
 <link rel="stylesheet" href="tech.css?v=1">
 </head>
 <body>
+<div class="msg" id="msg" role="status" aria-live="polite">
+  <i id="msgI">✉️</i>
+  <div><b id="msgT">Correo de NAVI Mando</b><span>Tu código de acceso es <em id="msgC"></em></span></div>
+  <small>ahora</small>
+</div>
+
 <div class="page">
   <section class="side">
     <a class="logo" href="../empresas.html#mando"><img src="../assets/navi-logo.png" alt="Navi"><small>MANDO</small></a>
     <h1>La consola de <em>tu operación</em>, solo para clientes Navi</h1>
-    <p>Entra con el usuario que Navi le dio a tu empresa. Verás solo a tu equipo, tus órdenes y el manual de procesos de NAVI Mando.</p>
+    <p>Entra con el usuario que Navi le dio a tu empresa. Sin contraseñas: te mandamos un código por correo o por SMS, como prefieras. Verás solo a tu equipo, tus órdenes y el manual de procesos.</p>
     <div class="giros" id="giros"></div>
   </section>
 
   <section class="main">
     <div class="top"><a class="back" href="../empresas.html#mando">← Volver a Navi Empresas</a></div>
     <div class="card">
-      <form id="f" novalidate>
+      <!-- paso 1: quién eres -->
+      <form class="step on" id="s1" novalidate>
         <h2>Entra a NAVI Mando</h2>
         <p class="sub">Consola central para la mesa de control y el administrador de tu empresa.</p>
-        <label for="user">Usuario</label>
-        <div class="in"><input id="user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="admin.empresa"></div>
-        <label for="pass">Contraseña</label>
-        <div class="in"><input id="pass" type="password" autocomplete="current-password" placeholder="••••••••"><button type="button" id="eye">Ver</button></div>
-        <label class="keep"><input type="checkbox" id="keep" checked><span>Mantener mi sesión abierta en este equipo<small>Desmárcalo si usas una computadora compartida: la sesión se cierra al cerrar la pestaña.</small></span></label>
-        <p class="err" id="err"></p>
-        <button class="btn btn-lime" type="submit">Entrar →</button>
+        <label for="user">Usuario, correo o celular</label>
+        <div class="in"><input id="user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="nombre@tuempresa.com"></div>
+        <p class="err" id="err1"></p>
+        <button class="btn btn-lime" type="submit">Continuar →</button>
         <div class="demo">
-          <p>Modo demostración · toca una empresa para llenar su usuario:</p>
+          <p>Modo demostración · toca un usuario para llenarlo:</p>
           <div id="demo"></div>
         </div>
-        <p class="note">¿Eres operador en campo? Entra desde la <a href="app/">📱 app del operador</a>.<br>¿Aún no eres cliente? <a href="../empresas.html#mando">Conoce NAVI Mando</a></p>
+        <p class="note">¿Eres operador en campo? Entra desde la <a href="app/">📱 app del operador</a>.<br>¿Aún no eres cliente? <a href="../empresas.html#contacto">Solicita una demo</a></p>
       </form>
-      <div class="done" id="done">
+
+      <!-- paso 2: el usuario decide por dónde recibir su código -->
+      <div class="step" id="sVia">
+        <h2>¿Cómo quieres tu código?</h2>
+        <p class="sub">Hola, <b id="who"></b>. Elige dónde te mandamos tu código de acceso.</p>
+        <div class="vias" role="radiogroup" aria-label="Medio para recibir el código">
+          <button type="button" class="via" role="radio" aria-checked="false" data-via="email"><i>✉️</i><span><b>Por correo</b><small id="toEmail"></small></span></button>
+          <button type="button" class="via" role="radio" aria-checked="false" data-via="sms"><i>💬</i><span><b>Por SMS</b><small id="toSms"></small></span></button>
+        </div>
+        <p class="err" id="errV"></p>
+        <button class="btn btn-lime" id="sendGo" type="button" disabled>Enviarme el código</button>
+        <div class="links"><button type="button" data-back="s1">← No soy yo</button></div>
+      </div>
+
+      <!-- paso 3: código -->
+      <form class="step" id="s2" novalidate>
+        <h2>Escribe tu código</h2>
+        <p class="sub">Lo enviamos <span id="sentTo"></span>. Vence en 10 minutos.</p>
+        <div class="code" id="code">
+          <input inputmode="numeric" aria-label="Dígito 1" autocomplete="one-time-code"><input inputmode="numeric" aria-label="Dígito 2"><input inputmode="numeric" aria-label="Dígito 3"><input inputmode="numeric" aria-label="Dígito 4"><input inputmode="numeric" aria-label="Dígito 5"><input inputmode="numeric" aria-label="Dígito 6">
+        </div>
+        <label class="keep"><input type="checkbox" id="keep" checked><span>Mantener mi sesión abierta en este equipo<small>Desmárcalo si usas una computadora compartida: la sesión se cierra al cerrar la pestaña.</small></span></label>
+        <p class="err" id="err2"></p>
+        <button class="btn btn-lime" id="verify" type="submit" disabled>Entrar</button>
+        <div class="links"><button type="button" id="other"></button><button type="button" id="resend" disabled></button></div>
+      </form>
+
+      <!-- listo -->
+      <div class="step done" id="s3">
         <div class="ok">✓</div>
         <h2 id="hello">¡Hola!</h2>
         <p class="sub" id="helloSub">Abriendo tu consola…</p>
@@ -102,37 +158,110 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
   </section>
 </div>
 
-<script src="mando.js?v=7"></script>
+<script src="mando.js?v=8"></script>
 <script>
 const M = Mando, A = M.Auth, E = M.esc, $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
 // solo se permite regresar a páginas de Mando
 const nxt = /^[\w\-./#?=&]*$/.test(qs.get('next') || '') && !/^\/\/|:/.test(qs.get('next') || '') ? (qs.get('next') || 'index.html') : 'index.html';
 if (A.current()) location.replace(nxt);
-if (qs.has('salir')) $('f').insertAdjacentHTML('afterbegin', '<p class="expired">👋 Cerraste tu sesión. Para entrar a otra empresa usa su propio usuario.</p>');
-if (qs.has('manual')) $('f').insertAdjacentHTML('afterbegin', '<p class="expired">📘 El manual de procesos es solo para clientes de NAVI Mando. Entra con tu usuario para consultarlo.</p>');
+if (qs.has('salir')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expired">👋 Cerraste tu sesión. Para entrar a otra empresa usa su propio usuario.</p>');
+if (qs.has('manual')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expired">📘 El manual de procesos es solo para clientes de NAVI Mando. Entra con tu usuario para consultarlo.</p>');
+
+const steps = ['s1', 'sVia', 's2', 's3'];
+const go = id => steps.forEach(s => $(s).classList.toggle('on', s === id));
 
 $('giros').innerHTML = Object.values(M.CLIENTS).map(c => `<div><b>${c.icon} ${E(c.tipo)}</b><small>${E(c.desc)}</small></div>`).join('');
 $('demo').innerHTML = A.USERS.map(u => { const c = M.CLIENTS[u.client];
-  return `<button type="button" data-u="${E(u.user)}"><i>${c.icon}</i><span>${E(c.name)}<small>${E(u.user)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span></button>`; }).join('');
+  return `<button type="button" data-u="${E(u.email)}"><i>${c.icon}</i><span>${E(c.name)}<small>${E(u.user)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span></button>`; }).join('');
 $('demo').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  $('user').value = b.dataset.u; $('pass').value = A.USERS.find(u => u.user === b.dataset.u).pass; $('err').textContent = '';
-  $('f').querySelector('[type=submit]').focus();
+  $('user').value = b.dataset.u; $('err1').textContent = '';
+  $('s1').querySelector('[type=submit]').focus();
 });
-$('eye').onclick = () => { const p = $('pass'); p.type = p.type === 'password' ? 'text' : 'password'; $('eye').textContent = p.type === 'password' ? 'Ver' : 'Ocultar'; };
-['user', 'pass'].forEach(id => $(id).addEventListener('input', () => $('err').textContent = ''));
+$('user').addEventListener('input', () => $('err1').textContent = '');
 
-$('f').addEventListener('submit', e => {
+// paso 1 → ¿existe el usuario?
+let who = '', via = null, timer = 0;
+$('s1').addEventListener('submit', e => {
   e.preventDefault();
-  const u = $('user').value.trim(), p = $('pass').value;
-  if (!u || !p) { $('err').textContent = 'Escribe tu usuario y tu contraseña.'; return; }
-  const s = A.login(u, p, $('keep').checked);
-  if (!s) { $('err').textContent = 'Usuario o contraseña incorrectos. Si no los tienes, pídeselos a tu ejecutivo Navi.'; return; }
-  const c = M.CLIENTS[s.client];
+  const id = $('user').value.trim();
+  if (!id) { $('err1').textContent = 'Escribe tu usuario, correo o celular.'; return; }
+  const u = A.find(id);
+  if (!u) { $('err1').textContent = 'No encontramos ese usuario. Si eres cliente y no tienes acceso, pídelo a tu ejecutivo Navi.'; return; }
+  who = u.user; const ch = A.channels(who);
+  $('who').textContent = u.name.split(' ')[0];
+  $('toEmail').textContent = ch.email; $('toSms').textContent = ch.sms;
+  via = null; document.querySelectorAll('.via').forEach(b => b.setAttribute('aria-checked', 'false'));
+  $('sendGo').disabled = true; $('errV').textContent = '';
+  go('sVia');
+});
+
+// paso 2 → el usuario elige correo o SMS
+document.querySelectorAll('.via').forEach(b => b.addEventListener('click', () => {
+  via = b.dataset.via;
+  document.querySelectorAll('.via').forEach(x => x.setAttribute('aria-checked', x === b));
+  $('sendGo').disabled = false; $('errV').textContent = '';
+}));
+document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => { clearInterval(timer); go(b.dataset.back); }));
+
+const msg = $('msg');
+function send() {
+  const r = A.sendCode(who, via); if (!r) return;
+  // demo: así se vería el correo o el SMS que le llega al usuario
+  $('msgI').textContent = via === 'email' ? '✉️' : '💬';
+  $('msgT').textContent = via === 'email' ? 'Correo de NAVI Mando · ' + r.to : 'SMS de Navi · ' + r.to;
+  $('msgC').textContent = r.code;
+  msg.classList.remove('show'); void msg.offsetWidth; msg.classList.add('show');
+  clearTimeout(msg.t); msg.t = setTimeout(() => msg.classList.remove('show'), 8000);
+  $('sentTo').innerHTML = via === 'email' ? `a tu correo <b>${E(r.to)}</b>` : `por SMS al <b>${E(r.to)}</b>`;
+  $('other').textContent = via === 'email' ? '💬 Mejor por SMS' : '✉️ Mejor por correo';
+  let left = 30; const rs = $('resend');
+  rs.disabled = true; rs.textContent = `Reenviar en ${left}s`;
+  clearInterval(timer);
+  timer = setInterval(() => { left--; rs.textContent = left ? `Reenviar en ${left}s` : 'Reenviar código'; if (!left) { rs.disabled = false; clearInterval(timer); } }, 1000);
+  boxes.forEach(b => b.value = ''); $('verify').disabled = true; $('err2').textContent = ''; $('code').classList.remove('bad');
+  go('s2'); setTimeout(() => boxes[0].focus(), 50);
+}
+$('sendGo').addEventListener('click', () => { if (!via) { $('errV').textContent = 'Elige correo o SMS.'; return; } send(); });
+$('resend').addEventListener('click', send);
+$('other').addEventListener('click', () => { via = via === 'email' ? 'sms' : 'email'; send(); });
+
+// paso 3 → cajitas del código
+const boxes = [...document.querySelectorAll('#code input')];
+const typed = () => boxes.map(b => b.value).join('');
+const update = () => {
+  const n = typed().length;
+  boxes[Math.min(n, 5)].focus();
+  $('verify').disabled = n !== 6; $('code').classList.remove('bad'); $('err2').textContent = '';
+  if (n === 6) $('s2').requestSubmit();
+};
+boxes.forEach((b, i) => {
+  b.addEventListener('keydown', e => {
+    if (/^\d$/.test(e.key)) { e.preventDefault(); (b.value ? boxes.find(x => !x.value) || b : b).value = e.key; update(); }
+    else if (e.key === 'Backspace' && !b.value && i) boxes[i - 1].focus();
+  });
+  // teclado del celular, pegar o autocompletar el código
+  b.addEventListener('input', () => {
+    const v = b.value.replace(/\D/g, '');
+    if (v.length > 1) v.split('').slice(0, 6 - i).forEach((d, k) => boxes[i + k].value = d); else b.value = v;
+    update();
+  });
+});
+$('s2').addEventListener('submit', e => {
+  e.preventDefault();
+  const r = A.verify(who, typed(), $('keep').checked);
+  if (r.err) {
+    const c = $('code'); c.classList.remove('bad'); void c.offsetWidth; c.classList.add('bad');
+    $('err2').textContent = r.err;
+    boxes.forEach(b => b.value = ''); boxes[0].focus(); $('verify').disabled = true;
+    return;
+  }
+  clearInterval(timer); msg.classList.remove('show');
+  const s = r.ok, c = M.CLIENTS[s.client];
   $('hello').textContent = `¡Hola, ${s.name.split(' ')[0]}!`;
-  $('helloSub').textContent = `${c.icon} ${c.name.split(',')[0]} · ${c.tipo}. Abriendo tu consola…`;
-  $('f').style.display = 'none'; $('done').classList.add('on');
+  $('helloSub').textContent = `${c.icon} ${c.name} · ${c.tipo}. Abriendo tu consola…`;
+  go('s3');
   setTimeout(() => location.href = nxt, 1200);
 });
 </script>
