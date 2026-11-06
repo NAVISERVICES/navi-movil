@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>NAVI Mando · Operador</title>
-<meta name="theme-color" content="#08083F">
+<meta name="theme-color" content="#03060F">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="../../assets/icon-192.png">
 <link rel="apple-touch-icon" href="../../assets/icon-180.png">
@@ -149,19 +149,20 @@ video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object
 .areas button{padding:12px 10px;border-radius:14px;border:1px solid var(--line2);font-size:13px;font-weight:700;text-align:left;display:flex;align-items:center;gap:8px}
 .areas button.on{border-color:var(--lime);background:#b4e32f18}
 </style>
+<link rel="stylesheet" href="../tech.css?v=1">
 </head>
 <body>
 <div class="phone" id="ph"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../mando.js?v=4"></script>
+<script src="../mando.js?v=6"></script>
 <script>
 const M = Mando, E = M.esc;
-// empresa del operador (en la demo hay tres clientes; en producción la da el código)
-(() => { let c = new URLSearchParams(location.search).get('cliente'); try { c = c || localStorage.getItem('navi.mando.app.cliente'); } catch (e) {} M.useClient(c || 'mixto'); })();
+// el operador entra con su usuario (código de empresa + celular + PIN); la empresa la fija su sesión
+let OSES = M.Auth.currentOp();
+M.useClient(OSES ? OSES.client : 'mixta');
 let S = M.load();
 const ph = document.getElementById('ph');
-const meKey = () => 'navi.mando.me' + (M.client() === 'mixto' ? '' : ':' + M.client());
-let meId = null; try { meId = localStorage.getItem(meKey()); } catch (e) {}
+let meId = OSES ? OSES.opId : null;
 const ui = { tab: 'inicio', order: null, chat: null, photo: null, sig: null, lastOrders: null, lastMsgs: S.msgs.length, scanStream: null, gpsErr: null, evacSeen: null };
 const me = () => S.ops.find(p => p.id === meId);
 const site = () => M.site(S, me().site);
@@ -182,28 +183,44 @@ const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) 
 
 // ---------- entrar ----------
 function login() {
-  let pick = null;
-  ph.innerHTML = `<div class="login"><img src="../../assets/navi-logo.png" alt="Navi">
-    <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: órdenes, radio, chat por departamento y botón de emergencia.</p>
-    <label class="muted" style="font-size:13px;font-weight:700">Código de empresa<input class="f" id="code" placeholder="${E(S.code)}" autocapitalize="characters" style="margin-top:6px"></label>
-    <div class="chips" id="cls">${Object.entries(M.CLIENTS).map(([k, c]) => `<button data-cl="${k}" class="${k === M.client() ? 'on' : ''}">${c.icon} ${E(c.name.split(',')[0])}</button>`).join('')}</div>
-    <div class="muted" style="font-size:12px;margin-top:-6px">${E(M.CLIENTS[M.client()].tipo)} · ${E(M.CLIENTS[M.client()].desc)} · código ${E(S.code)}</div>
-    <div class="muted" style="font-size:13px;font-weight:700">¿Quién eres? <span style="font-weight:500">(demo)</span></div>
-    <div class="opl">${S.ops.map(p => `<button data-p="${p.id}"><span class="av" style="background:${stc(p)}">${E(p.ini)}</span><span>${E(p.name)}<small>${M.site(S, p.site).icon} ${E(grpN(p.group))}</small></span></button>`).join('')}</div>
+  const fmtN = v => { const d = v.replace(/\D/g, '').slice(0, 10); return [d.slice(0, 2), d.slice(2, 6), d.slice(6)].filter(Boolean).join(' '); };
+  ph.innerHTML = `<div class="login"><div style="display:flex;align-items:center;justify-content:space-between"><img src="../../assets/navi-logo.png" alt="Navi"><button class="hb" id="lref" title="Refrescar la app" aria-label="Refrescar la app">⟳</button></div>
+    <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: órdenes, radio, chat por departamento y botón de emergencia. Solo para personal de empresas cliente de Navi.</p>
+    <label class="muted" style="font-size:13px;font-weight:700">Código de empresa<input class="f" id="code" placeholder="NAVI-0000" autocapitalize="characters" autocomplete="organization" style="margin-top:6px"></label>
+    <label class="muted" style="font-size:13px;font-weight:700">Tu celular Navi<input class="f" id="cel" inputmode="numeric" autocomplete="tel-national" placeholder="55 1234 5678" style="margin-top:6px"></label>
+    <label class="muted" style="font-size:13px;font-weight:700">PIN<input class="f" id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="••••" style="margin-top:6px"></label>
+    <p id="lerr" style="color:#FF9DB0;font-size:13px;min-height:18px;margin:-4px 0"></p>
     <button class="btn lime" id="go">Entrar</button>
-    <p class="muted" style="font-size:12px;text-align:center">Tu empresa te da el código. En la demo puedes dejarlo vacío.</p></div>`;
-  ph.querySelector('.opl').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; pick = b.dataset.p; ph.querySelectorAll('.opl button').forEach(x => x.classList.toggle('on', x === b)); };
-  const switchTo = k => { M.useClient(k); try { localStorage.setItem('navi.mando.app.cliente', k); } catch (e) {} S = M.load(); ui.lastMsgs = S.msgs.length; login(); };
-  ph.querySelector('#cls').onclick = e => { const b = e.target.closest('[data-cl]'); if (b && b.dataset.cl !== M.client()) switchTo(b.dataset.cl); };
-  const code = document.getElementById('code');
-  code.oninput = () => { const k = M.clientByCode(code.value); if (k && k !== M.client()) { const v = code.value; switchTo(k); const c2 = document.getElementById('code'); c2.value = v; toast('Empresa: ' + M.CLIENTS[k].name.split(',')[0]); } };
-  document.getElementById('go').onclick = () => {
-    const c = document.getElementById('code').value.trim().toUpperCase();
-    if (c && c !== S.code) return toast('Ese código no corresponde a ninguna empresa');
-    if (!pick) return toast('Elige tu nombre');
-    try { localStorage.setItem('navi.mando.app.cliente', M.client()); } catch (e) {}
-    meId = pick; try { localStorage.setItem(meKey(), meId); } catch (e) {}
-    ui.lastOrders = null; render(); if (me().shift) startGps();
+    <p class="muted" style="font-size:12px;text-align:center">Tu empresa te da el código y tu PIN. Para entrar a otra empresa cierra sesión y usa sus datos.</p>
+    <div style="border-top:1px dashed var(--line2);padding-top:12px">
+      <div class="muted" style="font-size:12.5px;font-weight:700;margin-bottom:8px">Modo demostración · toca tu empresa y luego tu nombre:</div>
+      <div class="chips" id="cls">${Object.entries(M.CLIENTS).map(([k, c]) => `<button data-cl="${k}">${c.icon} ${E(c.name)}</button>`).join('')}</div>
+      <div class="opl" id="opl" style="margin-top:8px"></div>
+    </div></div>`;
+  const $l = id => document.getElementById(id);
+  $l('lref').onclick = () => location.reload();
+  $l('cel').oninput = () => { $l('cel').value = fmtN($l('cel').value); $l('lerr').textContent = ''; };
+  ['code', 'pin'].forEach(id => $l(id).oninput = () => $l('lerr').textContent = '');
+  $l('cls').onclick = e => {
+    const b = e.target.closest('[data-cl]'); if (!b) return;
+    const k = b.dataset.cl, c = M.CLIENTS[k];
+    ph.querySelectorAll('#cls button').forEach(x => x.classList.toggle('on', x === b));
+    $l('code').value = c.code;
+    $l('opl').innerHTML = M.Auth.demoOps(k).map(p => `<button data-cel="${p.phone}"><span class="av" style="background:${stc(p)}">${E(p.ini)}</span><span>${E(p.name)}<small>${E(p.role)}</small></span></button>`).join('');
+  };
+  $l('opl').onclick = e => {
+    const b = e.target.closest('[data-cel]'); if (!b) return;
+    ph.querySelectorAll('#opl button').forEach(x => x.classList.toggle('on', x === b));
+    $l('cel').value = fmtN(b.dataset.cel); $l('pin').value = M.Auth.OP_PIN; $l('lerr').textContent = '';
+  };
+  $l('go').onclick = () => {
+    if (!$l('code').value.trim() || !$l('cel').value.trim() || !$l('pin').value) { $l('lerr').textContent = 'Escribe el código de empresa, tu celular y tu PIN.'; return; }
+    const r = M.Auth.loginOp($l('code').value, $l('cel').value, $l('pin').value);
+    if (r.err) { $l('lerr').textContent = r.err; return; }
+    OSES = r.ok; M.useClient(OSES.client); S = M.load(); ui.lastMsgs = S.msgs.length;
+    meId = OSES.opId; ui.tab = 'inicio'; ui.lastOrders = null;
+    toast('¡Hola, ' + OSES.name.split(' ')[0] + '! · ' + M.CLIENTS[OSES.client].name.split(',')[0]);
+    render(); if (me().shift) startGps();
   };
 }
 
@@ -358,7 +375,7 @@ function render() {
   const body = { inicio: scrInicio, ordenes: scrOrdenes, radio: scrRadio, chat: scrChat, mas: scrMas, rondin: scrRondin }[ui.tab]();
   const scr = ph.querySelector('.scr'), st = scr ? scr.scrollTop : 0;
   const keepMap = ph.querySelector('#omap');
-  ph.innerHTML = `<header class="hd">${avatar(p)}<div class="who"><b>${E(p.name)}</b><small>${E(grpN(p.group))} · ${site().icon} ${E(indoor() ? here() : S.empresa)}</small></div><button class="stb" data-a="status"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</button></header>
+  ph.innerHTML = `<header class="hd">${avatar(p)}<div class="who"><b>${E(p.name)}</b><small>${E(grpN(p.group))} · ${site().icon} ${E(indoor() ? here() : S.empresa)}</small></div><button class="stb" data-a="status"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</button><button class="hb" data-a="refresh" title="Refrescar la app" aria-label="Refrescar la app">⟳</button><button class="hb out" data-a="logout" title="Salir" aria-label="Cerrar sesión">⏻</button></header>
     <div class="scr" id="scr">${body}</div>
     ${ui.tab === 'chat' && ui.chat ? '<div class="comp"><input class="f" id="mIn" placeholder="Escribe un mensaje…" autocomplete="off"><button class="btn lime sm" id="mSend">Enviar</button></div>' : ''}
     <button class="sos" id="sos"><span class="fill"></span><i>🆘</i><span>EMERGENCIA<small>mantén 2 s</small></span></button>
@@ -400,7 +417,8 @@ function bind() {
     if (a === 'clr') initSig(true);
     if (a === 'solo') { M.update(s => { const p = s.ops.find(x => x.id === meId); p.solo = !p.solo; p.soloOk = Date.now(); p.soloAsk = null; M.event(s, meId, p.solo ? 'Activó modo trabajo solo' : 'Desactivó modo trabajo solo', 'estado'); }); render(); }
     if (a === 'install') installSheet();
-    if (a === 'logout') { if (confirm('¿Cerrar sesión?')) { stopGps(); meId = null; try { localStorage.removeItem(meKey()); } catch (e) {} render(); } }
+    if (a === 'refresh') { toast('⟳ Actualizando…'); setTimeout(() => location.reload(), 300); return; }
+    if (a === 'logout') { if (confirm('¿Cerrar sesión?')) { stopGps(); meId = null; OSES = null; M.Auth.logoutOp(); render(); } }
     if (a === 'rondin') { ui.tab = 'rondin'; render(); }
     if (a === 'backmas') { stopScan(); ui.tab = 'mas'; render(); }
     if (a === 'startr') { M.update(s => { s.rounds.push({ id: M.uid('rd'), route: s.routes.find(x => x.opId === meId).id, opId: meId, start: Date.now(), hits: [] }); M.event(s, meId, 'Inició rondín', 'rondin'); }); render(); }
