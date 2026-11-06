@@ -1,0 +1,121 @@
+/* Navi Empresas con el tema "dark tech" de NAVI Mando.
+   Se carga después de mando/tech.css y de los estilos propios de empresas.html.
+   Para regresar al diseño anterior basta con quitar los dos <link> del tema en empresas.html. */
+
+/* tech.css pinta ".in" (campos del login); aquí ".in" es la animación de aparición */
+.sh.in,.flow.in,.mside.in{background:none!important;border:0!important;box-shadow:none!important}
+
+/* encabezado */
+header.top .cta{background:var(--neon)!important;color:#020611!important;box-shadow:0 0 18px #22F0FF55,0 0 36px #9D5CFF33!important;font-family:var(--body);text-transform:uppercase;letter-spacing:.06em}
+header.top nav a{font-family:var(--body);letter-spacing:.08em;text-transform:uppercase;font-size:12.5px!important}
+header.top nav a:hover{color:var(--cyan)!important;text-shadow:0 0 10px #22F0FF}
+header.top nav a.nv-new{color:var(--cyan)!important}
+header.top nav a.nv-new::after{background:var(--neon)!important;color:#020611!important;font-family:var(--mono)}
+.logo small{font-family:var(--mono)!important;letter-spacing:.22em!important;color:var(--cyan)!important}
+
+/* secciones y títulos */
+section{border-top-color:var(--line)!important}
+.eyebrow{color:var(--cyan)!important;font-family:var(--mono)!important;text-shadow:0 0 10px #22F0FF88}
+.hero::before{background-image:linear-gradient(#22F0FF14 1px,transparent 1px),linear-gradient(90deg,#22F0FF14 1px,transparent 1px)!important}
+.hero h1{text-transform:uppercase;font-size:clamp(32px,4.4vw,56px)!important;line-height:1.08!important}
+.hero h1 em{color:transparent!important;background:var(--neon);-webkit-background-clip:text;background-clip:text}
+.hero h1 em path{stroke:var(--cyan)!important;filter:drop-shadow(0 0 6px #22F0FF)}
+.lead,.sh p{color:#9FB6CE!important}
+.sh h2{text-transform:uppercase;font-size:clamp(24px,3vw,38px)!important}
+.chips span{background:#22F0FF0d!important;border-color:var(--line2)!important;font-family:var(--mono);font-size:12px!important;color:#CFEFFF!important}
+.chips svg{color:var(--cyan)!important}
+
+/* panel ilustrativo de la portada */
+.console,.mshot{background:var(--glass)!important;border:1px solid var(--line2)!important;box-shadow:var(--glow),0 30px 70px #000a!important}
+.console::after{background:var(--neon)!important;opacity:.22!important;filter:blur(28px)}
+.c-top,.mshot .bar3{font-family:var(--mono)}
+.c-top .live{color:var(--cyan)!important;text-shadow:0 0 8px #22F0FF}
+.c-top .live::before{background:var(--cyan)!important}
+.c-map,.mgrid .mp{border-color:var(--line2)!important}
+.c-map::before,.mgrid .mp::before{background:linear-gradient(180deg,#03060Fb8,#050A1Ee6)!important}
+.c-map .route{stroke:var(--cyan)!important;filter:drop-shadow(0 0 4px #22F0FF)}
+.c-map .zone{fill:#9D5CFF26!important;stroke:#9D5CFF!important}
+.c-tag{background:#03060Fe6!important;border-color:var(--line2)!important;font-family:var(--mono)}
+.unit.l{background:var(--cyan)!important;color:var(--cyan)!important}
+
+/* diagrama del modelo */
+.flow::before{background:repeating-linear-gradient(90deg,var(--cyan) 0 8px,transparent 8px 16px)!important;box-shadow:0 0 8px #22F0FF}
+.flow .bub{background:var(--glass)!important;border-color:var(--line2)!important;box-shadow:0 0 22px #22F0FF22}
+.flow .bub svg{color:var(--cyan)!important;filter:drop-shadow(0 0 6px #22F0FF)}
+.flow div:last-child .bub{background:var(--neon)!important;border-color:transparent!important;box-shadow:0 0 30px #22F0FF66}
+.flow div:last-child .bub svg{color:#020611!important;filter:none}
+.flow b{text-transform:uppercase;font-size:16px!important}
+
+/* tarjetas, paneles y mosaicos de vidrio */
+.vc,.panel,.tile,.mfeat div{background:var(--glass)!important;border-color:var(--line2)!important;backdrop-filter:blur(8px)}
+.vc:hover,.tile:hover{border-color:var(--cyan)!important;box-shadow:var(--glow)}
+.vc .art{background:radial-gradient(circle at 50% 120%,#9D5CFF55,transparent 65%),#060B18!important;border-bottom-color:var(--line2)!important}
+.vc h3,.panel h3{text-transform:uppercase;font-size:16px!important}
+.vc .cap,.panel h3 small{color:var(--cyan)!important;font-family:var(--mono)!important}
+.vc p,.tile small,.mfeat small{color:#9FB6CE!important}
+.vc.hl{background:linear-gradient(160deg,#0B2A3A,#1A1240)!important;border-color:var(--cyan)!important;color:var(--text)!important;box-shadow:var(--glow)}
+.vc.hl .art{background:radial-gradient(circle at 50% 120%,#22F0FF55,transparent 65%),#071A26!important}
+.vc.hl p{color:#B9CCE0!important}
+.tile svg{color:var(--cyan)!important;filter:drop-shadow(0 0 5px #22F0FF88)}
+
+/* NAVI Mando */
+#mando{background:radial-gradient(ellipse at 80% 0%,#9D5CFF33,transparent 60%)!important}
+.mgrid .nv{background:#020611!important;border:1px solid var(--line)}
+.mgrid .nv span:first-child{background:var(--neon)!important;box-shadow:0 0 12px #22F0FF66}
+.mgrid .ls div{background:#22F0FF0d!important;font-family:var(--mono)}
+.mgrid .ls .sos{font-family:var(--mono)!important;background:#FF2E6326!important;border:1px solid #FF2E6388!important;box-shadow:0 0 12px #FF2E6344!important}
+.mptt{background:#22F0FF0d!important;font-family:var(--mono)}
+.mptt b{background:var(--neon)!important;color:#020611!important}
+.mphone{background:#03060F!important;box-shadow:0 0 0 1px #22F0FF55,0 0 30px #22F0FF33,0 20px 40px #000a!important}
+.mphone .o{background:#0A1226!important;border:1px solid var(--line)}
+.mphone .p{background:var(--neon)!important;box-shadow:0 0 20px #22F0FF88}
+.mside h3{text-transform:uppercase}
+.mside h3 em{color:transparent!important;background:var(--neon);-webkit-background-clip:text;background-clip:text}
+.mvs{border-color:var(--line2)!important;background:#22F0FF0a!important;font-family:var(--mono)}
+
+/* contacto */
+.advisor{background:radial-gradient(circle at 50% 100%,#22F0FF3d,transparent 60%),linear-gradient(160deg,#1A1240,#0A1226)!important;border:1px solid var(--line2);box-shadow:var(--glow)}
+.advisor::before{background-image:linear-gradient(#22F0FF14 1px,transparent 1px),linear-gradient(90deg,#22F0FF14 1px,transparent 1px)!important;background-size:30px 30px!important}
+.advisor h2{text-transform:uppercase}
+.advisor h2 em{color:transparent!important;background:var(--neon);-webkit-background-clip:text;background-clip:text}
+.advisor .bubble{background:#0A1226!important;color:var(--text)!important;border:1px solid var(--cyan);box-shadow:0 0 18px #22F0FF55!important}
+.advisor .mail{background:#03060Fcc!important;border-color:var(--line2)!important;font-family:var(--mono)}
+.advisor .mail svg{color:var(--cyan)!important}
+form.lead-f{background:var(--glass)!important;color:var(--text)!important;border:1px solid var(--line2);box-shadow:0 0 0 1px #22F0FF33,0 0 40px #22F0FF22!important;backdrop-filter:blur(10px)}
+form.lead-f h3{text-transform:uppercase;font-size:20px!important}
+.fgrid label{color:#B9CCE0!important}
+.fgrid input,.fgrid textarea{background:#020611cc!important;color:var(--text)!important;border:1px solid var(--line2)!important;font-family:var(--body)}
+.fgrid input:focus,.fgrid textarea:focus{border-color:var(--cyan)!important;box-shadow:0 0 0 3px #22F0FF22,0 0 18px #22F0FF33}
+.chipset label{border:1px solid var(--line2)!important;color:var(--text)}
+.chipset input{accent-color:var(--cyan)!important}
+.chipset label:has(input:checked){border-color:var(--cyan)!important;background:#22F0FF1a!important}
+form.lead-f .fine{color:var(--muted)!important}
+.ok{background:#22F0FF22!important;color:var(--text)}
+
+/* chat flotante (asistente.js mete sus estilos al final, por eso !important) */
+.nb-fab{background:var(--neon)!important;color:#020611!important;box-shadow:0 0 22px #22F0FF66,0 14px 30px #0008!important;font-family:var(--body)!important;letter-spacing:.04em}
+.nb-panel{background:var(--glass)!important;border:1px solid var(--line2)!important;box-shadow:var(--glow),0 24px 60px #000a!important;backdrop-filter:blur(12px);font-family:var(--body)!important}
+.nb-hd{background:#040914e6!important;border-bottom:1px solid var(--line2)!important}
+.nb-hd .av,.nb-f button{background:var(--neon)!important;color:#020611!important}
+.nb-m.me{background:var(--neon)!important;color:#020611!important}
+.nb-m.agent{background:#9D5CFF66!important}
+.nb-m a{color:var(--cyan)!important}
+.nb-q button{border-color:var(--line2)!important;background:#22F0FF0d!important}
+.nb-f input{background:#020611cc!important;border:1px solid var(--line2)!important}
+.nb-f input:focus{border-color:var(--cyan)!important;box-shadow:0 0 0 3px #22F0FF22}
+
+/* celular: la tipografía técnica es más ancha */
+.mfeat{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.mfeat b{overflow-wrap:anywhere}
+.mside h3{font-size:clamp(20px,2.4vw,26px)!important;overflow-wrap:anywhere}
+@media (max-width:560px){
+  .hero h1{font-size:clamp(26px,8.4vw,40px)!important}
+  .hero h1 em{white-space:normal!important}
+  .sh h2,.advisor h2{font-size:clamp(22px,7vw,30px)!important}
+  .mfeat{grid-template-columns:minmax(0,1fr)!important}
+  .c-tag{font-size:10px!important}
+}
+
+/* pie */
+footer.bz{border-top-color:var(--line2)!important;font-family:var(--mono);font-size:12px!important}
+footer.bz a{color:var(--cyan)!important}
