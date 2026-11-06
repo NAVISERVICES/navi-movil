@@ -166,6 +166,47 @@ form.lead-f .btn{width:100%;margin-top:16px}
 form.lead-f .fine{font-size:12px;color:#6b6b8f;margin-top:10px;text-align:center}
 .ok{display:none;margin-top:12px;background:#b4e32f33;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600}
 
+/* NAVI Mando: consola + app del operador */
+header.top nav a.nv-new{color:var(--lime);display:inline-flex;align-items:center;gap:6px}
+header.top nav a.nv-new::after{content:"NUEVO";font-size:9.5px;font-weight:800;letter-spacing:.06em;background:var(--lime);color:var(--ink);border-radius:6px;padding:1px 5px}
+#mando{background:radial-gradient(ellipse at 80% 0%,#7b5cfa33,transparent 60%)}
+.mando{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:stretch}
+@media (max-width:900px){.mando{grid-template-columns:1fr}}
+.mshot{background:linear-gradient(180deg,#14146A,#0E0E55);border:1px solid #ffffff1c;border-radius:24px;padding:14px;position:relative;overflow:hidden}
+.mshot .bar3{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:10px}
+.mshot .bar3 i{width:9px;height:9px;border-radius:50%;background:#ffffff26}
+.mshot .bar3 b{color:#fff;margin-left:6px}
+.mgrid{display:grid;grid-template-columns:54px 1fr 150px;gap:10px;height:300px}
+.mgrid .nv{background:#06063A;border-radius:14px;display:flex;flex-direction:column;gap:6px;padding:8px 6px}
+.mgrid .nv span{height:30px;border-radius:9px;background:#ffffff0d;display:grid;place-items:center;font-size:15px}
+.mgrid .nv span:first-child{background:var(--lime)}
+.mgrid .mp{border-radius:14px;background:url(assets/mapa-cdmx.jpg) center/cover;position:relative;overflow:hidden}
+.mgrid .mp::before{content:"";position:absolute;inset:0;background:#0A0A48aa}
+.mgrid .mp .u{position:absolute;width:24px;height:24px;border-radius:50%;border:2px solid #0A0A48;display:grid;place-items:center;font-size:9px;font-weight:800;color:var(--ink);transform:translate(-50%,-50%);animation:ping 2.4s infinite}
+.mgrid .mp .u.m1{animation:ping 2.4s infinite,mv1 9s ease-in-out infinite alternate}
+.mgrid .mp .u.m2{animation:ping 2.4s infinite,mv2 11s ease-in-out infinite alternate}
+@keyframes mv1{to{left:58%;top:30%}}
+@keyframes mv2{to{left:30%;top:70%}}
+.mgrid .ls{display:flex;flex-direction:column;gap:6px}
+.mgrid .ls div{background:#ffffff0a;border-radius:10px;padding:7px 8px;font-size:11px;display:flex;align-items:center;gap:6px}
+.mgrid .ls div i{width:8px;height:8px;border-radius:50%;flex:none}
+.mgrid .ls .sos{background:#ff4d6d2a;border:1px solid #ff4d6d88}
+.mptt{display:flex;align-items:center;gap:10px;margin-top:10px;background:#ffffff0a;border-radius:12px;padding:8px 10px;font-size:12px;color:var(--muted)}
+.mptt b{background:var(--lime);color:var(--ink);border-radius:10px;padding:6px 12px;font-family:var(--display)}
+.mphone{position:absolute;right:16px;bottom:-30px;width:130px;height:250px;border-radius:24px;border:6px solid #000;background:#08083F;box-shadow:0 20px 40px #000a;padding:10px 8px;display:flex;flex-direction:column;gap:6px}
+.mphone .o{background:#13136A;border-radius:10px;padding:6px;font-size:9.5px;line-height:1.3}
+.mphone .o b{display:block;font-size:10.5px}
+.mphone .p{margin:6px auto 0;width:66px;height:66px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:var(--ink);font-weight:800;font-size:9px;text-align:center;line-height:1.1}
+@media (max-width:560px){.mgrid{grid-template-columns:1fr;height:auto}.mgrid .nv,.mgrid .ls{display:none}.mgrid .mp{height:220px}.mphone{display:none}}
+.mfeat{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfeat div{background:#ffffff08;border:1px solid #ffffff12;border-radius:16px;padding:13px 14px}
+.mfeat b{display:block;font-size:14.5px}
+.mfeat small{color:var(--muted);font-size:12.5px;line-height:1.35;display:block;margin-top:2px}
+.mside{display:flex;flex-direction:column;gap:14px}
+.mside h3{font-size:26px}
+.mside h3 em{font-style:normal;color:var(--lime)}
+.mbtns{display:flex;gap:10px;flex-wrap:wrap}
+.mvs{font-size:12.5px;color:var(--muted);background:#ffffff08;border:1px dashed #ffffff26;border-radius:12px;padding:10px 12px}
 footer.bz{border-top:1px solid #ffffff12;padding:28px 0 40px;font-size:13px;color:var(--muted)}
 footer.bz .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 footer.bz a{color:#fff;text-decoration:underline;text-underline-offset:3px}
@@ -203,7 +244,7 @@ footer.bz a{color:#fff;text-decoration:underline;text-underline-offset:3px}
 <header class="top">
   <div class="wrap">
     <a class="logo" href="index.html"><img src="assets/navi-logo.png" alt="Navi"><small>EMPRESAS</small></a>
-    <nav aria-label="Secciones"><a href="#conectividad">Conectividad</a><a href="#aplicaciones">Aplicaciones</a><a href="#tecnologia">Tecnología</a><a href="#contacto">Contacto</a></nav>
+    <nav aria-label="Secciones"><a href="#conectividad">Conectividad</a><a href="#mando" class="nv-new">NAVI Mando</a><a href="#aplicaciones">Aplicaciones</a><a href="#tecnologia">Tecnología</a><a href="#contacto">Contacto</a></nav>
     <a class="btn sm cta" href="#contacto">Hablar con un asesor</a>
     <a class="btn btn-ghost sm back" href="index.html">← <span>Navi Móvil</span></a>
   </div>
@@ -290,6 +331,51 @@ footer.bz a{color:#fff;text-decoration:underline;text-underline-offset:3px}
           </svg></div>
           <div class="body"><h3>Internet para tu negocio</h3><p>Módem portátil solo datos para oficina, sucursal o punto de venta.</p></div>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="mando">
+    <div class="wrap">
+      <div class="sh reveal"><span class="eyebrow">Nuevo · NAVI Mando</span><h2>Toda tu operación en una consola. Tu equipo, en una app.</h2><p>Mapa en vivo, radio, órdenes de trabajo con evidencia, rondines, geocercas y SOS. La central dirige desde la web y los operadores trabajan desde su celular.</p></div>
+      <div class="mando">
+        <div class="mshot reveal" aria-hidden="true">
+          <div class="bar3"><i></i><i></i><i></i><b>NAVI Mando · Consola</b></div>
+          <div class="mgrid">
+            <div class="nv"><span>🛰️</span><span>📋</span><span>🛡️</span><span>📍</span><span>💬</span><span>🚨</span><span>📊</span></div>
+            <div class="mp">
+              <span class="u m1" style="left:30%;top:40%;background:#B4E32F">AR</span>
+              <span class="u m2" style="left:62%;top:28%;background:#7EE0FF">JS</span>
+              <span class="u" style="left:48%;top:66%;background:#FFC22E">LH</span>
+              <span class="u" style="left:76%;top:58%;background:#FF4D6D;color:#fff">KM</span>
+            </div>
+            <div class="ls">
+              <div class="sos"><i style="background:#FF4D6D"></i><b>SOS</b> Karla M.</div>
+              <div><i style="background:#7EE0FF"></i>José · En camino</div>
+              <div><i style="background:#FFC22E"></i>Lucía · En sitio</div>
+              <div><i style="background:#B4E32F"></i>Arturo · Disponible</div>
+              <div>📋 OT-1045 por asignar</div>
+              <div>✅ OT-1039 con firma</div>
+            </div>
+          </div>
+          <div class="mptt"><b>🎙️ Hablar</b>Canal Reparto Norte · José: "Voy saliendo hacia Lindavista"</div>
+          <div class="mphone"><div class="o"><b>OT-1044</b>Entrega · Polanco</div><div class="o"><b>✓ Checklist 3/3</b>📷 Foto · ✍️ Firma</div><div class="p">MANTÉN<br>PARA<br>HABLAR</div></div>
+        </div>
+        <div class="mside reveal">
+          <h3>Más que radio: <em>gestión completa</em> de tu equipo en campo</h3>
+          <div class="mfeat">
+            <div><b>🛰️ Mapa en vivo</b><small>Ubicación, estado, batería y datos de cada línea</small></div>
+            <div><b>🎙️ Radio PTT</b><small>Por grupo o privado, con voz grabada</small></div>
+            <div><b>📋 Órdenes con evidencia</b><small>Checklist, foto, firma y tiempo límite</small></div>
+            <div><b>🤖 Asignación inteligente</b><small>Sugiere al operador más cercano y libre</small></div>
+            <div><b>🛡️ Rondines QR / NFC</b><small>Cumplimiento por punto y por ronda</small></div>
+            <div><b>🆘 SOS y trabajo solo</b><small>Alerta inmediata y apoyo del más cercano</small></div>
+            <div><b>📍 Geocercas</b><small>Avisos al entrar o salir de cada zona</small></div>
+            <div><b>📊 Reportes</b><small>Resumen del turno y exportación a Excel</small></div>
+          </div>
+          <div class="mbtns"><a class="btn btn-lime" href="mando/" target="_blank" rel="noopener">Abrir la consola →</a><a class="btn btn-ghost" href="mando/app/" target="_blank" rel="noopener">📱 App del operador</a></div>
+          <p class="mvs">💡 Demo: abre la consola y la app en el mismo navegador (dos pestañas) y verás cómo se sincronizan al instante: asigna una orden y llega al celular; presiona SOS y suena en la central.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -414,6 +500,7 @@ footer.bz a{color:#fff;text-decoration:underline;text-underline-offset:3px}
               <label><input type="checkbox" value="Líneas móviles">Líneas</label>
               <label><input type="checkbox" value="Internet para negocio">Internet</label>
               <label><input type="checkbox" value="Seguridad (SOS / Safe City)">Seguridad</label>
+              <label><input type="checkbox" value="NAVI Mando (consola + app de operadores)">NAVI Mando</label>
               <label><input type="checkbox" value="PTT">PTT</label>
               <label><input type="checkbox" value="Rastreo (Track)">Rastreo</label>
               <label><input type="checkbox" value="IoT / LoRaWAN">IoT</label>
