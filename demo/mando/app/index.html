@@ -336,6 +336,7 @@ function scrMas() {
     ${r ? `<button class="li" data-a="rondin"><i>🛡️</i><span><b>Rondín</b><small>${E(r.name)}</small></span>›</button>` : ''}
     ${indoor() ? `<button class="li" data-a="area"><i>📍</i><span><b>¿En qué área estás?</b><small>${E(here())} · se actualiza al escanear el código del área</small></span>›</button>` : ''}
     <button class="li" data-a="solo"><i>🧍</i><span><b>Modo trabajo solo</b><small>Te preguntamos cada minuto si estás bien</small></span><span class="sw ${p.solo ? 'on' : ''}"></span></button>
+    <a class="li" href="../manual.html#dia" target="_blank" rel="noopener"><i>📘</i><span><b>Manual de uso</b><small>Cómo trabajar con la app paso a paso</small></span>›</a>
     <button class="li" data-a="install"><i>📲</i><span><b>Instalar en mi celular</b><small>Agrégala a tu pantalla de inicio</small></span>›</button>
     <button class="li" data-a="logout"><i>🚪</i><span><b>Cerrar sesión</b><small>${E(p.name)} · ${E(S.empresa)}</small></span>›</button>
     <p class="muted" style="font-size:12px;text-align:center;margin-top:16px">NAVI Mando · demo · tu ubicación solo se comparte durante tu turno</p>`;
