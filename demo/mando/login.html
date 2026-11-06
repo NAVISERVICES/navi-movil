@@ -102,7 +102,7 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
   </section>
 </div>
 
-<script src="mando.js?v=6"></script>
+<script src="mando.js?v=7"></script>
 <script>
 const M = Mando, A = M.Auth, E = M.esc, $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
@@ -114,7 +114,7 @@ if (qs.has('manual')) $('f').insertAdjacentHTML('afterbegin', '<p class="expired
 
 $('giros').innerHTML = Object.values(M.CLIENTS).map(c => `<div><b>${c.icon} ${E(c.tipo)}</b><small>${E(c.desc)}</small></div>`).join('');
 $('demo').innerHTML = A.USERS.map(u => { const c = M.CLIENTS[u.client];
-  return `<button type="button" data-u="${E(u.user)}"><i>${c.icon}</i><span>${E(c.name)}<small>${E(u.user)}</small></span></button>`; }).join('');
+  return `<button type="button" data-u="${E(u.user)}"><i>${c.icon}</i><span>${E(c.name)}<small>${E(u.user)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span></button>`; }).join('');
 $('demo').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   $('user').value = b.dataset.u; $('pass').value = A.USERS.find(u => u.user === b.dataset.u).pass; $('err').textContent = '';

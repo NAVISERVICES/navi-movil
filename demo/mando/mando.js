@@ -6,7 +6,7 @@
 // cerrado como un almacén (plano en metros). Cada sitio tiene su propia escala.
 (function () {
   const KEY = 'navi.mando';
-  const V = 9;
+  const V = 10;
   const now = () => Date.now();
   const MIN = 60000;
   const uid = p => (p || 'x') + Math.random().toString(36).slice(2, 8);
@@ -29,7 +29,9 @@
     bateria:  { t: 'Batería baja', i: '🔋', c: '#FFC22E' },
     receso:   { t: 'Receso excedido', i: '🍽️', c: '#E58BFF' },
     sla:      { t: 'Orden vencida', i: '⏱️', c: '#FF7A45' },
-    rondin:   { t: 'Rondín incompleto', i: '🛡️', c: '#FFC22E' }
+    rondin:   { t: 'Rondín incompleto', i: '🛡️', c: '#FFC22E' },
+    desvio:   { t: 'Fuera de ruta', i: '🛣️', c: '#FF7A45' },
+    cambio:   { t: 'Pide cambio de ruta', i: '🔀', c: '#9D5CFF' }
   };
 
   // SOS empresarial: tipo de emergencia con su protocolo para la mesa de control
@@ -354,6 +356,36 @@
       s.msgs = s.msgs.filter(m => !/wifi|Enterada|Pedido|andén/.test(m.txt || ''));
       s.msgs.find(m => m.kind === 'difusion').txt = 'Buen día choferes. Hoy hay lluvia en la tarde: manejen con precaución y respeten los límites.';
       s.msgs.push({ id: uid('m'), from: 'p9', to: 'c3', kind: 'text', txt: 'Ya cargué en el patio, salgo a Aeropuerto', at: t - 8 * MIN, reads: ['consola'] });
+      // la zona del aeropuerto es la terminal de carga, destino normal de los viajes
+      Object.assign(s.zones.find(z => z.id === 'z3'), { name: 'Terminal de carga Aeropuerto', type: 'base', exit: true });
+      // viajes con ruta asignada: corredor de tolerancia y cambios de ruta que autoriza el administrador
+      const o44 = s.orders.find(o => o.opId === 'p1' && o.status === 'asignada');
+      if (o44) { o44.opId = null; o44.status = 'nueva'; o44.hist = o44.hist.slice(0, 1); }
+      Object.assign(s.ops.find(p => p.id === 'p8'), { shift: { at: t - 3 * 60 * MIN } });
+      s.trips = []; s.tripFolio = 296;
+      const short = i => PLACES[i].n.split(' · ')[0];
+      const mkT = (opId, a, b, cargo, unit, ago) => {
+        const p = s.ops.find(x => x.id === opId), path = routeBetween(pt(PLACES[a]), pt(PLACES[b]));
+        const tr = { id: uid('vj'), folio: 'VJ-' + (++s.tripFolio), opId, from: short(a), to: short(b), fromAddr: PLACES[a].n, toAddr: PLACES[b].n, cargo, unit, path, orig: path, seg: 0, tol: TOL, start: t - ago * MIN, status: 'enruta', reqs: [], req: null, off: false, loop: true };
+        const q = path[0], n = path[1];
+        Object.assign(p, { site: 'city', x: +(q[0] + (n[0] - q[0]) * .35).toFixed(2), y: +(q[1] + (n[1] - q[1]) * .35).toFixed(2), target: null, order: null, status: 'encamino' });
+        p.trail = [[q[0], q[1]], [p.x, p.y]];
+        s.trips.push(tr); s.events.push({ at: tr.start, opId, txt: 'Inició viaje ' + tr.folio + ' · ' + tr.from + ' → ' + tr.to, type: 'ruta' });
+        return tr;
+      };
+      // viaje de la mañana ya entregado, con un cambio de ruta que autorizó la jefa de tráfico
+      const v0 = mkT('p9', 6, 8, 'Paquetería · 36 bultos', 'T-21', 150);
+      const r0 = { id: uid('rq'), motivo: 'obra', note: 'Cerraron Calzada de Tlalpan por obra del Metro', pick: 'B', at: t - 128 * MIN, status: 'aprobada', by: 'Laura Benítez', dec: t - 126 * MIN, resp: 'Adelante, avisa al llegar', chosen: 'B', opts: [] };
+      Object.assign(v0, { status: 'entregado', done: t - 95 * MIN, loop: false, req: r0, reqs: [r0], alt: 'Vía Narvarte' });
+      // en ruta ahora
+      mkT('p9', 8, 10, 'Paquetería · 48 bultos', 'T-21', 8);
+      const v2 = mkT('p8', 7, 3, 'Electrónica · 12 tarimas (custodiada)', 'T-07', 14);
+      const v3 = mkT('p1', 0, 5, 'Refacciones · 30 cajas', 'T-14', 11);
+      // Raúl pide ruta alterna por un choque: espera la autorización del administrador
+      tripReq(s, v2.id, 'choque', 'Choque de dos tráileres en Viaducto, no avanza nada', 'A');
+      s.alerts[s.alerts.length - 1].at = s.events[s.events.length - 1].at = v2.req.at = t - 2 * MIN;
+      // Arturo se va a desviar sin pedir permiso: la consola lo detecta en unos segundos
+      simDesvio(s, v3.id);
       s.folio = 1050;
     }
     s.alerts = s.alerts.filter(a => s.ops.some(p => p.id === a.opId));
@@ -459,10 +491,16 @@
         // con GPS real (señal de los últimos 2 min) no se simula: solo se revisa si ya llegó
         const gps = p.gps && t - p.gps < 120000;
         const o = p.order && s.orders.find(x => x.id === p.order);
+        // viaje con ruta: el simulador sigue la ruta vigente (o el desvío de prueba)
+        const tr = p.site === 'city' && activeTrip(s, p.id);
+        if (tr && !gps && !p.target) {
+          const n = tr.detour && tr.detourPt ? tr.detourPt : tr.path[tr.seg + 1];
+          if (n) p.target = { x: n[0], y: n[1] };
+        }
         if (gps) {
           if (o && o.status === 'encamino' && dist(p, o) < (st.kind === 'indoor' ? 3 : .6)) advance(s, o.id, 'ensitio', 'detectado por GPS');
         } else if (p.target) {
-          const d = dist(p, p.target), step = Math.min(d, sc.step * (.8 + Math.random() * .4));
+          const d = dist(p, p.target), step = Math.min(d, sc.step * (.8 + Math.random() * .4) * (tr ? .3 : 1));
           if (d > .3) { p.x += (p.target.x - p.x) / d * step; p.y += (p.target.y - p.y) / d * step; }
           if (dist(p, p.target) < sc.arrive) {
             if (o && o.status === 'encamino') advance(s, o.id, 'ensitio', st.kind === 'indoor' ? 'detectado en el área' : 'detectado por GPS');
@@ -504,6 +542,7 @@
           p.status = 'disponible'; p.recesoAt = null; p.recesoAuto = false;
         }
         if (p.status === 'receso' && p.recesoAt && t - p.recesoAt > (s.breakMin || 45) * MIN) alert(s, 'receso', p.id, 'Lleva ' + Math.round((t - p.recesoAt) / MIN) + ' min en receso (tiempo de comida: ' + (s.breakMin || 45) + ' min)', { ref: p.recesoAt });
+        if (tr) tripTick(s, p, tr, t);
         const moved = gps ? 0 : dist(prev, p);
         p.km = +(p.km + moved * sc.km).toFixed(3);
         if (moved > (st.kind === 'indoor' ? .8 : .2)) { p.trail.push([+p.x.toFixed(2), +p.y.toFixed(2)]); if (p.trail.length > 40) p.trail.shift(); }
@@ -531,6 +570,13 @@
       s.orders.forEach(o => {
         if (['completada', 'cancelada'].includes(o.status) || t < o.due) return;
         if (!o.late) { o.late = true; alert(s, 'sla', o.opId, o.folio + ' venció su tiempo (' + o.sla + ' min)', { ref: o.id }); }
+      });
+      // demo: al entregar, el chofer regresa a su base con un viaje nuevo
+      (s.trips || []).forEach(tr => {
+        if (tr.status !== 'entregado' || !tr.loop || tr.next || t - tr.done < 40000) return;
+        const p = s.ops.find(x => x.id === tr.opId); if (!p || ['fuera', 'sos', 'receso'].includes(p.status) || activeTrip(s, p.id)) return;
+        tr.next = true;
+        mkTrip(s, { opId: p.id, from: tr.to, to: tr.from, toAddr: tr.fromAddr, fromAddr: tr.toAddr, cargo: 'Regreso a base', unit: tr.unit, path: routeBetween(pt(p), tr.orig[0]), loop: true });
       });
     });
   }
@@ -759,14 +805,142 @@
     return a;
   }
 
+  // ---------- viajes con ruta asignada (transporte) ----------
+  // Cada viaje lleva una ruta y un corredor de tolerancia: si el chofer se sale, se alerta a la mesa de control.
+  // Si hay un choque, tráfico u obra, el chofer pide una ruta alterna desde su app y SOLO el administrador
+  // de la consola la puede autorizar. Mientras no la autoricen, la ruta vigente sigue siendo la original.
+  const DESVIO_MOT = {
+    choque:  { i: '💥', t: 'Choque o accidente adelante' },
+    trafico: { i: '🚗', t: 'Tráfico detenido (trancón)' },
+    obra:    { i: '🚧', t: 'Obra o calle cerrada' },
+    bloqueo: { i: '✊', t: 'Manifestación o bloqueo' },
+    clima:   { i: '🌧️', t: 'Inundación o clima' },
+    reten:   { i: '🚔', t: 'Operativo o retén' },
+    otro:    { i: '✍️', t: 'Otro motivo' }
+  };
+  const TOL = 1.2;  // tolerancia del corredor en unidades de mapa (≈ 370 m)
+  const pt = P => [+(+P.x).toFixed(2), +(+P.y).toFixed(2)];
+  // tramos en "L" entre los puntos de paso, como cuadras de la ciudad
+  function streetPath(pts, yFirst) {
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      const a = out[out.length - 1], b = pts[i];
+      if (Math.abs(a[0] - b[0]) > .3 && Math.abs(a[1] - b[1]) > .3) out.push(yFirst ? [a[0], b[1]] : [b[0], a[1]]);
+      out.push(b);
+    }
+    return out;
+  }
+  function routeBetween(a, b) {
+    const j = [+(a[0] + (b[0] - a[0]) * .45).toFixed(2), +(a[1] + (b[1] - a[1]) * .55).toFixed(2)];
+    return streetPath([a, j, b]);
+  }
+  function segD(p, a, b) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+    const k = L2 ? Math.max(0, Math.min(1, ((p.x - a[0]) * dx + (p.y - a[1]) * dy) / L2)) : 0;
+    return Math.hypot(p.x - a[0] - k * dx, p.y - a[1] - k * dy);
+  }
+  // qué tan lejos está el chofer de su ruta (unidades de mapa)
+  function offRoute(p, path) { let m = Infinity; for (let i = 1; i < path.length; i++) m = Math.min(m, segD(p, path[i - 1], path[i])); return m; }
+  function pathLen(path) { let d = 0; for (let i = 1; i < path.length; i++) d += Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]); return d; }
+  function tripLeft(tr, p) { const n = tr.path[tr.seg + 1]; return n ? Math.hypot(p.x - n[0], p.y - n[1]) + pathLen(tr.path.slice(tr.seg + 1)) : 0; }
+  // avance: lo ya recorrido antes de un cambio de ruta cuenta en el total
+  function tripPct(tr, p) { const T = pathLen(tr.path) + (tr.doneLen || 0); return tr.status === 'entregado' ? 100 : T ? Math.max(0, Math.min(99, Math.round((1 - tripLeft(tr, p) / T) * 100))) : 0; }
+  const activeTrip = (s, opId) => (s.trips || []).find(x => x.opId === opId && x.status === 'enruta');
+  // dos opciones de ruta alterna desde donde va el chofer hasta su destino
+  function altOptions(s, tr) {
+    const p = s.ops.find(x => x.id === tr.opId), dest = tr.path[tr.path.length - 1], from = pt(p);
+    const dx = dest[0] - from[0], dy = dest[1] - from[1], L = Math.hypot(dx, dy) || 1;
+    const side = [+(from[0] + dx / 2 - dy / L * 4).toFixed(2), +(from[1] + dy / 2 + dx / L * 4).toFixed(2)];
+    const mid = { x: from[0] + dx / 2, y: from[1] + dy / 2 };
+    const via = PLACES.filter(P => Math.hypot(P.x - dest[0], P.y - dest[1]) > 5 && Math.hypot(P.x - from[0], P.y - from[1]) > 5)
+      .sort((a, b) => dist(a, mid) - dist(b, mid))[0];
+    const opts = [{ id: 'A', name: 'Por calles paralelas', path: streetPath([from, side, dest], true) }];
+    if (via && dist(via, mid) < L * .8) opts.push({ id: 'B', name: 'Vía ' + via.n.split(' · ')[0], path: streetPath([from, pt(via), dest]) });
+    else opts.push({ id: 'B', name: 'Rodeo por el otro lado', path: streetPath([from, [+(from[0] + dx / 2 + dy / L * 4).toFixed(2), +(from[1] + dy / 2 - dx / L * 4).toFixed(2)], dest]) });
+    // tiempo estimado según el tipo de vía: calles paralelas más lentas que una avenida principal
+    opts.forEach(o => { o.km = +(pathLen(o.path) * SCALE.outdoor.km).toFixed(1); o.min = Math.max(3, Math.round(o.km / (o.id === 'A' ? 24 : 31) * 60)); });
+    return opts;
+  }
+  function mkTrip(s, o) {
+    s.trips = s.trips || [];
+    const tr = Object.assign({ id: uid('vj'), folio: 'VJ-' + (s.tripFolio = (s.tripFolio || 300) + 1), status: 'enruta', seg: 0, tol: TOL, start: now(), reqs: [], req: null, off: false, loop: false }, o);
+    tr.orig = tr.orig || tr.path;
+    s.trips.push(tr);
+    const p = s.ops.find(x => x.id === tr.opId);
+    if (p) { p.status = 'encamino'; p.target = null; }
+    event(s, tr.opId, 'Inició viaje ' + tr.folio + ' · ' + tr.from + ' → ' + tr.to, 'ruta');
+    return tr;
+  }
+  // el chofer pide la ruta alterna (desde su app)
+  function tripReq(s, tripId, motivo, note, pick) {
+    const tr = s.trips.find(x => x.id === tripId); if (!tr || tr.status !== 'enruta') return null;
+    if (tr.req && tr.req.status === 'pendiente') return tr.req;
+    const K = DESVIO_MOT[motivo] || DESVIO_MOT.otro;
+    tr.req = { id: uid('rq'), motivo, note: note || '', pick: pick || 'A', opts: altOptions(s, tr), at: now(), status: 'pendiente' };
+    alert(s, 'cambio', tr.opId, tr.folio + ' · ' + K.t + (note ? ' — "' + note + '"' : ''), { ref: tr.req.id, trip: tr.id });
+    event(s, tr.opId, 'Pidió ruta alterna (' + K.t + ') · ' + tr.folio, 'ruta');
+    return tr.req;
+  }
+  // SOLO el administrador de la consola autoriza o rechaza (en producción lo valida el servidor)
+  function tripDecide(s, tripId, ok, ses, optId, note) {
+    if (!ses || !ses.admin) return { err: 'Solo el administrador de la consola puede autorizar cambios de ruta.' };
+    const tr = s.trips.find(x => x.id === tripId), r = tr && tr.req;
+    if (!r || r.status !== 'pendiente') return { err: 'Esta solicitud ya fue atendida.' };
+    const p = s.ops.find(x => x.id === tr.opId), K = DESVIO_MOT[r.motivo] || DESVIO_MOT.otro;
+    Object.assign(r, { status: ok ? 'aprobada' : 'rechazada', by: ses.name, dec: now(), resp: note || '', chosen: ok ? (optId || r.pick) : null });
+    tr.reqs.push(r);
+    if (ok) {
+      const o = r.opts.find(x => x.id === r.chosen) || r.opts[0];
+      tr.base = tr.base || tr.path;
+      tr.doneLen = (tr.doneLen || 0) + Math.max(0, pathLen(tr.path) - tripLeft(tr, p));
+      tr.path = [pt(p)].concat(o.path.slice(1)); tr.seg = 0; tr.alt = o.name; tr.detour = false; tr.detourPt = null;
+      if (!(p.gps && now() - p.gps < 120000)) p.target = null;
+    }
+    s.alerts.filter(a => a.type === 'cambio' && a.ref === r.id && a.status !== 'cerrada').forEach(a => { a.status = 'cerrada'; a.closed = now(); a.note = (ok ? 'Autorizada' : 'Rechazada') + ' por ' + ses.name + (note ? ' — ' + note : ''); });
+    s.msgs.push({ id: uid('m'), from: 'consola', to: tr.opId, kind: 'text', at: now(), reads: ['consola'],
+      txt: ok ? '✅ Ruta alterna autorizada por ' + ses.name + ' (' + K.t + '). Ya está en tu mapa: ' + tr.alt + '.' + (note ? ' ' + note : '')
+              : '❌ ' + ses.name + ' no autorizó el cambio de ruta. Sigue tu ruta original.' + (note ? ' Motivo: ' + note : '') });
+    event(s, tr.opId, (ok ? 'Ruta alterna autorizada' : 'Cambio de ruta rechazado') + ' por ' + ses.name + ' · ' + tr.folio, 'ruta');
+    return { ok: true };
+  }
+  // demo: el chofer se sale de su ruta sin autorización
+  function simDesvio(s, tripId) {
+    const tr = s.trips.find(x => x.id === tripId), p = tr && s.ops.find(x => x.id === tr.opId); if (!p) return;
+    const n = tr.path[tr.seg + 1] || tr.path[tr.path.length - 1], dx = n[0] - p.x, dy = n[1] - p.y, L = Math.hypot(dx, dy) || 1;
+    tr.detour = true; tr.detourPt = [+(p.x + dx * .4 + dy / L * 4).toFixed(2), +(p.y + dy * .4 - dx / L * 4).toFixed(2)];
+    p.target = { x: tr.detourPt[0], y: tr.detourPt[1] };
+  }
+  // en cada ciclo: avanzar por la ruta, revisar el corredor y cerrar el viaje al llegar
+  function tripTick(s, p, tr, t) {
+    const n = tr.path[tr.seg + 1];
+    if (tr.detour && tr.detourPt) { if (Math.hypot(p.x - tr.detourPt[0], p.y - tr.detourPt[1]) < 1.05) { tr.detour = false; tr.detourPt = null; p.target = null; } }
+    else if (n && Math.hypot(p.x - n[0], p.y - n[1]) < 1.05) { tr.seg++; p.target = null; }
+    if (tr.seg >= tr.path.length - 1) {
+      tr.status = 'entregado'; tr.done = t; tr.off = false; p.target = null; if (p.status === 'encamino') p.status = 'disponible';
+      event(s, p.id, 'Llegó a destino · ' + tr.folio + ' · ' + tr.to, 'ruta'); return;
+    }
+    // GPS real fuera de la ciudad del demo (p. ej. probando desde otro país): no se evalúa el corredor
+    if (p.x < 0 || p.x > 100 || p.y < 0 || p.y > 100) return;
+    const d = offRoute(p, tr.path), off = d > (tr.tol || TOL);
+    tr.dev = +d.toFixed(2);
+    if (off && !tr.off) {
+      tr.off = true; tr.offAt = t;
+      const pend = tr.req && tr.req.status === 'pendiente';
+      alert(s, 'desvio', p.id, tr.folio + ' se salió de su ruta · ' + Math.round(d * SCALE.outdoor.km * 1000) + ' m fuera del corredor' + (pend ? ' (pidió cambio pero aún no se lo autorizan)' : ' sin autorización'), { ref: tr.id + ':' + t, trip: tr.id });
+      event(s, p.id, 'Se salió de la ruta · ' + tr.folio, 'ruta');
+    } else if (!off && tr.off) { tr.off = false; event(s, p.id, 'Regresó a su ruta · ' + tr.folio, 'ruta'); }
+  }
+
   // ---------- acceso por usuario ----------
   // Solo entran clientes de Navi. Cada usuario pertenece a UNA empresa: al entrar ve sus datos y
   // no puede cambiarse a otra empresa sin salir. En producción esto lo valida el servidor.
   const USERS = [
-    { user: 'prosegur.seguridad',   pass: 'Mando2026', name: 'Ricardo Salas',  role: 'Gerente de operaciones',   client: 'seguridad' },
-    { user: 'dhl.transporte',       pass: 'Mando2026', name: 'Laura Benítez',  role: 'Jefa de tráfico',          client: 'transporte' },
-    { user: 'amazon.almacen',       pass: 'Mando2026', name: 'Jorge Medina',   role: 'Gerente de CEDIS',         client: 'operativa' },
-    { user: 'mercadolibre.mixta',   pass: 'Mando2026', name: 'Patricia Ochoa', role: 'Directora de operaciones', client: 'mixta' }
+    // admin: true = administrador de la consola (autoriza cambios de ruta); false = monitorista de la mesa de control
+    { user: 'prosegur.seguridad',   pass: 'Mando2026', name: 'Ricardo Salas',  role: 'Gerente de operaciones',   client: 'seguridad',  admin: true },
+    { user: 'dhl.transporte',       pass: 'Mando2026', name: 'Laura Benítez',  role: 'Jefa de tráfico',          client: 'transporte', admin: true },
+    { user: 'dhl.mesa',             pass: 'Mando2026', name: 'Óscar Ruiz',     role: 'Monitorista · mesa de control', client: 'transporte', admin: false },
+    { user: 'amazon.almacen',       pass: 'Mando2026', name: 'Jorge Medina',   role: 'Gerente de CEDIS',         client: 'operativa',  admin: true },
+    { user: 'mercadolibre.mixta',   pass: 'Mando2026', name: 'Patricia Ochoa', role: 'Directora de operaciones', client: 'mixta',      admin: true }
   ];
   const OP_PIN = '1234';  // demo: todos los operadores entran con este PIN
   const SKEY = 'navi.mando.sesion', OKEY = 'navi.mando.app.sesion';
@@ -781,10 +955,12 @@
     login(user, pass, keep) {
       const u = USERS.find(x => x.user === String(user || '').trim().toLowerCase() && x.pass === pass);
       if (!u) return null;
-      const s = { kind: 'consola', user: u.user, name: u.name, role: u.role, client: u.client, at: now() };
+      const s = { kind: 'consola', user: u.user, name: u.name, role: u.role, client: u.client, admin: !!u.admin, at: now() };
       wr(SKEY, s, keep); return s;
     },
-    current() { const s = rd(SKEY); return s && CLIENTS[s.client] ? s : null; },
+    // el permiso de administrador sale de la lista de usuarios, no de lo guardado en el navegador
+    current() { const s = rd(SKEY), u = s && USERS.find(x => x.user === s.user); if (!s || !u || !CLIENTS[s.client]) return null; s.admin = !!u.admin; s.role = u.role; return s; },
+    admins(cid) { return USERS.filter(u => u.client === cid && u.admin).map(u => u.name); },
     logout() { wr(SKEY, null); },
     // app del operador: código de empresa + celular + PIN
     loginOp(code, phone, pin) {
@@ -806,6 +982,7 @@
 
   window.Mando = { Auth, SOS_KINDS, sos, KEY, STATUS, ORDER_ST, ALERT_T, PLACES, SCALE, BOX, toLL, fromLL, load, save, update, on, tick, nearest, advance, event, alert, orderHist, uid, dist, km, fmtD, eta, site, scale, areaAt, members, forMe, planSVG, fmtT, ago, esc, Ptt, beep, MIN,
     AREA_T, aType, isWork, CLIENTS,
+    DESVIO_MOT, routeBetween, altOptions, mkTrip, tripReq, tripDecide, simDesvio, activeTrip, tripLeft, tripPct, pathLen, offRoute, pt,
     useClient(cid) { CID = CLIENTS[cid] ? cid : 'mixta'; return CID; },
     client() { return CID; },
     clientByCode(code) { return Object.keys(CLIENTS).find(k => CLIENTS[k].code === String(code || '').trim().toUpperCase()); },

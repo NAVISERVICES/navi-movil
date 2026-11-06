@@ -256,6 +256,26 @@ table.t tr:hover td{background:#ffffff06}
 .me small{display:block;color:var(--muted);font-size:11px;line-height:1.2}
 .me button{font-size:12px;font-weight:700;color:var(--muted);border:1px solid var(--line2);border-radius:9px;padding:5px 9px}
 .me button:hover{color:#fff;border-color:var(--lime)}
+/* rutas y desvíos */
+.rutas{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:16px;align-items:start}
+.rutas > div:first-child{max-height:calc(100vh - 210px);overflow:auto;padding-right:4px}
+@media (max-width:1050px){.rutas{grid-template-columns:1fr}.rutas > div:first-child{max-height:none}}
+.rrole{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:10px 12px;border-radius:14px;border:1px solid var(--line2);background:#ffffff08;margin-bottom:12px}
+.rrole.adm{border-color:#b4e32f55;background:#b4e32f12}
+.rt-h{font-size:13px;color:var(--muted);margin:16px 0 8px;letter-spacing:.04em;text-transform:uppercase}
+.card.req{border-color:#ffc22e88;box-shadow:0 0 0 1px #ffc22e33,0 0 24px #ffc22e22;margin-bottom:12px}
+.card.trip{margin-bottom:10px;cursor:pointer;transition:border-color .2s}
+.card.trip.on{border-color:var(--lime)}.card.trip.off{border-color:#ff4d6d99}
+.trip .th{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.trip .th .sp{flex:1}
+.rq-who{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rq-who b{display:block;font-size:13.5px}.rq-who small{display:block;color:var(--muted);font-size:12px}
+.rq-mot{display:flex;gap:10px;align-items:flex-start;background:#ffffff0a;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px}
+.rq-mot > span:first-child{font-size:22px}.rq-mot small{display:block;color:var(--muted);margin-top:2px}
+.tr-ft{display:flex;gap:8px;font-size:13px;margin-bottom:8px;color:#dfe3ff}
+.row-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.row-b .lock{font-size:12.5px;color:var(--yellow);font-weight:700;margin-right:auto}
+.chip.ok{background:#b4e32f22;color:var(--lime)}.chip.warn{background:#ffc22e22;color:var(--yellow)}.chip.bad{background:#ff4d6d33;color:#ff9db0}
 .manv{height:100%;display:flex}
 .manv iframe{flex:1;width:100%;border:0;min-height:calc(100dvh - 58px);background:#0B0B4F}
 /* editor de layout */
@@ -311,7 +331,7 @@ table.t tr:hover td{background:#ffffff06}
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="mando.js?v=6"></script>
+<script src="mando.js?v=7"></script>
 <script>
 const M = Mando, E = M.esc, $ = id => document.getElementById(id);
 // solo entran clientes con usuario: la empresa la define la sesión, no se cambia desde adentro
@@ -320,11 +340,11 @@ if (!SES) { location.replace('login.html?next=' + encodeURIComponent('index.html
 M.useClient(SES.client);
 let S = M.load();
 let view = (location.hash.slice(1) || 'vivo');
-const ui = { sel: null, side: 'equipo', grp: 'all', site: 'city', show: { ord: true, zon: true, trail: true }, conv: 'all', pttCh: 'all', ordQ: '', ordG: 'all', pick: null, seenSos: new Set(), talking: false };
+const ui = { trip: null, optPick: {}, seenReq: new Set(), sel: null, side: 'equipo', grp: 'all', site: 'city', show: { ord: true, zon: true, trail: true }, conv: 'all', pttCh: 'all', ordQ: '', ordG: 'all', pick: null, seenSos: new Set(), talking: false };
 try { Object.assign(ui.show, JSON.parse(localStorage.getItem('navi.mando.ui') || '{}')); } catch (e) {}
 
 const VIEWS = [
-  ['vivo', '🛰️', 'En vivo'], ['ordenes', '📋', 'Órdenes'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
+  ['vivo', '🛰️', 'En vivo'], ['ordenes', '📋', 'Órdenes'], ['rutas', '🛣️', 'Rutas'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
   ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo'], ['layout', '🏗️', 'Layout'], ['manual', '📘', 'Manual']
 ];
 const op = id => S.ops.find(p => p.id === id);
@@ -345,8 +365,8 @@ const siteSeg = (cur, attr) => `<div class="seg" ${attr}>${S.sites.map(s => `<bu
 
 function nav() {
   const na = openAlerts().length + (S.evac ? 1 : 0), nm = unread().length, nu = S.orders.filter(o => o.status === 'nueva').length;
-  const badge = { alertas: na, mensajes: nm, ordenes: nu };
-  $('nav').innerHTML = VIEWS.map(([k, i, t]) => `<button class="${k === view ? 'on' : ''}" data-v="${k}"><i>${i}</i>${t}${badge[k] ? `<em>${badge[k]}</em>` : ''}</button>`).join('');
+  const badge = { alertas: na, mensajes: nm, ordenes: nu, rutas: (S.trips || []).filter(t => t.status === 'enruta' && (t.off || (t.req && t.req.status === 'pendiente'))).length };
+  $('nav').innerHTML = VIEWS.filter(v => v[0] !== 'rutas' || S.trips).map(([k, i, t]) => `<button class="${k === view ? 'on' : ''}" data-v="${k}"><i>${i}</i>${t}${badge[k] ? `<em>${badge[k]}</em>` : ''}</button>`).join('');
   $('bellN').hidden = !na; $('bellN').textContent = na;
   $('emp').textContent = S.empresa;
   const me = $('me');
@@ -422,6 +442,19 @@ function drawMap(el, o) {
   });
   if (o.trail) { const p = op(o.trail); if (p && p.site === sid && p.trail.length > 1) L.polyline(p.trail.map(t => LL(sid, t[0], t[1])).concat([LL(sid, p.x, p.y)]), { color: '#B4E32F', weight: 3, dashArray: '4 6', interactive: false }).addTo(g); }
   if (o.routes) S.routes.filter(r => r.site === sid).forEach(r => { const pts = r.points.map(id => S.points.find(c => c.id === id)).filter(Boolean); if (pts.length > 1) L.polyline(pts.concat([pts[0]]).map(c => LL(sid, c.x, c.y)), { color: '#9B80FF', weight: 2, dashArray: '5 5', interactive: false }).addTo(g); });
+  // viajes: ruta vigente, corredor de tolerancia (ancho real en metros), ruta original y propuestas pendientes
+  if (o.trips && S.trips && siteN(sid).kind !== 'indoor') {
+    const mpp = 156543.03 * Math.cos(19.42 * Math.PI / 180) / 2 ** m.getZoom(), P = q => LL(sid, q[0], q[1]);
+    S.trips.filter(tr => tr.status === 'enruta').forEach(tr => {
+      const sel = ui.trip === tr.id, dim = ui.trip && !sel, pend = tr.req && tr.req.status === 'pendiente';
+      if (tr.base && !dim) L.polyline(tr.base.map(P), { color: '#8A8FB0', weight: 3, opacity: .55, dashArray: '2 8', interactive: false }).addTo(g);
+      L.polyline(tr.path.map(P), { color: tr.off ? '#FF4D6D' : '#22F0FF', weight: Math.max(8, 2 * (tr.tol || 1.2) * 310 / mpp), opacity: dim ? .05 : .14, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(g);
+      L.polyline(tr.path.map(P), { color: tr.off ? '#FF4D6D' : tr.alt ? '#B4E32F' : '#22F0FF', weight: sel ? 4 : 3, opacity: dim ? .3 : .95, interactive: false }).addTo(g);
+      if (pend && !dim) tr.req.opts.forEach(x => L.polyline(x.path.map(P), { color: '#FFC22E', weight: 3, dashArray: '7 7', opacity: x.id === (ui.optPick[tr.id] || tr.req.pick) ? .95 : .4, interactive: false }).addTo(g));
+      const end = tr.path[tr.path.length - 1];
+      L.marker(P(end), { icon: L.divIcon({ className: 'zlw', html: `<span>🏁 ${E(tr.folio)} · ${E(tr.to)}</span>`, iconSize: [0, 0] }), interactive: false }).addTo(g);
+    });
+  }
   if (o.pickAt) L.circle(LL(sid, o.pickAt.x, o.pickAt.y), { radius: radM(sid, o.pickAt.r), color: '#B4E32F', weight: 2, fillOpacity: .2 }).addTo(g);
   if (o.orders) openOrders().filter(x => x.site === sid).forEach(x => {
     const mk = L.marker(LL(sid, x.x, x.y), { icon: L.divIcon({ className: 'pinw', html: `<span class="pin ${x.prio} ${x.status}" title="${E(x.title + ' · ' + x.client)}">${E(x.folio)}</span>`, iconSize: [0, 0] }) }).addTo(g);
@@ -477,7 +510,7 @@ function liveRefresh() {
     ['Alertas', openAlerts().length, '', openAlerts().length ? 'bad' : 'good']
   ].map(([t, n, e, c]) => `<div class="kpi ${c}"><small>${t}</small><b>${n}<em>${e}</em></b></div>`).join('');
   const seg = $('siteS'); if (seg) seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.site === ui.site));
-  drawMap($('lmap'), { site: ui.site, zones: ui.show.zon, orders: ui.show.ord, ops: true, trail: ui.show.trail && ui.sel, grp: ui.grp, fit: true,
+  drawMap($('lmap'), { site: ui.site, zones: ui.show.zon, orders: ui.show.ord, ops: true, trips: true, trail: ui.show.trail && ui.sel, grp: ui.grp, fit: true,
     onOp: id => { ui.sel = id; ui.side = 'equipo'; liveRefresh(); }, onOrder: id => orderModal(id) });
   if (ui.side === 'equipo') {
     const list = S.ops.filter(p => ui.grp === 'all' || p.group === ui.grp).sort((a, b) => (b.status === 'sos') - (a.status === 'sos') || (a.site !== ui.site) - (b.site !== ui.site) || (a.status === 'fuera') - (b.status === 'fuera'));
@@ -749,6 +782,118 @@ function bindRondines() {
   $('addCp').onclick = () => { ui.pick = { r: 1 }; m.classList.add('picking'); draw(); toast('Toca el plano donde va el punto'); };
 }
 
+// ---------- RUTAS: viajes con corredor, desvíos y cambios de ruta autorizados ----------
+const tripOf = id => (S.trips || []).find(t => t.id === id);
+const motT = k => M.DESVIO_MOT[k] || M.DESVIO_MOT.otro;
+const kmTxt = d => (d * M.SCALE.outdoor.km).toFixed(1) + ' km';
+function vRutas() {
+  return `<div class="view">
+    <div class="vh"><h2>Rutas y desvíos</h2><span class="sp"></span><button class="btn lime" id="addTrip">＋ Nuevo viaje</button>
+    <p>Cada viaje lleva su ruta con un corredor de ±370 m. Si el chofer se sale, llega una alerta. Si hay un choque, trancón u obra, el chofer pide una ruta alterna desde su app y <b>solo el administrador de la consola</b> la puede autorizar.</p></div>
+    <div class="rutas"><div id="rtL"></div>
+      <div>${mapShell('vmap', `<div class="legend"><span><i class="dot" style="background:#22F0FF"></i>Ruta asignada</span><span><i class="dot" style="background:#B4E32F"></i>Ruta alterna autorizada</span><span><i class="dot" style="background:#FFC22E"></i>Propuesta pendiente</span><span><i class="dot" style="background:#FF4D6D"></i>Fuera de ruta</span><span><i class="dot" style="background:#8A8FB0"></i>Ruta original</span></div>`)}
+      <div class="card" style="margin-top:12px" id="rtH"></div></div>
+    </div></div>`;
+}
+function rutasList() {
+  const act = S.trips.filter(t => t.status === 'enruta'), pend = act.filter(t => t.req && t.req.status === 'pendiente');
+  const admins = M.Auth.admins(SES.client).join(', ');
+  const role = SES.admin
+    ? `<div class="rrole adm">🔑 <span><b>Eres administrador.</b> Tú autorizas o rechazas los cambios de ruta.</span></div>`
+    : `<div class="rrole">👁️ <span><b>Mesa de control.</b> Ves los viajes y las solicitudes, pero solo ${E(admins)} (administrador) puede autorizar un cambio de ruta.</span></div>`;
+  const reqHTML = t => { const r = t.req, p = op(t.opId), K = motT(r.motivo), pick = ui.optPick[t.id] || r.pick;
+    return `<div class="card req" data-t="${t.id}"><h3>🔀 Pide ruta alterna<small>${M.ago(r.at)}</small></h3>
+      <div class="rq-who">${avatar(p, 's')}<span><b>${E(p?.name || '')}</b><small>${E(t.folio)} · Unidad ${E(t.unit)} · ${E(t.from)} → ${E(t.to)}</small></span></div>
+      <div class="rq-mot"><span>${K.i}</span><span><b>${E(K.t)}</b>${r.note ? `<small>"${E(r.note)}"</small>` : ''}</span></div>
+      ${r.opts.map(x => `<label class="sug"><input type="radio" name="opt-${t.id}" value="${x.id}" ${pick === x.id ? 'checked' : ''} ${SES.admin ? '' : 'disabled'}><span class="i"><b>Ruta ${x.id} · ${E(x.name)}</b><small>${x.km} km · ~${x.min} min al destino</small></span>${x.id === r.pick ? '<span class="chip">La pide el chofer</span>' : ''}</label>`).join('')}
+      <div class="row-b">${SES.admin
+        ? `<button class="btn lime" data-ok="${t.id}">✓ Autorizar ruta ${E(pick)}</button><button class="btn red" data-no="${t.id}">✕ Rechazar</button>`
+        : `<span class="lock">🔒 Esperando al administrador</span><button class="btn" data-ping="${t.id}">📣 Avisar al administrador</button>`}
+        <a class="btn" href="tel:${p?.phone}">📞</a></div></div>`; };
+  const tripHTML = t => { const p = op(t.opId), pct = M.tripPct(t, p), pend = t.req && t.req.status === 'pendiente';
+    const st = t.off ? '<span class="chip bad">⚠️ Fuera de ruta</span>' : pend ? '<span class="chip warn">⏳ Esperando autorización</span>' : t.alt ? '<span class="chip ok">🔀 Ruta alterna autorizada</span>' : '<span class="chip ok">✓ En ruta</span>';
+    const left = M.tripLeft(t, p);
+    return `<div class="card trip ${ui.trip === t.id ? 'on' : ''} ${t.off ? 'off' : ''}" data-sel="${t.id}"><div class="th"><b>${E(t.folio)}</b>${st}<span class="sp"></span><small class="muted">desde ${M.fmtT(t.start)}</small></div>
+      <div class="rq-who">${avatar(p, 's')}<span><b>${E(p?.name || '')}</b><small>Unidad ${E(t.unit)} · ${E(t.cargo)}</small></span></div>
+      <div class="tr-ft"><span>${E(t.from)}</span><span>→</span><span>🏁 ${E(t.to)}</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="muted" style="font-size:12px;margin-top:6px">${pct}% · faltan ${kmTxt(left)} · llega en ~${Math.max(2, Math.round(left * M.SCALE.outdoor.km / 28 * 60))} min${t.off ? ` · <b style="color:var(--red)">${Math.round((t.dev || 0) * 310)} m fuera del corredor</b>` : ''}${t.alt ? ' · ' + E(t.alt) : ''}</div>
+      <div class="row-b"><button class="btn sm" data-sel="${t.id}">⌖ Ver ruta</button>${t.off ? `<a class="btn sm" href="tel:${p?.phone}">📞 Llamar</a>` : `<button class="btn sm" data-sim="${t.id}" title="Demo: el chofer se sale de su ruta">Simular desvío</button>`}</div></div>`; };
+  const done = S.trips.filter(t => t.status === 'entregado').sort((a, b) => b.done - a.done).slice(0, 6);
+  return role + pend.map(reqHTML).join('') +
+    `<h3 class="rt-h">En ruta · ${act.length}</h3>` + (act.map(tripHTML).join('') || '<div class="card empty">Sin viajes en ruta. Crea uno con ＋ Nuevo viaje.</div>') +
+    (done.length ? `<h3 class="rt-h">Entregados</h3><div class="card">${done.map(t => `<div class="rq-who" style="margin:4px 0"><span>✅</span><span><b>${E(t.folio)} · ${E(t.to)}</b><small>${E(op(t.opId)?.name || '')} · llegó ${M.fmtT(t.done)}${t.reqs.some(r => r.status === 'aprobada') ? ' · con ruta alterna autorizada' : ''}</small></span></div>`).join('')}</div>` : '');
+}
+function rutasHist() {
+  const rs = S.trips.flatMap(t => t.reqs.map(r => ({ t, r }))).sort((a, b) => b.r.at - a.r.at);
+  return `<h3>Bitácora de cambios de ruta</h3><div class="tw"><table class="t"><tr><th>Hora</th><th>Viaje</th><th>Chofer</th><th>Motivo</th><th>Decisión</th><th>Respondió en</th></tr>
+    ${rs.map(({ t, r }) => `<tr><td>${M.fmtT(r.at)}</td><td><b>${E(t.folio)}</b></td><td>${E(op(t.opId)?.name || '')}</td><td>${motT(r.motivo).i} ${E(motT(r.motivo).t)}${r.note ? `<div class="muted" style="font-size:11.5px">"${E(r.note)}"</div>` : ''}</td><td>${r.status === 'aprobada' ? '✅ Autorizó' : '❌ Rechazó'} <b>${E(r.by)}</b>${r.resp ? `<div class="muted" style="font-size:11.5px">${E(r.resp)}</div>` : ''}</td><td class="muted">${Math.max(1, Math.round((r.dec - r.at) / M.MIN))} min</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Aún no hay cambios de ruta</td></tr>'}</table></div>
+    <p class="muted" style="font-size:12px;margin-top:10px">Cada autorización queda registrada con quién la dio y cuándo. El chofer recibe la respuesta en su app al instante.</p>`;
+}
+function rutasRefresh() {
+  const L1 = $('rtL'); if (!L1) return;
+  const a = document.activeElement;
+  // no se redibuja mientras el usuario tiene el mouse encima (para no perder clics)
+  const html = rutasList();
+  if (html !== L1._h && !(a && /INPUT|SELECT|TEXTAREA/.test(a.tagName) && L1.contains(a)) && (!L1.matches(':hover') || ui.forceL)) { const st = L1.scrollTop; L1.innerHTML = html; L1._h = html; L1.scrollTop = st; }
+  ui.forceL = false;
+  $('rtH').innerHTML = rutasHist();
+  const m = $('vmap');
+  drawMap(m, { site: 'city', ops: true, trips: true, zones: false, trail: ui.trip && tripOf(ui.trip)?.opId, onOp: id => { const t = M.activeTrip(S, id); if (t) selTrip(t.id); } });
+  if (!m._fitT) { m._fitT = 1; const pts = S.trips.filter(t => t.status === 'enruta').flatMap(t => t.path.map(q => LL('city', q[0], q[1]))); if (pts.length) m._L.fitBounds(pts, { padding: [40, 40] }); }
+}
+function selTrip(id) {
+  ui.trip = ui.trip === id ? null : id; ui.forceL = true; rutasRefresh();
+  const t = tripOf(ui.trip), m = $('vmap');
+  if (t && m && m._L) { const pts = t.path.concat(t.base || [], ...(t.req && t.req.status === 'pendiente' ? t.req.opts.map(x => x.path) : [])).map(q => LL('city', q[0], q[1])); const p = op(t.opId); pts.push(LL('city', p.x, p.y)); m._L.fitBounds(pts, { padding: [50, 50], maxZoom: 15 }); }
+}
+function decide(id, ok) {
+  const t = tripOf(id); if (!t) return;
+  const opt = ui.optPick[id] || t.req.pick, name = op(t.opId)?.name || '';
+  const run = note => { ui.forceL = true; const r = M.update(s => M.tripDecide(s, id, ok, SES, opt, note)); if (r && r.err) return toast('🔒 ' + r.err); toast(ok ? '✅ Ruta ' + opt + ' autorizada · ' + name + ' ya la ve en su app' : '❌ Cambio rechazado · se le avisó a ' + name); delete ui.optPick[id]; };
+  if (ok) return run('');
+  const ov = modal(`<div class="mh"><h3>Rechazar cambio de ruta</h3><button data-close>×</button></div>
+    <p style="font-size:13.5px;margin-bottom:10px">${E(name)} seguirá su ruta original. ¿Qué le decimos?</p>
+    <label class="l">Motivo<select class="f" id="rjM"><option>El tráfico ya se está liberando, sigue tu ruta</option><option>La ruta alterna no es segura para la carga</option><option>Espera instrucciones por radio</option><option>Detente en un lugar seguro y espera</option></select></label>
+    <label class="l" style="margin-top:10px">Nota (opcional)<input class="f" id="rjN" placeholder="Ej. Ya mandamos a la patrulla de apoyo"></label>
+    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn red" id="rjOk">Rechazar y avisar</button></div>`);
+  $('rjOk').onclick = () => { run($('rjM').value + ($('rjN').value.trim() ? '. ' + $('rjN').value.trim() : '')); ov.remove(); };
+}
+function tripModal() {
+  const free = S.ops.filter(p => p.site === 'city' && !['fuera', 'sos'].includes(p.status) && !M.activeTrip(S, p.id));
+  const ov = modal(`<div class="mh"><h3>🚚 Nuevo viaje con ruta</h3><button data-close>×</button></div><div class="grid2">
+    <label class="l">Chofer<select class="f" id="nvP">${free.map(p => `<option value="${p.id}">${E(p.name)} · ${E(p.role)}</option>`).join('')}</select></label>
+    <label class="l">Destino<select class="f" id="nvD">${M.PLACES.map((P, i) => `<option value="${i}">${E(P.n)}</option>`).join('')}</select></label>
+    <label class="l">Unidad<input class="f" id="nvU" value="T-${10 + Math.floor(Math.random() * 30)}"></label>
+    <label class="l">Carga<input class="f" id="nvC" placeholder="Ej. Paquetería · 20 bultos"></label></div>
+    <p class="muted" style="font-size:12.5px;margin-top:10px">La ruta sale de donde está el chofer. Corredor de tolerancia: ±370 m. Si se sale, te llega una alerta; si necesita otra ruta, la pide desde su app y la autoriza el administrador.</p>
+    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="nvOk" ${free.length ? '' : 'disabled'}>Asignar viaje</button></div>`);
+  $('nvOk').onclick = () => {
+    const pid = $('nvP').value, P = M.PLACES[+$('nvD').value];
+    let f = '';
+    M.update(s => { const p = s.ops.find(x => x.id === pid), near = M.PLACES.slice().sort((a, b) => M.dist(a, p) - M.dist(b, p))[0];
+      const t = M.mkTrip(s, { opId: pid, from: near.n.split(' · ')[0], fromAddr: near.n, to: P.n.split(' · ')[0], toAddr: P.n, cargo: $('nvC').value.trim() || 'Carga general', unit: $('nvU').value.trim() || 'T-00', path: M.routeBetween(M.pt(p), M.pt(P)) });
+      s.msgs.push({ id: M.uid('m'), from: 'consola', to: pid, kind: 'text', txt: '🚚 Nuevo viaje ' + t.folio + ' a ' + t.toAddr + '. Tu ruta ya está en tu app: no te salgas del corredor sin autorización.', at: Date.now(), reads: ['consola'] }); f = t.folio; });
+    ov.remove(); toast('✓ Viaje ' + f + ' asignado');
+  };
+}
+function bindRutas() {
+  const m = $('vmap'); m.style.minHeight = '520px';
+  $('addTrip').onclick = tripModal;
+  $('rtL').onclick = e => {
+    const t = e.target;
+    const ok = t.closest('[data-ok]'); if (ok) return decide(ok.dataset.ok, true);
+    const no = t.closest('[data-no]'); if (no) return decide(no.dataset.no, false);
+    const pg = t.closest('[data-ping]'); if (pg) { M.update(s => M.event(s, tripOf(pg.dataset.ping).opId, 'Mesa de control (' + SES.name + ') pidió al administrador revisar el cambio de ruta', 'ruta')); return toast('📣 Aviso enviado a ' + M.Auth.admins(SES.client).join(', ')); }
+    const sm = t.closest('[data-sim]'); if (sm) { M.update(s => M.simDesvio(s, sm.dataset.sim)); ui.trip = sm.dataset.sim; return toast('Demo: el chofer se está saliendo de su ruta…'); }
+    if (t.closest('a,input,label')) return;
+    const sl = t.closest('[data-sel]'); if (sl) selTrip(sl.dataset.sel);
+  };
+  $('rtL').onchange = e => { const r = e.target.closest('input[type=radio]'); if (!r) return; ui.optPick[r.name.slice(4)] = r.value; document.activeElement.blur(); ui.forceL = true; rutasRefresh(); };
+  $('rtL').onmouseleave = () => rutasRefresh();
+  rutasRefresh();
+}
+
 // ---------- GEOCERCAS ----------
 function vGeocercas() {
   const st = siteN(ui.site), ev = S.events.filter(e => e.type === 'geocerca' && op(e.opId)?.site === ui.site).slice(-30).reverse();
@@ -894,7 +1039,7 @@ function vAlertas() {
     ${evacHTML()}
     ${open.map(a => { const T = M.ALERT_T[a.type], K = sosInfo(a), p = op(a.opId); return `<div class="al" style="border-left-color:${a.silent ? 'var(--yellow)' : T.c}"><span class="ic">${K ? K.i : T.i}</span>
       <div class="i"><b>${K ? 'SOS · ' + E(K.t) : T.t}${p ? ' · ' + E(p.name) : ''}</b><small>${E(a.where || a.txt)} · ${M.ago(a.at)}${p ? ' · ' + E(grp(p.group)?.name || '') : ''}${a.status === 'atendida' ? ' · <b style="color:var(--lime)">En atención</b>' : ''}</small></div>
-      <div class="a">${p ? `${a.silent ? '' : `<a class="btn sm" href="tel:${p.phone}">📞 Llamar</a>`}<button class="btn sm" data-loc="${p.id}">🛰️ Ver en mapa</button>` : ''}${K && p ? `<button class="btn sm" data-help="${a.id}">🏃 Enviar al más cercano</button><button class="btn sm" data-dept="${a.id}">🏢 Avisar a ${E(grp(p.group)?.name || 'su depto.')}</button><a class="btn sm" href="tel:911">🚓 911</a>${a.kind === 'incendio' && !S.evac ? `<button class="btn sm red" data-ev="${p.site}">Evacuar sitio</button>` : ''}` : ''}${a.status === 'abierta' ? `<button class="btn sm lime" data-ack="${a.id}">Atender</button>` : ''}<button class="btn sm" data-close-a="${a.id}">Cerrar</button></div>
+      <div class="a">${p ? `${a.silent ? '' : `<a class="btn sm" href="tel:${p.phone}">📞 Llamar</a>`}<button class="btn sm" data-loc="${p.id}">🛰️ Ver en mapa</button>` : ''}${a.trip && S.trips ? `<button class="btn sm lime" data-trip="${a.trip}">🛣️ ${a.type === 'cambio' ? 'Revisar solicitud' : 'Ver en Rutas'}</button>` : ''}${K && p ? `<button class="btn sm" data-help="${a.id}">🏃 Enviar al más cercano</button><button class="btn sm" data-dept="${a.id}">🏢 Avisar a ${E(grp(p.group)?.name || 'su depto.')}</button><a class="btn sm" href="tel:911">🚓 911</a>${a.kind === 'incendio' && !S.evac ? `<button class="btn sm red" data-ev="${p.site}">Evacuar sitio</button>` : ''}` : ''}${a.status === 'abierta' ? `<button class="btn sm lime" data-ack="${a.id}">Atender</button>` : ''}<button class="btn sm" data-close-a="${a.id}">Cerrar</button></div>
       ${protoHTML(a)}</div>`; }).join('') || (S.evac ? '' : '<div class="card empty">✅ Sin alertas abiertas</div>')}
     <div class="card" style="margin-top:16px"><h3>Historial</h3><div class="tw"><table class="t"><tr><th>Hora</th><th>Tipo</th><th>Operador</th><th>Detalle</th><th>Cierre</th></tr>
       ${closed.map(a => { const K = sosInfo(a); return `<tr><td>${M.fmtT(a.at)}</td><td>${K ? K.i + ' ' + E(K.t) : M.ALERT_T[a.type].i + ' ' + M.ALERT_T[a.type].t}</td><td>${E(op(a.opId)?.name || '—')}</td><td class="muted">${E(a.where || a.txt)}</td><td class="muted">${E(a.note || '')} ${a.closed ? '· ' + Math.max(1, Math.round((a.closed - a.at) / M.MIN)) + ' min' : ''}${K ? ' · protocolo ' + (a.steps || []).length + '/' + K.steps.length : ''}</td></tr>`; }).join('') || '<tr><td colspan="5" class="empty">Sin historial</td></tr>'}</table></div></div>
@@ -943,6 +1088,7 @@ function bindAlertas() {
   main.querySelectorAll('[data-step]').forEach(b => b.onclick = () => { const [a, i] = b.dataset.step.split(':'); step(a, +i); });
   main.querySelectorAll('[data-ev]').forEach(b => b.onclick = () => startEvac(b.dataset.ev, 'Incendio'));
   main.querySelectorAll('[data-loc]').forEach(b => b.onclick = () => { ui.sel = b.dataset.loc; ui.site = op(ui.sel).site; go('vivo'); });
+  main.querySelectorAll('[data-trip]').forEach(b => b.onclick = () => { ui.trip = b.dataset.trip; go('rutas'); setTimeout(() => { ui.trip = null; selTrip(b.dataset.trip); }, 120); });
   if ($('evac')) $('evac').onclick = evacModal;
   if ($('evEnd')) $('evEnd').onclick = () => { if (!confirm('¿Terminar la evacuación?')) return; M.update(s => { const ev = s.evac; M.event(s, null, 'Terminó evacuación de ' + M.site(s, ev.site).name + ' · ' + Object.keys(ev.safe).length + ' a salvo', 'alerta'); s.evac = null; s.msgs.push({ id: M.uid('m'), from: 'consola', to: 'all', kind: 'difusion', txt: '✅ Terminó la evacuación. Pueden regresar a sus actividades.', at: Date.now(), reads: ['consola'] }); }); };
   if ($('evMark')) $('evMark').onclick = () => {
@@ -1192,9 +1338,9 @@ function bindLayout() {
 }
 
 // ---------- render general ----------
-const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rondines: [vRondines, bindRondines], geocercas: [vGeocercas, bindGeocercas], mensajes: [vMensajes, bindMensajes], alertas: [vAlertas, bindAlertas], reportes: [vReportes, () => document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv))], equipo: [vEquipo, bindEquipo], layout: [vLayout, bindLayout], manual: [vManual, () => {}] };
+const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rutas: [vRutas, bindRutas], rondines: [vRondines, bindRondines], geocercas: [vGeocercas, bindGeocercas], mensajes: [vMensajes, bindMensajes], alertas: [vAlertas, bindAlertas], reportes: [vReportes, () => document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv))], equipo: [vEquipo, bindEquipo], layout: [vLayout, bindLayout], manual: [vManual, () => {}] };
 function render() {
-  if (!R[view]) view = 'vivo';
+  if (!R[view] || (view === 'rutas' && !S.trips)) view = 'vivo';
   if (!S.sites.some(s => s.id === ui.site)) ui.site = S.sites[0].id;
   nav();
   // los mapas se conservan entre refrescos para no recargar las calles
@@ -1215,7 +1361,9 @@ function refresh() {
     });
   }
   lastMsgCount = nm;
+  reqWatch();
   if (view === 'vivo') return liveRefresh();
+  if (view === 'rutas') { if (!document.querySelector('.ov')) rutasRefresh(); return; }
   if (view === 'mensajes') { thread(); const c = document.querySelector('.convs'); if (c) { const st = c.scrollTop; c.innerHTML = convsHTML(); c.scrollTop = st; } return; }
   if (document.querySelector('.ov') || view === 'layout' || view === 'manual') return;
   const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && $('main').contains(a)) return;
@@ -1225,13 +1373,23 @@ function refresh() {
 let fromTick = false, ticks = 0, pend = false;
 M.on(s => {
   S = s;
-  if (fromTick && view !== 'vivo' && ticks % 5) { sosWatch(); return; }
+  if (fromTick && view !== 'vivo' && view !== 'rutas' && ticks % 5) { sosWatch(); return; }
   if (pend) return; pend = true;
   queueMicrotask(() => { pend = false; refresh(); });
 });
 setInterval(() => { ticks++; try { localStorage.setItem(M.hbKey(), Date.now()); } catch (e) {} fromTick = true; M.tick(); fromTick = false; }, 2000);
 setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }, 1000);
-render(); sosWatch();
+// aviso cuando un chofer pide cambio de ruta o se sale de ella
+function reqWatch() {
+  (S.trips || []).forEach(t => {
+    const r = t.req;
+    if (r && r.status === 'pendiente' && !ui.seenReq.has(r.id)) { ui.seenReq.add(r.id); if (ui.booted) { M.beep(); toast('🔀 ' + (op(t.opId)?.name || '') + ' pide ruta alterna: ' + motT(r.motivo).t + (SES.admin ? '' : ' · la autoriza el administrador')); } }
+    const k = 'off:' + t.id + ':' + t.offAt;
+    if (t.off && !ui.seenReq.has(k)) { ui.seenReq.add(k); if (ui.booted) { M.beep(true); toast('⚠️ ' + (op(t.opId)?.name || '') + ' se salió de su ruta · ' + t.folio); } }
+  });
+  ui.booted = true;
+}
+render(); sosWatch(); reqWatch();
 </script>
 </body>
 </html>
