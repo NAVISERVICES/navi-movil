@@ -6,7 +6,7 @@
 // cerrado como un almacén (plano en metros). Cada sitio tiene su propia escala.
 (function () {
   const KEY = 'navi.mando';
-  const V = 5;
+  const V = 7;
   const now = () => Date.now();
   const MIN = 60000;
   const uid = p => (p || 'x') + Math.random().toString(36).slice(2, 8);
@@ -15,6 +15,7 @@
     disponible: { t: 'Disponible', c: '#B4E32F' },
     encamino:   { t: 'En camino',  c: '#7EE0FF' },
     ensitio:    { t: 'En sitio',   c: '#FFC22E' },
+    receso:     { t: 'En receso',  c: '#E58BFF' },
     pausa:      { t: 'En pausa',   c: '#B9B7E6' },
     sos:        { t: 'SOS',        c: '#FF4D6D' },
     fuera:      { t: 'Fuera de turno', c: '#5E5C8F' }
@@ -26,6 +27,7 @@
     geocerca: { t: 'Geocerca', i: '📍', c: '#FFC22E' },
     acceso:   { t: 'Acceso no autorizado', i: '⛔', c: '#FF7A45' },
     bateria:  { t: 'Batería baja', i: '🔋', c: '#FFC22E' },
+    receso:   { t: 'Receso excedido', i: '🍽️', c: '#E58BFF' },
     sla:      { t: 'Orden vencida', i: '⏱️', c: '#FF7A45' },
     rondin:   { t: 'Rondín incompleto', i: '🛡️', c: '#FFC22E' }
   };
@@ -71,16 +73,23 @@
       { id: 'city', name: 'Ciudad de México', kind: 'outdoor', icon: '🏙️' },
       { id: 'alm', name: 'Almacén Central · Vallejo', kind: 'indoor', icon: '🏭', w: 120, h: 70,
         areas: [
-          { id: 'a1', name: 'Recepción', x: 2, y: 2, w: 22, h: 18, c: '#7EE0FF' },
-          { id: 'a2', name: 'Oficinas', x: 2, y: 24, w: 22, h: 20, c: '#9B80FF' },
-          { id: 'a3', name: 'Rack A', x: 32, y: 6, w: 8, h: 36, c: '#B4E32F' },
-          { id: 'a4', name: 'Rack B', x: 46, y: 6, w: 8, h: 36, c: '#B4E32F' },
-          { id: 'a5', name: 'Rack C', x: 60, y: 6, w: 8, h: 36, c: '#B4E32F' },
-          { id: 'a6', name: 'Rack D', x: 74, y: 6, w: 8, h: 36, c: '#B4E32F' },
-          { id: 'a7', name: 'Empaque', x: 90, y: 6, w: 28, h: 24, c: '#FFC22E' },
-          { id: 'a8', name: 'Andenes de carga', x: 2, y: 50, w: 38, h: 18, c: '#FF6FB1' },
-          { id: 'a9', name: 'Zona de montacargas', x: 46, y: 50, w: 46, h: 18, c: '#FF7A45' },
-          { id: 'a10', name: 'Cuarto de máquinas', x: 98, y: 48, w: 20, h: 20, c: '#FF4D6D' }
+          { id: 'a1', type: 'recepcion', name: 'Recepción', x: 2, y: 2, w: 22, h: 18, c: '#7EE0FF' },
+          { id: 'a2', type: 'oficinas', name: 'Oficinas', x: 2, y: 24, w: 22, h: 20, c: '#9B80FF' },
+          { id: 'a3', type: 'rack', name: 'Rack A', x: 32, y: 6, w: 8, h: 36, c: '#B4E32F' },
+          { id: 'a4', type: 'rack', name: 'Rack B', x: 46, y: 6, w: 8, h: 36, c: '#B4E32F' },
+          { id: 'a5', type: 'rack', name: 'Rack C', x: 60, y: 6, w: 8, h: 36, c: '#B4E32F' },
+          { id: 'a6', type: 'rack', name: 'Rack D', x: 74, y: 6, w: 8, h: 36, c: '#B4E32F' },
+          { id: 'a7', type: 'empaque', name: 'Empaque', x: 90, y: 6, w: 28, h: 24, c: '#FFC22E' },
+          { id: 'a8', type: 'andenes', name: 'Andenes de carga', x: 2, y: 50, w: 38, h: 18, c: '#FF6FB1' },
+          { id: 'a9', type: 'montacargas', name: 'Zona de montacargas', x: 46, y: 50, w: 46, h: 18, c: '#FF7A45' },
+          { id: 'a10', type: 'maquinas', name: 'Cuarto de máquinas', x: 98, y: 48, w: 20, h: 20, c: '#FF4D6D' },
+          { id: 'a11', type: 'comedor', name: 'Comedor', x: 92, y: 31, w: 26, h: 11, c: '#E58BFF' },
+          { id: 'a12', type: 'pasillo', name: 'Pasillo principal', x: 25, y: 43, w: 95, h: 6, c: '#FFC22E' },
+          { id: 'a13', type: 'andador', name: 'Andador peatonal', x: 26.8, y: 1, w: 1.6, h: 42, c: '#3DDC84' },
+          { id: 'a14', type: 'entrada', name: 'Entrada', x: 15, y: 0, w: 6, h: 1, c: '#B4E32F' },
+          { id: 'a15', type: 'salida', name: 'Salida', x: 0, y: 45, w: 1, h: 3.4, c: '#3DDC84' },
+          { id: 'a16', type: 'salida', name: 'Salida', x: 119, y: 44.3, w: 1, h: 3.4, c: '#3DDC84' },
+          { id: 'a17', type: 'salida', name: 'Salida', x: 85, y: 0, w: 3.4, h: 1, c: '#3DDC84' }
         ] }
     ];
     const ctr = (id) => { const a = sites[1].areas.find(z => z.id === id); return { x: a.x + a.w / 2, y: a.y + a.h / 2 }; };
@@ -105,7 +114,7 @@
       op('p4', 'Miguel Torres', 'g2', 'city', 20, 54, 'encamino', 91, 12.8, '5512345604', 'Técnico'),
       op('p8', 'Raúl Castillo', 'g1', 'city', 70, 30, 'fuera', 100, 2.1, '5512345608', 'Repartidor'),
       op('p5', 'Karla Méndez', 'g5', 'alm', 12, 10, 'disponible', 73, 3.3, '5512345605', 'Guardia'),
-      op('p6', 'Diego Ruiz', 'g5', 'alm', 14, 34, 'pausa', 18, 7.7, '5512345606', 'Guardia'),
+      op('p6', 'Diego Ruiz', 'g5', 'alm', 100, 37, 'receso', 18, 7.7, '5512345606', 'Guardia'),
       op('p7', 'Ana López', 'g4', 'alm', 104, 18, 'disponible', 55, 5.0, '5512345607', 'Supervisora de almacén'),
       op('p9', 'Sofía Vargas', 'g4', 'alm', 64, 30, 'ensitio', 66, 2.7, '5512345609', 'Montacarguista'),
       op('p10', 'Pedro Gómez', 'g3', 'alm', 70, 58, 'disponible', 88, 1.9, '5512345610', 'Técnico de mantenimiento')
@@ -149,6 +158,8 @@
     ops[2].order = orders[1].id; ops[2].x = orders[1].x + .5; ops[2].y = orders[1].y + .5;
     ops[0].order = orders[3].id;
     ops[8].order = orders[5].id; Object.assign(ops[8], { x: orders[5].x + 1, y: orders[5].y });
+    // Diego está comiendo y ya se pasó de su tiempo de receso
+    Object.assign(ops[6], { recesoAt: t - 50 * MIN, recesoAuto: true, breakLen: 52 * MIN });
     // geocercas: en la ciudad el radio va en unidades de mapa (≈310 m), en el almacén en metros
     const zones = [
       Object.assign({ id: 'z1', site: 'city', name: 'Almacén Central', r: 2.2, type: 'base', enter: true, exit: true }, fromLL(19.4405, -99.1830)),
@@ -191,15 +202,90 @@
       { at: t - 40 * MIN, opId: 'p4', txt: 'Aceptó OT-1043', type: 'orden' },
       { at: t - 70 * MIN, opId: 'p3', txt: 'Llegó a Café La Esquina', type: 'orden' }
     ];
-    return { v: V, empresa: 'Logística Demo, S.A. de C.V.', code: 'NAVI-4821', sites, groups, chats, ops, templates, orders, zones, points, routes, rounds, msgs, alerts, events, folio: 1048 };
+    return { v: V, empresa: 'Logística Demo, S.A. de C.V.', code: 'NAVI-4821', breakMin: 45, sites, groups, chats, ops, templates, orders, zones, points, routes, rounds, msgs, alerts, events, folio: 1048 };
+  }
+
+  // ---------- clientes de demo: solo interior, solo exterior y mixto ----------
+  const CLIENTS = {
+    mixto:   { name: 'Logística Demo, S.A. de C.V.', code: 'NAVI-4821', tipo: 'Mixto', icon: '🔀', desc: 'Reparto y técnicos en la ciudad + almacén central' },
+    indoor:  { name: 'Distribuidora Vallejo, S.A. de C.V.', code: 'NAVI-1100', tipo: 'Solo interior', icon: '🏭', desc: 'Centro de distribución: surtido, montacargas, mantenimiento y seguridad' },
+    outdoor: { name: 'TecnoServicios Express, S.A. de C.V.', code: 'NAVI-2200', tipo: 'Solo exterior', icon: '🏙️', desc: 'Técnicos, reparto y custodia en la calle' }
+  };
+  let CID = 'mixto';
+  const keyOf = () => KEY + (CID === 'mixto' ? '' : ':' + CID);
+  function seedFor(cid) {
+    const s = seed(), t = now(), C = CLIENTS[cid] || CLIENTS.mixto;
+    s.client = cid; s.empresa = C.name; s.code = C.code;
+    if (cid === 'mixto') return s;
+    const keepGroups = ids => { s.groups = s.groups.filter(g => ids.includes(g.id)); };
+    const cleanMsgs = () => { const ok = to => to === 'all' || to === 'consola' || s.groups.some(g => g.id === to) || s.chats.some(c => c.id === to) || s.ops.some(p => p.id === to); s.msgs = s.msgs.filter(m => ok(m.to) && (m.from === 'consola' || s.ops.some(p => p.id === m.from))); };
+    const mkOrder = (folio, tpl, site, P, client, prio, status, opId, ago) => {
+      const T = s.templates.find(x => x.id === tpl);
+      const o = { id: uid('o'), folio, tpl, site, title: T.name, client, addr: P.n, x: P.x, y: P.y, prio, sla: T.sla, status, opId, created: t - ago * MIN, due: t - ago * MIN + T.sla * MIN,
+        checklist: T.checklist.map(c => ({ t: c, done: false })), needPhoto: T.needPhoto, needSign: T.needSign, photo: null, sign: null, notes: '', rating: null, hist: [{ at: t - ago * MIN, txt: 'Orden creada por Mesa de control' }] };
+      if (opId) o.hist.push({ at: t - (ago - 2) * MIN, txt: 'Asignada a ' + s.ops.find(p => p.id === opId).name });
+      s.orders.push(o); return o;
+    };
+    if (cid === 'indoor') {
+      const st = s.sites.find(x => x.id === 'alm'); st.name = 'CEDIS Vallejo · Nave 1';
+      s.sites = [st];
+      const ctr = id => { const a = st.areas.find(z => z.id === id); return { n: a.name, x: a.x + a.w / 2, y: a.y + a.h / 2 }; };
+      // el personal de calle pasa a ser personal del CEDIS
+      const conv = { p1: ['g4', 'Surtidor', 'a3'], p2: ['g4', 'Surtidor', 'a6'], p3: ['g3', 'Técnica de mantenimiento', 'a9'], p4: ['g4', 'Montacarguista', 'a8'], p8: ['g4', 'Surtidor', 'a1'] };
+      s.ops.forEach(p => { const c = conv[p.id]; if (!c) return; const P = ctr(c[2]); Object.assign(p, { site: 'alm', group: c[0], role: c[1], x: P.x + 1, y: P.y, trail: [[P.x + 1, P.y]], target: null, order: null, km: +(Math.random() * 3 + 1).toFixed(2), status: p.status === 'fuera' ? 'fuera' : 'disponible' }); });
+      s.events = s.events.filter(e => !conv[e.opId]);
+      s.orders = s.orders.filter(o => o.site === 'alm');
+      s.templates = s.templates.filter(x => x.site !== 'outdoor');
+      s.zones = s.zones.filter(z => z.site === 'alm');
+      keepGroups(['g3', 'g4', 'g5']);
+      const o1 = mkOrder('OT-1048', 't4', 'alm', ctr('a6'), 'Pedido #58240 · Abarrotes Ermita', 'media', 'asignada', 'p1', 4);
+      mkOrder('OT-1049', 't4', 'alm', ctr('a3'), 'Pedido #58244 · Café La Esquina', 'alta', 'nueva', null, 2);
+      s.ops.find(p => p.id === 'p1').order = o1.id;
+      s.chats = [
+        { id: 'c1', name: 'Supervisores', dept: 'Operaciones', members: ['p7', 'p10', 'p3'], color: '#9B80FF' },
+        { id: 'c2', name: 'Turno noche · CEDIS', dept: 'Almacén', members: ['p5', 'p6', 'p9', 'p10', 'p7'], color: '#FFC22E' },
+        { id: 'c3', name: 'Embarques del día', dept: 'Logística', members: ['p7', 'p9', 'p1', 'p2', 'p4'], color: '#B4E32F' }
+      ];
+      s.msgs.find(m => m.kind === 'difusion').txt = 'Recuerden: chaleco y casco obligatorios en la zona de montacargas.';
+      s.msgs.push({ id: uid('m'), from: 'p4', to: 'c3', kind: 'text', txt: 'Andén A2 listo para cargar el camión de las 3', at: t - 5 * MIN, reads: ['consola'] });
+      s.folio = 1050;
+    }
+    if (cid === 'outdoor') {
+      const st = s.sites.find(x => x.id === 'city'); s.sites = [st];
+      // el personal del almacén pasa a ser personal de calle
+      const conv = { p5: ['g5', 'Custodia', 7], p6: ['g5', 'Custodia', 9], p7: ['g2', 'Supervisora de campo', 4], p9: ['g1', 'Repartidora', 8], p10: ['g2', 'Técnico', 10] };
+      s.ops.forEach(p => { const c = conv[p.id]; if (!c) return; const P = PLACES[c[2]]; Object.assign(p, { site: 'city', group: c[0], role: c[1], x: P.x + .6, y: P.y + .4, trail: [[P.x + .6, P.y + .4]], target: null, order: null, km: +(Math.random() * 25 + 5).toFixed(1), status: p.status === 'receso' ? 'receso' : 'disponible', recesoAuto: false, recesoAt: p.status === 'receso' ? t - 20 * MIN : null }); });
+      s.events = s.events.filter(e => !conv[e.opId]);
+      s.orders = s.orders.filter(o => o.site === 'city');
+      s.templates = s.templates.filter(x => x.site !== 'indoor');
+      s.zones = s.zones.filter(z => z.site === 'city');
+      keepGroups(['g1', 'g2', 'g5']); s.groups.find(g => g.id === 'g5').name = 'Custodia';
+      const o1 = mkOrder('OT-1048', 't2', 'city', PLACES[11], 'Consultorio Tlalpan', 'media', 'asignada', 'p10', 6);
+      mkOrder('OT-1049', 't1', 'city', PLACES[2], 'Librería Coyoacán', 'baja', 'nueva', null, 3);
+      s.ops.find(p => p.id === 'p10').order = o1.id;
+      // ronda de supervisión por sucursales en la calle
+      s.points = [[7, 'P-01', 'Sucursal Centro'], [9, 'P-02', 'Sucursal Narvarte'], [1, 'P-03', 'Sucursal Roma'], [0, 'P-04', 'Sucursal Polanco']].map(([i, code, name], k) => ({ id: 'cp' + (k + 1), site: 'city', code, name, x: PLACES[i].x, y: PLACES[i].y, method: 'QR' }));
+      s.routes = [{ id: 'r1', site: 'city', name: 'Ronda de supervisión de sucursales', points: ['cp1', 'cp2', 'cp3', 'cp4'], opId: 'p5', every: 180 }];
+      s.rounds = [{ id: uid('rd'), route: 'r1', opId: 'p5', start: t - 60 * MIN, hits: [{ p: 'cp1', at: t - 55 * MIN }, { p: 'cp2', at: t - 30 * MIN }] }];
+      s.chats = [
+        { id: 'c1', name: 'Supervisores', dept: 'Operaciones', members: ['p7', 'p3', 'p1'], color: '#9B80FF' },
+        { id: 'c3', name: 'Coordinación de entregas', dept: 'Logística', members: ['p1', 'p2', 'p8', 'p9', 'p7'], color: '#B4E32F' },
+        { id: 'c4', name: 'Custodia zona centro', dept: 'Custodia', members: ['p5', 'p6', 'p7'], color: '#FF6FB1' }
+      ];
+      s.folio = 1050;
+    }
+    s.alerts = s.alerts.filter(a => s.ops.some(p => p.id === a.opId));
+    s.events = s.events.filter(e => s.ops.some(p => p.id === e.opId && (cid !== 'indoor' || e.type !== 'geocerca')));
+    cleanMsgs();
+    return s;
   }
 
   function load() {
     try {
-      const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      const s = JSON.parse(localStorage.getItem(keyOf()) || 'null');
       if (s && s.v === V) return s;
     } catch (e) {}
-    const s = seed(); save(s); return s;
+    const s = seedFor(CID); save(s); return s;
   }
   function save(s, silent) {
     // los audios de PTT pesan: solo se guardan los últimos 12
@@ -207,15 +293,15 @@
     for (let i = s.msgs.length - 1; i >= 0; i--) if (s.msgs[i].audio && ++voz > 12) s.msgs[i].audio = null;
     if (s.msgs.length > 300) s.msgs = s.msgs.slice(-300);
     if (s.events.length > 300) s.events = s.events.slice(-300);
-    try { localStorage.setItem(KEY, JSON.stringify(s)); }
-    catch (e) { s.msgs.forEach(m => m.audio = null); try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e2) {} }
+    try { localStorage.setItem(keyOf(), JSON.stringify(s)); }
+    catch (e) { s.msgs.forEach(m => m.audio = null); try { localStorage.setItem(keyOf(), JSON.stringify(s)); } catch (e2) {} }
     if (!silent) subs.forEach(f => f(s, true));
   }
   // leer, cambiar y guardar en un solo paso (la consola y la app escriben a la vez)
   function update(fn, silent) { const s = load(); const r = fn(s); save(s, silent); return r; }
   const subs = [];
   function on(fn) { subs.push(fn); }
-  window.addEventListener('storage', e => { if (e.key === KEY) { const s = load(); subs.forEach(f => f(s, false)); } });
+  window.addEventListener('storage', e => { if (e.key === keyOf()) { const s = load(); subs.forEach(f => f(s, false)); } });
 
   const site = (s, id) => s.sites.find(x => x.id === id) || s.sites[0];
   const scale = (s, id) => SCALE[site(s, id).kind];
@@ -226,13 +312,37 @@
   const eta = (d, s, sid) => { const k = km(d, s, sid); return site(s, sid).kind === 'indoor' ? Math.max(1, Math.round(k * 1000 / 70)) : Math.max(3, Math.round(k / 25 * 60 + 2)); };
   function nearest(s, sid, x, y, filter) {
     const k = site(s, sid).kind === 'indoor' ? 40 : 16;
-    return s.ops.filter(p => p.site === sid && p.status !== 'fuera' && p.status !== 'sos' && (!filter || filter(p)))
+    return s.ops.filter(p => p.site === sid && !['fuera', 'sos', 'receso'].includes(p.status) && (!filter || filter(p)))
       .map(p => ({ p, d: dist(p, { x, y }), busy: s.orders.some(o => o.opId === p.id && ['asignada', 'aceptada', 'encamino', 'ensitio'].includes(o.status)) }))
       // puntaje: distancia + castigo si ya trae una orden o está en pausa
       .map(r => Object.assign(r, { score: r.d + (r.busy ? k : 0) + (r.p.status === 'pausa' ? k * 2 : 0) }))
       .sort((a, b) => a.score - b.score);
   }
-  function areaAt(s, sid, x, y) { const st = site(s, sid); return (st.areas || []).find(a => x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h); }
+  // tipos de área para armar el layout de cualquier almacén
+  const AREA_T = {
+    rack:        { t: 'Rack / estantería', i: '🗄️', c: '#B4E32F', w: 8, h: 30 },
+    recepcion:   { t: 'Recepción', i: '🛎️', c: '#7EE0FF', w: 18, h: 14 },
+    oficinas:    { t: 'Oficinas', i: '💼', c: '#9B80FF', w: 20, h: 16 },
+    empaque:     { t: 'Empaque', i: '📦', c: '#FFC22E', w: 24, h: 18 },
+    andenes:     { t: 'Andenes de carga', i: '🚚', c: '#FF6FB1', w: 34, h: 16 },
+    montacargas: { t: 'Zona de montacargas', i: '🏗️', c: '#FF7A45', w: 30, h: 14 },
+    maquinas:    { t: 'Cuarto de máquinas', i: '⚡', c: '#FF4D6D', w: 16, h: 16 },
+    comedor:     { t: 'Comedor', i: '🍽️', c: '#E58BFF', w: 20, h: 10 },
+    almacen:     { t: 'Área de almacenaje', i: '🧱', c: '#D9A066', w: 20, h: 14 },
+    pasillo:     { t: 'Pasillo de montacargas', i: '↔️', c: '#FFC22E', w: 40, h: 5 },
+    andador:     { t: 'Andador peatonal', i: '🚶', c: '#3DDC84', w: 1.6, h: 24 },
+    entrada:     { t: 'Entrada', i: '🚪', c: '#B4E32F', w: 6, h: 1 },
+    salida:      { t: 'Salida de emergencia', i: '🟩', c: '#3DDC84', w: 3.4, h: 1 },
+    generica:    { t: 'Área libre', i: '⬜', c: '#B0AEE0', w: 14, h: 10 }
+  };
+  const aType = a => a.type || (/^rack/i.test(a.name) ? 'rack' : /recep/i.test(a.name) ? 'recepcion' : /ofic/i.test(a.name) ? 'oficinas' : /empaque/i.test(a.name) ? 'empaque' : /anden/i.test(a.name) ? 'andenes' : /montacarg/i.test(a.name) ? 'montacargas' : /m[aá]quinas/i.test(a.name) ? 'maquinas' : /comedor/i.test(a.name) ? 'comedor' : 'generica');
+  const PASO = ['pasillo', 'andador', 'entrada', 'salida'];
+  const isWork = a => !PASO.includes(aType(a));
+  // área en un punto: primero las de trabajo, luego pasillos
+  function areaAt(s, sid, x, y) {
+    const st = site(s, sid), inA = a => x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h;
+    const L = st.areas || []; return L.find(a => isWork(a) && inA(a)) || L.find(a => ['pasillo', 'andador'].includes(aType(a)) && inA(a));
+  }
   function event(s, opId, txt, type) { s.events.push({ at: now(), opId, txt, type }); }
   function alert(s, type, opId, txt, extra) {
     if (s.alerts.some(a => a.type === type && a.opId === opId && a.status !== 'cerrada' && (!extra || a.ref === extra.ref))) return null;
@@ -278,19 +388,40 @@
           }
         } else if (p.status === 'disponible' || p.status === 'ensitio') {
           // en el almacén los disponibles caminan entre áreas de trabajo
-          if (st.kind === 'indoor' && p.status === 'disponible' && Math.random() < .06 && !p.locAt) {
-            const work = st.areas.filter(a => !/máquinas|montacargas/i.test(a.name) || p.group === 'g3');
+          const com = st.kind === 'indoor' && st.areas.find(a => aType(a) === 'comedor');
+          if (com && p.status === 'disponible' && !p.order && !p.locAt && Math.random() < .006) {
+            // de vez en cuando alguien sale a comer: camina al comedor
+            p.target = { x: com.x + com.w * (.15 + Math.random() * .7), y: com.y + com.h * (.25 + Math.random() * .5) };
+            p.breakLen = (60 + Math.random() * 90) * 1000;
+          } else if (st.kind === 'indoor' && p.status === 'disponible' && Math.random() < .06 && !p.locAt) {
+            const work = st.areas.filter(a => isWork(a) && aType(a) !== 'comedor' && (!['maquinas', 'montacargas'].includes(aType(a)) || p.group === 'g3'));
             const a = work[Math.floor(Math.random() * work.length)];
-            p.target = { x: a.x + a.w * (.2 + Math.random() * .6), y: a.y + a.h * (.2 + Math.random() * .6) };
+            if (a) p.target = { x: a.x + a.w * (.2 + Math.random() * .6), y: a.y + a.h * (.2 + Math.random() * .6) };
           }
           p.x += (Math.random() - .5) * sc.jitter; p.y += (Math.random() - .5) * sc.jitter;
+        } else if (p.status === 'receso' && p.recesoAuto && !p.locAt && p.recesoAt && t - p.recesoAt > (p.breakLen || 30 * MIN) && st.kind === 'indoor') {
+          // terminó de comer: regresa a un área de trabajo (al salir del comedor vuelve a disponible)
+          const work = st.areas.filter(a => isWork(a) && !['comedor', 'maquinas', 'montacargas'].includes(aType(a)));
+          const a = work[Math.floor(Math.random() * work.length)];
+          if (a) p.target = { x: a.x + a.w / 2, y: a.y + a.h / 2 };
         }
         if (!gps) {
           if (st.kind === 'indoor') { p.x = Math.max(1, Math.min(st.w - 1, p.x)); p.y = Math.max(1, Math.min(st.h - 1, p.y)); }
           else { p.x = Math.max(2, Math.min(98, p.x)); p.y = Math.max(3, Math.min(97, p.y)); }
           p.seen = t;
         }
-        if (p.locAt && t - p.locAt > 90000) p.locAt = null;
+        if (p.locAt && t - p.locAt > 90000 && p.status !== 'receso') p.locAt = null;
+        // comedor: al entrar queda en receso; al salir vuelve a disponible
+        const ar = st.kind === 'indoor' ? areaAt(s, p.site, p.x, p.y) : null, inCom = !!(ar && aType(ar) === 'comedor');
+        const tA = p.target && st.kind === 'indoor' ? areaAt(s, p.site, p.target.x, p.target.y) : null;
+        const goingCom = !p.target || !!(tA && aType(tA) === 'comedor');
+        if (inCom && goingCom && ['disponible', 'pausa'].includes(p.status) && !p.order) {
+          p.status = 'receso'; p.recesoAt = t; p.recesoAuto = true; p.target = null; event(s, p.id, 'Entró al comedor · en receso', 'estado');
+        } else if (!inCom && p.status === 'receso' && p.recesoAuto && st.kind === 'indoor') {
+          event(s, p.id, 'Regresó de receso · ' + Math.max(1, Math.round((t - (p.recesoAt || t)) / MIN)) + ' min', 'estado');
+          p.status = 'disponible'; p.recesoAt = null; p.recesoAuto = false;
+        }
+        if (p.status === 'receso' && p.recesoAt && t - p.recesoAt > (s.breakMin || 45) * MIN) alert(s, 'receso', p.id, 'Lleva ' + Math.round((t - p.recesoAt) / MIN) + ' min en receso (tiempo de comida: ' + (s.breakMin || 45) + ' min)', { ref: p.recesoAt });
         const moved = gps ? 0 : dist(prev, p);
         p.km = +(p.km + moved * sc.km).toFixed(3);
         if (moved > (st.kind === 'indoor' ? .8 : .2)) { p.trail.push([+p.x.toFixed(2), +p.y.toFixed(2)]); if (p.trail.length > 40) p.trail.shift(); }
@@ -335,14 +466,161 @@
   const ago = ts => { const m = Math.round((now() - ts) / MIN); return m < 1 ? 'ahora' : m < 60 ? 'hace ' + m + ' min' : 'hace ' + Math.floor(m / 60) + ' h ' + (m % 60) + ' min'; };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  // plano del almacén como imagen (SVG): áreas, racks y cuadrícula de 10 m
+  // plano de cualquier almacén como imagen (SVG en metros). Cada área se dibuja según su tipo:
+  // racks con tarimas, pasillos señalizados, andador peatonal, oficinas, empaque, comedor, andenes,
+  // montacargas, cuarto de máquinas, entradas y salidas de emergencia; muros y extintores automáticos.
   function planSVG(st) {
-    const a = st.areas.map(z => `<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="1.2" fill="${z.c}22" stroke="${z.c}" stroke-width=".35"/>` +
-      (/^Rack/.test(z.name) ? Array.from({ length: Math.floor(z.h / 4) }, (_, i) => `<line x1="${z.x}" y1="${z.y + (i + 1) * 4}" x2="${z.x + z.w}" y2="${z.y + (i + 1) * 4}" stroke="${z.c}66" stroke-width=".2"/>`).join('') : '') +
-      `<text x="${z.x + z.w / 2}" y="${z.y + (/^Rack/.test(z.name) ? -1.2 : z.h / 2 + 1.1)}" font-size="${/^Rack/.test(z.name) ? 2.4 : 2.8}" font-family="DM Sans,sans-serif" font-weight="700" fill="#E9E5FF" text-anchor="middle">${esc(z.name)}</text>`).join('');
-    const grid = Array.from({ length: Math.floor(st.w / 10) + 1 }, (_, i) => `<line x1="${i * 10}" y1="0" x2="${i * 10}" y2="${st.h}" stroke="#ffffff10" stroke-width=".2"/>`).join('') +
-      Array.from({ length: Math.floor(st.h / 10) + 1 }, (_, i) => `<line x1="0" y1="${i * 10}" x2="${st.w}" y2="${i * 10}" stroke="#ffffff10" stroke-width=".2"/>`).join('');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${st.w} ${st.h}" width="${st.w * 10}" height="${st.h * 10}"><rect width="${st.w}" height="${st.h}" fill="#0E0E55"/>${grid}<rect x=".3" y=".3" width="${st.w - .6}" height="${st.h - .6}" fill="none" stroke="#B9B7E6" stroke-width=".6"/><rect x="9" y="0" width="8" height="1" fill="#B4E32F"/><text x="13" y="3.4" font-size="1.8" fill="#B4E32F" text-anchor="middle" font-family="DM Sans,sans-serif">Entrada</text>${a}</svg>`;
+    const W = st.w, H = st.h, F = 'DM Sans,Segoe UI,sans-serif';
+    let sd = 11; const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+    const r = (x, y, w, h, a) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" ${a || ''}/>`;
+    const t = (x, y, s, txt, a) => `<text x="${x}" y="${y}" font-size="${s}" font-family="${F}" ${a || ''}>${esc(txt)}</text>`;
+    const pill = (x, y, txt, c) => { const w = txt.length * 1.05 + 3.6; return `<g>${r(x, y, w, 3, `rx="1.5" fill="#06062E" fill-opacity=".88" stroke="${c}" stroke-width=".25"`)}<circle cx="${x + 1.5}" cy="${y + 1.5}" r=".6" fill="${c}"/>${t(x + 2.6, y + 2.1, 1.75, txt, 'font-weight="700" fill="#F4F3FF"')}</g>`; };
+    const areas = (st.areas || []).slice(), ty = aType;
+    let defs = '', g = '', top = '', clipN = 0;
+    const clip = a => { const id = 'c' + (clipN++); defs += `<clipPath id="${id}"><rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}"/></clipPath>`; return id; };
+    // piso de concreto con cuadrícula de 5 m
+    g += r(0, 0, W, H, 'fill="url(#floor)"');
+    for (let x = 5; x < W; x += 5) g += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#ffffff" stroke-opacity="${x % 10 ? .025 : .05}" stroke-width=".12"/>`;
+    for (let y = 5; y < H; y += 5) g += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#ffffff" stroke-opacity="${y % 10 ? .025 : .05}" stroke-width=".12"/>`;
+
+    // 1) pasillos de montacargas y andadores
+    areas.filter(a => ty(a) === 'pasillo').forEach(a => {
+      const hz = a.w >= a.h, { x, y, w, h } = a;
+      g += r(x, y, w, h, 'fill="#ffffff" fill-opacity=".035"');
+      if (hz) {
+        g += `<line x1="${x}" y1="${y + .3}" x2="${x + w}" y2="${y + .3}" stroke="#FFC22E" stroke-width=".3"/><line x1="${x}" y1="${y + h - .3}" x2="${x + w}" y2="${y + h - .3}" stroke="#FFC22E" stroke-width=".3"/>`;
+        g += `<line x1="${x + 2}" y1="${y + h / 2}" x2="${x + w - 2}" y2="${y + h / 2}" stroke="#ffffff" stroke-opacity=".35" stroke-width=".22" stroke-dasharray="2 1.6"/>`;
+        for (let ax = x + 8; ax < x + w - 6; ax += 22) g += `<path d="M${ax} ${y + h * .27} l1.6 .8 -1.6 .8z M${ax + 4} ${y + h * .73} l-1.6-.8 1.6-.8z" fill="#ffffff" fill-opacity=".45"/>`;
+      } else {
+        g += `<line x1="${x + .3}" y1="${y}" x2="${x + .3}" y2="${y + h}" stroke="#FFC22E" stroke-width=".3"/><line x1="${x + w - .3}" y1="${y}" x2="${x + w - .3}" y2="${y + h}" stroke="#FFC22E" stroke-width=".3"/>`;
+        g += `<line x1="${x + w / 2}" y1="${y + 2}" x2="${x + w / 2}" y2="${y + h - 2}" stroke="#ffffff" stroke-opacity=".35" stroke-width=".22" stroke-dasharray="2 1.6"/>`;
+        for (let ay = y + 8; ay < y + h - 6; ay += 22) g += `<path d="M${x + w * .27} ${ay} l.8 1.6 .8-1.6z M${x + w * .73} ${ay + 4} l-.8-1.6 -.8 1.6z" fill="#ffffff" fill-opacity=".45"/>`;
+      }
+    });
+    areas.filter(a => ty(a) === 'andador').forEach(a => {
+      const vt = a.h >= a.w, cx = a.x + a.w / 2, cy = a.y + a.h / 2;
+      g += r(a.x, a.y, a.w, a.h, 'fill="#3DDC84" fill-opacity=".22"');
+      g += vt ? `<line x1="${cx}" y1="${a.y}" x2="${cx}" y2="${a.y + a.h}" stroke="#3DDC84" stroke-width=".18" stroke-dasharray="1 .8"/>` : `<line x1="${a.x}" y1="${cy}" x2="${a.x + a.w}" y2="${cy}" stroke="#3DDC84" stroke-width=".18" stroke-dasharray="1 .8"/>`;
+      if (Math.max(a.w, a.h) > 14) g += t(cx, cy, 1.25, 'ANDADOR PEATONAL', `fill="#3DDC84" font-weight="700" text-anchor="middle" dominant-baseline="middle" letter-spacing=".1"${vt ? ` transform="rotate(-90 ${cx} ${cy})"` : ''}`);
+      // paso de cebra donde cruza un pasillo de montacargas
+      areas.filter(p => ty(p) === 'pasillo').forEach(p => {
+        const ix = Math.max(a.x - .6, p.x), iy = Math.max(a.y - .6, p.y), ex = Math.min(a.x + a.w + .6, p.x + p.w), ey = Math.min(a.y + a.h + .6, p.y + p.h);
+        if (vt) { const yy0 = p.y, yy1 = p.y + p.h; if (a.x + a.w < p.x || a.x > p.x + p.w || a.y > yy1 || a.y + a.h < yy0 - 1) return; for (let y = yy0 + .6; y < yy1 - .3; y += 1) g += r(a.x - .6, y, a.w + 1.2, .5, 'fill="#ffffff" fill-opacity=".55"'); }
+        else if (ex > ix && ey > iy) for (let x = ix + .3; x < ex; x += 1) g += r(x, iy, .5, ey - iy, 'fill="#ffffff" fill-opacity=".55"');
+      });
+    });
+    // pasillos entre racks verticales vecinos
+    const racks = areas.filter(a => ty(a) === 'rack' && a.h >= a.w).sort((a, b) => a.x - b.x);
+    let pn = 0;
+    racks.forEach((a, i) => {
+      const b = racks[i + 1]; if (!b) return;
+      const ax = a.x + a.w, aw = b.x - ax, y0 = Math.max(a.y, b.y), y1 = Math.min(a.y + a.h, b.y + b.h);
+      if (aw < 2 || aw > 10 || y1 - y0 < 6) return;
+      pn++;
+      g += r(ax, y0, aw, y1 - y0, 'fill="#ffffff" fill-opacity=".03"');
+      g += `<line x1="${ax + aw / 2}" y1="${y0 + 1}" x2="${ax + aw / 2}" y2="${y1 - 1}" stroke="#FFC22E" stroke-opacity=".5" stroke-width=".18" stroke-dasharray="1.4 1.2"/>`;
+      g += t(ax + aw / 2, (y0 + y1) / 2, 1.4, 'PASILLO ' + pn, `fill="#FFC22E" fill-opacity=".7" font-weight="700" text-anchor="middle" dominant-baseline="middle" letter-spacing=".15" transform="rotate(-90 ${ax + aw / 2} ${(y0 + y1) / 2})"`);
+    });
+
+    // 2) áreas de trabajo (cada una recortada a su rectángulo)
+    areas.filter(a => !PASO.includes(ty(a))).forEach(a => {
+      const k = ty(a), { x, y, w, h } = a, c = a.c || (AREA_T[k] || AREA_T.generica).c;
+      let d = '';
+      if (k === 'rack') {
+        const vt = h >= w, L = vt ? h : w, S = vt ? w : h, bays = Math.max(1, Math.floor(L / 2.7)), bl = L / bays;
+        const R = (u, v, lu, lv, at) => vt ? r(x + v, y + u, lv, lu, at) : r(x + u, y + v, lu, lv, at);
+        const Ln = (u, v0, v1, at) => vt ? `<line x1="${x + v0}" y1="${y + u}" x2="${x + v1}" y2="${y + u}" ${at}/>` : `<line x1="${x + u}" y1="${y + v0}" x2="${x + u}" y2="${y + v1}" ${at}/>`;
+        const rows = S >= 4 ? [[.3, S / 2 - .6], [S / 2 + .3, S / 2 - .6]] : [[.2, S - .4]];
+        rows.forEach(([v0, rw]) => {
+          d += R(0, v0, L, rw, 'fill="#1A1A70" stroke="#3B3BA0" stroke-width=".15"');
+          for (let b = 0; b < bays; b++) {
+            const kk = rnd();
+            if (kk > .14) { const col = kk > .8 ? '#7EE0FF' : kk > .6 ? '#B4E32F' : kk > .35 ? '#D9A066' : '#FFC22E'; d += R(b * bl + .35, v0 + .35, bl - .7, rw - .7, `rx=".25" fill="${col}" fill-opacity=".72"`); }
+            d += Ln(b * bl, v0, v0 + rw, 'stroke="#FF7A45" stroke-width=".22"');
+          }
+          d += Ln(L, v0, v0 + rw, 'stroke="#FF7A45" stroke-width=".22"');
+        });
+        g += `<g clip-path="url(#${clip(a)})">${d}</g>`;
+        top += y >= 4.6 ? pill(x - .4, y - 4.2, a.name, c) : pill(x + .3, y + .3, a.name, c);
+        return;
+      }
+      g += r(x, y, w, h, `rx=".6" fill="${c}" fill-opacity=".07" stroke="${c}" stroke-opacity=".55" stroke-width=".22"`);
+      if (k === 'recepcion') {
+        d += `<path d="M${x + 3} ${y + 9} h9 v-4 h2 v6 h-11z" fill="#2A2A8A" stroke="${c}" stroke-width=".2"/>`;
+        if (h >= 16) [x + 6, x + 9, x + 12].forEach(cx => d += `<circle cx="${cx}" cy="${y + 12.4}" r=".7" fill="#B0AEE0" fill-opacity=".6"/>`);
+        for (let i = 0; i < Math.floor((w - 4) / 2.6); i++) d += r(x + 3 + i * 2.6, y + h - 3.2, 1.8, 1.4, 'rx=".4" fill="#3B3BA0"');
+        d += `<circle cx="${x + w - 2.2}" cy="${y + 10}" r="1.1" fill="#3DDC84" fill-opacity=".55"/><circle cx="${x + 2.2}" cy="${y + h - 6}" r="1" fill="#3DDC84" fill-opacity=".55"/>`;
+        d += t(x + w / 2, y + h - .5, 1.15, 'Control de acceso', 'fill="#B0AEE0" text-anchor="middle"');
+      } else if (k === 'oficinas') {
+        const mx = x + w * .55, my = y + h / 2;
+        d += `<path d="M${mx} ${y} V${my - 2} M${mx} ${my + 2} V${y + h} M${x} ${my} H${mx - 4} M${mx - 1.5} ${my} H${mx}" stroke="#C9C6F5" stroke-width=".35"/>`;
+        const desk = (dx, dy) => r(dx, dy, 3.2, 1.6, 'rx=".2" fill="#3B3BA0" stroke="#7B5CFA" stroke-width=".12"') + `<circle cx="${dx + 1.6}" cy="${dy + 2.4}" r=".55" fill="#B0AEE0" fill-opacity=".7"/>` + r(dx + 1.1, dy + .3, 1, .6, 'fill="#7EE0FF" fill-opacity=".7"');
+        for (let dx = x + 1.5; dx + 3.2 < mx - .5; dx += 5) { d += desk(dx, y + 4.4); if (y + 8.6 + 2.6 < my) d += desk(dx, y + 8.6); d += desk(dx, my + 2.5); }
+        const cx = mx + (x + w - mx) / 2;
+        d += `<ellipse cx="${cx}" cy="${y + h * .3}" rx="${Math.min(3.4, (x + w - mx) / 2 - 1)}" ry="1.8" fill="#3B3BA0" stroke="#7B5CFA" stroke-width=".15"/>`;
+        d += t(cx, y + h * .3 + 4.4, 1.15, 'Sala de juntas', 'fill="#B0AEE0" text-anchor="middle"');
+      } else if (k === 'empaque') {
+        d += r(x + 1, y + h - 4, w - 2, 2, 'fill="#2A2A8A" stroke="#FFC22E" stroke-width=".15"');
+        for (let i = x + 1.5; i < x + w - 1; i += 1) d += `<line x1="${i}" y1="${y + h - 4}" x2="${i}" y2="${y + h - 2}" stroke="#FFC22E" stroke-opacity=".35" stroke-width=".12"/>`;
+        [x + w * .3, x + w * .62].forEach(bx => d += r(bx, y + h - 3.7, 1.5, 1.4, 'rx=".15" fill="#D9A066"'));
+        for (let px = x + 2; px + 6 < x + w - 8; px += 8) for (let py = y + 4.4; py + 4.5 < y + h - 4.5; py += 6.6) {
+          d += r(px, py, 6, 3, 'rx=".3" fill="#3B3BA0" stroke="#FFC22E" stroke-opacity=".6" stroke-width=".15"');
+          d += r(px + .6, py + .6, 1.6, 1.4, 'rx=".15" fill="#D9A066"') + r(px + 2.8, py + .9, 1.2, 1.1, 'rx=".15" fill="#D9A066" fill-opacity=".8"');
+          d += `<circle cx="${px + 3}" cy="${py + 4.1}" r=".55" fill="#B0AEE0" fill-opacity=".7"/>`;
+        }
+        if (w >= 14 && h >= 20) d += `<circle cx="${x + w - 5}" cy="${y + 8}" r="3" fill="none" stroke="#7EE0FF" stroke-width=".3" stroke-dasharray=".8 .5"/><circle cx="${x + w - 5}" cy="${y + 8}" r="1.4" fill="#D9A066"/>` + t(x + w - 5, y + 12.6, 1.15, 'Emplayadora', 'fill="#B0AEE0" text-anchor="middle"');
+      } else if (k === 'andenes') {
+        const n = Math.max(1, Math.floor((w - 2) / 8.5));
+        for (let i = 0; i < n; i++) for (let j = 0; j < Math.max(1, Math.floor((h - 9) / 4.2)); j++) { const px = x + 3 + i * 8.5, py = y + 4 + j * 4.2; d += r(px, py, 6, 3.2, 'fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width=".15" stroke-dasharray=".6 .4"'); if (rnd() > .35) d += r(px + .5, py + .5, 5, 2.2, 'rx=".2" fill="#D9A066" fill-opacity=".75"'); }
+        for (let i = 0; i < n; i++) { const dx = x + 3 + i * 8.5; d += r(dx, y + h - 3.6, 6, 3.4, 'fill="url(#haz)"') + t(dx + 3, y + h - 4.3, 1.4, 'A' + (i + 1), 'fill="#FF6FB1" font-weight="800" text-anchor="middle"'); if (y + h >= H - 1.5) top += r(dx, H - 1, 6, 1, 'fill="#06062E"'); }
+      } else if (k === 'montacargas') {
+        d += r(x + .4, y + .4, w - .8, h - .8, 'fill="none" stroke="url(#haz)" stroke-width=".8"');
+        const fork = (fx, fy) => `<g transform="translate(${fx} ${fy})">${r(0, 0, 2.6, 3.6, 'rx=".4" fill="#FF7A45"')}${r(.5, .6, 1.6, 1.4, 'rx=".2" fill="#06062E" fill-opacity=".6"')}<line x1=".6" y1="3.6" x2=".6" y2="5.4" stroke="#C9C6F5" stroke-width=".3"/><line x1="2" y1="3.6" x2="2" y2="5.4" stroke="#C9C6F5" stroke-width=".3"/></g>`;
+        const spots = Math.max(1, Math.min(4, Math.floor((w - 8) / 4.6)));
+        for (let i = 0; i < spots; i++) { const px = x + w - 2 - (spots - i) * 4.6; d += r(px, y + 4.4, 3.8, 7, 'fill="none" stroke="#FF7A45" stroke-opacity=".7" stroke-width=".18"'); if (i !== 2) d += fork(px + .6, y + 5); }
+        if (w > 26) d += r(x + w - 4 - spots * 4.6 - 4, y + 5, 3.4, 4.6, 'rx=".3" fill="#2A2A8A" stroke="#B4E32F" stroke-width=".2"') + `<path d="M${x + w - 4 - spots * 4.6 - 2.1} ${y + 5.8} l-1 1.8 h1 l-.6 1.6 1.6-2.2 h-1 l.6-1.2z" fill="#B4E32F"/>`;
+        d += `<path d="M${x + 6} ${y + h / 2 + 2} h5 l-1.2-1.2 M${x + 11} ${y + h / 2 + 2} l-1.2 1.2" stroke="#FF7A45" stroke-width=".3" fill="none"/>`;
+      } else if (k === 'maquinas') {
+        d += r(x, y, w, h, 'rx=".6" fill="url(#red)"');
+        d += r(x + 2, y + 4.6, 6, 4, 'rx=".3" fill="#2A2A8A" stroke="#FF4D6D" stroke-width=".2"') + t(x + 5, y + 7.3, 1.1, 'Transformador', 'fill="#FFB3C1" text-anchor="middle"');
+        if (w > 14) [[x + 13, y + 6.6], [x + 16.5, y + 6.6]].forEach(([cx, cy]) => d += `<circle cx="${cx}" cy="${cy}" r="1.5" fill="#2A2A8A" stroke="#FF4D6D" stroke-width=".2"/><circle cx="${cx}" cy="${cy}" r=".5" fill="#FF4D6D"/>`);
+        d += r(x + w / 2 - 5.5, y + h / 2 + .6, 11, 2.4, 'rx="1.2" fill="#FF4D6D"') + t(x + w / 2, y + h / 2 + 2.3, 1.2, 'ACCESO RESTRINGIDO', 'fill="#fff" font-weight="800" text-anchor="middle"');
+        d += r(x + 2, y + h - 5, 8, 3, 'rx=".3" fill="#2A2A8A" stroke="#FFC22E" stroke-width=".2"') + `<path d="M${x + 6.2} ${y + h - 4.6} l-1 1.3 h1 l-.6 1.2 1.6-1.7 h-1 l.6-.8z" fill="#FFC22E"/>`;
+      } else if (k === 'comedor') {
+        d += r(x + w - 4.2, y + 1.2, 3, h - 2.4, 'rx=".3" fill="#2A2A8A" stroke="#E58BFF" stroke-opacity=".7" stroke-width=".18"');
+        for (let i = 0; i < Math.floor((h - 3) / 2.6); i++) d += r(x + w - 3.6, y + 2.4 + i * 2.6, 1.8, 1.3, 'rx=".2" fill="#C9C6F5" fill-opacity=".55"');
+        for (let cy = y + 5.2; cy < y + h - 2; cy += 5) for (let cx = x + 4; cx < x + w - 7; cx += 5.5) {
+          if (cy < y + 5.5 && cx < x + 12) continue;
+          d += `<circle cx="${cx}" cy="${cy}" r="1.4" fill="#3B3BA0" stroke="#E58BFF" stroke-opacity=".6" stroke-width=".15"/>`;
+          [[0, -2], [1.9, 0], [0, 2], [-1.9, 0]].forEach(([dx, dy]) => d += `<circle cx="${cx + dx}" cy="${cy + dy}" r=".45" fill="#B0AEE0" fill-opacity=".65"/>`);
+        }
+      } else if (k === 'almacen') {
+        for (let px = x + 1.5; px + 2.4 < x + w - 1; px += 3.4) for (let py = y + 4.4; py + 2.4 < y + h - 1; py += 3.4) if (rnd() > .25) d += r(px, py, 2.4, 2.4, `rx=".2" fill="${rnd() > .5 ? '#D9A066' : '#C8955A'}" fill-opacity=".8"`);
+      }
+      g += `<g clip-path="url(#${clip(a)})">${d}</g>`;
+      if (w >= 9 && h >= 4) top += pill(x + .6, y + .6, a.name, c); else top += t(x + w / 2, y + h / 2 + .5, 1.3, a.name, 'fill="#F4F3FF" font-weight="700" text-anchor="middle"');
+    });
+
+    // 3) muros, entradas y salidas de emergencia
+    g += r(.4, .4, W - .8, H - .8, 'fill="none" stroke="#D8D5FF" stroke-width=".8"');
+    areas.filter(a => ty(a) === 'entrada' || ty(a) === 'salida').forEach(a => {
+      const ex = ty(a) === 'entrada', col = ex ? '#B4E32F' : '#3DDC84', dark = ex ? '#5E7F10' : '#0C7A3A', lbl = ex ? 'ENTRADA' : 'SALIDA';
+      top += r(a.x, a.y, a.w, a.h, 'fill="#14146A"') + r(a.x, a.y, a.w, a.h, `fill="${col}" fill-opacity=".85"`);
+      const cx = a.x + a.w / 2, cy = a.y + a.h / 2, bw = lbl.length * .95 + 1.6;
+      const lx = Math.max(bw / 2 + .5, Math.min(W - bw / 2 - .5, a.x <= 1 ? cx + bw / 2 + .8 : a.x + a.w >= W - 1 ? cx - bw / 2 - .8 : cx));
+      const ly = Math.max(1.4, Math.min(H - 1.4, a.y <= 1 ? cy + 1.8 : a.y + a.h >= H - 1 ? cy - 1.8 : cy));
+      top += `<g transform="translate(${lx} ${ly})">${r(-bw / 2, -.9, bw, 1.8, `rx=".3" fill="${dark}"`)}${t(0, .45, 1.15, lbl, 'fill="#fff" font-weight="800" text-anchor="middle"')}</g>`;
+    });
+    // extintores cada ~25 m sobre los muros
+    for (let x = 12; x < W - 4; x += 25) top += `<circle cx="${x}" cy="1.3" r=".75" fill="#FF4D6D" stroke="#fff" stroke-width=".18"/><circle cx="${x + 12}" cy="${H - 1.3}" r=".75" fill="#FF4D6D" stroke="#fff" stroke-width=".18"/>`;
+    for (let y = 12; y < H - 4; y += 22) top += `<circle cx="1.3" cy="${y}" r=".75" fill="#FF4D6D" stroke="#fff" stroke-width=".18"/><circle cx="${W - 1.3}" cy="${y + 8}" r=".75" fill="#FF4D6D" stroke="#fff" stroke-width=".18"/>`;
+    defs = `<defs>
+      <pattern id="floor" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="#12125E"/><circle cx=".5" cy=".6" r=".07" fill="#ffffff" fill-opacity=".06"/><circle cx="1.5" cy="1.4" r=".05" fill="#ffffff" fill-opacity=".05"/></pattern>
+      <pattern id="haz" width="1.2" height="1.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.2" height="1.2" fill="#FFC22E"/><rect width=".6" height="1.2" fill="#06062E"/></pattern>
+      <pattern id="red" width="1.4" height="1.4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.4" height="1.4" fill="#FF4D6D" fill-opacity=".06"/><rect width=".25" height="1.4" fill="#FF4D6D" fill-opacity=".22"/></pattern>${defs}
+    </defs>`;
+    const px = Math.max(8, Math.min(16, 2000 / Math.max(W, H)));
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${Math.round(W * px)}" height="${Math.round(H * px)}">${defs}${g}${top}</svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
@@ -400,5 +678,10 @@
   }
 
   window.Mando = { SOS_KINDS, sos, KEY, STATUS, ORDER_ST, ALERT_T, PLACES, SCALE, BOX, toLL, fromLL, load, save, update, on, tick, nearest, advance, event, alert, orderHist, uid, dist, km, fmtD, eta, site, scale, areaAt, members, forMe, planSVG, fmtT, ago, esc, Ptt, beep, MIN,
-    reset() { localStorage.removeItem(KEY); return load(); } };
+    AREA_T, aType, isWork, CLIENTS,
+    useClient(cid) { CID = CLIENTS[cid] ? cid : 'mixto'; return CID; },
+    client() { return CID; },
+    clientByCode(code) { return Object.keys(CLIENTS).find(k => CLIENTS[k].code === String(code || '').trim().toUpperCase()); },
+    hbKey() { return 'navi.mando.hb:' + CID; },
+    reset() { localStorage.removeItem(keyOf()); return load(); } };
 })();

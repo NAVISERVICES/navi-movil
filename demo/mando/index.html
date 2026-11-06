@@ -112,7 +112,7 @@ table.t tr:hover td{background:#ffffff06}
 .leaflet-container{cursor:crosshair}
 .live{display:grid;grid-template-columns:1fr 360px;gap:14px;height:calc(100dvh - 58px);padding:14px}
 .lcol{display:flex;flex-direction:column;gap:12px;min-height:0}
-.lcol .kpis{margin:0;grid-template-columns:repeat(5,1fr)}
+.lcol .kpis{margin:0;grid-template-columns:repeat(6,1fr)}
 .lcol .kpi{padding:9px 12px}.lcol .kpi b{font-size:22px}
 .lcol .map{flex:1}
 .ptt{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 12px}
@@ -251,6 +251,24 @@ table.t tr:hover td{background:#ffffff06}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .toast{position:fixed;right:18px;bottom:18px;z-index:1600;display:flex;flex-direction:column;gap:8px}
 .toast div{background:#fff;color:var(--ink);font-weight:700;border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px #0007;animation:fi .2s;max-width:340px;font-size:13px}
+.cli{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);background:#ffffff0a;border:1px dashed var(--line2);border-radius:12px;padding:4px 6px 4px 10px}
+.cli select{background:#14146A;border:1px solid var(--line2);border-radius:9px;padding:5px 8px;font-weight:700;font-size:12.5px;color:#fff;outline:none}
+/* editor de layout */
+.lyw{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
+.lyc{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line2);background:#0E0E55;user-select:none;touch-action:none}
+.lyc img{display:block;width:100%;height:100%;pointer-events:none}
+.lyc svg{position:absolute;inset:0;width:100%;height:100%}
+.lya .b{fill:transparent;stroke:transparent;stroke-width:.3;cursor:move}
+.lya:hover .b{stroke:#ffffffaa;stroke-dasharray:.8 .5}
+.lya.on .b{stroke:#B4E32F;stroke-width:.45;fill:#b4e32f14}
+.lya .h{fill:#B4E32F;stroke:#06062E;stroke-width:.2;cursor:nwse-resize}
+.lyp{display:flex;flex-direction:column;gap:12px}
+.pal{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pal button{display:flex;align-items:center;gap:6px;text-align:left;font-size:12px;font-weight:700;border:1px solid var(--line2);border-radius:10px;padding:7px 8px;background:#ffffff08}
+.pal button:hover{border-color:var(--lime);background:#b4e32f12}
+.pal button i{font-style:normal;font-size:15px}
+.cliente{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media (max-width:1100px){.lyw{grid-template-columns:1fr}}
 .demo{font-size:11.5px;color:var(--muted);background:#ffffff0a;border:1px dashed var(--line2);border-radius:10px;padding:6px 10px}
 @media (max-width:1100px){.live{grid-template-columns:1fr;height:auto}.lcol .map{min-height:440px}.rside .list{max-height:420px}.lcol .kpis{grid-template-columns:repeat(3,1fr)}.r2,.r3{grid-template-columns:1fr}}
 @media (max-width:760px){
@@ -275,7 +293,7 @@ table.t tr:hover td{background:#ffffff06}
   <header class="top">
     <a class="brand" href="../empresas.html#mando" title="Volver a Empresas"><img src="../assets/navi-logo.png" alt="Navi">Mando<small id="emp"></small></a>
     <span class="sp"></span>
-    <span class="demo hide-m">Demo · datos de ejemplo</span>
+    <label class="cli hide-m" title="Cliente de demo">Demo<select id="cli"></select></label>
     <span class="clock" id="clock"></span>
     <button class="bell" id="bell" title="Alertas">🔔<b id="bellN" hidden></b></button>
     <a class="btn sm lime" href="app/" target="_blank" rel="noopener">📱 <span class="hide-m">App del operador</span></a>
@@ -286,9 +304,11 @@ table.t tr:hover td{background:#ffffff06}
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="mando.js?v=2"></script>
+<script src="mando.js?v=4"></script>
 <script>
 const M = Mando, E = M.esc, $ = id => document.getElementById(id);
+// cliente de demo: ?cliente=indoor|outdoor|mixto o el último elegido
+(() => { let c = new URLSearchParams(location.search).get('cliente'); try { c = c || localStorage.getItem('navi.mando.cliente'); if (c) localStorage.setItem('navi.mando.cliente', c); } catch (e) {} M.useClient(c || 'mixto'); })();
 let S = M.load();
 let view = (location.hash.slice(1) || 'vivo');
 const ui = { sel: null, side: 'equipo', grp: 'all', site: 'city', show: { ord: true, zon: true, trail: true }, conv: 'all', pttCh: 'all', ordQ: '', ordG: 'all', pick: null, seenSos: new Set(), talking: false };
@@ -296,7 +316,7 @@ try { Object.assign(ui.show, JSON.parse(localStorage.getItem('navi.mando.ui') ||
 
 const VIEWS = [
   ['vivo', '🛰️', 'En vivo'], ['ordenes', '📋', 'Órdenes'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
-  ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo']
+  ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo'], ['layout', '🏗️', 'Layout']
 ];
 const op = id => S.ops.find(p => p.id === id);
 const grp = id => S.groups.find(g => g.id === id);
@@ -307,6 +327,7 @@ const avatar = (p, cls) => p ? `<span class="av ${cls || ''}" style="background:
 const openOrders = () => S.orders.filter(o => !['completada', 'cancelada'].includes(o.status));
 const today = ts => new Date(ts).toDateString() === new Date().toDateString();
 const isGps = p => p.gps && Date.now() - p.gps < 120000;
+const brk = p => Math.max(0, Math.round((Date.now() - (p.recesoAt || Date.now())) / M.MIN)) + ' min';
 const where = p => { const st = siteN(p.site), a = M.areaAt(S, p.site, p.x, p.y); return st.icon + ' ' + (a ? a.name : st.kind === 'indoor' ? st.name : 'En calle'); };
 const unread = () => S.msgs.filter(m => m.from !== 'consola' && m.to !== 'all' && !m.reads.includes('consola'));
 const openAlerts = () => S.alerts.filter(a => a.status !== 'cerrada');
@@ -319,6 +340,11 @@ function nav() {
   $('nav').innerHTML = VIEWS.map(([k, i, t]) => `<button class="${k === view ? 'on' : ''}" data-v="${k}"><i>${i}</i>${t}${badge[k] ? `<em>${badge[k]}</em>` : ''}</button>`).join('');
   $('bellN').hidden = !na; $('bellN').textContent = na;
   $('emp').textContent = S.empresa;
+  const cs = $('cli');
+  if (cs && !cs.options.length) {
+    cs.innerHTML = Object.entries(M.CLIENTS).map(([k, c]) => `<option value="${k}" ${k === M.client() ? 'selected' : ''}>${c.icon} ${E(c.tipo)} · ${E(c.name.split(',')[0])}</option>`).join('');
+    cs.onchange = () => { try { localStorage.setItem('navi.mando.cliente', cs.value); } catch (e) {} location.href = location.pathname + '?cliente=' + cs.value + location.hash; };
+  }
 }
 $('nav').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); };
 $('bell').onclick = () => go('alertas');
@@ -331,8 +357,16 @@ const XY = (sid, ll) => { const st = siteN(sid); return st.kind === 'indoor' ? {
 const radM = (sid, r) => siteN(sid).kind === 'indoor' ? r : r * 310;
 function mapShell(id, extra) { return `<div class="map" id="${id}"><div class="lf"></div>${extra || ''}</div>`; }
 function lmap(el, sid) {
-  if (el._L && el._sid === sid) return el._L;
-  if (el._L) { el._L.remove(); el._L = null; el._mk = {}; }
+  // si cambió el layout del almacén se vuelve a dibujar el plano
+  const s0 = siteN(sid), sig = s0.kind === 'indoor' ? JSON.stringify([s0.w, s0.h, s0.areas]) : '';
+  if (el._L && el._sid === sid && el._sig === sig) return el._L;
+  el._sig = sig;
+  if (el._L) {
+    // detener animaciones antes de quitar el mapa y usar un contenedor nuevo
+    try { el._L.stop(); el._L.off(); el._L.remove(); } catch (e) {}
+    el._L = null; el._mk = {};
+    const old = el.querySelector('.lf'), nb = document.createElement('div'); nb.className = 'lf'; old.replaceWith(nb);
+  }
   const st = siteN(sid), box = el.querySelector('.lf');
   let m;
   if (st.kind === 'indoor') {
@@ -350,8 +384,9 @@ function lmap(el, sid) {
   m.on('zoomstart', () => el.classList.add('zooming'));
   m.on('zoomend', () => setTimeout(() => el.classList.remove('zooming'), 80));
   m.on('click', e => el._onMap && el._onMap(XY(sid, e.latlng)));
-  if (window.ResizeObserver) new ResizeObserver(() => m.invalidateSize()).observe(box);
-  setTimeout(() => m.invalidateSize(), 60);
+  const fix = () => { if (el._L === m && document.body.contains(box)) m.invalidateSize(); };
+  if (window.ResizeObserver) new ResizeObserver(fix).observe(box);
+  setTimeout(fix, 60);
   return m;
 }
 function fitOps(el, sid) {
@@ -386,7 +421,7 @@ function drawMap(el, o) {
   if (o.ops) S.ops.filter(p => p.status !== 'fuera' && p.site === sid).forEach(p => {
     seen[p.id] = 1;
     const cls = 'mkw' + (p.status === 'sos' ? ' sos' : '') + (ui.sel === p.id ? ' sel' : '') + (o.grp && o.grp !== 'all' && p.group !== o.grp ? ' dim' : '');
-    const html = avatar(p) + `<span class="nm">${E(p.name.split(' ')[0])}</span>` + (isGps(p) ? '<span class="gp" title="GPS real">📡</span>' : '');
+    const html = avatar(p) + `<span class="nm">${E(p.name.split(' ')[0])}${p.status === 'receso' ? ' · 🍽️ ' + brk(p) : ''}</span>` + (isGps(p) ? '<span class="gp" title="GPS real">📡</span>' : p.status === 'receso' ? '<span class="gp" title="En receso">🍽️</span>' : '');
     let mk = el._mk[p.id];
     if (!mk) { mk = L.marker(LL(sid, p.x, p.y), { zIndexOffset: 500 }).addTo(m); mk.on('click', () => o.onOp && el._onOp && el._onOp(p.id)); el._mk[p.id] = mk; }
     if (mk._key !== cls + html) { mk.setIcon(L.divIcon({ className: cls, html, iconSize: [34, 34], iconAnchor: [17, 17] })); mk._key = cls + html; }
@@ -404,7 +439,7 @@ function vVivo() {
       <div class="kpis" id="lk"></div>
       ${mapShell('lmap', `<div class="mapctl">${siteSeg(ui.site, 'id="siteS"')}<select id="fG"><option value="all">Todos los departamentos</option>${S.groups.map(g => `<option value="${g.id}" ${ui.grp === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</select>
         <button data-t="ord" class="${ui.show.ord ? 'on' : ''}">Órdenes</button><button data-t="zon" class="${ui.show.zon ? 'on' : ''}">Geocercas</button><button data-t="trail" class="${ui.show.trail ? 'on' : ''}">Recorrido</button><button id="fit">⌖ Centrar</button></div>
-        <div class="legend">${['disponible', 'encamino', 'ensitio', 'pausa', 'sos'].map(k => `<span><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</span>`).join('')}<span>📡 GPS real</span></div>`)}
+        <div class="legend">${['disponible', 'encamino', 'ensitio', 'receso', 'pausa', 'sos'].map(k => `<span><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</span>`).join('')}<span>📡 GPS real</span></div>`)}
       <div class="ptt">
         <div class="ch"><small>Canal de radio</small><select id="pttCh"><option value="all">📢 Todos</option><optgroup label="Departamentos">${S.groups.map(g => `<option value="${g.id}" ${ui.pttCh === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</optgroup><optgroup label="Grupos">${S.chats.map(c => `<option value="${c.id}" ${ui.pttCh === c.id ? 'selected' : ''}>${E(c.name)}</option>`).join('')}</optgroup><optgroup label="Privado">${S.ops.map(p => `<option value="${p.id}" ${ui.pttCh === p.id ? 'selected' : ''}>🔒 ${E(p.name)}</option>`).join('')}</optgroup></select></div>
         <button class="pttb" id="pttB">🎙️ Mantén para hablar</button>
@@ -422,6 +457,7 @@ function liveRefresh() {
   const enT = S.ops.filter(p => p.status !== 'fuera'), oo = openOrders();
   $('lk').innerHTML = [
     ['En turno', enT.length, '/ ' + S.ops.length, ''], ['En camino', S.ops.filter(p => p.status === 'encamino').length, '', ''],
+    ['🍽️ En receso', S.ops.filter(p => p.status === 'receso').length, '', S.ops.some(p => p.status === 'receso' && Date.now() - (p.recesoAt || 0) > (S.breakMin || 45) * M.MIN) ? 'warn' : ''],
     ['Órdenes abiertas', oo.length, '', ''], ['Por asignar', S.orders.filter(o => o.status === 'nueva').length, '', S.orders.some(o => o.status === 'nueva') ? 'warn' : ''],
     ['Alertas', openAlerts().length, '', openAlerts().length ? 'bad' : 'good']
   ].map(([t, n, e, c]) => `<div class="kpi ${c}"><small>${t}</small><b>${n}<em>${e}</em></b></div>`).join('');
@@ -432,18 +468,19 @@ function liveRefresh() {
     const list = S.ops.filter(p => ui.grp === 'all' || p.group === ui.grp).sort((a, b) => (b.status === 'sos') - (a.status === 'sos') || (a.site !== ui.site) - (b.site !== ui.site) || (a.status === 'fuera') - (b.status === 'fuera'));
     $('side').innerHTML = list.map(p => {
       const o = S.orders.find(x => x.id === p.order);
-      return `<button class="op ${ui.sel === p.id ? 'sel' : ''}" data-p="${p.id}">${avatar(p)}<span class="i"><b>${E(p.name)}</b><small><i class="dot" style="background:${stc(p)}"></i> ${M.STATUS[p.status].t}${o ? ' · ' + E(o.folio) : ''} · ${E(grp(p.group)?.name || '')}</small><small>${p.status === 'fuera' ? '' : E(where(p))}</small></span><span class="r">🔋${p.bat}%<br>${isGps(p) ? '📡' : ''}${'▮'.repeat(p.sig)}${'▯'.repeat(4 - p.sig)}</span></button>`;
+      return `<button class="op ${ui.sel === p.id ? 'sel' : ''}" data-p="${p.id}">${avatar(p)}<span class="i"><b>${E(p.name)}</b><small><i class="dot" style="background:${stc(p)}"></i> ${M.STATUS[p.status].t}${p.status === 'receso' ? ' ' + brk(p) : ''}${o ? ' · ' + E(o.folio) : ''} · ${E(grp(p.group)?.name || '')}</small><small>${p.status === 'fuera' ? '' : E(where(p))}</small></span><span class="r">🔋${p.bat}%<br>${isGps(p) ? '📡' : ''}${'▮'.repeat(p.sig)}${'▯'.repeat(4 - p.sig)}</span></button>`;
     }).join('');
   } else {
     $('side').innerHTML = S.events.slice(-60).reverse().map(e => `<div class="ev"><time>${M.fmtT(e.at)}</time><span><b>${E(op(e.opId)?.name.split(' ')[0] || 'Consola')}</b> ${E(e.txt)}</span></div>`).join('') || '<div class="empty">Sin actividad</div>';
   }
   const p = op(ui.sel);
-  if (!p) { $('det').innerHTML = `<div class="det"><b style="font-family:var(--display)">Mesa de control</b><p class="muted" style="font-size:12.5px;margin-top:4px">Cambia entre la ciudad y el almacén arriba del mapa. Toca a un operador para ver su estado, hablarle o asignarle una orden.</p></div>`; }
+  if (!p) { $('det').innerHTML = `<div class="det"><b style="font-family:var(--display)">Mesa de control</b><p class="muted" style="font-size:12.5px;margin-top:4px">${S.sites.length > 1 ? 'Cambia entre la ciudad y el almacén arriba del mapa. ' : ''}Toca a un operador para ver su estado, hablarle o asignarle una orden.</p></div>`; }
   else {
     const o = S.orders.find(x => x.id === p.order), pct = Math.min(100, p.gb / p.gbMax * 100), ind = siteN(p.site).kind === 'indoor';
     $('det').innerHTML = `<div class="det">
       <div class="hd">${avatar(p)}<div><b>${E(p.name)}</b><small>${E(p.role)} · ${E(grp(p.group)?.name || '')} · visto ${M.ago(p.seen)}</small></div><button class="x" data-x>×</button></div>
       <div style="font-size:12.5px;margin-bottom:8px">📍 ${E(where(p))}${isGps(p) ? ` · <span style="color:var(--cyan)">📡 GPS real ±${Math.round(p.acc || 10)} m</span>` : ind ? ' <span class="muted">· ubicación por área</span>' : ''}</div>
+      ${p.status === 'receso' ? `<div class="chip" style="margin-bottom:10px;background:#e58bff26;color:#F2C4FF">🍽️ En receso desde ${p.recesoAt ? M.fmtT(p.recesoAt) : '—'} · ${brk(p)} de ${S.breakMin || 45} min${p.recesoAuto ? ' · detectado en el comedor' : ''}</div>` : ''}
       <div class="stats"><div><small>Estado</small><b style="color:${stc(p)}">${M.STATUS[p.status].t}</b></div><div><small>Batería</small><b>${p.bat}%</b></div><div><small>Hoy</small><b>${ind ? Math.round(p.km * 1000) + ' m' : p.km.toFixed(1) + ' km'}</b></div><div><small>Turno</small><b>${p.shift ? M.fmtT(p.shift.at) : '—'}</b></div></div>
       <div style="font-size:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between"><span class="muted">Línea Navi ${p.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</span><span>${p.gb.toFixed(1)} / ${p.gbMax} GB</span></div><div class="bar" style="margin-top:4px"><i style="width:${pct}%;${pct > 85 ? 'background:var(--yellow)' : ''}"></i></div></div>
       ${o ? `<div class="oc" data-o="${o.id}" style="margin-bottom:10px"><div class="h">${E(o.folio)} · ${M.ORDER_ST[o.status]}<span class="chip prio-${o.prio}">${o.prio}</span></div><b>${E(o.title)}</b><small>${E(o.client)} · ${E(o.addr)}</small></div>` : ''}
@@ -551,7 +588,7 @@ async function geocode(q) {
   const r = await fetch(u); if (!r.ok) throw new Error('geo'); return r.json();
 }
 function newOrderModal({ opId, site }) {
-  let sid = site || 'city', loc = null;
+  let sid = site || (S.sites.some(s => s.id === ui.site) ? ui.site : S.sites[0].id), loc = null;
   const ov = modal(`<div class="mh"><h3>Nueva orden</h3><button data-close>×</button></div>
     <div class="grid2">
       <label class="l full">¿Dónde es el trabajo?<div>${siteSeg(sid, 'id="nS"')}</div></label>
@@ -569,7 +606,7 @@ function newOrderModal({ opId, site }) {
     $('nT').innerHTML = S.templates.filter(t => t.site === 'any' || t.site === kind).map(t => `<option value="${t.id}">${E(t.name)} · ${t.sla} min</option>`).join('');
     ov.querySelectorAll('#nS button').forEach(b => b.classList.toggle('on', b.dataset.site === sid));
     if (kind === 'indoor') {
-      $('nLoc').innerHTML = `<label class="l">Área del almacén<select class="f" id="nA">${st.areas.map(a => `<option value="${a.id}">${E(a.name)}</option>`).join('')}</select></label>`;
+      $('nLoc').innerHTML = `<label class="l">Área del almacén<select class="f" id="nA">${st.areas.filter(M.isWork).map(a => `<option value="${a.id}">${E(a.name)}</option>`).join('')}</select></label>`;
       const setA = () => { const a = st.areas.find(z => z.id === $('nA').value); loc = { n: a.name, x: a.x + a.w / 2, y: a.y + a.h / 2 }; sug(); };
       $('nA').onchange = () => { opId = undefined; setA(); }; setA();
     } else {
@@ -976,6 +1013,7 @@ function vEquipo() {
         <td>${p.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</td>
         <td style="min-width:140px"><div style="font-size:12px">${p.gb.toFixed(1)} / ${p.gbMax} GB</div><div class="bar"><i style="width:${pct}%;${pct > 85 ? 'background:var(--yellow)' : ''}"></i></div></td>
         <td>${p.bat}%</td></tr>`; }).join('')}</table></div></div>
+    <div class="card" style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><b>🍽️ Tiempo de comida / receso</b><div class="muted" style="font-size:13px">Quien entra al comedor queda "En receso". Si pasa este tiempo, te llega una alerta.</div></div><select class="f" id="brkM" style="max-width:150px">${[30, 45, 60, 90].map(m => `<option value="${m}" ${(S.breakMin || 45) === m ? 'selected' : ''}>${m} minutos</option>`).join('')}</select></div>
     <div class="card" style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><b>¿Una línea se está quedando sin datos?</b><div class="muted" style="font-size:13px">Recarga desde aquí o activa la recarga automática para todo tu equipo.</div></div><a class="btn lime" href="../recargas.html">Recargar líneas</a><button class="btn" id="rst">↺ Reiniciar demo</button></div>
   </div>`;
 }
@@ -983,6 +1021,7 @@ function bindEquipo() {
   document.querySelectorAll('[data-g]').forEach(s => s.onchange = () => M.update(st => { st.ops.find(p => p.id === s.dataset.g).group = s.value; }));
   document.querySelectorAll('[data-s]').forEach(s => s.onchange = () => M.update(st => { const p = st.ops.find(x => x.id === s.dataset.s), si = M.site(st, s.value); p.site = s.value; p.trail = []; p.target = null; p.gps = null; if (si.kind === 'indoor') { p.x = 13; p.y = 6; } else { p.x = 37.5; p.y = 43; } p.trail = [[p.x, p.y]]; }));
   $('addG').onclick = () => { const n = prompt('Nombre del departamento (también será su canal de radio y su chat)'); if (n && n.trim()) M.update(s => s.groups.push({ id: 'g' + Date.now().toString(36), name: n.trim(), color: ['#9B80FF', '#7EE0FF', '#FFC22E', '#FF6FB1'][s.groups.length % 4] })); };
+  $('brkM').onchange = e => { M.update(s => { s.breakMin = +e.target.value; }); toast('✓ Tiempo de comida: ' + e.target.value + ' min'); };
   $('rst').onclick = () => { if (confirm('¿Reiniciar los datos de ejemplo?')) { S = M.reset(); ui.sel = null; render(); toast('Demo reiniciada'); } };
   $('inv').onclick = () => {
     const url = new URL('app/', location.href).href;
@@ -994,15 +1033,159 @@ function bindEquipo() {
   };
 }
 
+// ---------- LAYOUT: cada cliente dibuja su propio almacén ----------
+ui.lay = { sid: null, draft: null, sel: null, dirty: false };
+const indoorSites = () => S.sites.filter(s => s.kind === 'indoor');
+const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
+const snap = v => Math.round(v * 2) / 2;
+function vLayout() {
+  const L = indoorSites(), Ly = ui.lay;
+  if (!Ly.sid || !L.some(s => s.id === Ly.sid)) { Ly.sid = L[0]?.id || null; Ly.draft = null; Ly.sel = null; Ly.dirty = false; }
+  if (Ly.sid && !Ly.draft) Ly.draft = JSON.parse(JSON.stringify(siteN(Ly.sid)));
+  const d = Ly.draft;
+  return `<div class="view">
+    <div class="vh"><h2>Layout de almacenes</h2>${L.length > 1 ? `<select class="f" id="lyS" style="max-width:280px">${L.map(s => `<option value="${s.id}" ${s.id === Ly.sid ? 'selected' : ''}>🏭 ${E(s.name)}</option>`).join('')}</select>` : ''}<span class="sp"></span><button class="btn" id="lyNew">＋ Nuevo almacén</button>${d ? `<button class="btn" id="lyUndo" ${Ly.dirty ? '' : 'disabled style="opacity:.5"'}>Descartar</button><button class="btn ${Ly.dirty ? 'lime' : 'done'}" id="lySave">${Ly.dirty ? '💾 Guardar cambios' : '✓ Guardado'}</button>` : ''}
+    <p>Arma el plano del almacén de cada cliente: medidas, racks, pasillos, andenes, oficinas, comedor, entradas y salidas. Arrastra un área para moverla y jala la esquina verde para cambiar su tamaño. Al guardar, el mapa de la consola y de la app usan este plano.</p></div>
+    ${d ? `<div class="lyw">
+      <div><div class="lyc" id="lyC" style="aspect-ratio:${d.w}/${d.h}"><img id="lyImg" alt="Plano del almacén"><svg id="lySvg" viewBox="0 0 ${d.w} ${d.h}" preserveAspectRatio="none"></svg></div>
+        <p class="muted" style="font-size:12px;margin-top:8px">Cuadrícula de 5 m · se ajusta cada 0.5 m · tecla Supr borra el área elegida, flechas la mueven.</p></div>
+      <aside class="lyp">
+        <div class="card" id="lyF"></div>
+        <div class="card"><h3>Agregar área</h3><div class="pal">${Object.entries(M.AREA_T).map(([k, v]) => `<button data-add="${k}"><i>${v.i}</i>${E(v.t)}</button>`).join('')}</div></div>
+        <div class="card"><h3>Almacén</h3><div class="grid2"><label class="l full">Nombre<input class="f" id="lyN" value="${E(d.name)}"></label><label class="l">Ancho (m)<input class="f" type="number" id="lyW" value="${d.w}" min="20" max="400"></label><label class="l">Largo (m)<input class="f" type="number" id="lyH" value="${d.h}" min="20" max="400"></label></div>
+          <p class="muted" style="font-size:12px;margin-top:8px">${d.areas.length} áreas · ${(d.w * d.h).toLocaleString('es-MX')} m² · ${S.ops.filter(p => p.site === d.id).length} personas asignadas</p>
+          ${S.ops.some(p => p.site === d.id) ? '' : '<button class="btn sm red" id="lyDel" style="margin-top:8px">Eliminar almacén</button>'}</div>
+      </aside></div>` : `<div class="card empty" style="padding:40px">🏭 Este cliente todavía no tiene almacenes.<br><br>Crea el primero con <b>＋ Nuevo almacén</b> y la operación se vuelve mixta: calle + interior.</div>`}
+  </div>`;
+}
+function lyArea() { return ui.lay.draft && ui.lay.draft.areas.find(a => a.id === ui.lay.sel); }
+let lyRaf = 0;
+function lyDraw(img) {
+  const d = ui.lay.draft, svg = $('lySvg'); if (!svg) return;
+  if (img !== false) { cancelAnimationFrame(lyRaf); lyRaf = requestAnimationFrame(() => { $('lyImg').src = M.planSVG(d); }); }
+  svg.setAttribute('viewBox', `0 0 ${d.w} ${d.h}`); $('lyC').style.aspectRatio = d.w + '/' + d.h;
+  const hs = Math.max(1.6, d.w / 60);
+  svg.innerHTML = d.areas.map(a => `<g class="lya ${ui.lay.sel === a.id ? 'on' : ''}" data-a="${a.id}"><rect class="b" x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx=".4"/>${ui.lay.sel === a.id ? `<rect class="h" x="${a.x + a.w - hs / 2}" y="${a.y + a.h - hs / 2}" width="${hs}" height="${hs}" rx=".3"/>` : ''}</g>`).join('');
+}
+function lyDirty() { if (!ui.lay.dirty) { ui.lay.dirty = true; const b = $('lySave'); if (b) { b.className = 'btn lime'; b.textContent = '💾 Guardar cambios'; } const u = $('lyUndo'); if (u) { u.disabled = false; u.style.opacity = ''; } } }
+function lyForm() {
+  const a = lyArea(), f = $('lyF'); if (!f) return;
+  if (!a) { f.innerHTML = '<h3>Área seleccionada</h3><p class="muted" style="font-size:13px">Toca un área del plano para editar su nombre, tipo, color y medidas, o agrega una nueva abajo.</p>'; return; }
+  f.innerHTML = `<h3>${(M.AREA_T[M.aType(a)] || {}).i || ''} ${E(a.name)}</h3><div class="grid2">
+    <label class="l full">Nombre<input class="f" data-k="name" value="${E(a.name)}"></label>
+    <label class="l">Tipo<select class="f" data-k="type">${Object.entries(M.AREA_T).map(([k, v]) => `<option value="${k}" ${M.aType(a) === k ? 'selected' : ''}>${E(v.t)}</option>`).join('')}</select></label>
+    <label class="l">Color<input class="f" type="color" data-k="c" value="${a.c || '#B0AEE0'}" style="height:40px;padding:4px"></label>
+    <label class="l">X (m)<input class="f" type="number" step=".5" data-k="x" value="${a.x}"></label><label class="l">Y (m)<input class="f" type="number" step=".5" data-k="y" value="${a.y}"></label>
+    <label class="l">Ancho (m)<input class="f" type="number" step=".5" min="1" data-k="w" value="${a.w}"></label><label class="l">Largo (m)<input class="f" type="number" step=".5" min="1" data-k="h" value="${a.h}"></label></div>
+    <div class="mf" style="justify-content:space-between"><button class="btn sm" id="lyDup">⧉ Duplicar</button><button class="btn sm red" id="lyRm">🗑️ Quitar</button></div>`;
+  f.querySelectorAll('[data-k]').forEach(i => i.onchange = () => {
+    const d = ui.lay.draft, k = i.dataset.k; let v = i.value;
+    if (['x', 'y', 'w', 'h'].includes(k)) { v = snap(+v || 0); if (k === 'w' || k === 'h') v = Math.max(1, v); }
+    a[k] = v;
+    if (k === 'type') { const T = M.AREA_T[v]; a.c = T.c; }
+    a.w = Math.min(a.w, d.w); a.h = Math.min(a.h, d.h); a.x = clampN(a.x, 0, d.w - a.w); a.y = clampN(a.y, 0, d.h - a.h);
+    lyDirty(); lyDraw(); lyForm();
+  });
+  $('lyDup').onclick = () => { const d = ui.lay.draft, n = Object.assign({}, a, { id: 'a' + Date.now().toString(36), name: nextName(a), x: clampN(a.x + a.w + 6, 0, d.w - a.w) }); d.areas.push(n); ui.lay.sel = n.id; lyDirty(); lyDraw(); lyForm(); };
+  $('lyRm').onclick = () => { lyRemove(); };
+}
+function lyRemove() { const d = ui.lay.draft; d.areas = d.areas.filter(x => x.id !== ui.lay.sel); ui.lay.sel = null; lyDirty(); lyDraw(); lyForm(); }
+function nextName(a) {
+  const k = M.aType(a), d = ui.lay.draft;
+  if (k === 'rack') { const used = d.areas.filter(x => M.aType(x) === 'rack').map(x => (x.name.match(/Rack\s+([A-Z])/i) || [])[1]).filter(Boolean).map(c => c.toUpperCase().charCodeAt(0)); return 'Rack ' + String.fromCharCode(used.length ? Math.max(...used) + 1 : 65); }
+  const base = M.AREA_T[k].t, n = d.areas.filter(x => M.aType(x) === k).length;
+  return ['entrada', 'salida', 'pasillo', 'andador'].includes(k) || !n ? base : base + ' ' + (n + 1);
+}
+// plantilla básica proporcional al tamaño del almacén
+function basicLayout(W, H) {
+  const A = [], add = (type, name, x, y, w, h) => { w = Math.min(w, W - x - 1); h = Math.min(h, H - y - 1); if (w > .9 && h > .9) A.push({ id: 'a' + (A.length + 1), type, name, x: snap(x), y: snap(y), w: snap(w), h: snap(h), c: M.AREA_T[type].c }); };
+  const rw = Math.min(20, W * .2), rh = Math.min(14, H * .22), rackH = H * .5, x0 = rw + 7;
+  add('entrada', 'Entrada', W * .12, 0, 6, 1); add('salida', 'Salida', 0, H * .55, 1, 3.4); add('salida', 'Salida', W - 1, H * .4, 1, 3.4);
+  add('recepcion', 'Recepción', 2, 2, rw, rh); add('oficinas', 'Oficinas', 2, rh + 4, rw, Math.min(16, H * .24));
+  add('andador', 'Andador peatonal', rw + 3.4, 1, 1.6, rackH + 5);
+  let i = 0; for (let x = x0; x + 8 < W * .72; x += 14) add('rack', 'Rack ' + String.fromCharCode(65 + i++), x, 6, 8, rackH);
+  add('pasillo', 'Pasillo principal', rw + 2.5, rackH + 7, W - rw - 3.5, 6);
+  add('empaque', 'Empaque', W * .75, 6, W * .25 - 2, Math.min(20, H * .3));
+  add('comedor', 'Comedor', W * .75, Math.min(20, H * .3) + 8, W * .25 - 2, Math.min(10, rackH - Math.min(20, H * .3) - 3));
+  add('andenes', 'Andenes de carga', 2, H - 17, Math.min(40, W * .4), 16);
+  add('montacargas', 'Zona de montacargas', Math.min(40, W * .4) + 6, H - 15, W * .3, 13);
+  add('maquinas', 'Cuarto de máquinas', W - 18, H - 17, 16, 16);
+  return A;
+}
+function newSiteModal() {
+  const ov = modal(`<div class="mh"><h3>🏭 Nuevo almacén</h3><button data-close>×</button></div>
+    <div class="grid2"><label class="l full">Nombre<input class="f" id="nsN" placeholder="Ej. CEDIS Querétaro · Nave 2"></label>
+    <label class="l">Ancho (m)<input class="f" type="number" id="nsW" value="100" min="20" max="400"></label><label class="l">Largo (m)<input class="f" type="number" id="nsH" value="60" min="20" max="400"></label>
+    <label class="l full">Empezar con<select class="f" id="nsT"><option value="basico">Plantilla básica (recepción, oficinas, racks, pasillo, andenes, comedor…)</option><option value="vacio">Solo los muros, lo dibujo yo</option>${ui.lay.draft ? `<option value="copia">Copia de "${E(ui.lay.draft.name)}"</option>` : ''}</select></label></div>
+    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="nsOk">Crear almacén</button></div>`);
+  $('nsOk').onclick = () => {
+    const n = $('nsN').value.trim() || 'Almacén ' + (indoorSites().length + 1), W = clampN(Math.round(+$('nsW').value || 100), 20, 400), H = clampN(Math.round(+$('nsH').value || 60), 20, 400), tp = $('nsT').value;
+    let areas = tp === 'basico' ? basicLayout(W, H) : tp === 'copia' ? JSON.parse(JSON.stringify(ui.lay.draft.areas)).filter(a => a.x + a.w <= W && a.y + a.h <= H) : [{ id: 'a1', type: 'entrada', name: 'Entrada', x: 10, y: 0, w: 6, h: 1, c: M.AREA_T.entrada.c }];
+    const id = 'w' + Date.now().toString(36);
+    M.update(s => s.sites.push({ id, name: n, kind: 'indoor', icon: '🏭', w: W, h: H, areas }));
+    ui.lay = { sid: id, draft: null, sel: null, dirty: false }; ov.remove(); toast('✓ Almacén "' + n + '" creado'); render();
+  };
+}
+function bindLayout() {
+  if ($('lyS')) $('lyS').onchange = e => { if (ui.lay.dirty && !confirm('Tienes cambios sin guardar. ¿Descartarlos?')) { e.target.value = ui.lay.sid; return; } ui.lay = { sid: e.target.value, draft: null, sel: null, dirty: false }; render(); };
+  $('lyNew').onclick = newSiteModal;
+  const d = ui.lay.draft; if (!d) return;
+  $('lyUndo').onclick = () => { ui.lay.draft = null; ui.lay.sel = null; ui.lay.dirty = false; render(); };
+  $('lySave').onclick = () => {
+    if (!ui.lay.dirty) return;
+    M.update(s => {
+      const i = s.sites.findIndex(x => x.id === d.id); s.sites[i] = JSON.parse(JSON.stringify(d));
+      s.ops.filter(p => p.site === d.id).forEach(p => { p.x = clampN(p.x, 1, d.w - 1); p.y = clampN(p.y, 1, d.h - 1); p.target = null; });
+      s.zones.filter(z => z.site === d.id).forEach(z => { z.x = clampN(z.x, 0, d.w); z.y = clampN(z.y, 0, d.h); });
+      s.points.filter(c => c.site === d.id).forEach(c => { c.x = clampN(c.x, 1, d.w - 1); c.y = clampN(c.y, 1, d.h - 1); });
+    });
+    ui.lay.dirty = false; toast('💾 Layout guardado · ya se ve en el mapa y en la app'); render();
+  };
+  if ($('lyDel')) $('lyDel').onclick = () => { if (!confirm('¿Eliminar "' + d.name + '"?')) return; M.update(s => { s.sites = s.sites.filter(x => x.id !== d.id); s.zones = s.zones.filter(z => z.site !== d.id); }); ui.lay = { sid: null, draft: null, sel: null, dirty: false }; render(); };
+  $('lyN').onchange = e => { d.name = e.target.value.trim() || d.name; lyDirty(); };
+  [['lyW', 'w'], ['lyH', 'h']].forEach(([id, k]) => $(id).onchange = e => { d[k] = clampN(Math.round(+e.target.value || d[k]), 20, 400); e.target.value = d[k]; d.areas.forEach(a => { a.w = Math.min(a.w, d.w); a.h = Math.min(a.h, d.h); a.x = clampN(a.x, 0, d.w - a.w); a.y = clampN(a.y, 0, d.h - a.h); }); lyDirty(); lyDraw(); });
+  document.querySelector('.pal').onclick = e => {
+    const b = e.target.closest('[data-add]'); if (!b) return;
+    const k = b.dataset.add, T = M.AREA_T[k], w = Math.min(T.w, d.w), h = Math.min(T.h, d.h);
+    const a = { id: 'a' + Date.now().toString(36), type: k, name: '', x: snap((d.w - w) / 2), y: snap((d.h - h) / 2), w, h, c: T.c };
+    a.name = nextName(a); d.areas.push(a); ui.lay.sel = a.id; lyDirty(); lyDraw(); lyForm();
+  };
+  const svg = $('lySvg');
+  const pt = e => { const r = svg.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * d.w, y: (e.clientY - r.top) / r.height * d.h }; };
+  svg.onpointerdown = e => {
+    const g = e.target.closest('[data-a]');
+    if (!g) { ui.lay.sel = null; lyDraw(false); lyForm(); return; }
+    const a = d.areas.find(x => x.id === g.dataset.a), p0 = pt(e), mode = e.target.classList.contains('h') ? 'size' : 'move', o = { x: a.x, y: a.y, w: a.w, h: a.h };
+    ui.lay.sel = a.id; svg.setPointerCapture(e.pointerId); let moved = false;
+    svg.onpointermove = ev => {
+      const p = pt(ev), dx = p.x - p0.x, dy = p.y - p0.y; if (Math.abs(dx) + Math.abs(dy) > .3) moved = true;
+      if (mode === 'move') { a.x = clampN(snap(o.x + dx), 0, d.w - a.w); a.y = clampN(snap(o.y + dy), 0, d.h - a.h); }
+      else { a.w = clampN(snap(o.w + dx), 1, d.w - a.x); a.h = clampN(snap(o.h + dy), 1, d.h - a.y); }
+      if (moved) lyDirty(); lyDraw();
+    };
+    svg.onpointerup = () => { svg.onpointermove = null; svg.onpointerup = null; lyDraw(); lyForm(); };
+    lyDraw(false); lyForm();
+  };
+  document.onkeydown = e => {
+    if (view !== 'layout' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    const a = lyArea(); if (!a) return;
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); return lyRemove(); }
+    const mv = { ArrowLeft: [-.5, 0], ArrowRight: [.5, 0], ArrowUp: [0, -.5], ArrowDown: [0, .5] }[e.key]; if (!mv) return;
+    e.preventDefault(); a.x = clampN(a.x + mv[0], 0, d.w - a.w); a.y = clampN(a.y + mv[1], 0, d.h - a.h); lyDirty(); lyDraw(); lyForm();
+  };
+  lyDraw(); lyForm();
+}
+
 // ---------- render general ----------
-const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rondines: [vRondines, bindRondines], geocercas: [vGeocercas, bindGeocercas], mensajes: [vMensajes, bindMensajes], alertas: [vAlertas, bindAlertas], reportes: [vReportes, () => document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv))], equipo: [vEquipo, bindEquipo] };
+const R = { vivo: [vVivo, bindVivo], ordenes: [vOrdenes, bindOrdenes], rondines: [vRondines, bindRondines], geocercas: [vGeocercas, bindGeocercas], mensajes: [vMensajes, bindMensajes], alertas: [vAlertas, bindAlertas], reportes: [vReportes, () => document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv))], equipo: [vEquipo, bindEquipo], layout: [vLayout, bindLayout] };
 function render() {
   if (!R[view]) view = 'vivo';
+  if (!S.sites.some(s => s.id === ui.site)) ui.site = S.sites[0].id;
   nav();
   // los mapas se conservan entre refrescos para no recargar las calles
   const keep = {}; $('main').querySelectorAll('.map[id]').forEach(m => { if (m._L) keep[m.id] = m; });
   $('main').innerHTML = R[view][0]();
-  Object.keys(keep).forEach(id => { const n = document.getElementById(id); if (n) { n.replaceWith(keep[id]); const ex = n.querySelectorAll(':scope > :not(.lf)'); keep[id].querySelectorAll(':scope > :not(.lf)').forEach(x => x.remove()); ex.forEach(x => keep[id].appendChild(x)); keep[id]._L.invalidateSize(); } else keep[id]._L.remove(); });
+  Object.keys(keep).forEach(id => { const n = document.getElementById(id); if (n) { n.replaceWith(keep[id]); const ex = n.querySelectorAll(':scope > :not(.lf)'); keep[id].querySelectorAll(':scope > :not(.lf)').forEach(x => x.remove()); ex.forEach(x => keep[id].appendChild(x)); keep[id]._L.invalidateSize(); } else { const k = keep[id]; try { k._L.stop(); k._L.off(); k._L.remove(); } catch (e) {} k._L = null; } });
   R[view][1]();
   if (view === 'vivo') liveRefresh();
 }
@@ -1019,7 +1202,7 @@ function refresh() {
   lastMsgCount = nm;
   if (view === 'vivo') return liveRefresh();
   if (view === 'mensajes') { thread(); const c = document.querySelector('.convs'); if (c) { const st = c.scrollTop; c.innerHTML = convsHTML(); c.scrollTop = st; } return; }
-  if (document.querySelector('.ov')) return;
+  if (document.querySelector('.ov') || view === 'layout') return;
   const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && $('main').contains(a)) return;
   if (ui.pick) return;
   const st = $('main').scrollTop; render(); $('main').scrollTop = st;
@@ -1031,7 +1214,7 @@ M.on(s => {
   if (pend) return; pend = true;
   queueMicrotask(() => { pend = false; refresh(); });
 });
-setInterval(() => { ticks++; try { localStorage.setItem('navi.mando.hb', Date.now()); } catch (e) {} fromTick = true; M.tick(); fromTick = false; }, 2000);
+setInterval(() => { ticks++; try { localStorage.setItem(M.hbKey(), Date.now()); } catch (e) {} fromTick = true; M.tick(); fromTick = false; }, 2000);
 setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }, 1000);
 render(); sosWatch();
 </script>
