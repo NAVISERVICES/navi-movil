@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>NAVI Mando · Operador</title>
+<meta name="theme-color" content="#08083F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../../assets/icon-192.png">
+<link rel="apple-touch-icon" href="../../assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Navi Mando">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08083F;--card:#13136A;--line:#ffffff17;--line2:#ffffff26;--text:#F4F3FF;--muted:#B0AEE0;--lime:#B4E32F;--ink:#06062E;--purple:#7B5CFA;--red:#FF4D6D;--cyan:#7EE0FF;--yellow:#FFC22E;--display:"Bricolage Grotesque",system-ui,sans-serif;--body:"DM Sans",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#02021c;color:var(--text);font:15px/1.45 var(--body);min-height:100dvh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
+/* en escritorio se ve como un teléfono */
+.phone{max-width:430px;margin:0 auto;height:100vh;height:100dvh;overflow:hidden;background:var(--bg);position:relative;display:flex;flex-direction:column}
+@media (min-width:600px){body{padding:20px 0;background:radial-gradient(circle at 30% 20%,#1E1E8A,#02021c 60%)}.phone{min-height:860px;height:860px;border-radius:40px;border:10px solid #000;overflow:hidden;box-shadow:0 40px 90px #000a}}
+.hd{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;padding-top:max(14px,env(safe-area-inset-top))}
+.hd .who{flex:1;min-width:0}
+.hd b{display:block;font-family:var(--display);font-size:17px}
+.hd small{font-size:12px;color:var(--muted)}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--ink);flex:none}
+.stb{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;border-radius:99px;padding:7px 12px;background:#ffffff12}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.scr{flex:1;overflow-y:auto;padding:4px 16px 110px}
+.tabbar{position:absolute;left:0;right:0;bottom:0;display:flex;background:#06063Af2;backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:6px 6px max(8px,env(safe-area-inset-bottom))}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--muted);padding:6px 0;position:relative}
+.tabbar button i{font-style:normal;font-size:21px}
+.tabbar button.on{color:var(--lime)}
+.tabbar button em{position:absolute;top:2px;left:calc(50% + 6px);background:var(--red);color:#fff;font-style:normal;font-size:10px;border-radius:9px;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}
+.sos{position:absolute;right:16px;bottom:86px;width:64px;height:64px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--display);font-weight:800;font-size:16px;box-shadow:0 8px 24px #ff4d6d77;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none}
+.sos svg{position:absolute;inset:-5px;width:74px;height:74px;transform:rotate(-90deg)}
+.sos circle{fill:none;stroke:#fff;stroke-width:4;stroke-dasharray:220;stroke-dashoffset:220}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.card h3{font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card h3 small{margin-left:auto;font-family:var(--body);font-size:12px;color:var(--muted);font-weight:500}
+.muted{color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border-radius:16px;padding:14px;font-weight:800;font-size:15px;background:#ffffff12;border:1px solid var(--line2)}
+.btn:active{transform:scale(.98)}
+.btn.lime{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{padding:9px 12px;font-size:13px;border-radius:12px;width:auto}
+.row{display:flex;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 6px;text-align:center}
+.stats small{display:block;font-size:11px;color:var(--muted)}
+.stats b{font-family:var(--display);font-size:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line2);border-radius:99px;padding:8px 12px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.chips button.on{background:#fff;color:var(--ink)}
+.oc{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+.oc .h{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.oc .h span:last-child{margin-left:auto}
+.oc b{display:block;font-size:16px}
+.oc small{display:block;color:var(--muted);font-size:13px}
+.pill{font-size:11px;font-weight:800;border-radius:99px;padding:3px 9px;background:#ffffff14}
+.pill.alta{background:#ff6fb133;color:#ffb3d6}.pill.new{background:var(--lime);color:var(--ink)}
+.bar{height:6px;border-radius:4px;background:#ffffff14;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lime)}
+.steps{display:flex;gap:4px;margin:12px 0}
+.steps i{flex:1;height:5px;border-radius:3px;background:#ffffff1c}
+.steps i.on{background:var(--lime)}
+.ck{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#ffffff08;margin-bottom:6px;font-size:14.5px;width:100%;text-align:left}
+.ck span{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);display:grid;place-items:center;flex:none;font-size:14px}
+.ck.on span{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.minimap{height:150px;border-radius:16px;background:#0A0A48 url(../../assets/mapa-cdmx.jpg) center/cover;position:relative;overflow:hidden;margin:10px 0}
+.minimap::before{content:"";position:absolute;inset:0;background:#0A0A4888}
+.minimap i{position:absolute;transform:translate(-50%,-100%);font-style:normal;font-size:28px}
+.minimap .me{transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--cyan);border:3px solid #fff;box-shadow:0 0 0 6px #7ee0ff44}
+canvas.sig{width:100%;height:170px;background:#fff;border-radius:14px;touch-action:none;display:block}
+.photo{width:100%;border-radius:14px;margin-top:8px;display:block}
+.ptt{width:210px;height:210px;border-radius:50%;margin:24px auto 14px;display:grid;place-items:center;background:radial-gradient(circle at 40% 30%,#d4f56b,var(--lime));color:var(--ink);font-family:var(--display);font-weight:800;font-size:20px;box-shadow:0 14px 0 #6f8f12,0 20px 50px #b4e32f55;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .08s,box-shadow .08s;text-align:center;line-height:1.2}
+.ptt.on{background:radial-gradient(circle at 40% 30%,#ff8fa4,var(--red));color:#fff;transform:translateY(10px);box-shadow:0 4px 0 #9b1f36,0 0 0 18px #ff4d6d33}
+.ptt small{display:block;font-family:var(--body);font-size:12px;font-weight:700;opacity:.75}
+.vz{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#ffffff0a;margin-bottom:6px;font-size:13px}
+.vz button{width:36px;height:36px;border-radius:50%;background:var(--lime);color:var(--ink);flex:none}
+.msgs{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
+.bub{max-width:82%;padding:9px 13px;border-radius:16px 16px 16px 4px;background:#ffffff14;font-size:14.5px}
+.bub.me{align-self:flex-end;background:var(--purple);border-radius:16px 16px 4px 16px}
+.bub.dif{align-self:center;background:#b4e32f1c;border:1px solid #b4e32f55;border-radius:16px;text-align:center;max-width:95%}
+.bub small{display:block;font-size:11px;color:#ffffffaa;margin-top:2px}
+.bub .w{font-size:11.5px;font-weight:800;color:var(--cyan);display:block}
+.bub audio{height:34px;max-width:220px;display:block}
+.comp{position:absolute;left:0;right:0;bottom:66px;display:flex;gap:8px;padding:8px 12px;background:var(--bg);border-top:1px solid var(--line)}
+input.f,select.f,textarea.f{background:#ffffff0d;border:1px solid var(--line2);border-radius:14px;padding:12px 13px;width:100%;outline:none}
+input.f:focus,textarea.f:focus{border-color:var(--lime)}
+select.f option{background:#14146A}
+.seg{display:flex;background:#ffffff0c;border-radius:14px;padding:4px;margin-bottom:12px}
+.seg button{flex:1;padding:9px;border-radius:11px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.seg button.on{background:#ffffff1c;color:#fff}
+.li{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:8px}
+.li i{font-style:normal;font-size:22px}
+.li span{flex:1}
+.li small{display:block;color:var(--muted);font-size:12.5px}
+.sw{width:46px;height:28px;border-radius:99px;background:#ffffff22;position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:var(--lime)}.sw.on::after{transform:translateX(18px)}
+.back{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--muted);margin:2px 0 10px}
+.ov{position:absolute;inset:0;background:#02021ccc;z-index:30;display:flex;align-items:flex-end;animation:fi .15s}
+@keyframes fi{from{opacity:0}}
+.sheet{background:#11115F;border-radius:26px 26px 0 0;padding:20px 18px max(20px,env(safe-area-inset-bottom));width:100%;max-height:88%;overflow-y:auto}
+.sheet h3{font-size:20px;margin-bottom:8px}
+.full{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:12px}
+.full.red{background:radial-gradient(circle,#ff4d6d,#5a0018)}
+.full.warn{background:radial-gradient(circle,#ff9a3d,#5a2600)}
+.full .big{font-size:76px;line-height:1}
+.full h2{font-size:30px}
+.toast{position:absolute;left:14px;right:14px;top:14px;z-index:50;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast div{background:#fff;color:var(--ink);font-weight:700;border-radius:16px;padding:12px 14px;box-shadow:0 10px 30px #0008;animation:fi .2s;font-size:14px}
+.login{flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;padding:28px 22px;gap:14px}
+.login img{height:40px;align-self:flex-start}
+.login h1{font-size:34px}
+.login h1 span{color:var(--lime)}
+.opl{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:280px;overflow-y:auto}
+.opl button{display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;border:1px solid var(--line2);text-align:left;font-size:13px;font-weight:700}
+.opl button.on{border-color:var(--lime);background:#b4e32f18}
+.opl .av{width:32px;height:32px;font-size:12px}
+.cps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cps div{padding:14px 10px;border-radius:16px;text-align:center;background:#ffffff0a;border:1px solid var(--line)}
+.cps div.ok{background:#b4e32f1f;border-color:#b4e32f66}
+video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object-fit:cover}
+</style>
+</head>
+<body>
+<div class="phone" id="ph"></div>
+<script src="../mando.js?v=1"></script>
+<script>
+const M = Mando, E = M.esc;
+let S = M.load();
+const ph = document.getElementById('ph');
+let meId = null; try { meId = localStorage.getItem('navi.mando.me'); } catch (e) {}
+const ui = { tab: 'inicio', order: null, chat: 'consola', photo: null, lastOrders: null, lastMsgs: S.msgs.length, scanStream: null };
+const me = () => S.ops.find(p => p.id === meId);
+const grpN = id => (S.groups.find(g => g.id === id) || {}).name || '';
+const stc = p => M.STATUS[p.status].c;
+const avatar = p => `<span class="av" style="background:${stc(p)}">${E(p.ini)}</span>`;
+const myOrders = () => S.orders.filter(o => o.opId === meId);
+const openMine = () => myOrders().filter(o => !['completada', 'cancelada'].includes(o.status)).sort((a, b) => a.due - b.due);
+const today = ts => new Date(ts).toDateString() === new Date().toDateString();
+const unread = () => S.msgs.filter(m => m.from !== meId && (m.to === meId || m.to === 'all' || m.to === me().group) && !m.reads.includes(meId)).length;
+function toast(t) { const box = ph.querySelector('.toast') || Object.assign(document.createElement('div'), { className: 'toast' }); ph.appendChild(box); const d = document.createElement('div'); d.textContent = t; box.appendChild(d); setTimeout(() => d.remove(), 3500); }
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+
+// ---------- entrar ----------
+function login() {
+  let pick = null;
+  ph.innerHTML = `<div class="login"><img src="../../assets/navi-logo.png" alt="Navi">
+    <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: órdenes, radio, chat y SOS en un solo lugar.</p>
+    <label class="muted" style="font-size:13px;font-weight:700">Código de empresa<input class="f" id="code" placeholder="${E(S.code)}" autocapitalize="characters" style="margin-top:6px"></label>
+    <div class="muted" style="font-size:13px;font-weight:700">¿Quién eres? <span style="font-weight:500">(demo)</span></div>
+    <div class="opl">${S.ops.map(p => `<button data-p="${p.id}"><span class="av" style="background:${stc(p)}">${E(p.ini)}</span>${E(p.name)}</button>`).join('')}</div>
+    <button class="btn lime" id="go">Entrar</button>
+    <p class="muted" style="font-size:12px;text-align:center">Tu empresa te da el código. En la demo puedes dejarlo vacío.</p></div>`;
+  ph.querySelector('.opl').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; pick = b.dataset.p; ph.querySelectorAll('.opl button').forEach(x => x.classList.toggle('on', x === b)); };
+  document.getElementById('go').onclick = () => {
+    const c = document.getElementById('code').value.trim().toUpperCase();
+    if (c && c !== S.code) return toast('Ese código no corresponde a ninguna empresa');
+    if (!pick) return toast('Elige tu nombre');
+    meId = pick; try { localStorage.setItem('navi.mando.me', meId); } catch (e) {}
+    ui.lastOrders = null; render();
+  };
+}
+
+// ---------- pantallas ----------
+function scrInicio() {
+  const p = me(), cur = openMine()[0], dif = S.msgs.filter(m => m.kind === 'difusion').slice(-1)[0];
+  const doneT = myOrders().filter(o => o.status === 'completada' && today(o.done)).length;
+  const pct = Math.min(100, p.gb / p.gbMax * 100);
+  return `<div class="card" style="background:${p.shift ? 'linear-gradient(135deg,#1d1d8f,#13136A)' : 'linear-gradient(135deg,#7B5CFA,#4B32C9)'}">
+      ${p.shift ? `<h3>🟢 Turno activo<small>desde ${M.fmtT(p.shift.at)}</small></h3><div class="chips" id="stc">${['disponible', 'pausa'].map(k => `<button data-st="${k}" class="${p.status === k ? 'on' : ''}"><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</button>`).join('')}</div>`
+        : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para recibir órdenes y aparecer en el mapa de tu central.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
+    </div>
+    <div class="stats"><div><small>Hoy</small><b>${doneT}</b><small>órdenes</small></div><div><small>Recorrido</small><b>${p.km.toFixed(0)}</b><small>km</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
+    ${cur ? `<div class="card"><h3>📋 Tu siguiente orden<small>${E(cur.folio)}</small></h3>${orderCard(cur)}${nextBtn(cur)}</div>` : `<div class="card"><h3>📋 Sin órdenes pendientes</h3><p class="muted" style="font-size:14px">Cuando tu central te asigne una, te llega aquí con aviso.</p></div>`}
+    ${dif ? `<div class="card" style="border-color:#b4e32f55"><h3>📢 Aviso de tu empresa<small>${M.fmtT(dif.at)}</small></h3><p style="font-size:14px">${E(dif.txt)}</p></div>` : ''}
+    <div class="card"><h3>📶 Tu línea Navi<small>${p.gb.toFixed(1)} de ${p.gbMax} GB</small></h3><div class="bar"><i style="width:${pct}%"></i></div><p class="muted" style="font-size:12.5px;margin-top:8px">La app consume muy pocos datos. Si te quedas sin datos, avisa a tu central para que recargue tu línea.</p></div>
+    ${p.shift ? '<button class="btn" data-a="endshift" style="margin-top:4px">⏹ Terminar turno</button>' : ''}`;
+}
+function orderCard(o) {
+  const left = Math.round((o.due - Date.now()) / M.MIN);
+  return `<button class="oc" data-o="${o.id}" style="margin:0 0 10px;background:#ffffff08"><div class="h"><span>${E(o.folio)}</span>${o.status === 'asignada' ? '<span class="pill new">NUEVA</span>' : ''}<span class="pill ${o.prio}">${o.prio}</span><span>${['completada', 'cancelada'].includes(o.status) ? M.ORDER_ST[o.status] : left < 0 ? '⚠️ Vencida' : '⏱️ ' + left + ' min'}</span></div><b>${E(o.title)}</b><small>${E(o.client)}</small><small>📍 ${E(o.addr)}</small></button>`;
+}
+function nextBtn(o) {
+  const n = { asignada: ['aceptada', '✓ Aceptar orden'], aceptada: ['encamino', '🚗 Voy en camino'], encamino: ['ensitio', '📍 Ya llegué'], ensitio: ['finish', '✅ Terminar trabajo'] }[o.status];
+  return n ? `<button class="btn lime" data-next="${o.id}" data-to="${n[0]}">${n[1]}</button>` : '';
+}
+function scrOrdenes() {
+  if (ui.order) return scrOrden();
+  const op = openMine(), dn = myOrders().filter(o => o.status === 'completada' && today(o.done)).sort((a, b) => b.done - a.done);
+  return `<h2 style="font-size:24px;margin:4px 0 12px">Mis órdenes</h2>
+    ${op.map(orderCard).join('') || '<div class="card muted" style="text-align:center">Sin órdenes pendientes 🎉</div>'}
+    ${dn.length ? `<h3 style="font-size:15px;margin:18px 0 10px" class="muted">Completadas hoy · ${dn.length}</h3>${dn.map(orderCard).join('')}` : ''}`;
+}
+function scrOrden() {
+  const o = S.orders.find(x => x.id === ui.order); if (!o) { ui.order = null; return scrOrdenes(); }
+  const p = me(), idx = ['asignada', 'aceptada', 'encamino', 'ensitio', 'completada'].indexOf(o.status), open = !['completada', 'cancelada'].includes(o.status);
+  return `<button class="back" data-a="back">← Mis órdenes</button>
+    <div class="h muted" style="font-size:12.5px">${E(o.folio)} · ${M.ORDER_ST[o.status]}</div>
+    <h2 style="font-size:24px;margin:4px 0">${E(o.title)}</h2>
+    <div class="steps">${[0, 1, 2, 3, 4].map(i => `<i class="${i <= idx ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="card"><b style="font-size:16px">${E(o.client)}</b><div class="muted" style="font-size:14px">📍 ${E(o.addr)}</div>
+      <div class="minimap"><i style="left:${o.x}%;top:${o.y}%">📍</i><span class="me" style="position:absolute;left:${p.x}%;top:${p.y}%"></span></div>
+      <div class="row"><a class="btn sm" style="flex:1" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.addr + ', CDMX')}">🧭 Cómo llegar</a><button class="btn sm" style="flex:1" data-a="chatc">💬 Central</button></div>
+      ${o.notes ? `<p style="font-size:13.5px;margin-top:10px;background:#ffffff0a;border-radius:12px;padding:10px">📝 ${E(o.notes)}</p>` : ''}</div>
+    ${o.status === 'ensitio' || o.status === 'completada' ? `<div class="card"><h3>Checklist<small>${o.checklist.filter(c => c.done).length}/${o.checklist.length}</small></h3>
+      ${o.checklist.map((c, i) => `<button class="ck ${c.done ? 'on' : ''}" data-ck="${i}" ${open ? '' : 'disabled'}><span>${c.done ? '✓' : ''}</span>${E(c.t)}</button>`).join('')}</div>
+      ${o.needPhoto ? `<div class="card"><h3>📷 Foto de evidencia</h3>${o.photo || ui.photo ? `<img class="photo" src="${o.photo || ui.photo}" alt="Evidencia">` : ''}${open ? `<label class="btn sm" style="width:100%;margin-top:8px">${o.photo || ui.photo ? 'Tomar otra' : 'Tomar foto'}<input type="file" accept="image/*" capture="environment" id="ph1" hidden></label>` : ''}</div>` : ''}
+      ${o.needSign ? `<div class="card"><h3>✍️ Firma del cliente</h3>${o.sign ? `<img class="photo" src="${o.sign}" style="background:#fff" alt="Firma">` : `<canvas class="sig" id="sig"></canvas><button class="btn sm" data-a="clr" style="margin-top:8px">Borrar firma</button>`}</div>` : ''}
+      ${open ? `<div class="card"><h3>⭐ ¿Cómo calificó el cliente el servicio?</h3><div class="chips" id="rate">${[1, 2, 3, 4, 5].map(n => `<button data-r="${n}" class="${o.rating === n ? 'on' : ''}">${'⭐'.repeat(n)}</button>`).join('')}</div></div>` : ''}` : ''}
+    ${open ? nextBtn(o) : `<div class="card" style="text-align:center;border-color:#b4e32f66">✅ Completada a las ${M.fmtT(o.done)}${o.done <= o.due ? ' · a tiempo' : ''}</div>`}
+    ${open && o.status !== 'asignada' ? '' : ''}`;
+}
+function scrRadio() {
+  const p = me(), ch = ui.radioCh || p.group;
+  const v = S.msgs.filter(m => m.kind === 'voz' && (ch === 'consola' ? (m.from === meId && m.to === 'consola') || (m.from === 'consola' && m.to === meId) : (m.to === p.group || m.to === 'all'))).slice(-15).reverse();
+  return `<h2 style="font-size:24px;margin:4px 0 12px">Radio</h2>
+    <div class="seg" id="rch"><button data-ch="${p.group}" class="${ch === p.group ? 'on' : ''}">👥 ${E(grpN(p.group))}</button><button data-ch="consola" class="${ch === 'consola' ? 'on' : ''}">🎧 Central</button></div>
+    <button class="ptt" id="ptt">MANTÉN<br>PARA HABLAR<small>${ch === 'consola' ? 'Privado con la central' : 'Canal ' + E(grpN(p.group))}</small></button>
+    <p class="muted" style="text-align:center;font-size:12.5px;margin-bottom:16px">Suelta para enviar. Los mensajes de voz se escuchan solos al llegar.</p>
+    ${v.map(m => { const w = m.from === 'consola' ? 'Central' : m.from === meId ? 'Tú' : (S.ops.find(x => x.id === m.from) || {}).name; return `<div class="vz">${m.audio ? `<button data-play="${m.id}">▶</button>` : '<span style="width:36px;text-align:center">🔈</span>'}<span style="flex:1"><b>${E(w)}</b><br><span class="muted">${m.secs}s · ${M.fmtT(m.at)}</span></span></div>`; }).join('') || '<p class="muted" style="text-align:center;font-size:13px">Aún no hay transmisiones</p>'}`;
+}
+function scrChat() {
+  const p = me(), c = ui.chat;
+  const ms = S.msgs.filter(m => m.kind !== 'voz' && (c === 'consola' ? ((m.from === meId && m.to === 'consola') || (m.from === 'consola' && m.to === meId) || m.to === 'all') : m.to === p.group));
+  return `<div class="seg" id="cseg"><button data-c="consola" class="${c === 'consola' ? 'on' : ''}">🎧 Central</button><button data-c="grupo" class="${c !== 'consola' ? 'on' : ''}">👥 ${E(grpN(p.group))}</button></div>
+    <div class="msgs" id="msgs">${ms.map(m => { const mine = m.from === meId; const w = m.from === 'consola' ? 'Central' : (S.ops.find(x => x.id === m.from) || {}).name; return `<div class="bub ${m.kind === 'difusion' ? 'dif' : mine ? 'me' : ''}">${m.kind === 'difusion' ? '<b>📢 Aviso general</b><br>' : mine ? '' : `<span class="w">${E(w)}</span>`}${E(m.txt)}<small>${M.fmtT(m.at)}${mine ? (m.reads.length > 1 ? ' · ✓✓' : ' · ✓') : ''}</small></div>`; }).join('') || '<p class="muted" style="text-align:center">Sin mensajes</p>'}</div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:60px" id="qk">${['Voy en camino', 'Ya llegué', 'Hay tráfico, voy tarde', 'Necesito apoyo'].map(q => `<button class="btn sm">${q}</button>`).join('')}</div>`;
+}
+function scrMas() {
+  const p = me(), r = S.routes.find(x => x.opId === meId);
+  return `<h2 style="font-size:24px;margin:4px 0 12px">Más</h2>
+    ${r ? `<button class="li" data-a="rondin"><i>🛡️</i><span><b>Rondín</b><small>${E(r.name)}</small></span>›</button>` : ''}
+    <button class="li" data-a="solo"><i>🧍</i><span><b>Modo trabajo solo</b><small>Te preguntamos cada minuto si estás bien. Si no respondes, avisamos a tu central.</small></span><span class="sw ${p.solo ? 'on' : ''}"></span></button>
+    <button class="li" data-a="install"><i>📲</i><span><b>Instalar en mi celular</b><small>Agrégala a tu pantalla de inicio como app</small></span>›</button>
+    <button class="li" data-a="logout"><i>🚪</i><span><b>Cerrar sesión</b><small>${E(p.name)} · ${E(S.empresa)}</small></span>›</button>
+    <p class="muted" style="font-size:12px;text-align:center;margin-top:16px">NAVI Mando · demo · tu ubicación solo se comparte durante tu turno</p>`;
+}
+function scrRondin() {
+  const r = S.routes.find(x => x.opId === meId);
+  let rd = S.rounds.filter(x => x.route === r.id && !x.end).sort((a, b) => b.start - a.start)[0];
+  return `<button class="back" data-a="backmas">← Más</button><h2 style="font-size:24px;margin:4px 0 4px">${E(r.name)}</h2>
+    <p class="muted" style="font-size:13.5px;margin-bottom:14px">${rd ? 'Ronda en curso desde ' + M.fmtT(rd.start) : 'Inicia la ronda y escanea cada punto al pasar.'}</p>
+    <div class="cps">${r.points.map(pid => { const c = S.points.find(x => x.id === pid), h = rd && rd.hits.find(x => x.p === pid); return `<div class="${h ? 'ok' : ''}"><div style="font-size:24px">${h ? '✅' : c.method === 'NFC' ? '📶' : '▦'}</div><b>${E(c.code)}</b><div class="muted" style="font-size:12px">${E(c.name)}</div><div style="font-size:12px">${h ? M.fmtT(h.at) : c.method}</div></div>`; }).join('')}</div>
+    <div style="margin-top:14px">${rd ? '<button class="btn lime" data-a="scan">📷 Escanear punto</button>' : '<button class="btn lime" data-a="startr">▶ Iniciar ronda</button>'}</div>`;
+}
+
+// ---------- armado ----------
+function render() {
+  S = M.load();
+  if (!meId || !me()) return login();
+  const p = me(), nU = unread(), nO = openMine().filter(o => o.status === 'asignada').length;
+  const body = { inicio: scrInicio, ordenes: scrOrdenes, radio: scrRadio, chat: scrChat, mas: scrMas, rondin: scrRondin }[ui.tab]();
+  const scr = ph.querySelector('.scr'), st = scr ? scr.scrollTop : 0;
+  ph.innerHTML = `<header class="hd">${avatar(p)}<div class="who"><b>${E(p.name)}</b><small>${E(S.empresa)}</small></div><button class="stb" data-a="status"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</button></header>
+    <div class="scr" id="scr">${body}</div>
+    ${ui.tab === 'chat' ? '<div class="comp"><input class="f" id="mIn" placeholder="Escribe a ' + (ui.chat === 'consola' ? 'tu central' : 'tu grupo') + '…" autocomplete="off"><button class="btn lime sm" id="mSend">Enviar</button></div>' : ''}
+    <button class="sos" id="sos"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="35"/></svg>SOS</button>
+    <nav class="tabbar">${[['inicio', '🏠', 'Inicio'], ['ordenes', '📋', 'Órdenes', nO], ['radio', '🎙️', 'Radio'], ['chat', '💬', 'Chat', nU], ['mas', '☰', 'Más']].map(([k, i, t, n]) => `<button data-tab="${k}" class="${ui.tab === k || (k === 'mas' && ui.tab === 'rondin') ? 'on' : ''}"><i>${i}</i>${t}${n ? `<em>${n}</em>` : ''}</button>`).join('')}</nav>`;
+  const s2 = document.getElementById('scr'); s2.scrollTop = st;
+  if (ui.tab === 'chat') { const m = document.getElementById('msgs'); s2.scrollTop = s2.scrollHeight; markRead(); }
+  bind();
+  checkPrompts();
+}
+function markRead() {
+  const p = me();
+  if (S.msgs.some(m => m.from !== meId && (m.to === meId || m.to === 'all' || m.to === p.group) && m.kind !== 'voz' && !m.reads.includes(meId)))
+    M.update(s => s.msgs.forEach(m => { if (m.from !== meId && (m.to === meId || m.to === 'all' || m.to === p.group) && m.kind !== 'voz' && !m.reads.includes(meId)) m.reads.push(meId); }));
+}
+function bind() {
+  ph.querySelector('.tabbar').onclick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.order = null; render(); };
+  ph.onclick = e => {
+    const t = e.target;
+    const o = t.closest('[data-o]'); if (o && !t.closest('[data-next]')) { if (ui.order !== o.dataset.o) { ui.photo = null; ui.sig = null; } ui.order = o.dataset.o; ui.tab = 'ordenes'; return render(); }
+    const nx = t.closest('[data-next]'); if (nx) return nextStep(nx.dataset.next, nx.dataset.to);
+    const st = t.closest('[data-st]'); if (st) { M.update(s => { const p = s.ops.find(x => x.id === meId); p.status = st.dataset.st; M.event(s, meId, 'Cambió su estado a ' + M.STATUS[p.status].t, 'estado'); }); return render(); }
+    const ck = t.closest('[data-ck]'); if (ck && !ck.disabled) { M.update(s => { const c = s.orders.find(x => x.id === ui.order).checklist[+ck.dataset.ck]; c.done = !c.done; }); return render(); }
+    const r = t.closest('[data-r]'); if (r) { M.update(s => { s.orders.find(x => x.id === ui.order).rating = +r.dataset.r; }); return render(); }
+    const pl = t.closest('[data-play]'); if (pl) return play(pl.dataset.play);
+    const ch = t.closest('[data-ch]'); if (ch) { ui.radioCh = ch.dataset.ch; return render(); }
+    const cs = t.closest('[data-c]'); if (cs) { ui.chat = cs.dataset.c; return render(); }
+    const q = t.closest('#qk button'); if (q) return send(q.textContent);
+    const a = t.closest('[data-a]')?.dataset.a; if (!a) return;
+    if (a === 'shift') { M.update(s => { const p = s.ops.find(x => x.id === meId); p.shift = { at: Date.now() }; p.status = 'disponible'; p.seen = Date.now(); M.event(s, meId, 'Inició turno', 'turno'); }); toast('🟢 Turno iniciado. Tu central ya te ve en el mapa.'); render(); }
+    if (a === 'endshift') { if (!confirm('¿Terminar tu turno?')) return; M.update(s => { const p = s.ops.find(x => x.id === meId); p.shift = null; p.status = 'fuera'; p.solo = false; M.event(s, meId, 'Terminó turno', 'turno'); }); render(); }
+    if (a === 'status') statusSheet();
+    if (a === 'back') { ui.order = null; render(); }
+    if (a === 'chatc') { ui.tab = 'chat'; ui.chat = 'consola'; ui.order = null; render(); }
+    if (a === 'clr') initSig(true);
+    if (a === 'solo') { M.update(s => { const p = s.ops.find(x => x.id === meId); p.solo = !p.solo; p.soloOk = Date.now(); p.soloAsk = null; M.event(s, meId, p.solo ? 'Activó modo trabajo solo' : 'Desactivó modo trabajo solo', 'estado'); }); render(); }
+    if (a === 'install') installSheet();
+    if (a === 'logout') { if (confirm('¿Cerrar sesión?')) { meId = null; try { localStorage.removeItem('navi.mando.me'); } catch (e) {} render(); } }
+    if (a === 'rondin') { ui.tab = 'rondin'; render(); }
+    if (a === 'backmas') { stopScan(); ui.tab = 'mas'; render(); }
+    if (a === 'startr') { M.update(s => { s.rounds.push({ id: M.uid('rd'), route: s.routes.find(x => x.opId === meId).id, opId: meId, start: Date.now(), hits: [] }); M.event(s, meId, 'Inició rondín', 'rondin'); }); render(); }
+    if (a === 'scan') scanSheet();
+  };
+  const f = document.getElementById('ph1'); if (f) f.onchange = () => photoIn(f.files[0]);
+  if (document.getElementById('sig')) initSig();
+  if (document.getElementById('ptt')) bindPtt(document.getElementById('ptt'));
+  if (document.getElementById('mSend')) { const i = document.getElementById('mIn'); document.getElementById('mSend').onclick = () => send(i.value); i.onkeydown = e => { if (e.key === 'Enter') send(i.value); }; }
+  bindSos(document.getElementById('sos'));
+}
+function send(t) {
+  t = (t || '').trim(); if (!t) return;
+  M.update(s => s.msgs.push({ id: M.uid('m'), from: meId, to: ui.chat === 'consola' ? 'consola' : me().group, kind: 'text', txt: t, at: Date.now(), reads: [meId] }));
+  render(); const i = document.getElementById('mIn'); if (i) i.focus();
+}
+function play(id) { const m = S.msgs.find(x => x.id === id); if (m && m.audio) new Audio(m.audio).play().catch(() => toast('Toca ▶ para escuchar')); }
+
+// avanzar la orden
+function nextStep(oid, to) {
+  const o = S.orders.find(x => x.id === oid);
+  if (to === 'finish') {
+    if (o.checklist.some(c => !c.done)) return toast('Completa el checklist antes de terminar');
+    if (o.needPhoto && !o.photo && !ui.photo) return toast('Falta la foto de evidencia');
+    const cv = document.getElementById('sig');
+    if (o.needSign && !o.sign && !ui.sig) return toast('Falta la firma del cliente');
+    const sign = o.needSign && !o.sign ? ui.sig : o.sign, photo = ui.photo || o.photo;
+    M.update(s => { const x = s.orders.find(q => q.id === oid); x.photo = photo; x.sign = sign; M.advance(s, oid, 'completada', me().name); });
+    ui.photo = null; ui.sig = null; vib(80); toast('✅ ' + o.folio + ' completada. ¡Buen trabajo!');
+  } else {
+    M.update(s => M.advance(s, oid, to, me().name));
+    if (to === 'aceptada') toast('Orden aceptada');
+    if (to === 'encamino') toast('🚗 Tu central ve que vas en camino');
+    ui.order = oid; ui.tab = 'ordenes';
+  }
+  render();
+}
+// foto reducida para que pese poco
+function photoIn(file) {
+  if (!file) return;
+  const img = new Image(), fr = new FileReader();
+  fr.onload = () => { img.onload = () => { const k = Math.min(1, 520 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ui.photo = c.toDataURL('image/jpeg', .6); render(); }; img.src = fr.result; };
+  fr.readAsDataURL(file);
+}
+function initSig(clear) {
+  const c = document.getElementById('sig'); if (!c) return;
+  const r = c.getBoundingClientRect(); c.width = r.width * 2; c.height = r.height * 2;
+  const x = c.getContext('2d'); x.scale(2, 2); x.lineWidth = 2.4; x.lineCap = 'round'; x.strokeStyle = '#06062E';
+  if (clear) ui.sig = null;
+  c._drawn = !!ui.sig;
+  if (ui.sig) { const im = new Image(); im.onload = () => x.drawImage(im, 0, 0, r.width, r.height); im.src = ui.sig; }
+  else { x.fillStyle = '#9a98c4'; x.font = '13px DM Sans'; x.fillText('Firma aquí', 12, 22); }
+  if (clear) return;
+  let d = false; const pt = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  c.onpointerdown = e => { if (!c._drawn) { x.clearRect(0, 0, c.width, c.height); } d = true; ui.drawing = true; c._drawn = true; c.setPointerCapture(e.pointerId); x.beginPath(); x.moveTo(...pt(e)); };
+  c.onpointermove = e => { if (d) { x.lineTo(...pt(e)); x.stroke(); } };
+  c.onpointerup = () => { d = false; ui.drawing = false; ui.sig = c.toDataURL('image/png'); };
+}
+function statusSheet() {
+  const ov = sheet(`<h3>Tu estado</h3><p class="muted" style="font-size:13.5px;margin-bottom:12px">Tu central lo ve al instante.</p>
+    ${['disponible', 'pausa', 'encamino', 'ensitio'].map(k => `<button class="li" data-set="${k}"><i class="dot" style="width:14px;height:14px;background:${M.STATUS[k].c}"></i><span><b>${M.STATUS[k].t}</b></span></button>`).join('')}`);
+  ov.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { M.update(s => { const p = s.ops.find(x => x.id === meId); p.status = b.dataset.set; if (!p.shift) p.shift = { at: Date.now() }; M.event(s, meId, 'Cambió su estado a ' + M.STATUS[p.status].t, 'estado'); }); ov.remove(); render(); });
+}
+function sheet(html) { const ov = document.createElement('div'); ov.className = 'ov'; ov.innerHTML = `<div class="sheet">${html}<button class="btn" data-x style="margin-top:10px">Cerrar</button></div>`; ov.onclick = e => { if (e.target === ov || e.target.closest('[data-x]')) { stopScan(); ov.remove(); } }; ph.appendChild(ov); return ov; }
+let deferred = null; window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
+function installSheet() {
+  if (deferred) { deferred.prompt(); deferred = null; return; }
+  const ios = /iphone|ipad/i.test(navigator.userAgent);
+  sheet(`<h3>Instalar NAVI Mando</h3><p style="font-size:14.5px;line-height:1.6">${ios ? '1. Abre esta página en <b>Safari</b>.<br>2. Toca <b>Compartir</b> (□↑).<br>3. Elige <b>Agregar a inicio</b>.' : '1. Abre el menú del navegador (⋮).<br>2. Toca <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.'}</p><p class="muted" style="font-size:13px;margin-top:10px">Queda como un ícono más en tu celular y abre a pantalla completa.</p>`);
+}
+// rondín: cámara con lector de QR si el navegador lo soporta; si no, se elige el punto (demo)
+async function scanSheet() {
+  const r = S.routes.find(x => x.opId === meId), rd = S.rounds.filter(x => x.route === r.id && !x.end).sort((a, b) => b.start - a.start)[0];
+  const pend = r.points.filter(p => !rd.hits.some(h => h.p === p)).map(id => S.points.find(c => c.id === id));
+  const ov = sheet(`<h3>Escanear punto</h3><video class="scan" id="vid" playsinline muted hidden></video><p class="muted" id="scanTxt" style="font-size:13px;margin:8px 0">Apunta al código QR del punto o acerca el celular a la etiqueta NFC.</p>
+    <div class="muted" style="font-size:12.5px;font-weight:700;margin:10px 0 6px">Demo: toca el punto en el que estás</div>
+    ${pend.map(c => `<button class="li" data-hit="${c.id}"><i>${c.method === 'NFC' ? '📶' : '▦'}</i><span><b>${E(c.code)} · ${E(c.name)}</b><small>${c.method}</small></span></button>`).join('')}`);
+  ov.querySelectorAll('[data-hit]').forEach(b => b.onclick = () => { hit(b.dataset.hit); stopScan(); ov.remove(); });
+  if ('BarcodeDetector' in window && navigator.mediaDevices) {
+    try {
+      const v = ov.querySelector('#vid'); ui.scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      v.srcObject = ui.scanStream; v.hidden = false; await v.play();
+      const det = new BarcodeDetector({ formats: ['qr_code'] });
+      const loop = async () => { if (!ui.scanStream) return; try { const c = await det.detect(v); const code = c[0] && c[0].rawValue; const pt = code && S.points.find(p => code.includes(p.code)); if (pt) { hit(pt.id); stopScan(); ov.remove(); return; } } catch (e) {} requestAnimationFrame(loop); };
+      loop();
+    } catch (e) { ui.scanStream = null; }
+  }
+}
+function stopScan() { if (ui.scanStream) { ui.scanStream.getTracks().forEach(t => t.stop()); ui.scanStream = null; } }
+function hit(pid) {
+  M.update(s => {
+    const r = s.routes.find(x => x.opId === meId), rd = s.rounds.filter(x => x.route === r.id && !x.end).sort((a, b) => b.start - a.start)[0];
+    if (rd.hits.some(h => h.p === pid)) return;
+    rd.hits.push({ p: pid, at: Date.now() }); const c = s.points.find(x => x.id === pid);
+    M.event(s, meId, 'Registró punto ' + c.code + ' ' + c.name, 'rondin');
+    if (rd.hits.length === r.points.length) { rd.end = Date.now(); M.event(s, meId, 'Completó el rondín', 'rondin'); }
+  });
+  vib(60); toast('✅ Punto registrado'); render();
+}
+// radio
+function bindPtt(btn) {
+  let down = false;
+  const ch = () => ui.radioCh || me().group;
+  btn.onpointerdown = async e => { e.preventDefault(); down = true; btn.classList.add('on'); vib(30); btn.innerHTML = 'HABLANDO…<small>suelta para enviar</small>'; await M.Ptt.start(); };
+  const up = async () => {
+    if (!down) return; down = false; btn.classList.remove('on');
+    const r = await M.Ptt.stop();
+    M.update(s => { s.msgs.push({ id: M.uid('m'), from: meId, to: ch(), kind: 'voz', secs: r.secs, audio: r.audio, at: Date.now(), reads: [meId] }); M.event(s, meId, 'Habló por radio', 'radio'); });
+    toast(r.audio ? '🎙️ Enviado' : '🎙️ Enviado (sin micrófono: aviso simulado)'); render();
+  };
+  btn.onpointerup = up; btn.onpointerleave = up; btn.onpointercancel = up; btn.oncontextmenu = e => e.preventDefault();
+}
+// SOS: mantener 2 segundos para evitar toques accidentales
+function bindSos(btn) {
+  let t = null; const c = btn.querySelector('circle');
+  const start = e => { e.preventDefault(); c.style.transition = 'stroke-dashoffset 2s linear'; c.style.strokeDashoffset = 0; vib(20); t = setTimeout(fire, 2000); };
+  const stop = () => { clearTimeout(t); c.style.transition = 'none'; c.style.strokeDashoffset = 220; };
+  btn.onpointerdown = start; btn.onpointerup = stop; btn.onpointerleave = stop; btn.onpointercancel = stop; btn.oncontextmenu = e => e.preventDefault();
+  btn.onclick = () => toast('Mantén presionado 2 segundos para enviar SOS');
+}
+function fire() {
+  vib([200, 100, 200, 100, 400]);
+  M.update(s => { const p = s.ops.find(x => x.id === meId); p.status = 'sos'; if (!p.shift) p.shift = { at: Date.now() }; M.alert(s, 'sos', meId, 'Presionó el botón SOS'); M.event(s, meId, 'Envió SOS', 'alerta'); });
+  render();
+}
+// pantallas que se imponen: SOS activo y verificación de trabajo solo
+function checkPrompts() {
+  const p = me(); if (!p) return;
+  ph.querySelectorAll('.full').forEach(x => x.remove());
+  const a = S.alerts.find(x => x.type === 'sos' && x.opId === meId && x.status !== 'cerrada');
+  if (a) {
+    const d = document.createElement('div'); d.className = 'full red';
+    d.innerHTML = `<div class="big">🆘</div><h2>SOS enviado</h2><p style="font-size:16px">${a.status === 'atendida' ? '<b>Tu central ya está atendiendo.</b> Mantente donde estás si es seguro.' : 'Tu central recibió tu ubicación y te va a contactar.'}</p>
+      <a class="btn" href="tel:911" style="background:#fff;color:#5a0018;max-width:300px">📞 Llamar al 911</a><button class="btn" id="ok" style="max-width:300px">Estoy bien, cancelar</button>`;
+    ph.appendChild(d);
+    d.querySelector('#ok').onclick = () => { M.update(s => { const x = s.alerts.find(q => q.id === a.id); x.status = 'cerrada'; x.note = 'Cancelada por el operador: está bien'; x.closed = Date.now(); s.ops.find(q => q.id === meId).status = 'disponible'; M.event(s, meId, 'Canceló el SOS: está bien', 'alerta'); }); render(); };
+    return;
+  }
+  if (p.solo && p.soloAsk) {
+    const d = document.createElement('div'); d.className = 'full warn';
+    const left = Math.max(0, 45 - Math.round((Date.now() - p.soloAsk) / 1000));
+    d.innerHTML = `<div class="big">🧍</div><h2>¿Estás bien?</h2><p style="font-size:16px">Modo trabajo solo. Si no respondes en ${left} s avisamos a tu central.</p><button class="btn lime" id="ok" style="max-width:300px;font-size:18px;padding:18px">Sí, estoy bien</button>`;
+    ph.appendChild(d); vib(150);
+    d.querySelector('#ok').onclick = () => { M.update(s => { const q = s.ops.find(x => x.id === meId); q.soloAsk = null; q.soloOk = Date.now(); }); render(); };
+  }
+}
+// avisos de lo que llega de la central
+function notify() {
+  const p = me(); if (!p) return;
+  const as = myOrders().filter(o => o.status === 'asignada').map(o => o.id);
+  if (ui.lastOrders) as.filter(id => !ui.lastOrders.includes(id)).forEach(id => { const o = S.orders.find(x => x.id === id); toast('📋 Nueva orden: ' + o.title + ' · ' + o.client); vib([120, 60, 120]); M.beep(); });
+  ui.lastOrders = as;
+  S.msgs.slice(ui.lastMsgs).filter(m => m.from !== meId && (m.to === meId || m.to === 'all' || m.to === p.group || (m.to === 'consola' && false))).forEach(m => {
+    if (m.kind === 'voz') { toast('🎙️ ' + (m.from === 'consola' ? 'Central' : 'Compañero') + ' habló por radio'); if (m.audio) play(m.id); }
+    else if (!(ui.tab === 'chat')) { toast('💬 ' + (m.from === 'consola' ? 'Central' : (S.ops.find(x => x.id === m.from) || {}).name) + ': ' + m.txt); vib(60); }
+  });
+  ui.lastMsgs = S.msgs.length;
+}
+// si la consola no está abierta, la app mueve la simulación sola
+function heartbeat() { try { return +localStorage.getItem('navi.mando.hb') || 0; } catch (e) { return 0; } }
+let pend = false;
+M.on(s => { S = s; if (pend) return; pend = true; queueMicrotask(() => { pend = false; if (!meId) return; notify(); const a = document.activeElement; if (a && a.id === 'mIn') { const m = document.getElementById('msgs'); if (m) { const tmp = document.createElement('div'); tmp.innerHTML = scrChat(); m.innerHTML = tmp.querySelector('#msgs').innerHTML; document.getElementById('scr').scrollTop = 1e6; markRead(); } return; } if (ui.drawing || ph.querySelector('.ov') || ph.querySelector('.ptt.on')) { checkPrompts(); return; } render(); }); });
+setInterval(() => {
+  if (meId && me() && Date.now() - heartbeat() > 7000) M.tick();
+  if (meId && me()) { M.update(s => { const p = s.ops.find(x => x.id === meId); if (p) p.seen = Date.now(); }); }
+}, 4000);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+render(); ui.lastOrders = meId && me() ? myOrders().filter(o => o.status === 'asignada').map(o => o.id) : null;
+</script>
+</body>
+</html>
