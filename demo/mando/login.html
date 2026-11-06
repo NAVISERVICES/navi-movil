@@ -5,30 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Entrar · NAVI Mando</title>
-<meta name="theme-color" content="#0B0B4F">
+<meta name="theme-color" content="#03060F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../navi.css?v=20261030d">
 <style>
 .page{min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr}
-.side{position:relative;overflow:hidden;background:var(--purple);padding:40px;display:flex;flex-direction:column}
-.side::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#ffffff30 2px,transparent 2px);background-size:28px 28px;mask-image:linear-gradient(180deg,#000,transparent 70%)}
+/* mismo estilo que Navi Empresas (intermedio): fondo oscuro con rejilla, vidrio, lima de marca y cian para datos */
+body{background:#03060F}
+.side{position:relative;overflow:hidden;padding:40px;display:flex;flex-direction:column;border-right:1px solid #22F0FF2a;
+  background:radial-gradient(700px 420px at 15% 0%,#9D5CFF33,transparent 60%),radial-gradient(600px 420px at 90% 100%,#22F0FF24,transparent 60%),#050A18}
+.side::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#22F0FF14 1px,transparent 1px),linear-gradient(90deg,#22F0FF14 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at 40% 40%,#000 20%,transparent 80%);pointer-events:none}
 .side > *{position:relative}
-.side h1{font-size:clamp(34px,4.2vw,56px);margin:auto 0 18px;max-width:540px}
-.side h1 em{font-style:normal;color:var(--lime)}
-.side p{color:#ECE8FF;max-width:460px}
-/* lado de marca, como en Mi Navi */
-.suite{display:flex;gap:10px;margin:24px 0 0;flex-wrap:wrap;max-width:520px}
-.suite span{display:flex;align-items:center;gap:8px;background:#ffffff1f;border:1px solid #ffffff30;padding:8px 14px;border-radius:99px;font-size:14px;font-weight:700;animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--lime);font:700 12px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;margin-top:auto;text-shadow:0 0 10px #B4E32F66}
+.eyebrow::before{content:"";width:22px;height:2px;background:currentColor;border-radius:2px}
+.side h1{font-size:clamp(34px,4.2vw,56px);margin:14px 0 16px;max-width:540px;letter-spacing:-.015em}
+.side h1 em{font-style:normal;background:linear-gradient(100deg,#B4E32F 10%,#22F0FF 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.side p{color:#9FB6CE;max-width:470px}
+.suite{display:flex;gap:8px;margin:20px 0 0;flex-wrap:wrap;max-width:540px}
+.suite span{display:flex;align-items:center;gap:7px;background:#22F0FF0d;border:1px solid #22F0FF33;color:#CFEFFF;padding:7px 12px;border-radius:99px;font:600 12px "JetBrains Mono",ui-monospace,monospace;animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
 .suite span:nth-child(2){animation-delay:.06s}.suite span:nth-child(3){animation-delay:.12s}.suite span:nth-child(4){animation-delay:.18s}.suite span:nth-child(5){animation-delay:.24s}.suite span:nth-child(6){animation-delay:.3s}
 @keyframes pop{from{transform:scale(0) translateY(20px)}}
-.crew{display:flex;align-items:flex-end;margin:30px 0 -40px;justify-content:center;position:relative}
-.crew::before{content:"";position:absolute;left:50%;bottom:-120px;width:420px;height:300px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 50% 30%,var(--lime-2),var(--lime) 65%)}
-.crew img{position:relative;height:200px;animation:bob 4s ease-in-out infinite}
-.crew .bubble{position:absolute;left:calc(50% + 70px);bottom:150px;background:#fff;color:var(--ink);font-weight:700;font-size:14px;border-radius:16px 16px 16px 4px;padding:10px 14px;box-shadow:0 10px 24px #0004;white-space:nowrap}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* panel de operación ilustrativo: red, unidades conectadas y central (no son datos reales) */
+.ops{margin:28px 0 auto;max-width:560px;background:linear-gradient(160deg,#0E1A35d9,#070D1Ce6);border:1px solid #22F0FF33;border-radius:22px;padding:14px;box-shadow:0 0 0 1px #22F0FF22,0 0 30px #22F0FF1a,0 24px 60px #000a;backdrop-filter:blur(8px)}
+.ops-top{display:flex;align-items:center;gap:7px;font:500 11.5px "JetBrains Mono",ui-monospace,monospace;color:#7F9BB8;margin-bottom:10px}
+.ops-top i{width:8px;height:8px;border-radius:50%;background:#ffffff26}
+.ops-top b{color:#E6F7FF;margin-left:4px}
+.ops-top .live{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--lime);font-weight:700}
+.ops-top .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #b4e32f88}100%{box-shadow:0 0 0 9px #b4e32f00}}
+.ops-map{height:190px;border-radius:14px;position:relative;overflow:hidden;background:url(../assets/mapa-cdmx.jpg) center/cover;border:1px solid #22F0FF2a}
+.ops-map::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#03060Fb8,#050A1Ee6)}
+.ops-map svg.net{position:absolute;inset:0;width:100%;height:100%}
+.ops-map .route{stroke:#22F0FF;stroke-width:2.5;fill:none;stroke-dasharray:6 7;animation:dash 2.4s linear infinite;filter:drop-shadow(0 0 4px #22F0FF)}
+.ops-map .link{stroke:#B4E32F;stroke-width:1.2;fill:none;stroke-dasharray:3 5;opacity:.7;animation:dash 1.6s linear infinite}
+.ops-map .zone{fill:#9D5CFF26;stroke:#9D5CFF;stroke-width:1.4;stroke-dasharray:5 4}
+.ops-map .wave{fill:none;stroke:#B4E32F;stroke-width:1.5;opacity:0;animation:wave 2.4s ease-out infinite}
+.ops-map .wave.d2{animation-delay:.8s}.ops-map .wave.d3{animation-delay:1.6s}
+@keyframes dash{to{stroke-dashoffset:-52}}
+@keyframes wave{0%{opacity:0;transform:scale(.6)}30%{opacity:.9}100%{opacity:0;transform:scale(1.4)}}
+.ops-map .wave{transform-box:fill-box;transform-origin:center}
+.u{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid #050A18;animation:ping 2.4s infinite}
+.u svg{width:15px;height:15px}
+.u.l{background:var(--lime);color:var(--lime)}.u.l svg{color:#06062E}
+.u.c{background:#22F0FF;color:#22F0FF}.u.c svg{color:#06062E}
+.u.p{background:#FF6FB1;color:#FF6FB1}.u.p svg{color:#fff}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 60%,transparent)}70%,100%{box-shadow:0 0 0 12px transparent}}
+.tag{position:absolute;background:#03060Fe6;border:1px solid #22F0FF33;border-radius:9px;padding:5px 9px;font:500 10.5px "JetBrains Mono",ui-monospace,monospace;color:#7F9BB8;white-space:nowrap}
+.tag b{color:#E6F7FF}
+.ops-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.ops-kpi div{background:#22F0FF0a;border:1px solid #22F0FF22;border-radius:12px;padding:8px 10px}
+.ops-kpi small{display:block;font:500 10px "JetBrains Mono",ui-monospace,monospace;color:#7F9BB8;text-transform:uppercase;letter-spacing:.06em}
+.ops-kpi b{font:800 19px "Orbitron","Bricolage Grotesque",sans-serif;color:#fff;text-shadow:0 0 12px #22F0FF55}
+.ops-kpi b.ok{color:var(--lime);text-shadow:0 0 12px #B4E32F55}
+@media (prefers-reduced-motion:reduce){.ops-map .route,.ops-map .link,.ops-map .wave,.u,.ops-top .live::before{animation:none}}
 /* lista de usuarios para elegir y entrar */
 .users{display:grid;gap:8px;margin-bottom:6px}
 .user{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:18px;border:2px solid #ffffff1f;background:#ffffff0a;transition:border-color .2s,transform .2s,background .2s}
@@ -102,8 +134,19 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
   .main{padding:20px 16px}
   .card{padding:30px 0 40px}
 }
-@media (max-width:900px){.side{padding-bottom:0}}
-@media (max-width:420px){.code{gap:6px}.crew img{height:160px}.crew .bubble{left:auto;right:8px;bottom:170px}}
+/* lado del formulario con el mismo vidrio oscuro */
+.main{background:#03060F}
+.in{background:#020611cc!important;border:1px solid #22F0FF33!important}
+.in input{color:#E6F7FF!important}
+.in:focus-within{border-color:var(--lime)!important;box-shadow:0 0 0 3px #B4E32F22,0 0 16px #B4E32F33!important}
+.user,.via{background:linear-gradient(160deg,#0E1A35d9,#070D1Ce6);border:1px solid #22F0FF2e}
+.user:hover,.user:focus-visible,.via[aria-checked="true"]{border-color:var(--lime);box-shadow:0 0 0 1px #B4E32F55,0 0 18px #B4E32F2a}
+.via small{font-family:"JetBrains Mono",ui-monospace,monospace}
+.code input{background:#020611cc;border-color:#22F0FF33}
+.card .btn-lime{box-shadow:0 0 20px #B4E32F55,0 0 40px #B4E32F22}
+.or::before,.or::after{background:#22F0FF22}
+@media (max-width:900px){.ops{margin-bottom:10px}}
+@media (max-width:420px){.code{gap:6px}.ops-map{height:160px}.tag.t3{display:none}.ops-kpi b{font-size:16px}}
 </style>
 </head>
 <body>
@@ -116,10 +159,35 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
 <div class="page">
   <section class="side">
     <a class="logo" href="../empresas.html"><img src="../assets/navi-logo.png" alt="Navi"><small>EMPRESAS</small></a>
+    <span class="eyebrow">NAVI Mando · Acceso de clientes</span>
     <h1>Una consola, <em>toda tu operación</em></h1>
     <p>Inicia sesión con el usuario que Navi le dio a tu empresa. Sin contraseñas: te mandamos un código por correo o por SMS, como prefieras.</p>
-    <div class="suite"><span>🛰️ Mapa en vivo</span><span>📋 Órdenes</span><span>🛣️ Rutas</span><span>🎙️ Radio PTT</span><span>🆘 SOS</span><span>🛡️ Rondines</span></div>
-    <div class="crew"><img src="../assets/beto.png" alt=""><span class="bubble">¡Bienvenido a NAVI Mando! 👋</span></div>
+    <div class="suite"><span>🛰️ Mapa en vivo</span><span>📋 Órdenes</span><span>🛣️ Rutas</span><span>🎙️ Radio PTT</span><span>🆘 SOS</span><span>📶 Red 4.5G LTE</span></div>
+    <!-- ilustración de la operación conectada: no son datos reales -->
+    <div class="ops" aria-hidden="true">
+      <div class="ops-top"><i></i><i></i><i></i><b>Central de operación</b><span class="live">En línea</span></div>
+      <div class="ops-map">
+        <svg class="net" viewBox="0 0 500 190" preserveAspectRatio="none">
+          <circle class="zone" cx="395" cy="62" r="40"/>
+          <path class="route" d="M30 160 C 110 90, 190 175, 270 110 S 380 50, 470 120"/>
+          <!-- torre de la red y su señal hacia las unidades -->
+          <g transform="translate(232 18)"><circle class="wave" cx="0" cy="8" r="16"/><circle class="wave d2" cx="0" cy="8" r="16"/><circle class="wave d3" cx="0" cy="8" r="16"/>
+            <path d="M0 6v26M-7 32 0 6l7 26M-4.6 24h9.2" stroke="#B4E32F" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="0" cy="4" r="3" fill="#B4E32F"/></g>
+          <path class="link" d="M232 26 L95 118"/><path class="link" d="M232 26 L290 100"/><path class="link" d="M232 26 L395 62"/>
+        </svg>
+        <span class="u l" style="left:19%;top:62%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>
+        <span class="u c" style="left:58%;top:53%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="15" rx="2"/><path d="M14 7V2M10 11h4M10 14h4"/></svg></span>
+        <span class="u p" style="left:79%;top:33%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span class="tag t1" style="right:4%;top:8%">Geocerca <b>Planta Norte</b></span>
+        <span class="tag t2" style="left:4%;top:80%">🚚 <b>Unidad 07</b> en ruta</span>
+        <span class="tag t3" style="left:47%;top:72%">🎙️ <b>Canal Reparto</b></span>
+      </div>
+      <div class="ops-kpi">
+        <div><small>Líneas activas</small><b>128</b></div>
+        <div><small>Unidades en ruta</small><b>31</b></div>
+        <div><small>Alertas atendidas</small><b class="ok">100%</b></div>
+      </div>
+    </div>
   </section>
 
   <section class="main">
