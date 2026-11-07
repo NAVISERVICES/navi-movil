@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>NAVI Mando · Operador</title>
+<title>NAVI Órbita · Operador</title>
 <meta name="theme-color" content="#03060F">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="../../assets/icon-192.png">
 <link rel="apple-touch-icon" href="../../assets/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Navi Mando">
+<meta name="apple-mobile-web-app-title" content="Navi Órbita">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -197,7 +197,7 @@ const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) 
 function login() {
   const fmtN = v => { const d = v.replace(/\D/g, '').slice(0, 10); return [d.slice(0, 2), d.slice(2, 6), d.slice(6)].filter(Boolean).join(' '); };
   ph.innerHTML = `<div class="login"><div style="display:flex;align-items:center;justify-content:space-between"><img src="../../assets/navi-logo.png" alt="Navi"><button class="hb" id="lref" title="Refrescar la app" aria-label="Refrescar la app">⟳</button></div>
-    <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: ubicación en turno, radio, chat por departamento y botón de emergencia. Solo para personal de empresas cliente de Navi.</p>
+    <h1>NAVI <span>Órbita</span></h1><p class="muted">La app de trabajo de tu empresa: ubicación en turno, radio, chat por departamento y botón de emergencia. Solo para personal de empresas cliente de Navi.</p>
     <label class="muted" style="font-size:13px;font-weight:700">Código de empresa<input class="f" id="code" placeholder="NAVI-0000" autocapitalize="characters" autocomplete="organization" style="margin-top:6px"></label>
     <label class="muted" style="font-size:13px;font-weight:700">Tu celular Navi<input class="f" id="cel" inputmode="numeric" autocomplete="tel-national" placeholder="55 1234 5678" style="margin-top:6px"></label>
     <label class="muted" style="font-size:13px;font-weight:700">PIN<input class="f" id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="••••" style="margin-top:6px"></label>
@@ -342,7 +342,7 @@ function scrMas() {
     <a class="li" href="../manual.html#dia" target="_blank" rel="noopener"><i>📘</i><span><b>Manual de uso</b><small>Cómo trabajar con la app paso a paso</small></span>›</a>
     <button class="li" data-a="install"><i>📲</i><span><b>Instalar en mi celular</b><small>Agrégala a tu pantalla de inicio</small></span>›</button>
     <button class="li" data-a="logout"><i>🚪</i><span><b>Cerrar sesión</b><small>${E(p.name)} · ${E(S.empresa)}</small></span>›</button>
-    <p class="muted" style="font-size:12px;text-align:center;margin-top:16px">NAVI Mando · demo · tu ubicación solo se comparte durante tu turno</p>`;
+    <p class="muted" style="font-size:12px;text-align:center;margin-top:16px">NAVI Órbita · demo · tu ubicación solo se comparte durante tu turno</p>`;
 }
 function scrRondin() {
   const r = S.routes.find(x => x.opId === meId);
@@ -465,7 +465,7 @@ let deferred = null; window.addEventListener('beforeinstallprompt', e => { e.pre
 function installSheet() {
   if (deferred) { deferred.prompt(); deferred = null; return; }
   const ios = /iphone|ipad/i.test(navigator.userAgent);
-  sheet(`<h3>Instalar NAVI Mando</h3><p style="font-size:14.5px;line-height:1.6">${ios ? '1. Abre esta página en <b>Safari</b>.<br>2. Toca <b>Compartir</b> (□↑).<br>3. Elige <b>Agregar a inicio</b>.' : '1. Abre el menú del navegador (⋮).<br>2. Toca <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.'}</p>`);
+  sheet(`<h3>Instalar NAVI Órbita</h3><p style="font-size:14.5px;line-height:1.6">${ios ? '1. Abre esta página en <b>Safari</b>.<br>2. Toca <b>Compartir</b> (□↑).<br>3. Elige <b>Agregar a inicio</b>.' : '1. Abre el menú del navegador (⋮).<br>2. Toca <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.'}</p>`);
 }
 async function scanSheet() {
   const r = S.routes.find(x => x.opId === meId), rd = S.rounds.filter(x => x.route === r.id && !x.end).sort((a, b) => b.start - a.start)[0];
