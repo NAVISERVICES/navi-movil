@@ -1,4 +1,4 @@
-/* Navi Empresas con el tema "dark tech" de NAVI Mando.
+/* Navi Empresas con el tema "dark tech" de NAVI Órbita.
    Se carga después de mando/tech.css y de los estilos propios de empresas.html.
    Para regresar al diseño anterior basta con quitar los dos <link> del tema en empresas.html. */
 
@@ -58,7 +58,7 @@ section{border-top-color:var(--line)!important}
 .vc.hl p{color:#B9CCE0!important}
 .tile svg{color:var(--cyan)!important;filter:drop-shadow(0 0 5px #22F0FF88)}
 
-/* NAVI Mando */
+/* NAVI Órbita */
 #mando{background:radial-gradient(ellipse at 80% 0%,#9D5CFF33,transparent 60%)!important}
 .mgrid .nv{background:#020611!important;border:1px solid var(--line)}
 .mgrid .nv span:first-child{background:var(--neon)!important;box-shadow:0 0 12px #22F0FF66}
@@ -123,7 +123,7 @@ footer.bz a{color:var(--cyan)!important}
 /* ===== Versión intermedia (elegida): marca Navi + toque tech =====
    - Verde lima de Navi como color principal (botones y acentos); cian solo para datos y mapas.
    - Títulos con la letra de Navi Móvil (Bricolage Grotesque), en mayúsculas y minúsculas.
-   - Orbitron solo en cosas cortas: números, etiquetas y el nombre de NAVI Mando. */
+   - Orbitron solo en cosas cortas: números, etiquetas y el nombre de NAVI Órbita. */
 
 :root{
   --display:"Bricolage Grotesque",system-ui,sans-serif;
