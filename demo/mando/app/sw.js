@@ -1,6 +1,6 @@
 // service worker de la app del operador: abre aunque no haya señal
-const CACHE = 'navi-mando-v11';
-const FILES = ['./', 'manifest.webmanifest', '../mando.js?v=11', '../tech.css?v=1','../../assets/icon-192.png', '../../assets/navi-logo.png'];
+const CACHE = 'navi-mando-v12';
+const FILES = ['./', 'manifest.webmanifest', '../config.js?v=1', '../mando.js?v=12', '../patch.js?v=1', '../sync.js?v=1', '../tech.css?v=1', '../../assets/icon-192.png', '../../assets/navi-logo.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -15,6 +15,8 @@ self.addEventListener('activate', e => {
 // red primero; sin señal, la copia guardada
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // la API y el canal en vivo nunca se guardan: siempre van directo al servidor
+  if (new URL(e.request.url).pathname.startsWith('/api/')) return;
   e.respondWith(fetch(e.request, { cache: 'no-cache' })
     .then(r => {
       if (r.ok && new URL(e.request.url).origin === location.origin) {

@@ -165,7 +165,10 @@ video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object
 <body>
 <div class="phone" id="ph"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../mando.js?v=11"></script>
+<script src="../config.js?v=1"></script>
+<script src="../mando.js?v=12"></script>
+<script src="../patch.js?v=1"></script>
+<script src="../sync.js?v=1"></script>
 <script>
 const M = Mando, E = M.esc;
 // el operador entra con su usuario (código de empresa + celular + PIN); la empresa la fija su sesión
@@ -222,9 +225,9 @@ function login() {
     ph.querySelectorAll('#opl button').forEach(x => x.classList.toggle('on', x === b));
     $l('cel').value = fmtN(b.dataset.cel); $l('pin').value = M.Auth.OP_PIN; $l('lerr').textContent = '';
   };
-  $l('go').onclick = () => {
+  $l('go').onclick = async () => {
     if (!$l('code').value.trim() || !$l('cel').value.trim() || !$l('pin').value) { $l('lerr').textContent = 'Escribe el código de empresa, tu celular y tu PIN.'; return; }
-    const r = M.Auth.loginOp($l('code').value, $l('cel').value, $l('pin').value);
+    const r = await M.Auth.loginOp($l('code').value, $l('cel').value, $l('pin').value);
     if (r.err) { $l('lerr').textContent = r.err; return; }
     OSES = r.ok; M.useClient(OSES.client); S = M.load(); ui.lastMsgs = S.msgs.length;
     meId = OSES.opId; ui.tab = 'inicio'; ui.lastOrders = null;
