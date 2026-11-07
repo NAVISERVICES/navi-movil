@@ -1,0 +1,12 @@
+{
+  "name": "navi-servidor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor de Navi Móvil y Navi Empresas: sitios + API de NAVI Mando",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node test/smoke.js"
+  }
+}
