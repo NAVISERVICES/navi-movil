@@ -242,7 +242,10 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
   </section>
 </div>
 
-<script src="mando.js?v=11"></script>
+<script src="config.js?v=1"></script>
+<script src="mando.js?v=12"></script>
+<script src="patch.js?v=1"></script>
+<script src="sync.js?v=1"></script>
 <script>
 const M = Mando, A = M.Auth, E = M.esc, $ = id => document.getElementById(id);
 const qs = new URLSearchParams(location.search);
@@ -258,8 +261,12 @@ const go = id => steps.forEach(s => $(s).classList.toggle('on', s === id));
 // usuarios para elegir: se toca uno y pasa directo a elegir correo o SMS
 // (demo: en producción aquí solo aparecen los usuarios que ya entraron antes en este equipo)
 const ini = n => n.split(' ').map(w => w[0]).slice(0, 2).join('');
-$('users').innerHTML = A.USERS.map(u => { const c = M.CLIENTS[u.client];
-  return `<button type="button" class="user" role="listitem" data-u="${E(u.email)}"><span class="av ${u.admin ? '' : 'mesa'}">${E(ini(u.name))}</span><span><b>${E(u.name)}</b><small>${c.icon} ${E(c.name)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span><em>›</em></button>`; }).join('');
+// con servidor la lista viene de la API (solo en modo demo); sin servidor, de la demo local
+Promise.resolve(A.demoUsers ? A.demoUsers() : A.USERS).then(list => {
+  $('users').innerHTML = list.filter(u => M.CLIENTS[u.client]).map(u => { const c = M.CLIENTS[u.client];
+    return `<button type="button" class="user" role="listitem" data-u="${E(u.email)}"><span class="av ${u.admin ? '' : 'mesa'}">${E(ini(u.name))}</span><span><b>${E(u.name)}</b><small>${c.icon} ${E(c.name)} · ${u.admin ? 'Administrador' : 'Mesa de control'}</small></span><em>›</em></button>`; }).join('');
+  if (!list.length) $('users').hidden = true;
+});
 $('users').addEventListener('click', e => {
   const b = e.target.closest('[data-u]'); if (!b) return;
   $('user').value = b.dataset.u; $('err1').textContent = '';
@@ -269,13 +276,13 @@ $('user').addEventListener('input', () => $('err1').textContent = '');
 
 // paso 1 → ¿existe el usuario?
 let who = '', via = null, timer = 0;
-$('s1').addEventListener('submit', e => {
+$('s1').addEventListener('submit', async e => {
   e.preventDefault();
   const id = $('user').value.trim();
   if (!id) { $('err1').textContent = 'Escribe tu usuario, correo o celular.'; return; }
-  const u = A.find(id);
+  const u = await A.find(id);
   if (!u) { $('err1').textContent = 'No encontramos ese usuario. Si eres cliente y no tienes acceso, pídelo a tu ejecutivo Navi.'; return; }
-  who = u.user; const ch = A.channels(who);
+  who = u.user; const ch = u.channels || A.channels(who);
   $('who').textContent = u.name.split(' ')[0];
   $('toEmail').textContent = ch.email; $('toSms').textContent = ch.sms;
   via = null; document.querySelectorAll('.via').forEach(b => b.setAttribute('aria-checked', 'false'));
@@ -292,14 +299,17 @@ document.querySelectorAll('.via').forEach(b => b.addEventListener('click', () =>
 document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => { clearInterval(timer); go(b.dataset.back); }));
 
 const msg = $('msg');
-function send() {
-  const r = A.sendCode(who, via); if (!r) return;
-  // demo: así se vería el correo o el SMS que le llega al usuario
-  $('msgI').textContent = via === 'email' ? '✉️' : '💬';
-  $('msgT').textContent = via === 'email' ? 'Correo de NAVI Mando · ' + r.to : 'SMS de Navi · ' + r.to;
-  $('msgC').textContent = r.code;
-  msg.classList.remove('show'); void msg.offsetWidth; msg.classList.add('show');
-  clearTimeout(msg.t); msg.t = setTimeout(() => msg.classList.remove('show'), 8000);
+async function send() {
+  const r = await A.sendCode(who, via); if (!r) return;
+  if (r.err) { ($('s2').classList.contains('on') ? $('err2') : $('errV')).textContent = r.err; return; }
+  // demo: así se vería el correo o el SMS que le llega al usuario (con servidor real el código no viene aquí)
+  if (r.code) {
+    $('msgI').textContent = via === 'email' ? '✉️' : '💬';
+    $('msgT').textContent = via === 'email' ? 'Correo de NAVI Mando · ' + r.to : 'SMS de Navi · ' + r.to;
+    $('msgC').textContent = r.code;
+    msg.classList.remove('show'); void msg.offsetWidth; msg.classList.add('show');
+    clearTimeout(msg.t); msg.t = setTimeout(() => msg.classList.remove('show'), 8000);
+  }
   $('sentTo').innerHTML = via === 'email' ? `a tu correo <b>${E(r.to)}</b>` : `por SMS al <b>${E(r.to)}</b>`;
   $('other').textContent = via === 'email' ? '💬 Mejor por SMS' : '✉️ Mejor por correo';
   let left = 30; const rs = $('resend');
@@ -334,9 +344,9 @@ boxes.forEach((b, i) => {
     update();
   });
 });
-$('s2').addEventListener('submit', e => {
+$('s2').addEventListener('submit', async e => {
   e.preventDefault();
-  const r = A.verify(who, typed(), $('keep').checked);
+  const r = await A.verify(who, typed(), $('keep').checked);
   if (r.err) {
     const c = $('code'); c.classList.remove('bad'); void c.offsetWidth; c.classList.add('bad');
     $('err2').textContent = r.err;

@@ -401,9 +401,12 @@
     return noOrders(s);
   }
 
+  // dónde vive la copia de los datos en este equipo: localStorage en la demo; con servidor, sessionStorage
+  // (una copia por pestaña, que llena el servidor) para que dos pestañas no se mezclen
+  let DATA = localStorage;
   function load() {
     try {
-      const s = JSON.parse(localStorage.getItem(keyOf()) || 'null');
+      const s = JSON.parse(DATA.getItem(keyOf()) || 'null');
       if (s && s.v === V) return s;
     } catch (e) {}
     const s = seedFor(CID); save(s); return s;
@@ -414,10 +417,13 @@
     for (let i = s.msgs.length - 1; i >= 0; i--) if (s.msgs[i].audio && ++voz > 12) s.msgs[i].audio = null;
     if (s.msgs.length > 300) s.msgs = s.msgs.slice(-300);
     if (s.events.length > 300) s.events = s.events.slice(-300);
-    try { localStorage.setItem(keyOf(), JSON.stringify(s)); }
-    catch (e) { s.msgs.forEach(m => m.audio = null); try { localStorage.setItem(keyOf(), JSON.stringify(s)); } catch (e2) {} }
+    try { DATA.setItem(keyOf(), JSON.stringify(s)); }
+    catch (e) { s.msgs.forEach(m => m.audio = null); try { DATA.setItem(keyOf(), JSON.stringify(s)); } catch (e2) {} }
+    // con servidor (sync.js) cada cambio local se manda a los demás equipos
+    saveHooks.forEach(f => { try { f(s); } catch (e) {} });
     if (!silent) subs.forEach(f => f(s, true));
   }
+  const saveHooks = [];
   // leer, cambiar y guardar en un solo paso (la consola y la app escriben a la vez)
   function update(fn, silent) { const s = load(); const r = fn(s); save(s, silent); return r; }
   const subs = [];
@@ -966,5 +972,14 @@
     client() { return CID; },
     clientByCode(code) { return Object.keys(CLIENTS).find(k => CLIENTS[k].code === String(code || '').trim().toUpperCase()); },
     hbKey() { return 'navi.mando.hb:' + CID; },
-    reset() { localStorage.removeItem(keyOf()); return load(); } };
+    reset() { DATA.removeItem(keyOf()); return load(); },
+    // para el servidor y para sync.js: versión de datos, datos iniciales de cada empresa y acceso a la copia local
+    V, _seed: seedFor,
+    _sync: {
+      onSave(fn) { saveHooks.push(fn); },
+      useSession() { DATA = sessionStorage; },
+      read() { try { return JSON.parse(DATA.getItem(keyOf()) || 'null'); } catch (e) { return null; } },
+      write(s) { try { DATA.setItem(keyOf(), JSON.stringify(s)); } catch (e) {} },
+      emit(s) { subs.forEach(f => f(s, false)); }
+    } };
 })();
