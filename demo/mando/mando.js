@@ -6,7 +6,7 @@
 // cerrado como un almacén (plano en metros). Cada sitio tiene su propia escala.
 (function () {
   const KEY = 'navi.mando';
-  const V = 10;
+  const V = 12;
   const now = () => Date.now();
   const MIN = 60000;
   const uid = p => (p || 'x') + Math.random().toString(36).slice(2, 8);
@@ -219,10 +219,21 @@
   };
   let CID = 'mixta';
   const keyOf = () => KEY + ':' + CID;
+  // sin órdenes de trabajo: NAVI Mando da visibilidad del personal y los activos por departamento,
+  // no administra ni mide la operación del cliente con sus propios clientes
+  function noOrders(s) {
+    s.orders = []; s.templates = [];
+    const enViaje = id => (s.trips || []).some(tr => tr.opId === id && tr.status === 'enruta');
+    s.ops.forEach(p => { p.order = null; if (['encamino', 'ensitio'].includes(p.status) && !enViaje(p.id)) { p.status = 'disponible'; p.target = null; } });
+    s.alerts = s.alerts.filter(a => a.type !== 'sla');
+    s.events = s.events.filter(e => e.type !== 'orden' && !/\bOT-\d/.test(e.txt || ''));
+    s.msgs = s.msgs.filter(m => !/\bOT-\d|pedido|orden/i.test(m.txt || ''));
+    return s;
+  }
   function seedFor(cid) {
     const s = seed(), t = now(), C = CLIENTS[cid] || CLIENTS.mixta;
     s.client = cid; s.empresa = C.name; s.code = C.code;
-    if (cid === 'mixta') return s;
+    if (cid === 'mixta') return noOrders(s);
     const keepGroups = ids => { s.groups = s.groups.filter(g => ids.includes(g.id)); };
     const nameGroups = m => s.groups.forEach(g => { if (m[g.id]) g.name = m[g.id]; });
     const cleanMsgs = () => { const ok = to => to === 'all' || to === 'consola' || s.groups.some(g => g.id === to) || s.chats.some(c => c.id === to) || s.ops.some(p => p.id === to); s.msgs = s.msgs.filter(m => ok(m.to) && (m.from === 'consola' || s.ops.some(p => p.id === m.from))); };
@@ -391,7 +402,7 @@
     s.alerts = s.alerts.filter(a => s.ops.some(p => p.id === a.opId));
     s.events = s.events.filter(e => s.ops.some(p => p.id === e.opId && (cid !== 'operativa' || e.type !== 'geocerca')));
     cleanMsgs();
-    return s;
+    return noOrders(s);
   }
 
   function load() {

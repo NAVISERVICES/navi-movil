@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../navi.css?v=20261030d">
 <link rel="stylesheet" href="../suite.css?v=20261030d">
-<script src="mando.js?v=8"></script>
+<script src="mando.js?v=9"></script>
 <script>
 // el manual es solo para clientes: hace falta sesión de la consola o de la app del operador
 (function () {
@@ -91,13 +91,13 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
 </header>
 <main class="wrap">
   <section class="hero-m"><small style="font-weight:800;letter-spacing:.14em">MANUAL DE PROCESOS · NOVIEMBRE 2026</small><h1>Cómo se opera NAVI Mando</h1>
-    <p>Procesos paso a paso para implementar NAVI Mando en un cliente y operarlo todos los días: desde dar de alta el almacén y al equipo, hasta ver en vivo al personal y los activos, dar seguimiento a los servicios que llegan del ERP del cliente, comunicarse, atender emergencias y cerrar el turno. Sirve para el equipo de Navi, para el administrador del cliente, para la mesa de control y para capacitar a los operadores.</p>
+    <p>Procesos paso a paso para implementar NAVI Mando en un cliente y operarlo todos los días: desde dar de alta el almacén y al equipo, hasta ver en vivo al personal y los activos de cada departamento, comunicarse, atender emergencias y cerrar el turno. Sirve para el equipo de Navi, para el administrador del cliente, para la mesa de control y para capacitar a los operadores.</p>
     <div class="acts"><button class="btn btn-ink" onclick="print()">Imprimir o guardar en PDF</button><a class="btn btn-ghost" href="index.html" style="border-color:#06062E33;color:#06062E">Abrir la consola</a><a class="btn btn-ghost" href="app/" style="border-color:#06062E33;color:#06062E">Abrir la app del operador</a></div></section>
   <div class="doc">
     <nav class="toc" aria-label="Contenido"><b>CONTENIDO</b>
       <a href="#que">1. Qué es y para quién</a><a class="sub" href="#roles">Roles y responsables</a><a class="sub" href="#tipos">Tipos de cliente</a>
-      <a href="#impl">2. Implementación del cliente</a><a class="sub" href="#p-alta">P1 · Alta de la empresa</a><a class="sub" href="#p-layout">P2 · Layout del almacén</a><a class="sub" href="#p-equipo">P3 · Departamentos y equipo</a><a class="sub" href="#p-config">P4 · Plantillas, geocercas y rondines</a><a class="sub" href="#p-capac">P5 · Instalación y capacitación</a>
-      <a href="#dia">3. Operación diaria</a><a class="sub" href="#p-turno">P6 · Inicio de turno</a><a class="sub" href="#p-orden">P7 · Orden de trabajo</a><a class="sub" href="#p-seguim">P8 · Seguimiento en vivo</a><a class="sub" href="#p-comun">P9 · Comunicación</a><a class="sub" href="#p-receso">P10 · Recesos</a><a class="sub" href="#p-rondin">P11 · Rondines</a><a class="sub" href="#p-cierre">P12 · Cierre de turno</a>
+      <a href="#impl">2. Implementación del cliente</a><a class="sub" href="#p-alta">P1 · Alta de la empresa</a><a class="sub" href="#p-layout">P2 · Layout del almacén</a><a class="sub" href="#p-equipo">P3 · Departamentos y equipo</a><a class="sub" href="#p-config">P4 · Geocercas y rondines</a><a class="sub" href="#p-capac">P5 · Instalación y capacitación</a>
+      <a href="#dia">3. Operación diaria</a><a class="sub" href="#p-turno">P6 · Inicio de turno</a><a class="sub" href="#p-orden">P7 · Visibilidad por departamento</a><a class="sub" href="#p-seguim">P8 · Seguimiento en vivo</a><a class="sub" href="#p-comun">P9 · Comunicación</a><a class="sub" href="#p-receso">P10 · Recesos</a><a class="sub" href="#p-rondin">P11 · Rondines</a><a class="sub" href="#p-cierre">P12 · Cierre de turno</a>
       <a href="#emerg">4. Emergencias y alertas</a><a class="sub" href="#p-sos">P13 · SOS empresarial</a><a class="sub" href="#p-silent">P14 · Asalto (silencioso)</a><a class="sub" href="#p-evac">P15 · Evacuación</a><a class="sub" href="#p-alertas">P16 · Otras alertas</a>
       <a href="#indic">5. Indicadores y reportes</a>
       <a href="#reglas">6. Reglas de operación</a>
@@ -109,8 +109,8 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <h2 id="que">1. Qué es y para quién</h2>
       <p><b>NAVI Mando</b> es el sistema de gestión de la operación para empresas con personal en campo, en la calle o dentro de un espacio cerrado como un almacén. Tiene dos partes que trabajan juntas:</p>
       <div class="cards">
-        <div><b>🖥️ Consola central</b><span>Web para la mesa de control: mapa en vivo, servicios del ERP, rutas, rondines, geocercas, mensajes, alertas, reportes, equipo y layout. <a href="index.html">Abrir</a></span></div>
-        <div><b>📱 App del operador</b><span>Se instala en el celular. Turno, servicios con evidencia, radio, chat, receso, emergencia y rondín. <a href="app/">Abrir</a></span></div>
+        <div><b>🖥️ Consola central</b><span>Web para la mesa de control: mapa en vivo, rutas, rondines, geocercas, mensajes, alertas, reportes, equipo y layout. <a href="index.html">Abrir</a></span></div>
+        <div><b>📱 App del operador</b><span>Se instala en el celular. Turno y ubicación, radio, chat, receso, emergencia y rondín. <a href="app/">Abrir</a></span></div>
         <div><b>📶 Línea Navi</b><span>Cada operador trabaja con su línea Navi; la consola muestra datos usados y permite recargar.</span></div>
       </div>
       <div class="leg"><span><span class="who w-adm">ADMIN</span>Administrador del cliente</span><span><span class="who w-mc">MESA</span>Mesa de control / supervisor</span><span><span class="who w-op">OPERADOR</span>Personal en campo</span><span><span class="who w-sis">SISTEMA</span>Lo hace NAVI Mando solo</span></div>
@@ -118,9 +118,9 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <h3 id="roles">Roles y responsables</h3>
       <div class="tw"><table>
         <tr><th>Rol</th><th>Quién es</th><th>Qué hace en NAVI Mando</th></tr>
-        <tr><td><span class="who w-adm">ADMIN</span></td><td>Gerente de operaciones del cliente o el ejecutivo de Navi que hace la implementación</td><td>Da de alta sitios y layout, departamentos, operadores, plantillas, geocercas, rondines y el tiempo de comida. Revisa reportes.</td></tr>
-        <tr><td><span class="who w-mc">MESA</span></td><td>Despachador, supervisor de turno o central de monitoreo</td><td>Vigila el mapa, da responsable en campo a los servicios del ERP, habla por radio, atiende alertas y emergencias con su protocolo, coordina evacuaciones.</td></tr>
-        <tr><td><span class="who w-op">OPERADOR</span></td><td>Repartidor, técnico, surtidor, montacarguista, guardia, etc.</td><td>Inicia turno, atiende sus órdenes con evidencia, se comunica, marca receso, hace rondines y usa el botón de emergencia.</td></tr>
+        <tr><td><span class="who w-adm">ADMIN</span></td><td>Gerente de operaciones del cliente o el ejecutivo de Navi que hace la implementación</td><td>Da de alta sitios y layout, departamentos, operadores, geocercas, rondines y el tiempo de comida. Revisa reportes.</td></tr>
+        <tr><td><span class="who w-mc">MESA</span></td><td>Despachador, supervisor de turno o central de monitoreo</td><td>Vigila el mapa por departamento, habla por radio, atiende alertas y emergencias con su protocolo, coordina evacuaciones.</td></tr>
+        <tr><td><span class="who w-op">OPERADOR</span></td><td>Repartidor, técnico, surtidor, montacarguista, guardia, etc.</td><td>Inicia turno (comparte ubicación), se comunica con su departamento, marca receso, hace rondines y usa el botón de emergencia.</td></tr>
         <tr><td><span class="who w-sis">SISTEMA</span></td><td>NAVI Mando</td><td>Ubica (GPS o área), detecta llegada, receso en comedor, entradas a zonas, vencimientos, batería baja y trabajo solo; genera alertas y reportes.</td></tr>
       </table></div>
 
@@ -128,8 +128,8 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <p>Cada cliente tiene un perfil según su giro de negocio. El perfil define sus departamentos, puestos, tipos de orden, rondines y mapas. Cada empresa entra con <b>su propio usuario</b> y solo ve sus datos: para ver otra empresa hay que cerrar sesión y entrar con el usuario de esa empresa.</p>
       <div class="tw"><table>
         <tr><th>Perfil</th><th>Departamentos y trabajo típico</th><th>Cómo se ubica al personal</th><th>Demo</th></tr>
-        <tr><td><b>🛡️ Seguridad privada</b></td><td>Guardias intramuros, patrullaje, custodia de traslados y supervisión. Órdenes: atención de alarma, custodia de traslado, control de acceso y rondas.</td><td>Área del plano en el sitio del cliente + GPS en patrullaje y traslados</td><td>Prosegur Seguridad · NAVI-5500<br><code>prosegur.seguridad</code></td></tr>
-        <tr><td><b>🚚 Transporte y reparto</b></td><td>Choferes de reparto, supervisión y mecánicos de ruta, custodia de carga. Órdenes: entrega, recolección de carga, revisión de unidad.</td><td>GPS real del celular durante el turno (km)</td><td>DHL Transporte · NAVI-2200<br><code>dhl.transporte</code> (administrador)<br><code>dhl.mesa</code> (mesa de control)</td></tr>
+        <tr><td><b>🛡️ Seguridad privada</b></td><td>Guardias intramuros, patrullaje, custodia de traslados y supervisión.</td><td>Área del plano en el sitio del cliente + GPS en patrullaje y traslados</td><td>Prosegur Seguridad · NAVI-5500<br><code>prosegur.seguridad</code></td></tr>
+        <tr><td><b>🚚 Transporte y reparto</b></td><td>Choferes de reparto, supervisión y mecánicos de ruta, custodia de carga.</td><td>GPS real del celular durante el turno (km)</td><td>DHL Transporte · NAVI-2200<br><code>dhl.transporte</code> (administrador)<br><code>dhl.mesa</code> (mesa de control)</td></tr>
         <tr><td><b>🏭 Almacén / CEDIS</b></td><td>CEDIS, almacén o planta: surtido, montacargas, mantenimiento y seguridad interna.</td><td>Área del plano (metros). En producción: balizas Bluetooth o QR por área.</td><td>Amazon Almacén · NAVI-1100<br><code>amazon.almacen</code></td></tr>
         <tr><td><b>🔀 Logística mixta</b></td><td>Combina calle y almacén: reparto y técnicos en la ciudad + almacén central.</td><td>GPS afuera y área adentro; la consola cambia entre ambos mapas</td><td>Mercado Libre Logística · NAVI-4821<br><code>mercadolibre.mixta</code></td></tr>
       </table></div>
@@ -137,7 +137,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
 
       <h2 id="impl">2. Implementación del cliente</h2>
       <p>Se hace una sola vez al arrancar con un cliente (y se ajusta cuando cambie su operación). Orden recomendado:</p>
-      <div class="flow"><div class="st"><em>P1</em><b>Alta de la empresa</b>Código y tipo</div><span class="ar">→</span><div class="st"><em>P2</em><b>Layout</b>Plano de cada almacén</div><span class="ar">→</span><div class="st"><em>P3</em><b>Equipo</b>Departamentos y operadores</div><span class="ar">→</span><div class="st"><em>P4</em><b>Configuración</b>Plantillas, zonas, rondines</div><span class="ar">→</span><div class="st"><em>P5</em><b>Arranque</b>Instalar app y capacitar</div></div>
+      <div class="flow"><div class="st"><em>P1</em><b>Alta de la empresa</b>Código y tipo</div><span class="ar">→</span><div class="st"><em>P2</em><b>Layout</b>Plano de cada almacén</div><span class="ar">→</span><div class="st"><em>P3</em><b>Equipo</b>Departamentos y operadores</div><span class="ar">→</span><div class="st"><em>P4</em><b>Configuración</b>Zonas y rondines</div><span class="ar">→</span><div class="st"><em>P5</em><b>Arranque</b>Instalar app y capacitar</div></div>
 
       <h3 id="p-alta">P1 · Alta de la empresa <span class="who w-adm">ADMIN</span></h3>
       <ol class="steps">
@@ -164,7 +164,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>Recepción · Oficinas · Empaque · Andenes · Zona de montacargas</td><td>Áreas de trabajo; se pueden elegir como destino de una orden y como ubicación del operador.</td></tr>
         <tr><td>Cuarto de máquinas</td><td>Área de riesgo; se acompaña con una geocerca restringida por departamento.</td></tr>
         <tr><td>Comedor</td><td>Quien entra queda "En receso" automáticamente.</td></tr>
-        <tr><td>Pasillo de montacargas · Andador peatonal</td><td>Señalización de circulación (no son destino de órdenes).</td></tr>
+        <tr><td>Pasillo de montacargas · Andador peatonal</td><td>Señalización de circulación (no son áreas de trabajo).</td></tr>
         <tr><td>Entrada · Salida de emergencia</td><td>Puertas del muro; las salidas son clave para evacuaciones.</td></tr>
       </table></div>
       <div class="rule"><b>Regla:</b> no se puede eliminar un almacén que tenga personas asignadas; primero se cambian de sitio en Equipo.</div>
@@ -177,9 +177,8 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li>En <b>Mensajes → Grupos de chat → ＋ Nuevo</b>, crear los grupos de coordinación que crucen departamentos (ej. "Supervisores", "Embarques del día", "Turno noche"). Con <b>Agregar todos</b> se suma un departamento completo.</li>
       </ol>
 
-      <h3 id="p-config">P4 · Plantillas, geocercas y rondines <span class="who w-adm">ADMIN</span></h3>
+      <h3 id="p-config">P4 · Geocercas y rondines <span class="who w-adm">ADMIN</span></h3>
       <ol class="steps">
-        <li><b>Conexión con el ERP</b> (🔗 Servicios ERP → ⚙️ Conexión): Navi configura con el área de sistemas del cliente qué servicios se reciben (API, webhook o archivo) y qué evidencia se le regresa. Por cada tipo de servicio se define el checklist y si exige foto y/o firma.</li>
         <li><b>Geocercas</b> (por sitio): bases y puntos de reunión, zonas permitidas (avisa si salen) y restringidas (avisa si entran). En una restringida se eligen los departamentos que <b>sí</b> pueden entrar (ej. cuarto de máquinas solo Mantenimiento).</li>
         <li><b>Rondines</b>: pegar un código QR o etiqueta NFC en cada punto y darlos de alta con <b>＋ Punto de control</b> tocando el plano o el mapa. La ruta se asigna a un guardia con su frecuencia.</li>
       </ol>
@@ -190,11 +189,11 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li>En <b>Equipo → 📲 Invitar operador</b> se copia o manda por WhatsApp el enlace de la app y el código de empresa.</li>
         <li>El operador abre el enlace en su celular y lo <b>instala</b> (Android: menú ⋮ → Instalar app; iPhone: Safari → Compartir → Agregar a inicio).</li>
         <li>Entra con el código y su nombre, y <b>acepta el permiso de ubicación</b> (personal de calle) y de micrófono (radio).</li>
-        <li>Capacitación de 20 minutos con este manual: turno, órdenes, radio, chat, receso, emergencia y evacuación. Hacer un <b>simulacro</b> de SOS y uno de evacuación.</li>
+        <li>Capacitación de 20 minutos con este manual: turno, radio, chat, receso, emergencia y evacuación. Hacer un <b>simulacro</b> de SOS y uno de evacuación.</li>
       </ol>
 
       <h2 id="dia">3. Operación diaria</h2>
-      <div class="flow"><div class="st app"><em>OPERADOR</em><b>Inicia turno</b>GPS o área</div><span class="ar">→</span><div class="st auto"><em>ERP</em><b>Envía</b>servicios</div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>Atiende</b>con evidencia</div><span class="ar">→</span><div class="st auto"><em>SISTEMA</em><b>Mide</b>tiempos, km, alertas</div><span class="ar">→</span><div class="st"><em>MESA</em><b>Cierra turno</b>y reporta</div></div>
+      <div class="flow"><div class="st app"><em>OPERADOR</em><b>Inicia turno</b>GPS o área</div><span class="ar">→</span><div class="st"><em>MESA</em><b>Ve</b>por departamento</div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>Se comunica</b>radio y chat</div><span class="ar">→</span><div class="st auto"><em>SISTEMA</em><b>Avisa</b>zonas, SOS, batería</div><span class="ar">→</span><div class="st"><em>MESA</em><b>Cierra turno</b>y reporta</div></div>
 
       <h3 id="p-turno">P6 · Inicio de turno <span class="who w-op">OPERADOR</span> <span class="who w-mc">MESA</span></h3>
       <ol class="steps">
@@ -205,31 +204,20 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       </ol>
       <div class="rule"><b>Privacidad:</b> la ubicación solo se comparte durante el turno. Al terminar el turno se deja de enviar.</div>
 
-      <h3 id="p-orden">P7 · Servicio del ERP en campo (de principio a fin) <span class="who w-mc">MESA</span> <span class="who w-op">OPERADOR</span></h3>
-      <div class="rule"><b>NAVI Mando no sustituye al ERP del cliente.</b> Las órdenes se crean, modifican, cancelan y facturan en su sistema (SAP, Oracle, Dynamics o el que use). NAVI Mando las recibe por integración y solo agrega la <b>visibilidad de campo</b>: quién la atiende, dónde está, cuándo llegó, cuánto tardó y la evidencia. Eso regresa al ERP.</div>
-      <div class="flow"><div class="st auto"><em>ERP</em><b>Envía el servicio</b>folio + ubicación</div><span class="ar">→</span><div class="st"><em>MESA</em><b>Responsable</b>al sugerido</div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>Acepta</b></div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>En camino</b></div><span class="ar">→</span><div class="st auto"><em>SISTEMA</em><b>Llegó</b>detecta la llegada</div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>Evidencia</b>checklist, foto, firma</div><span class="ar">→</span><div class="st auto"><em>SISTEMA</em><b>Regresa al ERP</b>tiempos y evidencia</div></div>
+      <h3 id="p-orden">P7 · Visibilidad por departamento, sin tocar la operación <span class="who w-adm">ADMIN</span> <span class="who w-mc">MESA</span></h3>
+      <div class="rule"><b>NAVI Mando no es un gestor de órdenes y no mide el negocio del cliente.</b> No crea, asigna ni califica trabajos, ni registra lo que el cliente hace con sus propios clientes. Solo da visibilidad de su personal y sus activos: dónde están, si están en turno, si entraron a una zona restringida y si están a salvo. La operación sigue igual, en los sistemas que el cliente ya usa.</div>
       <ol class="steps">
-        <li><b>Llega del ERP:</b> el servicio aparece solo en <b>🔗 Servicios ERP</b> con su folio, dirección o área y tiempo comprometido. En la demo se simula con <b>⇣ Simular servicio entrante</b>; <b>⚙️ Conexión</b> muestra qué datos van y vienen.</li>
-        <li><b>Responsable en campo:</b> si el ERP no trae responsable, el sistema ordena a los operadores del mismo sitio por cercanía y carga; el primero dice <b>Recomendado</b>. También se puede dar desde el mapa: persona → <b>🔗 Servicio</b>.</li>
-        <li><b>Recibir:</b> al operador le llega aviso con vibración. Toca la orden → <b>Aceptar</b>.</li>
-        <li><b>Traslado:</b> <b>Voy en camino</b> (en la calle puede abrir Google Maps o Waze). Al llegar, el sistema lo detecta y la marca <b>En sitio</b>; también puede tocar <b>Ya llegué</b>.</li>
-        <li><b>Ejecutar:</b> marcar cada paso del checklist, tomar la foto de evidencia, recabar la firma del cliente y su calificación cuando la plantilla lo pide.</li>
-        <li><b>Cerrar:</b> <b>Terminar trabajo</b>. La app no deja cerrar sin la evidencia obligatoria.</li>
-        <li><b>Revisar:</b> la mesa abre la orden en Completadas para ver historial, foto, firma y si fue a tiempo.</li>
+        <li><b>Cada departamento se gestiona solo:</b> seguridad, mantenimiento, almacén, transporte, etc. tienen su canal de radio, su chat, sus geocercas y, si aplica, sus rondines.</li>
+        <li><b>La mesa ve por departamento:</b> en <b>🛰️ En vivo</b> se filtra el mapa por departamento para ver a su gente, en qué área está y su estado (disponible, en receso, en pausa, SOS).</li>
+        <li><b>Activos:</b> unidades y equipo (montacargas, vehículos) se siguen por la persona que los opera o por su propia línea Navi.</li>
+        <li><b>Seguridad primero:</b> SOS, evacuación, trabajo solo, zonas restringidas y desvíos de ruta llegan como alertas con protocolo.</li>
       </ol>
-      <div class="tw"><table>
-        <tr><th>Situación</th><th>Qué hacer</th></tr>
-        <tr><td>La orden se acerca a su tiempo límite</td><td>La barra se pone amarilla. La mesa llama o escribe al operador; si no la alcanza, <b>Reasignar</b>.</td></tr>
-        <tr><td>Venció</td><td>Llega la alerta "Orden vencida" y la tarjeta se marca en rojo. Reasignar o avisar al cliente.</td></tr>
-        <tr><td>El cliente canceló</td><td>Abrir la orden → <b>Cancelar orden</b>; el operador queda disponible.</td></tr>
-        <tr><td>El operador está en receso</td><td>No aparece como sugerido; esperar o asignar a otro.</td></tr>
-      </table></div>
 
       <h3 id="p-seguim">P8 · Seguimiento en vivo <span class="who w-mc">MESA</span></h3>
       <ol class="steps">
         <li>En <b>🛰️ En vivo</b> elegir el sitio arriba del mapa (Ciudad o el almacén) y, si hace falta, filtrar por departamento.</li>
-        <li>Leer los indicadores: en turno, en camino, en receso, órdenes abiertas, por asignar y alertas.</li>
-        <li>Tocar a un operador para ver su estado, ubicación (calle o área), batería, km o metros recorridos, datos de su línea y orden actual. Desde ahí: llamar, mensaje, radio privado o asignar.</li>
+        <li>Leer los indicadores: en turno, departamentos activos, en receso, con GPS real, batería baja y alertas.</li>
+        <li>Tocar a un operador para ver su estado, ubicación (calle o área), batería, km o metros recorridos, datos de su línea y departamento. Desde ahí: llamar, mensaje, radio privado o ver su recorrido.</li>
         <li>Activar <b>Recorrido</b> para ver el trayecto del seleccionado y <b>⌖ Centrar</b> para ver a todo el equipo.</li>
         <li>La pestaña <b>Actividad</b> muestra todo lo que pasa: llegadas, entradas a zonas, recesos, rondines.</li>
       </ol>
@@ -272,9 +260,9 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
 
       <h3 id="p-cierre">P12 · Cierre de turno <span class="who w-op">OPERADOR</span> <span class="who w-mc">MESA</span></h3>
       <ol class="steps">
-        <li>El operador termina o devuelve sus órdenes abiertas y toca <b>⏹ Terminar turno</b> (deja de compartir ubicación).</li>
-        <li>La mesa revisa que no queden órdenes "Por asignar" ni vencidas sin atender, y que todas las alertas estén cerradas con motivo.</li>
-        <li>En <b>📊 Reportes</b> lee el <b>Resumen del turno</b> y descarga en CSV: órdenes, actividad e incidentes.</li>
+        <li>El operador toca <b>⏹ Terminar turno</b> (deja de compartir ubicación).</li>
+        <li>La mesa revisa que todo el personal haya cerrado su turno y que todas las alertas estén cerradas con motivo.</li>
+        <li>En <b>📊 Reportes</b> lee el <b>Resumen del turno</b> y descarga en CSV: personal, actividad e incidentes.</li>
         <li>Pasa novedades al siguiente turno por el grupo de supervisores.</li>
       </ol>
 
@@ -335,33 +323,31 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>📍 Geocerca</td><td>Sale de una zona permitida o entra a una restringida</td><td>Confirmar la razón con el operador</td></tr>
         <tr><td>🧍 Trabajador sin respuesta</td><td>En modo trabajo solo, no contestó "¿Estás bien?" en 45 s</td><td>Llamar de inmediato; si no responde, tratar como emergencia y enviar al más cercano</td></tr>
         <tr><td>🍽️ Receso excedido</td><td>Pasó el tiempo de comida</td><td>Recordarle por chat o radio</td></tr>
-        <tr><td>🔋 Batería baja</td><td>Batería en 15% o menos</td><td>Pedir que cargue; considerar reasignar</td></tr>
-        <tr><td>⏱️ Orden vencida</td><td>Pasó el tiempo límite de la orden</td><td>Reasignar o avisar al cliente</td></tr>
+        <tr><td>🔋 Batería baja</td><td>Batería en 15% o menos</td><td>Pedir que cargue para no perder su ubicación</td></tr>
       </table></div>
       <p><b>Modo trabajo solo</b> (app → Más): para quien trabaja sin compañeros cerca (guardia nocturno, técnico en sótano). La app pregunta "¿Estás bien?" cada minuto.</p>
 
       <h2 id="indic">5. Indicadores y reportes</h2>
       <div class="kpi">
-        <div><b>Órdenes completadas</b><span>Del día, por operador y por departamento</span></div>
-        <div><b>% a tiempo</b><span>Completadas antes de su tiempo límite</span></div>
+        <div><b>Personal en turno</b><span>Por departamento y por sitio</span></div>
+        <div><b>Alertas por departamento</b><span>SOS, zonas, batería y desvíos</span></div>
         <div><b>Recorrido</b><span>Km en la ciudad y metros en el almacén</span></div>
         <div><b>Respuesta a alertas</b><span>Minutos promedio entre la alerta y su cierre</span></div>
         <div><b>Cumplimiento de rondines</b><span>Puntos registrados por ronda</span></div>
         <div><b>Datos usados</b><span>GB de las líneas Navi del equipo</span></div>
       </div>
-      <p>En <b>📊 Reportes</b> están el resumen del turno en palabras, las gráficas y tres descargas en CSV (se abren en Excel): <b>Órdenes</b>, <b>Actividad</b> e <b>Incidentes</b> (con los pasos del protocolo que se siguieron). Se recomienda descargarlas al cierre de cada turno.</p>
+      <p>En <b>📊 Reportes</b> están el resumen del turno en palabras, las gráficas y tres descargas en CSV (se abren en Excel): <b>Personal</b>, <b>Actividad</b> e <b>Incidentes</b> (con los pasos del protocolo que se siguieron). Se recomienda descargarlas al cierre de cada turno.</p>
 
       <h2 id="reglas">6. Reglas de operación</h2>
       <ul>
         <li>Cada operador pertenece a <b>un departamento</b> (su radio y chat) y a <b>un sitio</b>; puede estar además en varios grupos de chat.</li>
-        <li>Las sugerencias de asignación solo incluyen operadores <b>del mismo sitio</b>, en turno y que no estén en SOS ni en receso; se castiga a quien ya trae orden o está en pausa.</li>
-        <li>Una orden <b>no se puede cerrar</b> sin el checklist completo y la evidencia que pide su plantilla.</li>
+        <li>NAVI Mando <b>no gestiona órdenes ni mide la operación</b> del cliente con sus propios clientes: solo personal, activos y seguridad.</li>
         <li>La ubicación se comparte <b>solo durante el turno</b>. Dentro del almacén se ubica por área.</li>
         <li>Entrar al comedor pone en receso; salir lo quita. El receso manual se quita con "Regresar a trabajar".</li>
         <li>El SOS de asalto <b>nunca</b> suena en el celular y la mesa no debe llamar al operador.</li>
         <li>Toda alerta se cierra con <b>motivo</b>; las de SOS además con notas del incidente.</li>
         <li>Los cambios de layout solo se aplican al tocar <b>Guardar cambios</b>; un almacén con personas asignadas no se puede eliminar.</li>
-        <li>Cada empresa ve únicamente sus datos (sitios, equipo, órdenes y mensajes).</li>
+        <li>Cada empresa ve únicamente sus datos (sitios, equipo, alertas y mensajes).</li>
       </ul>
 
       <h2 id="problemas">7. Problemas frecuentes</h2>
@@ -388,16 +374,15 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>Autorización de cambios de ruta</td><td>El permiso de administrador se revisa en el navegador</td><td>Lo valida el servidor: solo un administrador puede aprobar, aunque alguien manipule su navegador</td></tr>
         <tr><td>Clientes y acceso</td><td>Cuatro empresas de ejemplo, una por perfil, cada una con su usuario demo; la sesión se valida en el navegador</td><td>Cada cliente con su código, usuarios y permisos validados por el servidor de Navi</td></tr>
       </table></div>
-      <div class="warn">En la demo, si alguien cambia layouts u órdenes, esos cambios solo existen en su navegador. Para empezar de cero: Equipo → <b>↺ Reiniciar demo</b>.</div>
+      <div class="warn">En la demo, si alguien cambia layouts o geocercas, esos cambios solo existen en su navegador. Para empezar de cero: Equipo → <b>↺ Reiniciar demo</b>.</div>
 
       <h2 id="glosario">9. Glosario</h2>
       <div class="tw"><table>
         <tr><td><b>Mesa de control</b></td><td>Quien opera la consola central y dirige al equipo.</td></tr>
         <tr><td><b>Sitio</b></td><td>Lugar de operación: la ciudad (mapa real) o un almacén (plano).</td></tr>
         <tr><td><b>Layout</b></td><td>Plano del almacén con sus áreas, hecho en el editor.</td></tr>
-        <tr><td><b>Área</b></td><td>Parte del almacén (rack, andenes, comedor…); sirve para ubicar al personal y como destino de órdenes.</td></tr>
+        <tr><td><b>Área</b></td><td>Parte del almacén (rack, andenes, comedor…); sirve para ubicar al personal y para las geocercas.</td></tr>
         <tr><td><b>Geocerca</b></td><td>Zona en el mapa o plano que avisa cuando alguien entra o sale.</td></tr>
-        <tr><td><b>Plantilla</b></td><td>Tipo de trabajo con su tiempo límite, checklist y evidencia.</td></tr>
         <tr><td><b>PTT</b></td><td>Push-to-talk: radio por celular, se mantiene el botón para hablar.</td></tr>
         <tr><td><b>Rondín</b></td><td>Recorrido de vigilancia por puntos de control con QR o NFC.</td></tr>
         <tr><td><b>Protocolo</b></td><td>Pasos que sigue la mesa ante cada tipo de emergencia.</td></tr>
