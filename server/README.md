@@ -4,7 +4,7 @@ Un solo servidor publica:
 
 - **Navi Móvil** (`/` y `/demo/…`).
 - **Navi Empresas** (`/demo/empresas.html`, o un dominio propio si se activa en el `Caddyfile`).
-- **La API de NAVI Mando** (`/api/…`): acceso con código por correo o SMS, datos de cada empresa y cambios en vivo entre la consola y la app.
+- **La API de NAVI Órbita** (`/api/…`): acceso con código por correo o SMS, datos de cada empresa y cambios en vivo entre la consola y la app.
 
 No usa librerías externas: solo Node.js 24 o más nuevo (trae HTTP, SQLite y criptografía). Los datos quedan en un archivo SQLite dentro de `/data`, con un respaldo diario (se guardan los últimos 14).
 

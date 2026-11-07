@@ -2,7 +2,7 @@
   "name": "navi-servidor",
   "version": "1.0.0",
   "private": true,
-  "description": "Servidor de Navi Móvil y Navi Empresas: sitios + API de NAVI Mando",
+  "description": "Servidor de Navi Móvil y Navi Empresas: sitios + API de NAVI Órbita",
   "type": "module",
   "engines": { "node": ">=24" },
   "scripts": {
