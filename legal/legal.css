@@ -1,0 +1,20 @@
+/* páginas legales de Navi: sencillas, legibles y en el tono oscuro de NAVI Órbita */
+:root { --bg: #070B1A; --card: #0E1430; --line: #22F0FF22; --text: #E8ECFF; --muted: #9AA3C7; --lime: #B4E32F; --cyan: #22F0FF; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { display: flex; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 1px solid var(--line); }
+header img { height: 34px; display: block; }
+header span { font-weight: 800; letter-spacing: .18em; font-size: 13px; padding-left: 12px; border-left: 1px solid #ffffff33; }
+main { max-width: 780px; margin: 0 auto; padding: 32px 24px 48px; }
+.kicker { color: var(--lime); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12.5px; margin: 0 0 4px; }
+h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.15; margin: 0 0 6px; }
+.meta { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+h2 { font-size: 20px; margin: 32px 0 8px; color: var(--cyan); }
+a { color: var(--lime); }
+table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid #ffffff14; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; text-align: center; padding: 18px 24px; }
+@media (max-width: 560px) { table, tr, td, th { font-size: 13.5px; } th, td { padding: 8px 6px; } }
