@@ -1,0 +1,32 @@
+# Arranque en el servidor:  docker compose up -d --build
+# Caddy pone HTTPS automático (Let's Encrypt) y manda todo al servidor de Navi.
+services:
+  navi:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - navi-data:/data
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SITE_DOMAIN=${SITE_DOMAIN:-www.navimovil.com}
+      - ROOT_DOMAIN=${ROOT_DOMAIN:-navimovil.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - navi
+
+volumes:
+  navi-data:
+  caddy-data:
+  caddy-config:

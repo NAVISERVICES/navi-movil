@@ -1,0 +1,21 @@
+# HTTPS automático. Los dominios salen del archivo .env (SITE_DOMAIN y ROOT_DOMAIN).
+{$ROOT_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	# el canal en vivo de NAVI Mando no se debe retener
+	reverse_proxy navi:8080 {
+		flush_interval -1
+	}
+	header Strict-Transport-Security "max-age=31536000"
+}
+
+# Navi Empresas con dominio propio (opcional): quita los # y pon el dominio
+# empresas.navimovil.com {
+# 	redir / /demo/empresas.html
+# 	reverse_proxy navi:8080 {
+# 		flush_interval -1
+# 	}
+# }
