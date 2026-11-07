@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../navi.css?v=20261030d">
 <link rel="stylesheet" href="../suite.css?v=20261030d">
-<script src="mando.js?v=10"></script>
+<script src="mando.js?v=11"></script>
 <script>
 // el manual es solo para clientes: hace falta sesión de la consola o de la app del operador
 (function () {
@@ -210,7 +210,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li><b>Cada departamento se gestiona solo:</b> seguridad, mantenimiento, almacén, transporte, etc. tienen su canal de radio, su chat, sus geocercas y, si aplica, sus rondines.</li>
         <li><b>La mesa ve por departamento:</b> en <b>🛰️ En vivo</b> se filtra el mapa por departamento para ver a su gente, en qué área está y su estado (disponible, en receso, en pausa, SOS).</li>
         <li><b>Activos:</b> unidades y equipo (montacargas, vehículos) se siguen por la persona que los opera o por su propia línea Navi.</li>
-        <li><b>Seguridad primero:</b> SOS, evacuación, trabajo solo, zonas restringidas y batería baja llegan como alertas con protocolo.</li>
+        <li><b>Seguridad primero:</b> SOS, evacuación, trabajo solo, zonas restringidas, batería baja y unidades fuera de ruta llegan como alertas con protocolo.</li>
       </ol>
 
       <h3 id="p-seguim">P8 · Seguimiento en vivo <span class="who w-mc">MESA</span></h3>
@@ -266,12 +266,14 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li>Pasa novedades al siguiente turno por el grupo de supervisores.</li>
       </ol>
 
-      <h3 id="p-rutas">Unidades: trazabilidad y ubicación (transporte) <span class="who w-mc">MESA</span> <span class="who w-op">OPERADOR</span></h3>
+      <h3 id="p-rutas">Unidades y rutas (transporte) <span class="who w-mc">MESA</span> <span class="who w-op">OPERADOR</span></h3>
+      <div class="flow"><div class="st"><em>MESA</em><b>Asigna destino</b>se traza la ruta</div><span class="ar">→</span><div class="st app"><em>CHOFER</em><b>Ve su ruta</b>y la sigue</div><span class="ar">→</span><div class="st alert"><em>SISTEMA</em><b>Compara</b>ruta vs. recorrido real</div><span class="ar">→</span><div class="st alert"><em>SISTEMA</em><b>Avisa a la mesa</b>si se separa ≥ 1 km</div><span class="ar">→</span><div class="st"><em>MESA</em><b>Da seguimiento</b>y cierra la alerta</div></div>
       <ol>
-        <li>En <b>🚚 Unidades</b> la mesa ve cada unidad, quién la maneja, si está en movimiento o detenida, cerca de dónde está, la batería del celular y los km del día.</li>
-        <li><b>〰️ Ver recorrido</b> dibuja en el mapa por dónde ha pasado la unidad. La <b>Bitácora de recorridos</b> dice de dónde salió y a dónde llegó, con la hora.</li>
-        <li>NAVI Mando <b>no asigna viajes, no autoriza rutas y no registra la carga</b>: eso es parte de la operación del cliente. Solo da trazabilidad y ubicación de la unidad.</li>
-        <li>El chofer ve en su app la unidad que maneja y su recorrido; la ubicación se comparte solo durante el turno.</li>
+        <li>En <b>🚚 Unidades y rutas</b> la mesa toca <b>＋ Asignar destino</b>: elige chofer, unidad y destino. La <b>ruta programada</b> se traza desde donde está la unidad (línea azul) y le llega al chofer en su app.</li>
+        <li>El sistema compara todo el tiempo la ruta programada con el <b>recorrido real</b> (línea verde). Si la unidad se separa <b>1 km o más</b>, la mesa recibe un aviso con sonido, la tarjeta y la ruta se ponen en rojo y queda la alerta <b>🛣️ Fuera de ruta</b> en Alertas.</li>
+        <li>La mesa le da seguimiento: llama al chofer o le habla por radio, y cierra la alerta con el motivo (desvío por tráfico, obra, etc.). Cuando la unidad vuelve a su ruta queda registrado en la actividad.</li>
+        <li>La <b>Bitácora de recorridos</b> muestra de dónde salió cada unidad, su destino, a qué hora llegó y cuántas veces se separó de la ruta.</li>
+        <li>No se registra la carga: solo destino, ruta, ubicación y recorrido de la unidad.</li>
       </ol>
 
 
@@ -322,13 +324,14 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>🧍 Trabajador sin respuesta</td><td>En modo trabajo solo, no contestó "¿Estás bien?" en 45 s</td><td>Llamar de inmediato; si no responde, tratar como emergencia y enviar al más cercano</td></tr>
         <tr><td>🍽️ Receso excedido</td><td>Pasó el tiempo de comida</td><td>Recordarle por chat o radio</td></tr>
         <tr><td>🔋 Batería baja</td><td>Batería en 15% o menos</td><td>Pedir que cargue para no perder su ubicación</td></tr>
+        <tr><td>🛣️ Fuera de ruta</td><td>La unidad se separó 1 km o más de su ruta programada</td><td>Llamar o hablar por radio al chofer, darle seguimiento y cerrar con el motivo</td></tr>
       </table></div>
       <p><b>Modo trabajo solo</b> (app → Más): para quien trabaja sin compañeros cerca (guardia nocturno, técnico en sótano). La app pregunta "¿Estás bien?" cada minuto.</p>
 
       <h2 id="indic">5. Indicadores y reportes</h2>
       <div class="kpi">
         <div><b>Personal en turno</b><span>Por departamento y por sitio</span></div>
-        <div><b>Alertas por departamento</b><span>SOS, zonas y batería</span></div>
+        <div><b>Alertas por departamento</b><span>SOS, zonas, batería y desvíos de ruta</span></div>
         <div><b>Recorrido</b><span>Km en la ciudad y metros en el almacén</span></div>
         <div><b>Respuesta a alertas</b><span>Minutos promedio entre la alerta y su cierre</span></div>
         <div><b>Cumplimiento de rondines</b><span>Puntos registrados por ronda</span></div>
@@ -368,7 +371,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>Mapas y direcciones</td><td>OpenStreetMap</td><td>Proveedor de mapas contratado</td></tr>
         <tr><td>Radio</td><td>Notas de voz que se reproducen al llegar</td><td>Audio en vivo</td></tr>
         <tr><td>Rondines</td><td>QR con la cámara si el navegador lo permite; NFC simulado</td><td>QR y NFC reales</td></tr>
-        <tr><td>Recorrido de las unidades</td><td>El movimiento de la unidad es simulado sobre la ciudad, salvo GPS real del celular</td><td>Posición real del celular del chofer o de un GPS en la unidad, con historial guardado en el servidor</td></tr>
+        <tr><td>Recorrido de las unidades</td><td>El movimiento de la unidad es simulado sobre la ciudad, salvo GPS real del celular</td><td>Posición real del celular del chofer o de un GPS en la unidad, rutas trazadas por calles con un servicio de rutas, y la distancia de 1 km medida en el servidor con historial guardado</td></tr>
         <tr><td>Clientes y acceso</td><td>Cuatro empresas de ejemplo, una por perfil, cada una con su usuario demo; la sesión se valida en el navegador</td><td>Cada cliente con su código, usuarios y permisos validados por el servidor de Navi</td></tr>
       </table></div>
       <div class="warn">En la demo, si alguien cambia layouts o geocercas, esos cambios solo existen en su navegador. Para empezar de cero: Equipo → <b>↺ Reiniciar demo</b>.</div>

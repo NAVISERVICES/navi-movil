@@ -335,7 +335,7 @@ table.t tr:hover td{background:#ffffff06}
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="mando.js?v=10"></script>
+<script src="mando.js?v=11"></script>
 <script>
 const M = Mando, E = M.esc, $ = id => document.getElementById(id);
 // solo entran clientes con usuario: la empresa la define la sesión, no se cambia desde adentro
@@ -349,7 +349,7 @@ const ui = { trip: null, sel: null, side: 'equipo', grp: 'all', site: 'city', sh
 try { Object.assign(ui.show, JSON.parse(localStorage.getItem('navi.mando.ui') || '{}')); } catch (e) {}
 
 const VIEWS = [
-  ['vivo', '🛰️', 'En vivo'], ['rutas', '🚚', 'Unidades'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
+  ['vivo', '🛰️', 'En vivo'], ['rutas', '🚚', 'Unidades y rutas'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
   ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo'], ['layout', '🏗️', 'Layout'], ['manual', '📘', 'Manual']
 ];
 const op = id => S.ops.find(p => p.id === id);
@@ -369,7 +369,7 @@ const siteSeg = (cur, attr) => `<div class="seg" ${attr}>${S.sites.map(s => `<bu
 
 function nav() {
   const na = openAlerts().length + (S.evac ? 1 : 0), nm = unread().length;
-  const badge = { alertas: na, mensajes: nm };
+  const badge = { alertas: na, mensajes: nm, rutas: (S.trips || []).filter(t => t.status === 'enruta' && t.off).length };
   $('nav').innerHTML = VIEWS.filter(v => v[0] !== 'rutas' || S.trips).map(([k, i, t]) => `<button class="${k === view ? 'on' : ''}" data-v="${k}"><i>${i}</i>${t}${badge[k] ? `<em>${badge[k]}</em>` : ''}</button>`).join('');
   $('bellN').hidden = !na; $('bellN').textContent = na;
   $('emp').textContent = S.empresa;
@@ -455,6 +455,16 @@ function drawMap(el, o) {
   });
   if (o.trail) { const p = op(o.trail); if (p && p.site === sid && p.trail.length > 1) L.polyline(p.trail.map(t => LL(sid, t[0], t[1])).concat([LL(sid, p.x, p.y)]), { color: '#B4E32F', weight: 3, dashArray: '4 6', interactive: false }).addTo(g); }
   if (o.routes) S.routes.filter(r => r.site === sid).forEach(r => { const pts = r.points.map(id => S.points.find(c => c.id === id)).filter(Boolean); if (pts.length > 1) L.polyline(pts.concat([pts[0]]).map(c => LL(sid, c.x, c.y)), { color: '#9B80FF', weight: 2, dashArray: '5 5', interactive: false }).addTo(g); });
+  // unidades: ruta programada con su franja de 1 km a cada lado, y el destino
+  if (o.trips && S.trips && siteN(sid).kind !== 'indoor') {
+    const mpp = 156543.03 * Math.cos(19.42 * Math.PI / 180) / 2 ** m.getZoom(), P = q => LL(sid, q[0], q[1]);
+    S.trips.filter(tr => tr.status === 'enruta').forEach(tr => {
+      const sel = ui.trip === tr.opId, dim = ui.trip && !sel, c = tr.off ? '#FF4D6D' : '#22F0FF';
+      L.polyline(tr.path.map(P), { color: c, weight: Math.max(10, 2 * M.DESV_KM * 1000 / mpp), opacity: dim ? .03 : .08, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(g);
+      L.polyline(tr.path.map(P), { color: c, weight: sel ? 5 : 3.5, opacity: dim ? .3 : .95, interactive: false }).addTo(g);
+      L.marker(P(tr.path[tr.path.length - 1]), { icon: L.divIcon({ className: 'zlw', html: `<span>🏁 ${E(tr.unit)} · ${E(tr.to)}</span>`, iconSize: [0, 0] }), interactive: false }).addTo(g);
+    });
+  }
   if (o.pickAt) L.circle(LL(sid, o.pickAt.x, o.pickAt.y), { radius: radM(sid, o.pickAt.r), color: '#B4E32F', weight: 2, fillOpacity: .2 }).addTo(g);
   if (o.points) S.points.filter(c => c.site === sid).forEach(c => {
     L.marker(LL(sid, c.x, c.y), { icon: L.divIcon({ className: 'cpw', html: '<span></span>', iconSize: [16, 16], iconAnchor: [8, 8] }), title: c.code + ' ' + c.name }).addTo(g);
@@ -506,7 +516,7 @@ function liveRefresh() {
     ['Alertas', openAlerts().length, '', openAlerts().length ? 'bad' : 'good']
   ].map(([t, n, e, c]) => `<div class="kpi ${c}"><small>${t}</small><b>${n}<em>${e}</em></b></div>`).join('');
   const seg = $('siteS'); if (seg) seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.site === ui.site));
-  drawMap($('lmap'), { site: ui.site, zones: ui.show.zon, ops: true, trail: ui.show.trail && ui.sel, grp: ui.grp, fit: true,
+  drawMap($('lmap'), { site: ui.site, zones: ui.show.zon, ops: true, trips: true, trail: ui.show.trail && ui.sel, grp: ui.grp, fit: true,
     onOp: id => { ui.sel = id; ui.side = 'equipo'; liveRefresh(); } });
   if (ui.side === 'equipo') {
     const list = S.ops.filter(p => ui.grp === 'all' || p.group === ui.grp).sort((a, b) => (b.status === 'sos') - (a.status === 'sos') || (a.site !== ui.site) - (b.site !== ui.site) || (a.status === 'fuera') - (b.status === 'fuera'));
@@ -623,11 +633,10 @@ function bindRondines() {
   $('addCp').onclick = () => { ui.pick = { r: 1 }; m.classList.add('picking'); draw(); toast('Toca el plano donde va el punto'); };
 }
 
-// ---------- UNIDADES: solo trazabilidad y ubicación (no asigna viajes, no autoriza rutas, no ve la carga) ----------
+// ---------- UNIDADES: destino con ruta programada, recorrido real y aviso a la mesa si se separa 1 km ----------
 const kmTxt = d => (d * M.SCALE.outdoor.km).toFixed(1) + ' km';
 const nearPlace = p => M.PLACES.slice().sort((a, b) => M.dist(a, p) - M.dist(b, p))[0]?.n.split(' · ')[0] || 'Ciudad';
-const trailLen = p => (p.trail || []).concat([[p.x, p.y]]).reduce((a, q, i, l) => i ? a + Math.hypot(q[0] - l[i - 1][0], q[1] - l[i - 1][1]) : 0, 0);
-// una tarjeta por unidad: la última vez que alguien la manejó
+// una tarjeta por unidad: su recorrido más reciente
 function units() {
   const by = {};
   (S.trips || []).slice().sort((a, b) => a.start - b.start).forEach(t => { by[t.unit] = t; });
@@ -635,27 +644,29 @@ function units() {
 }
 function vRutas() {
   return `<div class="view">
-    <div class="vh"><h2>Unidades · trazabilidad y ubicación</h2>
-    <p>Dónde está cada unidad ahora y por dónde ha pasado. NAVI Mando <b>no asigna viajes ni rutas y no registra la carga</b>: solo da visibilidad de la unidad y de quién la maneja.</p></div>
+    <div class="vh"><h2>Unidades y rutas</h2><span class="sp"></span><button class="btn lime" id="addTrip">＋ Asignar destino</button>
+    <p>Al asignar un destino se traza la <b>ruta programada</b>. Si el recorrido real de la unidad se separa <b>${M.DESV_KM} km o más</b> de esa ruta, la mesa de control recibe un aviso para darle seguimiento. No se registra la carga.</p></div>
     <div class="rutas"><div id="rtL"></div>
-      <div>${mapShell('vmap', `<div class="legend"><span><i class="dot" style="background:#7EE0FF"></i>En movimiento</span><span><i class="dot" style="background:#B4E32F"></i>Detenida</span><span>〰️ Recorrido de la unidad seleccionada</span></div>`)}
+      <div>${mapShell('vmap', `<div class="legend"><span><i class="dot" style="background:#22F0FF"></i>Ruta programada</span><span><i class="dot" style="background:#B4E32F"></i>Recorrido real</span><span><i class="dot" style="background:#FF4D6D"></i>Fuera de ruta (≥ ${M.DESV_KM} km)</span><span>🏁 Destino</span></div>`)}
       <div class="card" style="margin-top:12px" id="rtH"></div></div>
     </div></div>`;
 }
 function rutasList() {
   return units().map(({ unit, t, p }) => {
-    const mov = t.status === 'enruta' && p.status === 'encamino';
-    return `<div class="card trip ${ui.trip === p.id ? 'on' : ''}" data-sel="${p.id}"><div class="th"><b>🚚 Unidad ${E(unit)}</b>${mov ? '<span class="chip ok">● En movimiento</span>' : '<span class="chip">■ Detenida</span>'}<span class="sp"></span><small class="muted">visto ${M.ago(p.seen)}</small></div>
+    const act = t.status === 'enruta', dev = (t.dev || 0) * M.SCALE.outdoor.km;
+    const chip = !act ? `<span class="chip">✅ Llegó ${t.done ? M.fmtT(t.done) : ''}</span>` : t.off ? `<span class="chip bad">⚠️ Fuera de ruta · ${dev.toFixed(1)} km</span>` : '<span class="chip ok">● En ruta</span>';
+    return `<div class="card trip ${ui.trip === p.id ? 'on' : ''} ${act && t.off ? 'off' : ''}" data-sel="${p.id}"><div class="th"><b>🚚 Unidad ${E(unit)}</b>${chip}<span class="sp"></span><small class="muted">visto ${M.ago(p.seen)}</small></div>
       <div class="rq-who">${avatar(p, 's')}<span><b>${E(p.name)}</b><small>${E(p.role)} · 🔋${p.bat}%${isGps(p) ? ' · 📡 GPS real' : ''}</small></span></div>
-      <div class="muted" style="font-size:12.5px;margin:6px 0">📍 Cerca de <b style="color:var(--text,#fff)">${E(nearPlace(p))}</b> · hoy ${p.km.toFixed(1)} km</div>
-      <div class="row-b"><button class="btn sm" data-sel="${p.id}">〰️ Ver recorrido</button><a class="btn sm" href="tel:${p.phone}">📞 Llamar</a></div></div>`;
-  }).join('') || '<div class="card empty">Sin unidades con ubicación.</div>';
+      <div class="tr-ft"><span>${E(t.from)}</span><span>→</span><span>🏁 ${E(t.to)}</span></div>
+      <div class="muted" style="font-size:12.5px;margin:6px 0">📍 Cerca de <b>${E(nearPlace(p))}</b> · salió ${M.fmtT(t.start)}${act ? ` · a ${dev.toFixed(1)} km de su ruta` : ''}</div>
+      <div class="row-b"><button class="btn sm" data-sel="${p.id}">⌖ Ver ruta</button><a class="btn sm" href="tel:${p.phone}">📞 Llamar</a>${act ? (t.off ? '' : `<button class="btn sm" data-sim="${t.id}" title="Demo: la unidad se separa de su ruta">Simular desvío</button>`) : `<button class="btn sm lime" data-asg="${p.id}">＋ Nuevo destino</button>`}</div></div>`;
+  }).join('') || '<div class="card empty">Sin unidades. Asigna un destino con ＋ Asignar destino.</div>';
 }
 function rutasHist() {
   const rs = (S.trips || []).slice().sort((a, b) => b.start - a.start);
-  return `<h3>Bitácora de recorridos<small>salida y llegada de cada unidad</small></h3><div class="tw"><table class="t"><tr><th>Unidad</th><th>Chofer</th><th>Salió de</th><th>Hora</th><th>Llegó a</th><th>Hora</th></tr>
-    ${rs.map(t => `<tr><td><b>${E(t.unit)}</b></td><td>${E(op(t.opId)?.name || '')}</td><td>${E(t.from)}</td><td>${M.fmtT(t.start)}</td><td>${t.status === 'entregado' ? E(t.to) : '<span class="muted">en movimiento</span>'}</td><td>${t.done ? M.fmtT(t.done) : '—'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Sin recorridos</td></tr>'}</table></div>
-    <p class="muted" style="font-size:12px;margin-top:10px">Solo ubicación y horas: sirve para saber dónde estuvo cada unidad y quién la manejaba.</p>`;
+  return `<h3>Bitácora de recorridos<small>destino, llegada y desvíos de cada unidad</small></h3><div class="tw"><table class="t"><tr><th>Unidad</th><th>Chofer</th><th>Salió de</th><th>Hora</th><th>Destino</th><th>Llegó</th><th>Desvíos ≥ ${M.DESV_KM} km</th></tr>
+    ${rs.map(t => `<tr><td><b>${E(t.unit)}</b></td><td>${E(op(t.opId)?.name || '')}</td><td>${E(t.from)}</td><td>${M.fmtT(t.start)}</td><td>🏁 ${E(t.to)}</td><td>${t.done ? M.fmtT(t.done) : '<span class="muted">en ruta</span>'}</td><td>${t.offs ? `<b style="color:var(--red)">${t.offs}</b>` : '—'}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">Sin recorridos</td></tr>'}</table></div>
+    <p class="muted" style="font-size:12px;margin-top:10px">Cada aviso de desvío también queda en 🚨 Alertas, donde la mesa lo cierra con el motivo del seguimiento.</p>`;
 }
 function rutasRefresh() {
   const L1 = $('rtL'); if (!L1) return;
@@ -664,18 +675,42 @@ function rutasRefresh() {
   ui.forceL = false;
   $('rtH').innerHTML = rutasHist();
   const m = $('vmap');
-  drawMap(m, { site: 'city', ops: true, zones: false, trail: ui.trip, onOp: id => { if (units().some(u => u.p.id === id)) selTrip(id); } });
-  if (!m._fitT) { m._fitT = 1; const pts = units().map(u => LL('city', u.p.x, u.p.y)); if (pts.length) m._L.fitBounds(pts, { padding: [60, 60], maxZoom: 14 }); }
+  drawMap(m, { site: 'city', ops: true, trips: true, zones: false, trail: ui.trip, onOp: id => { if (units().some(u => u.p.id === id)) selTrip(id); } });
+  if (!m._fitT) { m._fitT = 1; const pts = (S.trips || []).filter(t => t.status === 'enruta').flatMap(t => t.path.map(q => LL('city', q[0], q[1]))).concat(units().map(u => LL('city', u.p.x, u.p.y))); if (pts.length) m._L.fitBounds(pts, { paddingTopLeft: [40, 40], paddingBottomRight: [40, 70] }); }
 }
 function selTrip(pid) {
   ui.trip = ui.trip === pid ? null : pid; ui.forceL = true; rutasRefresh();
-  const p = op(ui.trip), m = $('vmap');
-  if (p && m && m._L) { const pts = (p.trail || []).concat([[p.x, p.y]]).map(q => LL('city', q[0], q[1])); m._L.fitBounds(pts, { padding: [50, 50], maxZoom: 15 }); }
+  const p = op(ui.trip), m = $('vmap'), t = p && M.activeTrip(S, p.id);
+  if (p && m && m._L) { const pts = (p.trail || []).concat([[p.x, p.y]], t ? t.path : []).map(q => LL('city', q[0], q[1])); m._L.fitBounds(pts, { padding: [50, 50], maxZoom: 15 }); }
+}
+// la mesa de control asigna el destino; la ruta programada sale de donde está la unidad
+function tripModal(pre) {
+  const free = S.ops.filter(p => p.site === 'city' && !['fuera', 'sos'].includes(p.status) && !M.activeTrip(S, p.id));
+  const lastUnit = id => (S.trips || []).filter(t => t.opId === id).slice(-1)[0]?.unit || '';
+  const ov = modal(`<div class="mh"><h3>🚚 Asignar destino</h3><button data-close>×</button></div><div class="grid2">
+    <label class="l">Chofer<select class="f" id="nvP">${free.map(p => `<option value="${p.id}" ${pre === p.id ? 'selected' : ''}>${E(p.name)} · ${E(p.role)}</option>`).join('')}</select></label>
+    <label class="l">Unidad<input class="f" id="nvU" placeholder="Ej. T-21"></label>
+    <label class="l full">Destino<select class="f" id="nvD">${M.PLACES.map((P, i) => `<option value="${i}">${E(P.n)}</option>`).join('')}</select></label></div>
+    <p class="muted" style="font-size:12.5px;margin-top:10px">Se traza la ruta programada desde donde está la unidad. Si su recorrido real se separa ${M.DESV_KM} km o más, te llega un aviso para darle seguimiento.</p>
+    <div class="mf"><button class="btn" data-close>Cancelar</button><button class="btn lime" id="nvOk" ${free.length ? '' : 'disabled'}>Asignar destino</button></div>`);
+  const setU = () => { $('nvU').value = lastUnit($('nvP').value) || 'T-' + (10 + Math.floor(Math.random() * 30)); };
+  if (free.length) { setU(); $('nvP').onchange = setU; } else ov.querySelector('.grid2').insertAdjacentHTML('afterend', '<p style="color:var(--yellow);font-size:13px;margin-top:8px">Todas las unidades en la ciudad ya tienen destino.</p>');
+  $('nvOk').onclick = () => {
+    const pid = $('nvP').value, P = M.PLACES[+$('nvD').value];
+    let f = '';
+    M.update(s => { const p = s.ops.find(x => x.id === pid), near = M.PLACES.slice().sort((a, b) => M.dist(a, p) - M.dist(b, p))[0];
+      const t = M.mkTrip(s, { opId: pid, from: near.n.split(' · ')[0], fromAddr: near.n, to: P.n.split(' · ')[0], toAddr: P.n, unit: $('nvU').value.trim() || 'T-00', path: M.routeBetween(M.pt(p), M.pt(P)) });
+      s.msgs.push({ id: M.uid('m'), from: 'consola', to: pid, kind: 'text', txt: '🚚 Nuevo destino: ' + t.toAddr + '. Tu ruta programada ya está en tu app.', at: Date.now(), reads: ['consola'] }); f = t.unit + ' → ' + t.to; });
+    ov.remove(); ui.forceL = true; toast('✓ Destino asignado · ' + f);
+  };
 }
 function bindRutas() {
   const m = $('vmap'); m.style.minHeight = '520px';
+  $('addTrip').onclick = () => tripModal();
   $('rtL').onclick = e => {
     const t = e.target; if (t.closest('a')) return;
+    const as = t.closest('[data-asg]'); if (as) return tripModal(as.dataset.asg);
+    const sm = t.closest('[data-sim]'); if (sm) { M.update(s => M.simDesvio(s, sm.dataset.sim)); return toast('Demo: la unidad se está separando de su ruta…'); }
     const sl = t.closest('[data-sel]'); if (sl) selTrip(sl.dataset.sel);
   };
   $('rtL').onmouseleave = () => rutasRefresh();
@@ -823,7 +858,7 @@ function evacHTML() {
 function vAlertas() {
   const open = openAlerts().sort((a, b) => (b.type === 'sos') - (a.type === 'sos') || b.at - a.at), closed = S.alerts.filter(a => a.status === 'cerrada').slice(-20).reverse();
   return `<div class="view">
-    <div class="vh"><h2>Alertas y emergencias</h2><span class="sp"></span><button class="btn" id="simA">Simular alerta</button>${S.evac ? '' : '<button class="btn red" id="evac">🚨 Evacuar un sitio</button>'}<p>SOS por tipo de emergencia con su protocolo, accesos no autorizados, trabajador sin respuesta, geocercas y batería baja. Todo queda registrado.</p></div>
+    <div class="vh"><h2>Alertas y emergencias</h2><span class="sp"></span><button class="btn" id="simA">Simular alerta</button>${S.evac ? '' : '<button class="btn red" id="evac">🚨 Evacuar un sitio</button>'}<p>SOS por tipo de emergencia con su protocolo, accesos no autorizados, trabajador sin respuesta, geocercas, batería baja y unidades a 1 km o más de su ruta. Todo queda registrado.</p></div>
     ${evacHTML()}
     ${open.map(a => { const T = M.ALERT_T[a.type], K = sosInfo(a), p = op(a.opId); return `<div class="al" style="border-left-color:${a.silent ? 'var(--yellow)' : T.c}"><span class="ic">${K ? K.i : T.i}</span>
       <div class="i"><b>${K ? 'SOS · ' + E(K.t) : T.t}${p ? ' · ' + E(p.name) : ''}</b><small>${E(a.where || a.txt)} · ${M.ago(a.at)}${p ? ' · ' + E(grp(p.group)?.name || '') : ''}${a.status === 'atendida' ? ' · <b style="color:var(--lime)">En atención</b>' : ''}</small></div>
@@ -1146,6 +1181,7 @@ function refresh() {
     });
   }
   lastMsgCount = nm;
+  offWatch();
   if (view === 'vivo') return liveRefresh();
   if (view === 'rutas') { if (!document.querySelector('.ov')) rutasRefresh(); return; }
   if (view === 'mensajes') { thread(); const c = document.querySelector('.convs'); if (c) { const st = c.scrollTop; c.innerHTML = convsHTML(); c.scrollTop = st; } return; }
@@ -1163,7 +1199,17 @@ M.on(s => {
 });
 setInterval(() => { ticks++; try { localStorage.setItem(M.hbKey(), Date.now()); } catch (e) {} fromTick = true; M.tick(); fromTick = false; }, 2000);
 setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }, 1000);
-render(); sosWatch();
+// aviso a la mesa de control cuando una unidad se separa 1 km o más de su ruta programada
+const seenOff = new Set();
+let offBoot = false;
+function offWatch() {
+  (S.trips || []).forEach(t => {
+    const k = t.id + ':' + t.offAt;
+    if (t.status === 'enruta' && t.off && !seenOff.has(k)) { seenOff.add(k); if (offBoot) { M.beep(true); toast('⚠️ Unidad ' + t.unit + ' (' + (op(t.opId)?.name || '') + ') va a ' + kmTxt(t.dev || 0) + ' de su ruta a ' + t.to + '. Dale seguimiento.'); } }
+  });
+  offBoot = true;
+}
+render(); sosWatch(); offWatch();
 </script>
 </body>
 </html>

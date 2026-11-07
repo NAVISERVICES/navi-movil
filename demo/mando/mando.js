@@ -6,7 +6,7 @@
 // cerrado como un almacén (plano en metros). Cada sitio tiene su propia escala.
 (function () {
   const KEY = 'navi.mando';
-  const V = 13;
+  const V = 14;
   const now = () => Date.now();
   const MIN = 60000;
   const uid = p => (p || 'x') + Math.random().toString(36).slice(2, 8);
@@ -225,7 +225,7 @@
     s.orders = []; s.templates = [];
     const enViaje = id => (s.trips || []).some(tr => tr.opId === id && tr.status === 'enruta');
     s.ops.forEach(p => { p.order = null; if (['encamino', 'ensitio'].includes(p.status) && !enViaje(p.id)) { p.status = 'disponible'; p.target = null; } });
-    s.alerts = s.alerts.filter(a => !['sla', 'desvio', 'cambio'].includes(a.type));
+    s.alerts = s.alerts.filter(a => !['sla', 'cambio'].includes(a.type));
     s.events = s.events.filter(e => e.type !== 'orden' && !/\bOT-\d/.test(e.txt || ''));
     s.msgs = s.msgs.filter(m => !/\bOT-\d|pedido|orden/i.test(m.txt || ''));
     return s;
@@ -369,7 +369,7 @@
       s.msgs.push({ id: uid('m'), from: 'p9', to: 'c3', kind: 'text', txt: 'Ya cargué en el patio, salgo a Aeropuerto', at: t - 8 * MIN, reads: ['consola'] });
       // la zona del aeropuerto es la terminal de carga, destino normal de los viajes
       Object.assign(s.zones.find(z => z.id === 'z3'), { name: 'Terminal de carga Aeropuerto', type: 'base', exit: true });
-      // unidades: solo trazabilidad y ubicación (de dónde salió, por dónde va, a dónde llegó). Sin carga ni rutas autorizadas
+      // unidades: destino con ruta programada, recorrido real y aviso a la mesa si se separa 1 km. Sin carga
       Object.assign(s.ops.find(p => p.id === 'p8'), { shift: { at: t - 3 * 60 * MIN } });
       s.trips = []; s.tripFolio = 296;
       const short = i => PLACES[i].n.split(' · ')[0];
@@ -379,7 +379,7 @@
         const q = path[0], n = path[1];
         Object.assign(p, { site: 'city', x: +(q[0] + (n[0] - q[0]) * .35).toFixed(2), y: +(q[1] + (n[1] - q[1]) * .35).toFixed(2), target: null, order: null, status: 'encamino' });
         p.trail = [[q[0], q[1]], [p.x, p.y]];
-        s.trips.push(tr); s.events.push({ at: tr.start, opId, txt: 'Unidad ' + unit + ' salió de ' + tr.from, type: 'ruta' });
+        s.trips.push(tr); s.events.push({ at: tr.start, opId, txt: 'Unidad ' + unit + ' salió de ' + tr.from + ' rumbo a ' + tr.to, type: 'ruta' });
         return tr;
       };
       // recorrido de la mañana ya terminado
@@ -389,7 +389,9 @@
       // en movimiento ahora
       mkT('p9', 8, 10, 'T-21', 8);
       mkT('p8', 7, 3, 'T-07', 14);
-      mkT('p1', 0, 5, 'T-14', 11);
+      const v3 = mkT('p1', 0, 5, 'T-14', 11);
+      // Arturo se va a separar de su ruta: en unos segundos la mesa recibe el aviso
+      simDesvio(s, v3.id);
       s.events.sort((a, b) => a.at - b.at);
       s.folio = 1050;
     }
@@ -810,10 +812,26 @@
     return a;
   }
 
-  // ---------- unidades (transporte): solo trazabilidad y ubicación ----------
-  // El recorrido sirve para mover la unidad en el demo y dejar su rastro. No hay corredor, ni alertas
-  // de desvío, ni solicitudes de ruta: NAVI Mando no administra la operación del cliente.
+  // ---------- unidades (transporte): destino, ruta programada y seguimiento ----------
+  // La mesa de control asigna un destino y se traza la ruta programada. Si el recorrido real se separa
+  // 1 km o más de esa ruta, se avisa a la mesa de control para que le dé seguimiento. No hay carga
+  // ni autorizaciones: solo ubicación, trazabilidad y aviso de desvío.
+  const DESV_KM = 1, DESV = DESV_KM / SCALE.outdoor.km;   // 1 km en unidades de mapa
   const pt = P => [+(+P.x).toFixed(2), +(+P.y).toFixed(2)];
+  function segD(p, a, b) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+    const k = L2 ? Math.max(0, Math.min(1, ((p.x - a[0]) * dx + (p.y - a[1]) * dy) / L2)) : 0;
+    return Math.hypot(p.x - a[0] - k * dx, p.y - a[1] - k * dy);
+  }
+  // qué tan lejos va la unidad de su ruta programada (unidades de mapa)
+  function offRoute(p, path) { let m = Infinity; for (let i = 1; i < path.length; i++) m = Math.min(m, segD(p, path[i - 1], path[i])); return m; }
+  // demo: la unidad se sale de su ruta programada
+  function simDesvio(s, tripId) {
+    const tr = s.trips.find(x => x.id === tripId), p = tr && s.ops.find(x => x.id === tr.opId); if (!p || tr.status !== 'enruta') return;
+    const n = tr.path[tr.seg + 1] || tr.path[tr.path.length - 1], dx = n[0] - p.x, dy = n[1] - p.y, L = Math.hypot(dx, dy) || 1;
+    tr.detour = true; tr.detourPt = [+(p.x + dx * .3 + dy / L * DESV * 1.7).toFixed(2), +(p.y + dy * .3 - dx / L * DESV * 1.7).toFixed(2)];
+    p.target = { x: tr.detourPt[0], y: tr.detourPt[1] };
+  }
   // tramos en "L" entre los puntos de paso, como cuadras de la ciudad
   function streetPath(pts, yFirst) {
     const out = [pts[0]];
@@ -837,7 +855,7 @@
     s.trips.push(tr);
     const p = s.ops.find(x => x.id === tr.opId);
     if (p) { p.status = 'encamino'; p.target = null; }
-    event(s, tr.opId, 'Unidad ' + tr.unit + ' salió de ' + tr.from, 'ruta');
+    event(s, tr.opId, 'Unidad ' + tr.unit + ' salió de ' + tr.from + ' rumbo a ' + tr.to, 'ruta');
     return tr;
   }
   // en cada ciclo: avanzar por el recorrido y registrar la llegada
@@ -848,8 +866,18 @@
     if (tr.seg >= tr.path.length - 1) {
       tr.status = 'entregado'; tr.done = t; tr.off = false; p.target = null; if (p.status === 'encamino') p.status = 'disponible';
       event(s, p.id, 'Unidad ' + tr.unit + ' llegó a ' + tr.to, 'ruta');
+      return;
     }
-    // solo trazabilidad y ubicación: no hay corredor ni alertas de desvío
+    // GPS real fuera de la ciudad del demo (p. ej. probando desde otro país): no se evalúa la ruta
+    if (p.x < 0 || p.x > 100 || p.y < 0 || p.y > 100) return;
+    const d = offRoute(p, tr.path);
+    tr.dev = +d.toFixed(2);
+    if (d >= DESV && !tr.off) {
+      // aviso a la mesa de control para que le dé seguimiento
+      tr.off = true; tr.offAt = t; tr.offs = (tr.offs || 0) + 1;
+      alert(s, 'desvio', p.id, 'Unidad ' + tr.unit + ' a ' + (d * SCALE.outdoor.km).toFixed(1) + ' km de su ruta programada a ' + tr.to + '. Dar seguimiento.', { ref: tr.id + ':' + t, trip: tr.id });
+      event(s, p.id, 'Unidad ' + tr.unit + ' se separó ' + (d * SCALE.outdoor.km).toFixed(1) + ' km de su ruta', 'ruta');
+    } else if (tr.off && d < DESV * .7) { tr.off = false; event(s, p.id, 'Unidad ' + tr.unit + ' regresó a su ruta', 'ruta'); }
   }
 
   // ---------- acceso por usuario con código (sin contraseñas) ----------
@@ -933,7 +961,7 @@
 
   window.Mando = { Auth, SOS_KINDS, sos, KEY, STATUS, ORDER_ST, ALERT_T, PLACES, SCALE, BOX, toLL, fromLL, load, save, update, on, tick, nearest, advance, event, alert, orderHist, uid, dist, km, fmtD, eta, site, scale, areaAt, members, forMe, planSVG, fmtT, ago, esc, Ptt, beep, MIN,
     AREA_T, aType, isWork, CLIENTS,
-    routeBetween, mkTrip, activeTrip, pathLen, pt,
+    routeBetween, mkTrip, activeTrip, pathLen, pt, offRoute, simDesvio, DESV_KM,
     useClient(cid) { CID = CLIENTS[cid] ? cid : 'mixta'; return CID; },
     client() { return CID; },
     clientByCode(code) { return Object.keys(CLIENTS).find(k => CLIENTS[k].code === String(code || '').trim().toUpperCase()); },
