@@ -83,6 +83,7 @@ table.t tr:hover td{background:#ffffff06}
 /* mapa real (Leaflet) */
 .map{position:relative;border-radius:18px;overflow:hidden;background:#0E0E55;border:1px solid var(--line);min-height:300px}
 .map .lf{position:absolute;inset:0;background:#0E0E55}
+.map.fixed .leaflet-container,.map.fixed .leaflet-interactive{cursor:default}
 .dark-tiles{filter:invert(1) hue-rotate(200deg) brightness(.82) saturate(.55) contrast(.95)}
 .leaflet-container{font-family:var(--body);background:#0E0E55}
 .leaflet-control-zoom a{background:#14146A!important;color:#fff!important;border-color:var(--line2)!important}
@@ -408,11 +409,14 @@ function lmap(el, sid) {
   const st = siteN(sid), box = el.querySelector('.lf');
   let m;
   if (st.kind === 'indoor') {
-    m = L.map(box, { crs: L.CRS.Simple, minZoom: 1, maxZoom: 6, zoomSnap: .25, zoomControl: false, attributionControl: false });
+    // plano fijo: no se arrastra; solo se acerca o aleja (rueda, botones + / − o pellizco) y nunca se sale del almacén
+    m = L.map(box, { crs: L.CRS.Simple, minZoom: 0, maxZoom: 6, zoomSnap: .25, zoomControl: false, attributionControl: false, dragging: false, keyboard: false, boxZoom: false, maxBoundsViscosity: 1 });
     const b = [[0, 0], [st.h, st.w]];
     L.imageOverlay(M.planSVG(st), b).addTo(m);
-    m.fitBounds(b, { padding: [14, 14] }); m.setMaxBounds([[-25, -25], [st.h + 25, st.w + 25]]);
+    m.fitBounds(b, { padding: [14, 14] }); m.setMaxBounds(b);
+    el.classList.add('fixed');
   } else {
+    el.classList.remove('fixed');
     m = L.map(box, { zoomControl: false }).setView([19.42, -99.16], 12);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, className: 'dark-tiles', attribution: '© OpenStreetMap' }).addTo(m);
   }
@@ -422,7 +426,12 @@ function lmap(el, sid) {
   m.on('zoomstart', () => el.classList.add('zooming'));
   m.on('zoomend', () => setTimeout(() => el.classList.remove('zooming'), 80));
   m.on('click', e => el._onMap && el._onMap(XY(sid, e.latlng)));
-  const fix = () => { if (el._L === m && document.body.contains(box)) m.invalidateSize(); };
+  const fix = () => {
+    if (el._L !== m || !document.body.contains(box)) return;
+    m.invalidateSize();
+    // en el almacén el zoom mínimo es el plano completo: no se puede alejar más ni quedar fuera de cuadro
+    if (st.kind === 'indoor') { const b = [[0, 0], [st.h, st.w]], z = m.getBoundsZoom(b, false, L.point(28, 28)); m.setMinZoom(z); if (m.getZoom() <= z + .01) m.fitBounds(b, { padding: [14, 14], animate: false }); }
+  };
   if (window.ResizeObserver) new ResizeObserver(fix).observe(box);
   setTimeout(fix, 60);
   return m;
@@ -431,7 +440,8 @@ function fitOps(el, sid) {
   const m = el._L, pts = S.ops.filter(p => p.site === sid && p.status !== 'fuera').map(p => LL(sid, p.x, p.y));
   if (!m) return;
   if (siteN(sid).kind === 'indoor') { const st = siteN(sid); m.fitBounds([[0, 0], [st.h, st.w]], { padding: [14, 14] }); }
-  else if (pts.length) m.fitBounds(pts, { padding: [50, 50], maxZoom: 15 });
+  // margen extra arriba (controles) y abajo (leyenda) para que nadie quede tapado en pantallas chicas
+  else if (pts.length) m.fitBounds(pts, { paddingTopLeft: [50, 80], paddingBottomRight: [60, 70], maxZoom: 15 });
 }
 function drawMap(el, o) {
   if (!el) return;
