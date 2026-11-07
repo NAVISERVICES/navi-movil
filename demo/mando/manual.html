@@ -107,7 +107,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
     </nav>
     <article>
       <h2 id="que">1. Qué es y para quién</h2>
-      <p><b>NAVI Mando</b> es el sistema de gestión de la operación para empresas con personal en campo, en la calle o dentro de un espacio cerrado como un almacén. Tiene dos partes que trabajan juntas:</p>
+      <p><b>NAVI Mando</b> es una solución de <b>smart warehouse y visibilidad operativa</b> para empresas con personal y unidades en campo, en la calle o dentro de un almacén. Muestra dónde está cada persona y cada unidad, por departamento (seguridad, mantenimiento, almacén, transporte), y avisa ante emergencias, zonas restringidas o desvíos de ruta. <b>No es invasivo:</b> no gestiona órdenes ni mide la operación del cliente con sus propios clientes. Tiene dos partes que trabajan juntas:</p>
       <div class="cards">
         <div><b>🖥️ Consola central</b><span>Web para la mesa de control: mapa en vivo, rutas, rondines, geocercas, mensajes, alertas, reportes, equipo y layout. <a href="index.html">Abrir</a></span></div>
         <div><b>📱 App del operador</b><span>Se instala en el celular. Turno y ubicación, radio, chat, receso, emergencia y rondín. <a href="app/">Abrir</a></span></div>
@@ -125,7 +125,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       </table></div>
 
       <h3 id="tipos">Tipos de cliente</h3>
-      <p>Cada cliente tiene un perfil según su giro de negocio. El perfil define sus departamentos, puestos, tipos de orden, rondines y mapas. Cada empresa entra con <b>su propio usuario</b> y solo ve sus datos: para ver otra empresa hay que cerrar sesión y entrar con el usuario de esa empresa.</p>
+      <p>Cada cliente tiene un perfil según su giro de negocio. El perfil define sus departamentos, puestos, geocercas, rondines y mapas. Cada empresa entra con <b>su propio usuario</b> y solo ve sus datos: para ver otra empresa hay que cerrar sesión y entrar con el usuario de esa empresa.</p>
       <div class="tw"><table>
         <tr><th>Perfil</th><th>Departamentos y trabajo típico</th><th>Cómo se ubica al personal</th><th>Demo</th></tr>
         <tr><td><b>🛡️ Seguridad privada</b></td><td>Guardias intramuros, patrullaje, custodia de traslados y supervisión.</td><td>Área del plano en el sitio del cliente + GPS en patrullaje y traslados</td><td>Prosegur Seguridad · NAVI-5500<br><code>prosegur.seguridad</code></td></tr>
@@ -161,7 +161,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <div class="tw"><table>
         <tr><th>Tipo de área</th><th>Para qué sirve</th></tr>
         <tr><td>Rack / estantería · Área de almacenaje</td><td>Ubicaciones de surtido y almacenaje; los pasillos entre racks se numeran solos.</td></tr>
-        <tr><td>Recepción · Oficinas · Empaque · Andenes · Zona de montacargas</td><td>Áreas de trabajo; se pueden elegir como destino de una orden y como ubicación del operador.</td></tr>
+        <tr><td>Recepción · Oficinas · Empaque · Andenes · Zona de montacargas</td><td>Áreas de trabajo; sirven como ubicación del operador y para geocercas.</td></tr>
         <tr><td>Cuarto de máquinas</td><td>Área de riesgo; se acompaña con una geocerca restringida por departamento.</td></tr>
         <tr><td>Comedor</td><td>Quien entra queda "En receso" automáticamente.</td></tr>
         <tr><td>Pasillo de montacargas · Andador peatonal</td><td>Señalización de circulación (no son áreas de trabajo).</td></tr>
@@ -199,7 +199,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <ol class="steps">
         <li>El operador abre la app y toca <b>▶ Iniciar turno</b>.</li>
         <li><b>En la calle:</b> la app pide la ubicación y muestra "📡 Ubicación en vivo ± metros". <b>En el almacén:</b> muestra su área; si no es correcta, <b>Cambiar área</b> o escanear el código del área.</li>
-        <li>Revisa el aviso general del día y su siguiente orden.</li>
+        <li>Revisa el aviso general del día; si maneja una unidad, ve su destino y la ruta programada.</li>
         <li>La mesa confirma en <b>En vivo</b> que todo el turno aparece (indicador "En turno") y que nadie tiene batería baja o datos por agotarse.</li>
       </ol>
       <div class="rule"><b>Privacidad:</b> la ubicación solo se comparte durante el turno. Al terminar el turno se deja de enviar.</div>
@@ -219,13 +219,14 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li>Leer los indicadores: en turno, departamentos activos, en receso, con GPS real, batería baja y alertas.</li>
         <li>Tocar a un operador para ver su estado, ubicación (calle o área), batería, km o metros recorridos, datos de su línea y departamento. Desde ahí: llamar, mensaje, radio privado o ver su recorrido.</li>
         <li>Activar <b>Recorrido</b> para ver el trayecto del seleccionado y <b>⌖ Centrar</b> para ver a todo el equipo.</li>
+        <li><b>Plano del almacén fijo:</b> no se arrastra; solo se acerca o aleja con la rueda del mouse, los botones + / − o pellizcando en el celular, y nunca se sale del almacén. ⌖ Centrar regresa al plano completo.</li>
+        <li><b>¿No ves a alguien?</b> Tócalo en la lista <b>Equipo</b>: el mapa cambia solo a Ciudad o al almacén donde esté y se centra en esa persona. Quien está "Fuera de turno" no aparece en el mapa.</li>
         <li>La pestaña <b>Actividad</b> muestra todo lo que pasa: llegadas, entradas a zonas, recesos, rondines.</li>
       </ol>
       <div class="tw"><table>
         <tr><th>Estado</th><th>Significa</th><th>Quién lo pone</th></tr>
-        <tr><td>🟢 Disponible</td><td>Libre para recibir trabajo</td><td>Operador / sistema al cerrar orden o salir del comedor</td></tr>
-        <tr><td>🔵 En camino</td><td>Se dirige a una orden o a apoyar</td><td>Operador / mesa al enviar apoyo</td></tr>
-        <tr><td>🟡 En sitio</td><td>Trabajando en el lugar de la orden</td><td>Sistema al detectar llegada / operador</td></tr>
+        <tr><td>🟢 Disponible</td><td>En turno, trabajando en su área</td><td>Operador al iniciar turno / sistema al salir del comedor</td></tr>
+        <tr><td>🔵 En camino</td><td>Unidad en ruta a su destino o persona yendo a apoyar</td><td>Sistema al asignar destino / mesa al enviar apoyo</td></tr>
         <tr><td>🟣 En receso</td><td>Comida o descanso</td><td>Sistema al entrar al comedor / operador</td></tr>
         <tr><td>⚪ En pausa</td><td>Detenido por otra razón (trámite, espera)</td><td>Operador</td></tr>
         <tr><td>🔴 SOS</td><td>Emergencia activa</td><td>Operador con el botón de emergencia</td></tr>
@@ -357,7 +358,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>El operador no aparece en el mapa</td><td>Verificar que inició turno. En la calle: que aceptó la ubicación ("Activar" en Inicio). En el almacén: que eligió su área.</td></tr>
         <tr><td>"Permiso de ubicación negado"</td><td>En el celular: Ajustes → la app o el navegador → Ubicación → Permitir. Luego "Reintentar" en la app.</td></tr>
         <tr><td>El radio no graba</td><td>Dar permiso de micrófono al navegador. Sin permiso se envía un aviso sin audio.</td></tr>
-        <tr><td>No le llega la orden</td><td>Revisar que la orden esté asignada a esa persona y que tenga datos en su línea (Equipo muestra el consumo).</td></tr>
+        <tr><td>Al chofer no le aparece su destino</td><td>Revisar en Unidades y rutas que el destino esté asignado a esa persona y que tenga datos en su línea (Equipo muestra el consumo).</td></tr>
         <tr><td>El plano no se actualizó</td><td>Confirmar que se tocó "Guardar cambios" en Layout y recargar la app.</td></tr>
         <tr><td>Un operador quedó en receso sin estar comiendo</td><td>Que toque "Regresar a trabajar" o elija su área real en "Cambiar área".</td></tr>
         <tr><td>No pudo escanear el QR del rondín</td><td>Limpiar la cámara y acercarse; si el celular no lee QR desde el navegador, elegir el punto de la lista (demo) y reportarlo.</td></tr>
