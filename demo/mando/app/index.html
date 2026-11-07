@@ -165,7 +165,7 @@ video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object
 <body>
 <div class="phone" id="ph"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../mando.js?v=10"></script>
+<script src="../mando.js?v=11"></script>
 <script>
 const M = Mando, E = M.esc;
 // el operador entra con su usuario (código de empresa + celular + PIN); la empresa la fija su sesión
@@ -282,23 +282,30 @@ function scrInicio() {
 function tripHTML() {
   const t = M.activeTrip(S, meId); if (!t) return '';
   const p = me();
+  const end = M.toLL(...t.path[t.path.length - 1]).map(v => v.toFixed(5)).join(',');
+  const way = t.path.slice(t.seg + 1, -1).slice(0, 8).map(q => M.toLL(q[0], q[1]).map(v => v.toFixed(5)).join(',')).join('|');
   return `<div class="card trip"><h3>🚚 Unidad ${E(t.unit)}<small>compartiendo ubicación</small></h3>
+    <div class="tr-ft"><b>${E(t.from)}</b> → <b>🏁 ${E(t.to)}</b></div>
     <div class="omap" id="tmap" data-t="${t.id}"></div>
-    <div class="muted" style="font-size:12.5px;margin:6px 0 0">Salió de <b style="color:#fff">${E(t.from)}</b> a las ${M.fmtT(t.start)} · hoy ${p.km.toFixed(1)} km. Tu central ve dónde está la unidad y su recorrido.</div>
+    <div class="muted" style="font-size:12.5px;margin:6px 0 8px">Sigue la ruta programada (línea azul). Tu central ve tu recorrido y te contacta si te separas ${M.DESV_KM} km o más.</div>
+    <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${end}${way ? '&waypoints=' + encodeURIComponent(way) : ''}&travelmode=driving">🧭 Navegar mi ruta</a>
   </div>`;
 }
 function tripMap() {
   const el = document.getElementById('tmap'); if (!el) return;
-  const p = me(), pts = (p.trail || []).concat([[p.x, p.y]]).map(q => M.toLL(q[0], q[1]));
+  const t = M.activeTrip(S, meId); if (!t) return;
+  const p = me(), pts = (p.trail || []).concat([[p.x, p.y]]).map(q => M.toLL(q[0], q[1])), route = t.path.map(q => M.toLL(q[0], q[1]));
   if (!el._L) {
     el._L = L.map(el, { zoomControl: false, attributionControl: false });
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, className: 'dark-tiles' }).addTo(el._L);
     el._g = L.layerGroup().addTo(el._L);
-    el._L.setView(pts[pts.length - 1], 14);
+    el._L.fitBounds(route.concat([pts[pts.length - 1]]), { padding: [18, 18] });
     setTimeout(() => el._L.invalidateSize(), 50);
   }
   el._g.clearLayers();
-  if (pts.length > 1) L.polyline(pts, { color: '#22F0FF', weight: 4, opacity: .9 }).addTo(el._g);
+  L.polyline(route, { color: '#22F0FF', weight: 4, opacity: .9 }).addTo(el._g);
+  L.marker(route[route.length - 1], { icon: L.divIcon({ className: '', html: '<div class="dpin">🏁</div>', iconSize: [28, 28], iconAnchor: [14, 28] }) }).addTo(el._g);
+  if (pts.length > 1) L.polyline(pts, { color: '#B4E32F', weight: 3, opacity: .9, dashArray: '4 6' }).addTo(el._g);
   L.marker(pts[pts.length - 1], { icon: L.divIcon({ className: '', html: '<div class="mepin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(el._g);
 }
 function scrRadio() {
