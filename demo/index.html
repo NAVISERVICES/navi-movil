@@ -108,7 +108,19 @@ header.main .wrap{display:flex;align-items:center;height:72px;gap:28px}
   header.main .wrap{gap:8px}
 }
 @media (max-width:370px){header.main .logo img{height:32px}}
-@media (max-width:1320px){.links{display:none}.header-cta{margin-left:auto}}
+/* laptops, tabletas y celulares: el menú baja a una segunda fila (cintillo deslizable) en vez de esconderse */
+@media (max-width:1320px){
+  header.main .wrap{flex-wrap:wrap;height:auto;row-gap:0}
+  header.main .logo{height:64px}
+  header.main .header-cta{margin-left:auto}
+  header.main .links{order:3;flex:1 0 100%;margin:0;justify-content:center;gap:6px;font-size:14px;overflow-x:auto;scrollbar-width:none;padding:8px 0 10px;border-top:1px solid #ffffff14}
+  header.main .links::-webkit-scrollbar{display:none}
+  header.main .links a{padding:6px 13px;border-radius:99px;background:#ffffff0d;border:1px solid #ffffff12}
+  header.main .links a:hover{border-color:var(--lime)}
+}
+@media (max-width:1000px){header.main .links{justify-content:flex-start;-webkit-mask:linear-gradient(90deg,#000 88%,transparent);mask:linear-gradient(90deg,#000 88%,transparent)}}
+@media (max-width:480px){header.main .logo{height:58px;flex:1 1 0;min-width:0}header.main .logo img{max-width:100%;object-fit:contain;object-position:left center}header.main .header-cta{flex:none}header.main .links{font-size:13px;gap:5px}header.main .links a{padding:5px 11px}}
+html{scroll-padding-top:150px}
 .squiggle path{stroke:var(--pink);stroke-width:5;fill:none;stroke-linecap:round;stroke-dasharray:400;stroke-dashoffset:400;animation:draw 1.4s .6s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 .hero p.lead{font-size:18px;color:var(--muted);max-width:520px}
@@ -503,7 +515,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:100}
 
 /* ---------- responsive ---------- */
 @media (max-width:980px){
-  .links,.header-cta .long{display:none}
+  .header-cta .long{display:none}
   .hero .wrap,.family-plan .wrap,.calm .wrap{grid-template-columns:1fr}
   .cards,.pgrid{grid-template-columns:repeat(2,1fr)}
   .steps{grid-template-columns:1fr}
