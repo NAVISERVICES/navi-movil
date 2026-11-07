@@ -196,7 +196,7 @@ const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) 
 function login() {
   const fmtN = v => { const d = v.replace(/\D/g, '').slice(0, 10); return [d.slice(0, 2), d.slice(2, 6), d.slice(6)].filter(Boolean).join(' '); };
   ph.innerHTML = `<div class="login"><div style="display:flex;align-items:center;justify-content:space-between"><img src="../../assets/navi-logo.png" alt="Navi"><button class="hb" id="lref" title="Refrescar la app" aria-label="Refrescar la app">⟳</button></div>
-    <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: órdenes, radio, chat por departamento y botón de emergencia. Solo para personal de empresas cliente de Navi.</p>
+    <h1>NAVI <span>Mando</span></h1><p class="muted">La app de trabajo de tu empresa: ubicación en turno, radio, chat por departamento y botón de emergencia. Solo para personal de empresas cliente de Navi.</p>
     <label class="muted" style="font-size:13px;font-weight:700">Código de empresa<input class="f" id="code" placeholder="NAVI-0000" autocapitalize="characters" autocomplete="organization" style="margin-top:6px"></label>
     <label class="muted" style="font-size:13px;font-weight:700">Tu celular Navi<input class="f" id="cel" inputmode="numeric" autocomplete="tel-national" placeholder="55 1234 5678" style="margin-top:6px"></label>
     <label class="muted" style="font-size:13px;font-weight:700">PIN<input class="f" id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="••••" style="margin-top:6px"></label>
@@ -271,11 +271,11 @@ function scrInicio() {
   const pct = Math.min(100, p.gb / p.gbMax * 100);
   return `<div class="card" style="background:${p.shift ? 'linear-gradient(135deg,#1d1d8f,#13136A)' : 'linear-gradient(135deg,#7B5CFA,#4B32C9)'}">
       ${p.shift ? `<h3>🟢 Turno activo<small>desde ${M.fmtT(p.shift.at)}</small></h3><div class="chips">${['disponible', 'receso', 'pausa'].map(k => `<button data-st="${k}" class="${p.status === k ? 'on' : ''}"><i class="dot" style="background:${M.STATUS[k].c}"></i>${k === 'receso' ? '🍽️ Receso' : M.STATUS[k].t}</button>`).join('')}</div>${recesoHTML()}${gpsHTML()}`
-        : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para recibir órdenes y aparecer en el mapa de tu central${indoor() ? '' : ' (te pediremos tu ubicación)'}.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
+        : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para aparecer en el mapa de tu central y ver tus servicios del día${indoor() ? '' : ' (te pediremos tu ubicación)'}.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
     </div>
     ${tripHTML()}
-    <div class="stats"><div><small>Hoy</small><b>${doneT}</b><small>órdenes</small></div><div><small>Recorrido</small><b>${indoor() ? Math.round(p.km * 1000) : p.km.toFixed(0)}</b><small>${indoor() ? 'm' : 'km'}</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
-    ${cur ? `<div class="card"><h3>📋 Tu siguiente orden<small>${E(cur.folio)}</small></h3>${orderCard(cur)}${nextBtn(cur)}</div>` : `<div class="card"><h3>📋 Sin órdenes pendientes</h3><p class="muted" style="font-size:14px">Cuando tu central te asigne una, te llega aquí con aviso.</p></div>`}
+    <div class="stats"><div><small>Hoy</small><b>${doneT}</b><small>servicios</small></div><div><small>Recorrido</small><b>${indoor() ? Math.round(p.km * 1000) : p.km.toFixed(0)}</b><small>${indoor() ? 'm' : 'km'}</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
+    ${cur ? `<div class="card"><h3>📋 Tu siguiente servicio<small>${E(cur.folio)}</small></h3>${orderCard(cur)}${nextBtn(cur)}</div>` : `<div class="card"><h3>📋 Sin servicios pendientes</h3><p class="muted" style="font-size:14px">Cuando tu central te asigne uno, te llega aquí con aviso.</p></div>`}
     ${dif ? `<div class="card" style="border-color:#b4e32f55"><h3>📢 Aviso de tu empresa<small>${M.fmtT(dif.at)}</small></h3><p style="font-size:14px">${E(dif.txt)}</p></div>` : ''}
     <div class="card"><h3>📶 Tu línea Navi<small>${p.gb.toFixed(1)} de ${p.gbMax} GB</small></h3><div class="bar"><i style="width:${pct}%"></i></div><p class="muted" style="font-size:12.5px;margin-top:8px">La app consume muy pocos datos. Si te quedas sin datos, avisa a tu central para que recargue tu línea.</p></div>
     ${p.shift ? '<button class="btn" data-a="endshift" style="margin-top:4px">⏹ Terminar turno</button>' : ''}`;
@@ -348,15 +348,15 @@ function nextBtn(o) {
 function scrOrdenes() {
   if (ui.order) return scrOrden();
   const op = openMine(), dn = myOrders().filter(o => o.status === 'completada' && today(o.done)).sort((a, b) => b.done - a.done);
-  return `<h2 style="font-size:24px;margin:4px 0 12px">Mis órdenes</h2>
-    ${op.map(orderCard).join('') || '<div class="card muted" style="text-align:center">Sin órdenes pendientes 🎉</div>'}
+  return `<h2 style="font-size:24px;margin:4px 0 12px">Mis servicios</h2>
+    ${op.map(orderCard).join('') || '<div class="card muted" style="text-align:center">Sin servicios pendientes 🎉</div>'}
     ${dn.length ? `<h3 style="font-size:15px;margin:18px 0 10px" class="muted">Completadas hoy · ${dn.length}</h3>${dn.map(orderCard).join('')}` : ''}`;
 }
 function scrOrden() {
   const o = S.orders.find(x => x.id === ui.order); if (!o) { ui.order = null; return scrOrdenes(); }
   const idx = ['asignada', 'aceptada', 'encamino', 'ensitio', 'completada'].indexOf(o.status), open = !['completada', 'cancelada'].includes(o.status);
   const ll = M.toLL(o.x, o.y), city = o.site === 'city';
-  return `<button class="back" data-a="back">← Mis órdenes</button>
+  return `<button class="back" data-a="back">← Mis servicios</button>
     <div class="muted" style="font-size:12.5px">${E(o.folio)} · ${M.ORDER_ST[o.status]}</div>
     <h2 style="font-size:24px;margin:4px 0">${E(o.title)}</h2>
     <div class="steps">${[0, 1, 2, 3, 4].map(i => `<i class="${i <= idx ? 'on' : ''}"></i>`).join('')}</div>
@@ -448,7 +448,7 @@ function render() {
     <div class="scr" id="scr">${body}</div>
     ${ui.tab === 'chat' && ui.chat ? '<div class="comp"><input class="f" id="mIn" placeholder="Escribe un mensaje…" autocomplete="off"><button class="btn lime sm" id="mSend">Enviar</button></div>' : ''}
     <button class="sos" id="sos"><span class="fill"></span><i>🆘</i><span>EMERGENCIA<small>mantén 2 s</small></span></button>
-    <nav class="tabbar">${[['inicio', '🏠', 'Inicio'], ['ordenes', '📋', 'Órdenes', nO], ['radio', '🎙️', 'Radio'], ['chat', '💬', 'Chat', nU], ['mas', '☰', 'Más']].map(([k, i, t, n]) => `<button data-tab="${k}" class="${ui.tab === k || (k === 'mas' && ui.tab === 'rondin') ? 'on' : ''}"><i>${i}</i>${t}${n ? `<em>${n}</em>` : ''}</button>`).join('')}</nav>`;
+    <nav class="tabbar">${[['inicio', '🏠', 'Inicio'], ['ordenes', '📋', 'Servicios', nO], ['radio', '🎙️', 'Radio'], ['chat', '💬', 'Chat', nU], ['mas', '☰', 'Más']].map(([k, i, t, n]) => `<button data-tab="${k}" class="${ui.tab === k || (k === 'mas' && ui.tab === 'rondin') ? 'on' : ''}"><i>${i}</i>${t}${n ? `<em>${n}</em>` : ''}</button>`).join('')}</nav>`;
   const s2 = document.getElementById('scr'); s2.scrollTop = st;
   // el mapa de la orden se conserva entre refrescos
   const nm = ph.querySelector('#omap'); if (nm && keepMap && keepMap._L && keepMap.dataset.o === nm.dataset.o) { nm.replaceWith(keepMap); keepMap._L.invalidateSize(); moveMe(); } else orderMap();
@@ -703,7 +703,7 @@ function checkPrompts() {
 function notify() {
   const p = me(); if (!p) return;
   const as = myOrders().filter(o => o.status === 'asignada').map(o => o.id);
-  if (ui.lastOrders) as.filter(id => !ui.lastOrders.includes(id)).forEach(id => { const o = S.orders.find(x => x.id === id); toast('📋 Nueva orden: ' + o.title + ' · ' + o.client); vib([120, 60, 120]); M.beep(); });
+  if (ui.lastOrders) as.filter(id => !ui.lastOrders.includes(id)).forEach(id => { const o = S.orders.find(x => x.id === id); toast('📋 Nuevo servicio: ' + o.title + ' · ' + o.client); vib([120, 60, 120]); M.beep(); });
   ui.lastOrders = as;
   // aviso al chofer si se sale de su ruta
   const tr = M.activeTrip(S, meId);
