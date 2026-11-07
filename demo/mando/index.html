@@ -165,6 +165,7 @@ table.t tr:hover td{background:#ffffff06}
 .oc.late{border-color:var(--red)}
 .oc .h{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin-bottom:5px}
 .oc .h .chip{margin-left:auto}
+.chip.erp{background:#7EE0FF1f;color:#7EE0FF;border:1px solid #7EE0FF44;align-self:center}
 .oc b{display:block;font-size:14px}
 .oc small{display:block;color:var(--muted);font-size:12px}
 .oc .f{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:12px}
@@ -344,7 +345,7 @@ const ui = { trip: null, optPick: {}, seenReq: new Set(), sel: null, side: 'equi
 try { Object.assign(ui.show, JSON.parse(localStorage.getItem('navi.mando.ui') || '{}')); } catch (e) {}
 
 const VIEWS = [
-  ['vivo', '🛰️', 'En vivo'], ['ordenes', '📋', 'Órdenes'], ['rutas', '🛣️', 'Rutas'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
+  ['vivo', '🛰️', 'En vivo'], ['ordenes', '🔗', 'Servicios ERP'], ['rutas', '🛣️', 'Rutas'], ['rondines', '🛡️', 'Rondines'], ['geocercas', '📍', 'Geocercas'],
   ['mensajes', '💬', 'Mensajes'], ['alertas', '🚨', 'Alertas'], ['reportes', '📊', 'Reportes'], ['equipo', '👥', 'Equipo'], ['layout', '🏗️', 'Layout'], ['manual', '📘', 'Manual']
 ];
 const op = id => S.ops.find(p => p.id === id);
@@ -486,7 +487,7 @@ function vVivo() {
     <div class="lcol">
       <div class="kpis" id="lk"></div>
       ${mapShell('lmap', `<div class="mapctl">${siteSeg(ui.site, 'id="siteS"')}<select id="fG"><option value="all">Todos los departamentos</option>${S.groups.map(g => `<option value="${g.id}" ${ui.grp === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</select>
-        <button data-t="ord" class="${ui.show.ord ? 'on' : ''}">Órdenes</button><button data-t="zon" class="${ui.show.zon ? 'on' : ''}">Geocercas</button><button data-t="trail" class="${ui.show.trail ? 'on' : ''}">Recorrido</button><button id="fit">⌖ Centrar</button></div>
+        <button data-t="ord" class="${ui.show.ord ? 'on' : ''}">Servicios</button><button data-t="zon" class="${ui.show.zon ? 'on' : ''}">Geocercas</button><button data-t="trail" class="${ui.show.trail ? 'on' : ''}">Recorrido</button><button id="fit">⌖ Centrar</button></div>
         <div class="legend">${['disponible', 'encamino', 'ensitio', 'receso', 'pausa', 'sos'].map(k => `<span><i class="dot" style="background:${M.STATUS[k].c}"></i>${M.STATUS[k].t}</span>`).join('')}<span>📡 GPS real</span></div>`)}
       <div class="ptt">
         <div class="ch"><small>Canal de radio</small><select id="pttCh"><option value="all">📢 Todos</option><optgroup label="Departamentos">${S.groups.map(g => `<option value="${g.id}" ${ui.pttCh === g.id ? 'selected' : ''}>${E(g.name)}</option>`).join('')}</optgroup><optgroup label="Grupos">${S.chats.map(c => `<option value="${c.id}" ${ui.pttCh === c.id ? 'selected' : ''}>${E(c.name)}</option>`).join('')}</optgroup><optgroup label="Privado">${S.ops.map(p => `<option value="${p.id}" ${ui.pttCh === p.id ? 'selected' : ''}>🔒 ${E(p.name)}</option>`).join('')}</optgroup></select></div>
@@ -506,7 +507,7 @@ function liveRefresh() {
   $('lk').innerHTML = [
     ['En turno', enT.length, '/ ' + S.ops.length, ''], ['En camino', S.ops.filter(p => p.status === 'encamino').length, '', ''],
     ['🍽️ En receso', S.ops.filter(p => p.status === 'receso').length, '', S.ops.some(p => p.status === 'receso' && Date.now() - (p.recesoAt || 0) > (S.breakMin || 45) * M.MIN) ? 'warn' : ''],
-    ['Órdenes abiertas', oo.length, '', ''], ['Por asignar', S.orders.filter(o => o.status === 'nueva').length, '', S.orders.some(o => o.status === 'nueva') ? 'warn' : ''],
+    ['Servicios abiertos', oo.length, '', ''], ['Sin responsable', S.orders.filter(o => o.status === 'nueva').length, '', S.orders.some(o => o.status === 'nueva') ? 'warn' : ''],
     ['Alertas', openAlerts().length, '', openAlerts().length ? 'bad' : 'good']
   ].map(([t, n, e, c]) => `<div class="kpi ${c}"><small>${t}</small><b>${n}<em>${e}</em></b></div>`).join('');
   const seg = $('siteS'); if (seg) seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.site === ui.site));
@@ -533,7 +534,7 @@ function liveRefresh() {
       <div style="font-size:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between"><span class="muted">Línea Navi ${p.phone.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')}</span><span>${p.gb.toFixed(1)} / ${p.gbMax} GB</span></div><div class="bar" style="margin-top:4px"><i style="width:${pct}%;${pct > 85 ? 'background:var(--yellow)' : ''}"></i></div></div>
       ${o ? `<div class="oc" data-o="${o.id}" style="margin-bottom:10px"><div class="h">${E(o.folio)} · ${M.ORDER_ST[o.status]}<span class="chip prio-${o.prio}">${o.prio}</span></div><b>${E(o.title)}</b><small>${E(o.client)} · ${E(o.addr)}</small></div>` : ''}
       ${p.solo ? '<div class="chip" style="margin-bottom:10px;background:#ff7a4533">🧍 Modo trabajo solo activo</div>' : ''}
-      <div class="acts"><a class="btn" href="tel:${p.phone}"><i>📞</i>Llamar</a><button class="btn" data-a="msg"><i>💬</i>Mensaje</button><button class="btn" data-a="ptt"><i>🎙️</i>Radio</button><button class="btn" data-a="asig"><i>📋</i>Asignar</button></div>
+      <div class="acts"><a class="btn" href="tel:${p.phone}"><i>📞</i>Llamar</a><button class="btn" data-a="msg"><i>💬</i>Mensaje</button><button class="btn" data-a="ptt"><i>🎙️</i>Radio</button><button class="btn" data-a="asig"><i>🔗</i>Servicio</button></div>
     </div>`;
   }
   pttLog();
@@ -559,7 +560,7 @@ function bindVivo() {
     const a = e.target.closest('[data-a]')?.dataset.a;
     if (a === 'msg') { ui.conv = ui.sel; go('mensajes'); }
     if (a === 'ptt') { ui.pttCh = ui.sel; $('pttCh').value = ui.sel; toast('Canal privado con ' + op(ui.sel).name + '. Mantén el botón para hablar.'); }
-    if (a === 'asig') newOrderModal({ opId: ui.sel, site: op(ui.sel).site });
+    if (a === 'asig') pickSvc(ui.sel);
   };
   $('pttCh').onchange = e => ui.pttCh = e.target.value;
   $('pttLog').onclick = e => { const b = e.target.closest('[data-play]'); if (b) playVoice(b.dataset.play); };
@@ -595,16 +596,16 @@ function ocard(o) {
 function vOrdenes() {
   const q = ui.ordQ.toLowerCase();
   const f = S.orders.filter(o => (!q || (o.folio + o.title + o.client + o.addr).toLowerCase().includes(q)) && (ui.ordG === 'all' || o.site === ui.ordG || op(o.opId)?.group === ui.ordG || (!o.opId && ui.ordG === 'none')));
-  const cols = [['Por asignar', f.filter(o => o.status === 'nueva'), '#FFC22E'], ['Asignadas', f.filter(o => ['asignada', 'aceptada'].includes(o.status)), '#9B80FF'], ['En curso', f.filter(o => ['encamino', 'ensitio'].includes(o.status)), '#7EE0FF'], ['Completadas hoy', f.filter(o => o.status === 'completada' && today(o.done)).sort((a, b) => b.done - a.done), '#B4E32F']];
+  const cols = [['Sin responsable en campo', f.filter(o => o.status === 'nueva'), '#FFC22E'], ['Asignados', f.filter(o => ['asignada', 'aceptada'].includes(o.status)), '#9B80FF'], ['En camino / en sitio', f.filter(o => ['encamino', 'ensitio'].includes(o.status)), '#7EE0FF'], ['Atendidos hoy', f.filter(o => o.status === 'completada' && today(o.done)).sort((a, b) => b.done - a.done), '#B4E32F']];
   const comp = S.orders.filter(o => o.status === 'completada' && today(o.done)), onTime = comp.filter(o => o.done <= o.due).length;
   return `<div class="view">
-    <div class="vh"><h2>Órdenes de trabajo</h2><span class="sp"></span><button class="btn" id="tplB">🧩 Plantillas</button><button class="btn lime" id="newO">＋ Nueva orden</button>
-    <p>En la calle o dentro del almacén. El operador la recibe en su app y la cierra con fotos, checklist y firma.</p></div>
+    <div class="vh"><h2>Servicios del ERP en campo</h2><span class="sp"></span><span class="chip erp">🔗 ${E(ERP_NAME)} · sincronizado hace 1 min</span><button class="btn" id="tplB">⚙️ Conexión</button><button class="btn" id="newO">⇣ Simular servicio entrante</button>
+    <p>NAVI Mando no crea ni administra órdenes: esas viven en tu ERP (SAP, Oracle o el que uses). Aquí solo se reflejan para que veas quién atiende cada servicio, dónde está y cuánto lleva. Llegada, tiempo en sitio y evidencia regresan a tu sistema.</p></div>
     <div class="kpis">
-      <div class="kpi ${cols[0][1].length ? 'warn' : ''}"><small>Por asignar</small><b>${S.orders.filter(o => o.status === 'nueva').length}</b></div>
+      <div class="kpi ${cols[0][1].length ? 'warn' : ''}"><small>Sin responsable</small><b>${S.orders.filter(o => o.status === 'nueva').length}</b></div>
       <div class="kpi"><small>En curso</small><b>${S.orders.filter(o => ['asignada', 'aceptada', 'encamino', 'ensitio'].includes(o.status)).length}</b></div>
       <div class="kpi ${openOrders().some(o => o.late) ? 'bad' : ''}"><small>Vencidas</small><b>${openOrders().filter(o => o.late).length}</b></div>
-      <div class="kpi good"><small>Completadas hoy</small><b>${comp.length}</b></div>
+      <div class="kpi good"><small>Atendidos hoy</small><b>${comp.length}</b></div>
       <div class="kpi"><small>A tiempo</small><b>${comp.length ? Math.round(onTime / comp.length * 100) : 100}<em>%</em></b></div>
     </div>
     <div class="vh" style="margin-bottom:12px"><input class="f" id="oq" placeholder="Buscar folio, cliente o ubicación" value="${E(ui.ordQ)}" style="max-width:300px">
@@ -612,9 +613,50 @@ function vOrdenes() {
     <div class="kan">${cols.map(([t, l, c]) => `<div class="col"><h4><i class="dot" style="background:${c}"></i>${t}<b>${l.length}</b></h4>${l.map(ocard).join('') || '<div class="empty">—</div>'}</div>`).join('')}</div>
   </div>`;
 }
+// el ERP del cliente es la fuente de las órdenes; NAVI solo las refleja y les agrega lo que pasa en campo
+const ERP_NAME = 'SAP S/4HANA';
+function erpModal() {
+  modal(`<div class="mh"><h3>🔗 Conexión con tu sistema</h3><button data-close>×</button></div>
+    <p class="muted" style="font-size:13.5px;margin-bottom:12px">NAVI Mando es una capa de <b>visibilidad operativa</b> de tu personal y tus activos. No sustituye a tu ERP: lo complementa con lo que pasa en la calle y en el almacén.</p>
+    <div class="grid2">
+      <div class="card"><h3>⇣ Tu sistema → NAVI</h3><div class="ck">• Folio y tipo de servicio</div><div class="ck">• Dirección o área del almacén</div><div class="ck">• Responsable y tiempo comprometido</div><div class="ck">• Ruta del viaje (transporte)</div></div>
+      <div class="card"><h3>⇡ NAVI → tu sistema</h3><div class="ck">• Llegada y salida del sitio, con hora</div><div class="ck">• Tiempo en sitio y recorrido</div><div class="ck">• Foto, firma y checklist de evidencia</div><div class="ck">• Desvíos de ruta, SOS e incidentes</div></div>
+    </div>
+    <div class="card" style="margin-top:12px"><h3>Conectores</h3><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip erp">✓ ${E(ERP_NAME)} · conectado</span><span class="chip">Oracle ERP / NetSuite</span><span class="chip">Microsoft Dynamics</span><span class="chip">API REST + webhooks</span><span class="chip">Archivo CSV / SFTP</span></div>
+      <p class="muted" style="font-size:12.5px;margin-top:10px">En esta demo la conexión es ilustrativa: los servicios vienen precargados y puedes simular uno entrante.</p></div>
+    <div class="mf"><button class="btn" data-close>Cerrar</button></div>`, 'wide');
+}
+function simErp() {
+  const sid = S.sites.some(s => s.id === ui.site) ? ui.site : S.sites[0].id, st = siteN(sid);
+  const tpls = S.templates.filter(t => t.site === 'any' || t.site === st.kind), T = tpls[Math.floor(Math.random() * tpls.length)];
+  let loc;
+  if (st.kind === 'indoor') { const ws = st.areas.filter(M.isWork), a = ws[Math.floor(Math.random() * ws.length)]; loc = { n: a.name, x: a.x + a.w / 2, y: a.y + a.h / 2 }; }
+  else loc = M.PLACES[Math.floor(Math.random() * M.PLACES.length)];
+  const folio = M.update(s => {
+    const t = Date.now(), f = 'OT-' + (s.folio++);
+    s.orders.push({ id: M.uid('o'), folio: f, tpl: T.id, site: sid, title: T.name, client: 'Pedido ' + ERP_NAME.split(' ')[0] + ' #45' + String(Math.floor(Math.random() * 90000) + 10000), addr: loc.n, x: loc.x, y: loc.y, prio: 'media', sla: T.sla, status: 'nueva', opId: null, created: t, due: t + T.sla * M.MIN,
+      checklist: T.checklist.map(c => ({ t: c, done: false })), needPhoto: T.needPhoto, needSign: T.needSign, photo: null, sign: null, notes: '', erp: true, hist: [{ at: t, txt: 'Recibido desde ' + ERP_NAME }] });
+    return f;
+  });
+  toast('⇣ ' + folio + ' llegó desde ' + ERP_NAME);
+}
+// desde el mapa: darle a una persona un servicio del ERP que aún no tiene responsable en campo
+function pickSvc(pid) {
+  const p = op(pid), l = openOrders().filter(o => o.status === 'nueva' && o.site === p.site);
+  const ov = modal(`<div class="mh"><h3>Servicio para ${E(p.name.split(' ')[0])}</h3><button data-close>×</button></div>
+    <p class="muted" style="font-size:12.5px;margin-bottom:10px">Servicios que llegaron de ${E(ERP_NAME)} y aún no tienen responsable en campo en este sitio.</p>
+    ${l.map(o => `<button class="sug" data-pk="${o.id}" style="width:100%;text-align:left"><span class="i"><b>${E(o.folio)} · ${E(o.title)}</b><small>${E(o.client)} · 📍 ${E(o.addr)}</small></span></button>`).join('') || '<div class="muted" style="font-size:13px">No hay servicios pendientes en este sitio.</div>'}
+    <div class="mf"><button class="btn" data-close>Cerrar</button></div>`);
+  ov.onclick = e => {
+    if (e.target === ov || e.target.closest('[data-close]')) return ov.remove();
+    const b = e.target.closest('[data-pk]'); if (!b) return;
+    M.update(s => { const x = s.orders.find(q => q.id === b.dataset.pk); x.opId = pid; x.status = 'asignada'; M.orderHist(x, 'Asignada a ' + p.name); M.event(s, pid, 'Recibió ' + x.folio, 'orden'); });
+    ov.remove(); toast('✓ Servicio enviado a ' + p.name);
+  };
+}
 function bindOrdenes() {
-  $('newO').onclick = () => newOrderModal({});
-  $('tplB').onclick = tplModal;
+  $('newO').onclick = simErp;
+  $('tplB').onclick = erpModal;
   $('oq').oninput = e => { ui.ordQ = e.target.value; const pos = e.target.selectionStart; render(); const i = $('oq'); i.focus(); i.setSelectionRange(pos, pos); };
   $('og').onchange = e => { ui.ordG = e.target.value; render(); };
   document.querySelector('.kan').onclick = e => { const c = e.target.closest('[data-o]'); if (c) orderModal(c.dataset.o); };
@@ -704,9 +746,9 @@ function orderModal(id) {
       ${o.photo || o.sign ? `<div class="full"><span class="muted" style="font-size:12px">Evidencia</span><div class="evid">${o.photo ? `<img src="${o.photo}" alt="Foto de evidencia">` : ''}${o.sign ? `<img src="${o.sign}" alt="Firma del cliente">` : ''}</div>${o.rating ? `<div style="margin-top:6px">Calificación: ${'⭐'.repeat(o.rating)}</div>` : ''}</div>` : (o.needPhoto || o.needSign ? `<div class="full muted" style="font-size:12.5px">Requiere: ${[o.needPhoto && 'foto', o.needSign && 'firma del cliente'].filter(Boolean).join(' y ')}</div>` : '')}
       ${open ? `<div class="full"><b style="font-size:13px">${p ? 'Reasignar' : 'Asignar'}</b><div style="margin-top:8px">${suggestHTML(o.site, o.x, o.y, o.opId || '')}</div></div>` : ''}
     </div>
-    <div class="mf">${open ? `<button class="btn red" id="oCan">Cancelar orden</button>${p ? `<button class="btn" id="oMsg">💬 Escribir a ${E(p.name.split(' ')[0])}</button>` : ''}<button class="btn lime" id="oAsg">Guardar asignación</button>` : '<button class="btn" data-close>Cerrar</button>'}</div>`, 'wide');
+    <p class="muted" style="font-size:12px;margin-top:12px">🔗 Este servicio viene de ${E(ERP_NAME)}. Para cambiarlo o cancelarlo, hazlo en tu sistema; aquí solo se elige quién lo atiende en campo.</p>
+    <div class="mf">${open ? `${p ? `<button class="btn" id="oMsg">💬 Escribir a ${E(p.name.split(' ')[0])}</button>` : ''}<button class="btn lime" id="oAsg">Guardar responsable</button>` : '<button class="btn" data-close>Cerrar</button>'}</div>`, 'wide');
   if (!open) return;
-  $('oCan').onclick = () => { if (!confirm('¿Cancelar ' + o.folio + '?')) return; M.update(s => M.advance(s, id, 'cancelada', 'Mesa de control')); ov.remove(); toast(o.folio + ' cancelada'); };
   if ($('oMsg')) $('oMsg').onclick = () => { ov.remove(); ui.conv = o.opId; go('mensajes'); };
   $('oAsg').onclick = () => {
     const who = (ov.querySelector('input[name=asg]:checked') || {}).value || null;
@@ -1035,7 +1077,7 @@ function evacHTML() {
 function vAlertas() {
   const open = openAlerts().sort((a, b) => (b.type === 'sos') - (a.type === 'sos') || b.at - a.at), closed = S.alerts.filter(a => a.status === 'cerrada').slice(-20).reverse();
   return `<div class="view">
-    <div class="vh"><h2>Alertas y emergencias</h2><span class="sp"></span><button class="btn" id="simA">Simular alerta</button>${S.evac ? '' : '<button class="btn red" id="evac">🚨 Evacuar un sitio</button>'}<p>SOS por tipo de emergencia con su protocolo, accesos no autorizados, trabajador sin respuesta, geocercas, batería y órdenes vencidas. Todo queda registrado.</p></div>
+    <div class="vh"><h2>Alertas y emergencias</h2><span class="sp"></span><button class="btn" id="simA">Simular alerta</button>${S.evac ? '' : '<button class="btn red" id="evac">🚨 Evacuar un sitio</button>'}<p>SOS por tipo de emergencia con su protocolo, accesos no autorizados, trabajador sin respuesta, geocercas, batería, desvíos de ruta y servicios fuera de tiempo. Todo queda registrado.</p></div>
     ${evacHTML()}
     ${open.map(a => { const T = M.ALERT_T[a.type], K = sosInfo(a), p = op(a.opId); return `<div class="al" style="border-left-color:${a.silent ? 'var(--yellow)' : T.c}"><span class="ic">${K ? K.i : T.i}</span>
       <div class="i"><b>${K ? 'SOS · ' + E(K.t) : T.t}${p ? ' · ' + E(p.name) : ''}</b><small>${E(a.where || a.txt)} · ${M.ago(a.at)}${p ? ' · ' + E(grp(p.group)?.name || '') : ''}${a.status === 'atendida' ? ' · <b style="color:var(--lime)">En atención</b>' : ''}</small></div>
@@ -1131,10 +1173,10 @@ function vReportes() {
   const maxD = Math.max(1, ...byDept.map(x => x.n + x.open));
   const top = per[0], late = openOrders().filter(o => o.late), nu = S.orders.filter(o => o.status === 'nueva');
   return `<div class="view">
-    <div class="vh"><h2>Reportes</h2><span class="sp"></span><button class="btn" data-csv="orders">⬇ Órdenes (CSV)</button><button class="btn" data-csv="events">⬇ Actividad (CSV)</button><button class="btn" data-csv="alerts">⬇ Incidentes (CSV)</button><p>Indicadores del día por sitio y departamento. Se exportan a Excel con un clic.</p></div>
-    <div class="sum" style="margin-bottom:16px">✨ <b>Resumen del turno:</b> llevas <b>${comp.length} órdenes completadas</b>, ${comp.length ? Math.round(onT.length / comp.length * 100) : 100}% a tiempo. ${top && top.n ? `Destaca <b>${E(top.p.name)}</b> con ${top.n}. ` : ''}${late.length ? `Hay <b>${late.length} orden(es) vencida(s)</b>: ${late.map(o => E(o.folio)).join(', ')}. ` : 'Ninguna orden vencida. '}${nu.length ? `Faltan por asignar <b>${nu.length}</b>. ` : ''}${openAlerts().length ? `Tienes <b>${openAlerts().length} alerta(s)</b> abiertas.` : 'Sin alertas abiertas.'}</div>
+    <div class="vh"><h2>Reportes</h2><span class="sp"></span><button class="btn" data-csv="orders">⬇ Servicios en campo (CSV)</button><button class="btn" data-csv="events">⬇ Actividad (CSV)</button><button class="btn" data-csv="alerts">⬇ Incidentes (CSV)</button><p>Indicadores del día por sitio y departamento. Se exportan a Excel con un clic.</p></div>
+    <div class="sum" style="margin-bottom:16px">✨ <b>Resumen del turno:</b> llevas <b>${comp.length} servicios atendidos</b>, ${comp.length ? Math.round(onT.length / comp.length * 100) : 100}% a tiempo. ${top && top.n ? `Destaca <b>${E(top.p.name)}</b> con ${top.n}. ` : ''}${late.length ? `Hay <b>${late.length} servicio(s) fuera de tiempo</b>: ${late.map(o => E(o.folio)).join(', ')}. ` : 'Ningún servicio fuera de tiempo. '}${nu.length ? `Sin responsable en campo: <b>${nu.length}</b>. ` : ''}${openAlerts().length ? `Tienes <b>${openAlerts().length} alerta(s)</b> abiertas.` : 'Sin alertas abiertas.'}</div>
     <div class="kpis">
-      <div class="kpi good"><small>Órdenes completadas</small><b>${comp.length}</b></div>
+      <div class="kpi good"><small>Servicios atendidos</small><b>${comp.length}</b></div>
       <div class="kpi"><small>Cumplimiento a tiempo</small><b>${comp.length ? Math.round(onT.length / comp.length * 100) : 100}<em>%</em></b></div>
       <div class="kpi"><small>Recorrido en ciudad</small><b>${kmC.toFixed(0)}<em>km</em></b></div>
       <div class="kpi"><small>Recorrido en almacén</small><b>${(mA / 1000).toFixed(1)}<em>km</em></b></div>
@@ -1142,10 +1184,10 @@ function vReportes() {
       <div class="kpi"><small>Datos usados (líneas Navi)</small><b>${gbT.toFixed(1)}<em>GB</em></b></div>
     </div>
     <div class="r2">
-      <div class="card"><h3>Órdenes por departamento<small>completadas · abiertas</small></h3>${byDept.map(x => `<div class="hb"><span>${E(x.g.name)}</span><div class="bar" style="display:flex"><i style="width:${x.n / maxD * 100}%"></i><i style="width:${x.open / maxD * 100}%;background:var(--purple);border-radius:0"></i></div><b>${x.n} · ${x.open}</b></div>`).join('')}</div>
-      <div class="card"><h3>Órdenes completadas por operador</h3>${per.map(x => `<div class="hb"><span>${siteN(x.p.site).icon} ${E(x.p.name)}</span><div class="bar"><i style="width:${x.n / maxN * 100}%"></i></div><b>${x.n}</b></div>`).join('')}</div>
+      <div class="card"><h3>Servicios por departamento<small>atendidos · abiertos</small></h3>${byDept.map(x => `<div class="hb"><span>${E(x.g.name)}</span><div class="bar" style="display:flex"><i style="width:${x.n / maxD * 100}%"></i><i style="width:${x.open / maxD * 100}%;background:var(--purple);border-radius:0"></i></div><b>${x.n} · ${x.open}</b></div>`).join('')}</div>
+      <div class="card"><h3>Servicios atendidos por operador</h3>${per.map(x => `<div class="hb"><span>${siteN(x.p.site).icon} ${E(x.p.name)}</span><div class="bar"><i style="width:${x.n / maxN * 100}%"></i></div><b>${x.n}</b></div>`).join('')}</div>
     </div>
-    <div class="card"><h3>Detalle de órdenes de hoy</h3><div class="tw"><table class="t"><tr><th>Folio</th><th>Sitio</th><th>Trabajo</th><th>Cliente</th><th>Operador</th><th>Estado</th><th>Creada</th><th>Cierre</th><th>A tiempo</th></tr>
+    <div class="card"><h3>Detalle de servicios de hoy<small>folios de tu ERP</small></h3><div class="tw"><table class="t"><tr><th>Folio</th><th>Sitio</th><th>Trabajo</th><th>Cliente</th><th>Operador</th><th>Estado</th><th>Creada</th><th>Cierre</th><th>A tiempo</th></tr>
       ${S.orders.slice().reverse().map(o => `<tr><td><b>${E(o.folio)}</b></td><td>${siteN(o.site).icon}</td><td>${E(o.title)}</td><td>${E(o.client)}</td><td>${E(op(o.opId)?.name || '—')}</td><td>${M.ORDER_ST[o.status]}</td><td>${M.fmtT(o.created)}</td><td>${o.done ? M.fmtT(o.done) : '—'}</td><td>${o.status === 'completada' ? (o.done <= o.due ? '✅' : '⚠️') : o.late ? '⚠️' : '—'}</td></tr>`).join('')}</table></div></div>
   </div>`;
 }
