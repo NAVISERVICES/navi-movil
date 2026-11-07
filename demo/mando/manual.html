@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../navi.css?v=20261030d">
 <link rel="stylesheet" href="../suite.css?v=20261030d">
-<script src="mando.js?v=9"></script>
+<script src="mando.js?v=10"></script>
 <script>
 // el manual es solo para clientes: hace falta sesión de la consola o de la app del operador
 (function () {
@@ -129,7 +129,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <div class="tw"><table>
         <tr><th>Perfil</th><th>Departamentos y trabajo típico</th><th>Cómo se ubica al personal</th><th>Demo</th></tr>
         <tr><td><b>🛡️ Seguridad privada</b></td><td>Guardias intramuros, patrullaje, custodia de traslados y supervisión.</td><td>Área del plano en el sitio del cliente + GPS en patrullaje y traslados</td><td>Prosegur Seguridad · NAVI-5500<br><code>prosegur.seguridad</code></td></tr>
-        <tr><td><b>🚚 Transporte y reparto</b></td><td>Choferes de reparto, supervisión y mecánicos de ruta, custodia de carga.</td><td>GPS real del celular durante el turno (km)</td><td>DHL Transporte · NAVI-2200<br><code>dhl.transporte</code> (administrador)<br><code>dhl.mesa</code> (mesa de control)</td></tr>
+        <tr><td><b>🚚 Transporte y reparto</b></td><td>Choferes, supervisores y mecánicos; ubicación y recorrido de cada unidad.</td><td>GPS real del celular durante el turno (km)</td><td>DHL Transporte · NAVI-2200<br><code>dhl.transporte</code> (administrador)<br><code>dhl.mesa</code> (mesa de control)</td></tr>
         <tr><td><b>🏭 Almacén / CEDIS</b></td><td>CEDIS, almacén o planta: surtido, montacargas, mantenimiento y seguridad interna.</td><td>Área del plano (metros). En producción: balizas Bluetooth o QR por área.</td><td>Amazon Almacén · NAVI-1100<br><code>amazon.almacen</code></td></tr>
         <tr><td><b>🔀 Logística mixta</b></td><td>Combina calle y almacén: reparto y técnicos en la ciudad + almacén central.</td><td>GPS afuera y área adentro; la consola cambia entre ambos mapas</td><td>Mercado Libre Logística · NAVI-4821<br><code>mercadolibre.mixta</code></td></tr>
       </table></div>
@@ -210,7 +210,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li><b>Cada departamento se gestiona solo:</b> seguridad, mantenimiento, almacén, transporte, etc. tienen su canal de radio, su chat, sus geocercas y, si aplica, sus rondines.</li>
         <li><b>La mesa ve por departamento:</b> en <b>🛰️ En vivo</b> se filtra el mapa por departamento para ver a su gente, en qué área está y su estado (disponible, en receso, en pausa, SOS).</li>
         <li><b>Activos:</b> unidades y equipo (montacargas, vehículos) se siguen por la persona que los opera o por su propia línea Navi.</li>
-        <li><b>Seguridad primero:</b> SOS, evacuación, trabajo solo, zonas restringidas y desvíos de ruta llegan como alertas con protocolo.</li>
+        <li><b>Seguridad primero:</b> SOS, evacuación, trabajo solo, zonas restringidas y batería baja llegan como alertas con protocolo.</li>
       </ol>
 
       <h3 id="p-seguim">P8 · Seguimiento en vivo <span class="who w-mc">MESA</span></h3>
@@ -266,16 +266,14 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <li>Pasa novedades al siguiente turno por el grupo de supervisores.</li>
       </ol>
 
-      <h3 id="p-rutas">Viajes con ruta y cambios de ruta (transporte) <span class="who w-mc">MESA</span> <span class="who w-op">OPERADOR</span> <span class="who w-adm">ADMIN</span></h3>
-      <div class="flow"><div class="st"><em>MESA</em><b>Asigna viaje</b>ruta + corredor ±370 m</div><span class="ar">→</span><div class="st alert"><em>SISTEMA</em><b>Vigila</b>alerta si se sale</div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>Pide ruta alterna</b>motivo + opción</div><span class="ar">→</span><div class="st"><em>ADMIN</em><b>Autoriza o rechaza</b>queda en bitácora</div><span class="ar">→</span><div class="st app"><em>OPERADOR</em><b>Recibe respuesta</b>nueva ruta en su mapa</div></div>
+      <h3 id="p-rutas">Unidades: trazabilidad y ubicación (transporte) <span class="who w-mc">MESA</span> <span class="who w-op">OPERADOR</span></h3>
       <ol>
-        <li>En <b>🛣️ Rutas</b>, la mesa toca <b>＋ Nuevo viaje</b>: elige chofer, destino, unidad y carga. La ruta sale de donde está el chofer.</li>
-        <li>Cada viaje tiene un <b>corredor de ±370 m</b> alrededor de la ruta. Si el chofer se sale, llega la alerta <b>🛣️ Fuera de ruta</b> a la consola y al chofer. La mesa lo llama y cierra la alerta con motivo.</li>
-        <li>Si hay un choque, trancón, obra, bloqueo, inundación o retén, el chofer toca <b>🔀 Pedir ruta alterna</b> en su app, elige el motivo y una de las dos rutas que le propone el sistema. <b>No debe cambiar de ruta hasta que le respondan</b>; si corre peligro usa 🆘.</li>
-        <li>La solicitud aparece arriba en <b>Rutas</b> y en <b>Alertas</b>. <b>Solo el administrador de la consola</b> puede autorizarla (puede elegir la otra opción) o rechazarla con un motivo. La mesa de control la ve, pero solo puede avisar al administrador.</li>
-        <li>Si se autoriza, la ruta nueva se vuelve la oficial (línea verde) y el corredor se mueve con ella. Si se rechaza, sigue la original. En ambos casos el chofer recibe la respuesta en su app.</li>
-        <li>Toda decisión queda en la <b>Bitácora de cambios de ruta</b>: quién lo pidió, por qué, quién decidió y en cuántos minutos.</li>
+        <li>En <b>🚚 Unidades</b> la mesa ve cada unidad, quién la maneja, si está en movimiento o detenida, cerca de dónde está, la batería del celular y los km del día.</li>
+        <li><b>〰️ Ver recorrido</b> dibuja en el mapa por dónde ha pasado la unidad. La <b>Bitácora de recorridos</b> dice de dónde salió y a dónde llegó, con la hora.</li>
+        <li>NAVI Mando <b>no asigna viajes, no autoriza rutas y no registra la carga</b>: eso es parte de la operación del cliente. Solo da trazabilidad y ubicación de la unidad.</li>
+        <li>El chofer ve en su app la unidad que maneja y su recorrido; la ubicación se comparte solo durante el turno.</li>
       </ol>
+
 
       <h2 id="emerg">4. Emergencias y alertas</h2>
       <h3 id="p-sos">P13 · SOS empresarial <span class="who w-op">OPERADOR</span> <span class="who w-mc">MESA</span></h3>
@@ -330,7 +328,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <h2 id="indic">5. Indicadores y reportes</h2>
       <div class="kpi">
         <div><b>Personal en turno</b><span>Por departamento y por sitio</span></div>
-        <div><b>Alertas por departamento</b><span>SOS, zonas, batería y desvíos</span></div>
+        <div><b>Alertas por departamento</b><span>SOS, zonas y batería</span></div>
         <div><b>Recorrido</b><span>Km en la ciudad y metros en el almacén</span></div>
         <div><b>Respuesta a alertas</b><span>Minutos promedio entre la alerta y su cierre</span></div>
         <div><b>Cumplimiento de rondines</b><span>Puntos registrados por ronda</span></div>
@@ -370,8 +368,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td>Mapas y direcciones</td><td>OpenStreetMap</td><td>Proveedor de mapas contratado</td></tr>
         <tr><td>Radio</td><td>Notas de voz que se reproducen al llegar</td><td>Audio en vivo</td></tr>
         <tr><td>Rondines</td><td>QR con la cámara si el navegador lo permite; NFC simulado</td><td>QR y NFC reales</td></tr>
-        <tr><td>Rutas de viaje</td><td>Rutas trazadas por cuadras sobre el mapa; el recorrido del chofer es simulado salvo GPS real en la ciudad del demo</td><td>Rutas reales por calles con un servicio de rutas, tráfico en vivo y corredor medido con el GPS del celular o de la unidad</td></tr>
-        <tr><td>Autorización de cambios de ruta</td><td>El permiso de administrador se revisa en el navegador</td><td>Lo valida el servidor: solo un administrador puede aprobar, aunque alguien manipule su navegador</td></tr>
+        <tr><td>Recorrido de las unidades</td><td>El movimiento de la unidad es simulado sobre la ciudad, salvo GPS real del celular</td><td>Posición real del celular del chofer o de un GPS en la unidad, con historial guardado en el servidor</td></tr>
         <tr><td>Clientes y acceso</td><td>Cuatro empresas de ejemplo, una por perfil, cada una con su usuario demo; la sesión se valida en el navegador</td><td>Cada cliente con su código, usuarios y permisos validados por el servidor de Navi</td></tr>
       </table></div>
       <div class="warn">En la demo, si alguien cambia layouts o geocercas, esos cambios solo existen en su navegador. Para empezar de cero: Equipo → <b>↺ Reiniciar demo</b>.</div>
