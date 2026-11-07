@@ -42,9 +42,9 @@ export async function sendCode(id, via, ip) {
   const code = String(randomInt(100000, 1000000));
   q('DELETE FROM login_codes WHERE user = ?').run(u.user);
   q('INSERT INTO login_codes (user, hash, via, at) VALUES (?, ?, ?, ?)').run(u.user, sha(u.user + ':' + code), via, Date.now());
-  const text = `Tu código de NAVI Mando es ${code}. Vence en 10 minutos. No lo compartas.`;
+  const text = `Tu código de NAVI Órbita es ${code}. Vence en 10 minutos. No lo compartas.`;
   try {
-    if (via === 'sms') await sendSms(u.phone, text); else await sendEmail(u.email, 'Tu código de NAVI Mando', text);
+    if (via === 'sms') await sendSms(u.phone, text); else await sendEmail(u.email, 'Tu código de NAVI Órbita', text);
   } catch (e) { console.error('envío fallido', e.message); return { err: 'No pudimos enviar el código. Intenta con el otro medio.' }; }
   audit(u.company, u.user, 'codigo-enviado', via);
   const to = via === 'email' ? maskMail(u.email) : maskPhone(u.phone);

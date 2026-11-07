@@ -1,4 +1,4 @@
-// Servidor de Navi: sitios (Navi Móvil y Navi Empresas) + API de NAVI Mando con datos en vivo.
+// Servidor de Navi: sitios (Navi Móvil y Navi Empresas) + API de NAVI Órbita con datos en vivo.
 // Sin dependencias externas: Node 24+ (http, sqlite y crypto incluidos).
 import http from 'node:http';
 import { createReadStream, statSync } from 'node:fs';

@@ -17,7 +17,7 @@ export const CONFIG = {
   demoPin: env.DEMO_OP_PIN || '1234',
   // envío de códigos: 'log' (solo en la bitácora del servidor), 'twilio' (SMS) y 'sendgrid' (correo)
   sms: { provider: env.SMS_PROVIDER || 'log', twilioSid: env.TWILIO_SID, twilioToken: env.TWILIO_TOKEN, twilioFrom: env.TWILIO_FROM },
-  email: { provider: env.EMAIL_PROVIDER || 'log', sendgridKey: env.SENDGRID_KEY, from: env.EMAIL_FROM || 'NAVI Mando <no-responder@navimovil.com>' },
+  email: { provider: env.EMAIL_PROVIDER || 'log', sendgridKey: env.SENDGRID_KEY, from: env.EMAIL_FROM || 'NAVI Órbita <no-responder@navimovil.com>' },
   sessionHours: Number(env.SESSION_HOURS || 12),
   keepDays: Number(env.SESSION_KEEP_DAYS || 30),
   trustProxy: bool(env.TRUST_PROXY)
