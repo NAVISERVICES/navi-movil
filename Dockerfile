@@ -1,4 +1,4 @@
-# Servidor de Navi: sitios (Navi Móvil y Navi Empresas) + API de NAVI Mando.
+# Servidor de Navi: sitios (Navi Móvil y Navi Empresas) + API de NAVI Órbita.
 # Una sola imagen con Node; los datos viven en el volumen /data.
 FROM node:26-alpine
 WORKDIR /srv/site
