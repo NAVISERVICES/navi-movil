@@ -1,4 +1,4 @@
-// NAVI Mando · conexión con el servidor de Navi.
+// NAVI Órbita · conexión con el servidor de Navi.
 // Si la página viene del servidor (config.js define NAVI_API), el acceso y los datos pasan por la API:
 // códigos reales por correo/SMS, sesiones del servidor y cambios en vivo entre todos los equipos.
 // En GitHub Pages (sin servidor) este archivo no hace nada y la demo sigue igual que antes.

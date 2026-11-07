@@ -1,4 +1,4 @@
-// NAVI Mando · cambios entre equipos.
+// NAVI Órbita · cambios entre equipos.
 // En vez de mandar todos los datos de la empresa en cada cambio, se manda solo lo que cambió:
 // por persona, alerta o mensaje (por su id) y por campo. Así la consola y la app pueden escribir
 // a la vez sin pisarse: si cada una cambia campos distintos, ambos cambios se conservan.

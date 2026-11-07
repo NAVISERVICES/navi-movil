@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>NAVI Mando · Consola</title>
+<title>NAVI Órbita · Consola</title>
 <meta name="theme-color" content="#03060F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -325,7 +325,7 @@ table.t tr:hover td{background:#ffffff06}
 <body>
 <div class="app">
   <header class="top">
-    <a class="brand" href="../empresas.html#mando" title="Volver a Empresas"><img src="../assets/navi-logo.png" alt="Navi">Mando<small id="emp"></small></a>
+    <a class="brand" href="../empresas.html#mando" title="Volver a Empresas"><img src="../assets/navi-logo.png" alt="Navi">Órbita<small id="emp"></small></a>
     <span class="sp"></span>
     <div class="me" id="me"></div>
     <span class="clock" id="clock"></span>
@@ -386,12 +386,12 @@ function nav() {
     me.title = c.tipo + ' · ' + c.name;
     me.innerHTML = `<span class="hide-m"><b>${E(SES.name)}</b><small>${c.icon} ${E(c.tipo)} · ${E(SES.role)}</small></span><button id="refr" title="Refrescar la consola">⟳</button><button id="salir">⏻ Salir</button>`;
     $('refr').onclick = () => location.reload();
-    $('salir').onclick = () => { if (confirm('¿Cerrar tu sesión de NAVI Mando?')) { M.Auth.logout(); location.replace('login.html?salir=1'); } };
+    $('salir').onclick = () => { if (confirm('¿Cerrar tu sesión de NAVI Órbita?')) { M.Auth.logout(); location.replace('login.html?salir=1'); } };
     $('manBtn').onclick = () => { view = 'manual'; location.hash = 'manual'; render(); };
   }
 }
 // manual de procesos dentro de la consola (solo con sesión de cliente)
-const vManual = () => `<div class="manv"><iframe src="manual.html?embed=1" title="Manual de procesos de NAVI Mando"></iframe></div>`;
+const vManual = () => `<div class="manv"><iframe src="manual.html?embed=1" title="Manual de procesos de NAVI Órbita"></iframe></div>`;
 $('nav').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); };
 $('bell').onclick = () => go('alertas');
 function go(v) { view = v; location.hash = v; ui.pick = null; render(); $('main').scrollTop = 0; }
@@ -998,7 +998,7 @@ function vReportes() {
   const maxD = Math.max(1, ...byDept.map(x => x.all)), maxA = Math.max(1, ...byDept.map(x => x.al));
   const alOf = id => S.alerts.filter(a => a.opId === id).length, lowB = enT.filter(p => p.bat < 20);
   return `<div class="view">
-    <div class="vh"><h2>Reportes</h2><span class="sp"></span><button class="btn" data-csv="staff">⬇ Personal (CSV)</button><button class="btn" data-csv="events">⬇ Actividad (CSV)</button><button class="btn" data-csv="alerts">⬇ Incidentes (CSV)</button><p>Presencia, ubicación y seguridad del personal por departamento. NAVI Mando no mide la operación de tu negocio: solo dónde está tu gente y si está bien.</p></div>
+    <div class="vh"><h2>Reportes</h2><span class="sp"></span><button class="btn" data-csv="staff">⬇ Personal (CSV)</button><button class="btn" data-csv="events">⬇ Actividad (CSV)</button><button class="btn" data-csv="alerts">⬇ Incidentes (CSV)</button><p>Presencia, ubicación y seguridad del personal por departamento. NAVI Órbita no mide la operación de tu negocio: solo dónde está tu gente y si está bien.</p></div>
     <div class="sum" style="margin-bottom:16px">✨ <b>Resumen del turno:</b> hay <b>${enT.length} de ${S.ops.length}</b> personas en turno en ${byDept.filter(x => x.on).length} departamentos. ${cl.length ? `Se atendieron <b>${cl.length} alerta(s)</b> con respuesta promedio de ${resp} min. ` : ''}${openAlerts().length ? `Tienes <b>${openAlerts().length} alerta(s)</b> abiertas.` : 'Sin alertas abiertas.'}${lowB.length ? ` Batería baja: ${lowB.map(p => E(p.name.split(' ')[0])).join(', ')}.` : ''}</div>
     <div class="kpis">
       <div class="kpi good"><small>En turno</small><b>${enT.length}<em>/ ${S.ops.length}</em></b></div>
@@ -1057,7 +1057,7 @@ function bindEquipo() {
       <p style="font-size:14px">Comparte este enlace con tu operador. Al abrirlo en su celular la instala como app y entra con el código de tu empresa.</p>
       <div class="card" style="margin:14px 0;text-align:center"><div class="muted" style="font-size:12px">Código de empresa</div><div style="font-family:var(--display);font-size:34px;font-weight:800;letter-spacing:.06em;color:var(--lime)">${E(S.code)}</div></div>
       <label class="l">Enlace de la app<input class="f" readonly value="${E(url)}" onclick="this.select()"></label>
-      <div class="mf"><a class="btn" target="_blank" href="https://wa.me/?text=${encodeURIComponent('Instala la app NAVI Mando de tu empresa: ' + url + ' · Código: ' + S.code)}">Enviar por WhatsApp</a><button class="btn lime" onclick="navigator.clipboard&&navigator.clipboard.writeText('${E(url)}');this.textContent='✓ Copiado'">Copiar enlace</button></div>`);
+      <div class="mf"><a class="btn" target="_blank" href="https://wa.me/?text=${encodeURIComponent('Instala la app NAVI Órbita de tu empresa: ' + url + ' · Código: ' + S.code)}">Enviar por WhatsApp</a><button class="btn lime" onclick="navigator.clipboard&&navigator.clipboard.writeText('${E(url)}');this.textContent='✓ Copiado'">Copiar enlace</button></div>`);
   };
 }
 

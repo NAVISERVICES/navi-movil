@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Entrar · NAVI Mando</title>
+<title>Entrar · NAVI Órbita</title>
 <meta name="theme-color" content="#03060F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -152,14 +152,14 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
 <body>
 <div class="msg" id="msg" role="status" aria-live="polite">
   <i id="msgI">✉️</i>
-  <div><b id="msgT">Correo de NAVI Mando</b><span>Tu código de acceso es <em id="msgC"></em></span></div>
+  <div><b id="msgT">Correo de NAVI Órbita</b><span>Tu código de acceso es <em id="msgC"></em></span></div>
   <small>ahora</small>
 </div>
 
 <div class="page">
   <section class="side">
     <a class="logo" href="../empresas.html"><img src="../assets/navi-logo.png" alt="Navi"><small>EMPRESAS</small></a>
-    <span class="eyebrow">NAVI Mando · Acceso de clientes</span>
+    <span class="eyebrow">NAVI Órbita · Acceso de clientes</span>
     <h1>Una consola, <em>toda tu operación</em></h1>
     <p>Inicia sesión con el usuario que Navi le dio a tu empresa. Sin contraseñas: te mandamos un código por correo o por SMS, como prefieras.</p>
     <div class="suite"><span>🛰️ Mapa en vivo</span><span>🏢 Por departamento</span><span>🚚 Unidades</span><span>🎙️ Radio PTT</span><span>🆘 SOS</span><span>📶 Red 4.5G LTE</span></div>
@@ -196,7 +196,7 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14p
       <!-- paso 1: quién eres -->
       <form class="step on" id="s1" novalidate>
         <h2>Inicia sesión</h2>
-        <p class="sub">Elige tu usuario para entrar a NAVI Mando.</p>
+        <p class="sub">Elige tu usuario para entrar a NAVI Órbita.</p>
         <div class="users" id="users" role="list"></div>
         <div class="or">o escribe tu usuario</div>
         <label for="user" style="margin-top:6px">Usuario, correo o celular</label>
@@ -253,7 +253,7 @@ const qs = new URLSearchParams(location.search);
 const nxt = /^[\w\-./#?=&]*$/.test(qs.get('next') || '') && !/^\/\/|:/.test(qs.get('next') || '') ? (qs.get('next') || 'index.html') : 'index.html';
 if (A.current()) location.replace(nxt);
 if (qs.has('salir')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expired">👋 Cerraste tu sesión. Para entrar a otra empresa usa su propio usuario.</p>');
-if (qs.has('manual')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expired">📘 El manual de procesos es solo para clientes de NAVI Mando. Entra con tu usuario para consultarlo.</p>');
+if (qs.has('manual')) $('s1').insertAdjacentHTML('afterbegin', '<p class="expired">📘 El manual de procesos es solo para clientes de NAVI Órbita. Entra con tu usuario para consultarlo.</p>');
 
 const steps = ['s1', 'sVia', 's2', 's3'];
 const go = id => steps.forEach(s => $(s).classList.toggle('on', s === id));
@@ -305,7 +305,7 @@ async function send() {
   // demo: así se vería el correo o el SMS que le llega al usuario (con servidor real el código no viene aquí)
   if (r.code) {
     $('msgI').textContent = via === 'email' ? '✉️' : '💬';
-    $('msgT').textContent = via === 'email' ? 'Correo de NAVI Mando · ' + r.to : 'SMS de Navi · ' + r.to;
+    $('msgT').textContent = via === 'email' ? 'Correo de NAVI Órbita · ' + r.to : 'SMS de Navi · ' + r.to;
     $('msgC').textContent = r.code;
     msg.classList.remove('show'); void msg.offsetWidth; msg.classList.add('show');
     clearTimeout(msg.t); msg.t = setTimeout(() => msg.classList.remove('show'), 8000);

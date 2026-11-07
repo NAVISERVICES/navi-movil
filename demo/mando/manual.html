@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Manual de procesos · NAVI Mando</title>
+<title>Manual de procesos · NAVI Órbita</title>
 <meta name="theme-color" content="#03060F">
 <link rel="icon" href="../assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,13 +88,13 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="../empresas.html#mando"><img src="../assets/navi-logo.png" alt="Navi"><small>MANDO</small></a>
+    <a class="logo" href="../empresas.html#mando"><img src="../assets/navi-logo.png" alt="Navi"><small>ÓRBITA</small></a>
     <a class="btn btn-ghost sm back" href="index.html">← <span>Consola</span></a>
   </div>
 </header>
 <main class="wrap">
-  <section class="hero-m"><small style="font-weight:800;letter-spacing:.14em">MANUAL DE PROCESOS · NOVIEMBRE 2026</small><h1>Cómo se opera NAVI Mando</h1>
-    <p>Procesos paso a paso para implementar NAVI Mando en un cliente y operarlo todos los días: desde dar de alta el almacén y al equipo, hasta ver en vivo al personal y los activos de cada departamento, comunicarse, atender emergencias y cerrar el turno. Sirve para el equipo de Navi, para el administrador del cliente, para la mesa de control y para capacitar a los operadores.</p>
+  <section class="hero-m"><small style="font-weight:800;letter-spacing:.14em">MANUAL DE PROCESOS · NOVIEMBRE 2026</small><h1>Cómo se opera NAVI Órbita</h1>
+    <p>Procesos paso a paso para implementar NAVI Órbita en un cliente y operarlo todos los días: desde dar de alta el almacén y al equipo, hasta ver en vivo al personal y los activos de cada departamento, comunicarse, atender emergencias y cerrar el turno. Sirve para el equipo de Navi, para el administrador del cliente, para la mesa de control y para capacitar a los operadores.</p>
     <div class="acts"><button class="btn btn-ink" onclick="print()">Imprimir o guardar en PDF</button><a class="btn btn-ghost" href="index.html" style="border-color:#06062E33;color:#06062E">Abrir la consola</a><a class="btn btn-ghost" href="app/" style="border-color:#06062E33;color:#06062E">Abrir la app del operador</a></div></section>
   <div class="doc">
     <nav class="toc" aria-label="Contenido"><b>CONTENIDO</b>
@@ -110,21 +110,21 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
     </nav>
     <article>
       <h2 id="que">1. Qué es y para quién</h2>
-      <p><b>NAVI Mando</b> es una solución de <b>smart warehouse y visibilidad operativa</b> para empresas con personal y unidades en campo, en la calle o dentro de un almacén. Muestra dónde está cada persona y cada unidad, por departamento (seguridad, mantenimiento, almacén, transporte), y avisa ante emergencias, zonas restringidas o desvíos de ruta. <b>No es invasivo:</b> no gestiona órdenes ni mide la operación del cliente con sus propios clientes. Tiene dos partes que trabajan juntas:</p>
+      <p><b>NAVI Órbita</b> es una solución de <b>smart warehouse y visibilidad operativa</b> para empresas con personal y unidades en campo, en la calle o dentro de un almacén. Muestra dónde está cada persona y cada unidad, por departamento (seguridad, mantenimiento, almacén, transporte), y avisa ante emergencias, zonas restringidas o desvíos de ruta. <b>No es invasivo:</b> no gestiona órdenes ni mide la operación del cliente con sus propios clientes. Tiene dos partes que trabajan juntas:</p>
       <div class="cards">
         <div><b>🖥️ Consola central</b><span>Web para la mesa de control: mapa en vivo, rutas, rondines, geocercas, mensajes, alertas, reportes, equipo y layout. <a href="index.html">Abrir</a></span></div>
         <div><b>📱 App del operador</b><span>Se instala en el celular. Turno y ubicación, radio, chat, receso, emergencia y rondín. <a href="app/">Abrir</a></span></div>
         <div><b>📶 Línea Navi</b><span>Cada operador trabaja con su línea Navi; la consola muestra datos usados y permite recargar.</span></div>
       </div>
-      <div class="leg"><span><span class="who w-adm">ADMIN</span>Administrador del cliente</span><span><span class="who w-mc">MESA</span>Mesa de control / supervisor</span><span><span class="who w-op">OPERADOR</span>Personal en campo</span><span><span class="who w-sis">SISTEMA</span>Lo hace NAVI Mando solo</span></div>
+      <div class="leg"><span><span class="who w-adm">ADMIN</span>Administrador del cliente</span><span><span class="who w-mc">MESA</span>Mesa de control / supervisor</span><span><span class="who w-op">OPERADOR</span>Personal en campo</span><span><span class="who w-sis">SISTEMA</span>Lo hace NAVI Órbita solo</span></div>
 
       <h3 id="roles">Roles y responsables</h3>
       <div class="tw"><table>
-        <tr><th>Rol</th><th>Quién es</th><th>Qué hace en NAVI Mando</th></tr>
+        <tr><th>Rol</th><th>Quién es</th><th>Qué hace en NAVI Órbita</th></tr>
         <tr><td><span class="who w-adm">ADMIN</span></td><td>Gerente de operaciones del cliente o el ejecutivo de Navi que hace la implementación</td><td>Da de alta sitios y layout, departamentos, operadores, geocercas, rondines y el tiempo de comida. Revisa reportes.</td></tr>
         <tr><td><span class="who w-mc">MESA</span></td><td>Despachador, supervisor de turno o central de monitoreo</td><td>Vigila el mapa por departamento, habla por radio, atiende alertas y emergencias con su protocolo, coordina evacuaciones.</td></tr>
         <tr><td><span class="who w-op">OPERADOR</span></td><td>Repartidor, técnico, surtidor, montacarguista, guardia, etc.</td><td>Inicia turno (comparte ubicación), se comunica con su departamento, marca receso, hace rondines y usa el botón de emergencia.</td></tr>
-        <tr><td><span class="who w-sis">SISTEMA</span></td><td>NAVI Mando</td><td>Ubica (GPS o área), detecta llegada, receso en comedor, entradas a zonas, vencimientos, batería baja y trabajo solo; genera alertas y reportes.</td></tr>
+        <tr><td><span class="who w-sis">SISTEMA</span></td><td>NAVI Órbita</td><td>Ubica (GPS o área), detecta llegada, receso en comedor, entradas a zonas, vencimientos, batería baja y trabajo solo; genera alertas y reportes.</td></tr>
       </table></div>
 
       <h3 id="tipos">Tipos de cliente</h3>
@@ -208,7 +208,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <div class="rule"><b>Privacidad:</b> la ubicación solo se comparte durante el turno. Al terminar el turno se deja de enviar.</div>
 
       <h3 id="p-orden">P7 · Visibilidad por departamento, sin tocar la operación <span class="who w-adm">ADMIN</span> <span class="who w-mc">MESA</span></h3>
-      <div class="rule"><b>NAVI Mando no es un gestor de órdenes y no mide el negocio del cliente.</b> No crea, asigna ni califica trabajos, ni registra lo que el cliente hace con sus propios clientes. Solo da visibilidad de su personal y sus activos: dónde están, si están en turno, si entraron a una zona restringida y si están a salvo. La operación sigue igual, en los sistemas que el cliente ya usa.</div>
+      <div class="rule"><b>NAVI Órbita no es un gestor de órdenes y no mide el negocio del cliente.</b> No crea, asigna ni califica trabajos, ni registra lo que el cliente hace con sus propios clientes. Solo da visibilidad de su personal y sus activos: dónde están, si están en turno, si entraron a una zona restringida y si están a salvo. La operación sigue igual, en los sistemas que el cliente ya usa.</div>
       <ol class="steps">
         <li><b>Cada departamento se gestiona solo:</b> seguridad, mantenimiento, almacén, transporte, etc. tienen su canal de radio, su chat, sus geocercas y, si aplica, sus rondines.</li>
         <li><b>La mesa ve por departamento:</b> en <b>🛰️ En vivo</b> se filtra el mapa por departamento para ver a su gente, en qué área está y su estado (disponible, en receso, en pausa, SOS).</li>
@@ -348,7 +348,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
       <h2 id="reglas">6. Reglas de operación</h2>
       <ul>
         <li>Cada operador pertenece a <b>un departamento</b> (su radio y chat) y a <b>un sitio</b>; puede estar además en varios grupos de chat.</li>
-        <li>NAVI Mando <b>no gestiona órdenes ni mide la operación</b> del cliente con sus propios clientes: solo personal, activos y seguridad.</li>
+        <li>NAVI Órbita <b>no gestiona órdenes ni mide la operación</b> del cliente con sus propios clientes: solo personal, activos y seguridad.</li>
         <li>La ubicación se comparte <b>solo durante el turno</b>. Dentro del almacén se ubica por área.</li>
         <li>Entrar al comedor pone en receso; salir lo quita. El receso manual se quita con "Regresar a trabajar".</li>
         <li>El SOS de asalto <b>nunca</b> suena en el celular y la mesa no debe llamar al operador.</li>
@@ -395,7 +395,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:28
         <tr><td><b>Pase de lista</b></td><td>Conteo en vivo de quién está a salvo durante una evacuación.</td></tr>
         <tr><td><b>CEDIS</b></td><td>Centro de distribución.</td></tr>
       </table></div>
-      <p class="muted" style="margin-top:24px;font-size:13px">NAVI Mando · NAVICom, división empresarial de NAVI Services · Manual de procesos v1 · noviembre 2026.</p>
+      <p class="muted" style="margin-top:24px;font-size:13px">NAVI Órbita · NAVICom, división empresarial de NAVI Services · Manual de procesos v1 · noviembre 2026.</p>
     </article>
   </div>
 </main>

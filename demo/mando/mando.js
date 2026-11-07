@@ -1,4 +1,4 @@
-// NAVI Mando · datos compartidos entre la consola central y la app del operador.
+// NAVI Órbita · datos compartidos entre la consola central y la app del operador.
 // Demo: todo vive en localStorage del navegador (clave navi.mando). Si abres la consola y la app
 // en el mismo navegador se sincronizan al instante. En producción esto es un servidor en tiempo real.
 //
@@ -219,7 +219,7 @@
   };
   let CID = 'mixta';
   const keyOf = () => KEY + ':' + CID;
-  // sin órdenes de trabajo: NAVI Mando da visibilidad del personal y los activos por departamento,
+  // sin órdenes de trabajo: NAVI Órbita da visibilidad del personal y los activos por departamento,
   // no administra ni mide la operación del cliente con sus propios clientes
   function noOrders(s) {
     s.orders = []; s.templates = [];
