@@ -269,6 +269,10 @@ table.t tr:hover td{background:#ffffff06}
 .rt-h{font-size:13px;color:var(--muted);margin:16px 0 8px;letter-spacing:.04em;text-transform:uppercase}
 .card.req{border-color:#ffc22e88;box-shadow:0 0 0 1px #ffc22e33,0 0 24px #ffc22e22;margin-bottom:12px}
 .card.trip{margin-bottom:10px;cursor:pointer;transition:border-color .2s}
+.grpbox{margin-bottom:12px}.grpbox .th{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.grow{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:1px solid #ffffff12;flex-wrap:wrap}
+.grow .gi{flex:1;min-width:140px}.grow .gi b{display:block;font-size:13px}.grow .gi small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.ov .chips{display:flex;flex-wrap:wrap;gap:6px}.ov .chips .chip{cursor:pointer;border:1px solid #ffffff22}.ov .chips .chip:hover{border-color:var(--lime)}
 .card.trip.on{border-color:var(--lime)}.card.trip.off{border-color:#ff4d6d99}
 .trip .th{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .trip .th .sp{flex:1}
@@ -651,15 +655,50 @@ function vRutas() {
       <div class="card" style="margin-top:12px" id="rtH"></div></div>
     </div></div>`;
 }
+// grupos de operadores para mensajes y llamadas masivas (los mismos grupos de chat; también aparecen en Mensajes y en el radio)
+function grpCards() {
+  const gs = S.chats || [];
+  return `<div class="card grpbox"><div class="th"><b>👥 Grupos de operadores</b><span class="sp"></span><button class="btn sm lime" data-gnew>＋ Nuevo grupo</button></div>
+    ${gs.map(c => `<div class="grow"><i class="dot" style="background:${c.color}"></i><span class="gi"><b>${E(c.name)}</b><small>${c.members.length} personas · ${E(c.members.map(id => op(id)?.name.split(' ')[0]).filter(Boolean).join(', '))}</small></span>
+      <button class="btn sm" data-gmsg="${c.id}" title="Mensaje a todo el grupo">💬 Mensaje</button><button class="btn sm" data-gptt="${c.id}" title="Llamada por radio a todo el grupo">🎙️ Llamada</button><button class="btn sm" data-gedit="${c.id}" title="Editar integrantes">✎</button></div>`).join('') || '<p class="muted" style="font-size:12.5px">Crea un grupo con los operadores que quieras para mandarles un mensaje o una llamada de radio a todos a la vez.</p>'}
+  </div>`;
+}
+// mensaje de texto a una persona o a un grupo
+function msgModal(to) {
+  const n = (S.chats || []).find(c => c.id === to), who = n ? n.name + ' · ' + n.members.length + ' personas' : op(to)?.name;
+  const quick = ['¿Cuál es tu ubicación?', 'Confirma cuando llegues', 'Regresa a tu ruta', 'Llámame en cuanto puedas', 'Regresa a base'];
+  const ov = modal(`<div class="mh"><h3>💬 Mensaje${n ? ' masivo' : ''}</h3><button data-close>×</button></div>
+    <p class="muted" style="font-size:13px;margin-bottom:10px">Para: <b style="color:#fff">${E(who)}</b>. Les llega al instante en su app${n ? ', a cada integrante' : ''}.</p>
+    <div class="chips" style="margin-bottom:10px">${quick.map(q => `<button class="chip" data-q="${E(q)}">${E(q)}</button>`).join('')}</div>
+    <textarea class="f" id="mmT" rows="3" placeholder="Escribe el mensaje…"></textarea>
+    <div class="mf"><button class="btn" id="mmChat">Abrir chat</button><button class="btn lime" id="mmOk">Enviar</button></div>`);
+  ov.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { $('mmT').value = b.dataset.q; $('mmT').focus(); });
+  $('mmChat').onclick = () => { ov.remove(); ui.conv = to; go('mensajes'); };
+  $('mmOk').onclick = () => {
+    const t = $('mmT').value.trim(); if (!t) return $('mmT').focus();
+    M.update(s => { s.msgs.push({ id: M.uid('m'), from: 'consola', to, kind: 'text', txt: t, at: Date.now(), reads: ['consola'] }); if (n) M.event(s, null, 'Mensaje masivo al grupo ' + n.name, 'mensaje'); });
+    ov.remove(); toast('✓ Mensaje enviado a ' + who);
+  };
+  setTimeout(() => $('mmT')?.focus(), 50);
+}
+// llamada por radio (PTT) a todo un grupo: se mantiene el botón para hablar
+function pttModal(to) {
+  const c = (S.chats || []).find(x => x.id === to); if (!c) return;
+  const ov = modal(`<div class="mh"><h3>🎙️ Llamada masiva por radio</h3><button data-close>×</button></div>
+    <p class="muted" style="font-size:13px;margin-bottom:12px">Grupo <b style="color:#fff">${E(c.name)}</b> · ${c.members.length} personas. Mantén presionado el botón y habla; al soltar, la transmisión les llega a todos en su app.</p>
+    <button class="pttb" id="gPtt" style="width:100%;min-height:90px">🎙️ Mantén para hablar</button>
+    <div class="mf"><button class="btn" data-close>Cerrar</button></div>`);
+  bindPtt($('gPtt'), () => to);
+}
 function rutasList() {
-  return units().map(({ unit, t, p }) => {
+  return grpCards() + units().map(({ unit, t, p }) => {
     const act = t.status === 'enruta', dev = (t.dev || 0) * M.SCALE.outdoor.km;
     const chip = !act ? `<span class="chip">✅ Llegó ${t.done ? M.fmtT(t.done) : ''}</span>` : t.off ? `<span class="chip bad">⚠️ Fuera de ruta · ${dev.toFixed(1)} km</span>` : '<span class="chip ok">● En ruta</span>';
     return `<div class="card trip ${ui.trip === p.id ? 'on' : ''} ${act && t.off ? 'off' : ''}" data-sel="${p.id}"><div class="th"><b>🚚 Unidad ${E(unit)}</b>${chip}<span class="sp"></span><small class="muted">visto ${M.ago(p.seen)}</small></div>
       <div class="rq-who">${avatar(p, 's')}<span><b>${E(p.name)}</b><small>${E(p.role)} · 🔋${p.bat}%${isGps(p) ? ' · 📡 GPS real' : ''}</small></span></div>
       <div class="tr-ft"><span>${E(t.from)}</span><span>→</span><span>🏁 ${E(t.to)}</span></div>
       <div class="muted" style="font-size:12.5px;margin:6px 0">📍 Cerca de <b>${E(nearPlace(p))}</b> · salió ${M.fmtT(t.start)}${act ? ` · a ${dev.toFixed(1)} km de su ruta` : ''}</div>
-      <div class="row-b"><button class="btn sm" data-sel="${p.id}">⌖ Ver ruta</button><a class="btn sm" href="tel:${p.phone}">📞 Llamar</a>${act ? (t.off ? '' : `<button class="btn sm" data-sim="${t.id}" title="Demo: la unidad se separa de su ruta">Simular desvío</button>`) : `<button class="btn sm lime" data-asg="${p.id}">＋ Nuevo destino</button>`}</div></div>`;
+      <div class="row-b"><button class="btn sm" data-sel="${p.id}">⌖ Ver ruta</button><button class="btn sm" data-msg="${p.id}">💬 Mensaje</button><a class="btn sm" href="tel:${p.phone}">📞 Llamar</a>${act ? (t.off ? '' : `<button class="btn sm" data-sim="${t.id}" title="Demo: la unidad se separa de su ruta">Simular desvío</button>`) : `<button class="btn sm lime" data-asg="${p.id}">＋ Nuevo destino</button>`}</div></div>`;
   }).join('') || '<div class="card empty">Sin unidades. Asigna un destino con ＋ Asignar destino.</div>';
 }
 function rutasHist() {
@@ -710,6 +749,11 @@ function bindRutas() {
   $('rtL').onclick = e => {
     const t = e.target; if (t.closest('a')) return;
     const as = t.closest('[data-asg]'); if (as) return tripModal(as.dataset.asg);
+    const ms = t.closest('[data-msg]'); if (ms) return msgModal(ms.dataset.msg);
+    if (t.closest('[data-gnew]')) return chatModal();
+    const gm = t.closest('[data-gmsg]'); if (gm) return msgModal(gm.dataset.gmsg);
+    const gp = t.closest('[data-gptt]'); if (gp) return pttModal(gp.dataset.gptt);
+    const ge = t.closest('[data-gedit]'); if (ge) return chatModal(ge.dataset.gedit);
     const sm = t.closest('[data-sim]'); if (sm) { M.update(s => M.simDesvio(s, sm.dataset.sim)); return toast('Demo: la unidad se está separando de su ruta…'); }
     const sl = t.closest('[data-sel]'); if (sl) selTrip(sl.dataset.sel);
   };
