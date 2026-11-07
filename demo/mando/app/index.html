@@ -165,7 +165,7 @@ video.scan{width:100%;border-radius:16px;background:#000;max-height:260px;object
 <body>
 <div class="phone" id="ph"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="../mando.js?v=8"></script>
+<script src="../mando.js?v=9"></script>
 <script>
 const M = Mando, E = M.esc;
 // el operador entra con su usuario (código de empresa + celular + PIN); la empresa la fija su sesión
@@ -181,8 +181,6 @@ const indoor = () => site().kind === 'indoor';
 const grpN = id => (S.groups.find(g => g.id === id) || {}).name || '';
 const stc = p => M.STATUS[p.status].c;
 const avatar = p => `<span class="av" style="background:${stc(p)}">${E(p.ini)}</span>`;
-const myOrders = () => S.orders.filter(o => o.opId === meId);
-const openMine = () => myOrders().filter(o => !['completada', 'cancelada'].includes(o.status)).sort((a, b) => a.due - b.due);
 const today = ts => new Date(ts).toDateString() === new Date().toDateString();
 const myChats = () => [['consola', '🎧', 'Central', 'Mesa de control'], [me().group, '🏢', grpN(me().group), 'Tu departamento'], ...S.chats.filter(c => c.members.includes(meId)).map(c => [c.id, '👥', c.name, c.dept])];
 const inChat = (m, id) => id === 'consola' ? ((m.from === meId && m.to === 'consola') || (m.from === 'consola' && m.to === meId) || m.to === 'all') : m.to === id;
@@ -250,7 +248,7 @@ function startGps() {
       Object.assign(p, xy, { gps: Date.now(), acc: Math.round(accuracy), seen: Date.now(), target: null });
       p.trail.push([xy.x, xy.y]); if (p.trail.length > 60) p.trail.shift();
     }, true);
-    S = M.load(); paintGps(); moveMe();
+    S = M.load(); paintGps();
   }, err => { ui.gpsErr = err.code === 1 ? 'Permiso de ubicación negado' : 'Sin señal GPS'; paintGps(); }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
 }
 function stopGps() { if (watch != null) { navigator.geolocation.clearWatch(watch); watch = null; } }
@@ -266,16 +264,16 @@ function paintGps() { const b = document.getElementById('gpsBox'); if (b) b.oute
 
 // ---------- pantallas ----------
 function scrInicio() {
-  const p = me(), cur = openMine()[0], dif = S.msgs.filter(m => m.kind === 'difusion').slice(-1)[0];
-  const doneT = myOrders().filter(o => o.status === 'completada' && today(o.done)).length;
+  const p = me(), dif = S.msgs.filter(m => m.kind === 'difusion').slice(-1)[0];
+  const mates = S.ops.filter(q => q.group === p.group && q.id !== p.id && q.status !== 'fuera');
   const pct = Math.min(100, p.gb / p.gbMax * 100);
   return `<div class="card" style="background:${p.shift ? 'linear-gradient(135deg,#1d1d8f,#13136A)' : 'linear-gradient(135deg,#7B5CFA,#4B32C9)'}">
       ${p.shift ? `<h3>🟢 Turno activo<small>desde ${M.fmtT(p.shift.at)}</small></h3><div class="chips">${['disponible', 'receso', 'pausa'].map(k => `<button data-st="${k}" class="${p.status === k ? 'on' : ''}"><i class="dot" style="background:${M.STATUS[k].c}"></i>${k === 'receso' ? '🍽️ Receso' : M.STATUS[k].t}</button>`).join('')}</div>${recesoHTML()}${gpsHTML()}`
-        : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para aparecer en el mapa de tu central y ver tus servicios del día${indoor() ? '' : ' (te pediremos tu ubicación)'}.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
+        : `<h3>¡Hola, ${E(p.name.split(' ')[0])}!</h3><p class="muted" style="font-size:14px;margin-bottom:12px">Inicia tu turno para aparecer en el mapa de tu central y estar en contacto con tu departamento${indoor() ? '' : ' (te pediremos tu ubicación)'}.</p><button class="btn lime" data-a="shift">▶ Iniciar turno</button>`}
     </div>
     ${tripHTML()}
-    <div class="stats"><div><small>Hoy</small><b>${doneT}</b><small>servicios</small></div><div><small>Recorrido</small><b>${indoor() ? Math.round(p.km * 1000) : p.km.toFixed(0)}</b><small>${indoor() ? 'm' : 'km'}</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
-    ${cur ? `<div class="card"><h3>📋 Tu siguiente servicio<small>${E(cur.folio)}</small></h3>${orderCard(cur)}${nextBtn(cur)}</div>` : `<div class="card"><h3>📋 Sin servicios pendientes</h3><p class="muted" style="font-size:14px">Cuando tu central te asigne uno, te llega aquí con aviso.</p></div>`}
+    <div class="stats"><div><small>Turno</small><b>${p.shift ? Math.max(0, Math.round((Date.now() - p.shift.at) / 3600000 * 10) / 10) : 0}</b><small>horas</small></div><div><small>Recorrido</small><b>${indoor() ? Math.round(p.km * 1000) : p.km.toFixed(0)}</b><small>${indoor() ? 'm' : 'km'}</small></div><div><small>Batería</small><b>${p.bat}%</b><small>&nbsp;</small></div><div><small>Datos</small><b>${(p.gbMax - p.gb).toFixed(1)}</b><small>GB libres</small></div></div>
+    <div class="card"><h3>👥 ${E(grpN(p.group))}<small>${mates.length} en turno contigo</small></h3><p class="muted" style="font-size:13.5px">${mates.length ? mates.slice(0, 6).map(q => E(q.name.split(' ')[0])).join(', ') + '. ' : ''}Habla con tu departamento en 🎙️ Radio o 💬 Chat. Si algo pasa, mantén el botón de emergencia.</p></div>
     ${dif ? `<div class="card" style="border-color:#b4e32f55"><h3>📢 Aviso de tu empresa<small>${M.fmtT(dif.at)}</small></h3><p style="font-size:14px">${E(dif.txt)}</p></div>` : ''}
     <div class="card"><h3>📶 Tu línea Navi<small>${p.gb.toFixed(1)} de ${p.gbMax} GB</small></h3><div class="bar"><i style="width:${pct}%"></i></div><p class="muted" style="font-size:12.5px;margin-top:8px">La app consume muy pocos datos. Si te quedas sin datos, avisa a tu central para que recargue tu línea.</p></div>
     ${p.shift ? '<button class="btn" data-a="endshift" style="margin-top:4px">⏹ Terminar turno</button>' : ''}`;
@@ -337,63 +335,6 @@ function altSheet() {
     ov.remove(); vib(60); toast('⏳ Solicitud enviada. Espera la autorización de tu administrador.'); render();
   };
 }
-function orderCard(o) {
-  const left = Math.round((o.due - Date.now()) / M.MIN);
-  return `<button class="oc" data-o="${o.id}" style="margin:0 0 10px;background:#ffffff08"><div class="h"><span>${E(o.folio)}</span>${o.status === 'asignada' ? '<span class="pill new">NUEVA</span>' : ''}<span class="pill ${o.prio}">${o.prio}</span><span>${['completada', 'cancelada'].includes(o.status) ? M.ORDER_ST[o.status] : left < 0 ? '⚠️ Vencida' : '⏱️ ' + left + ' min'}</span></div><b>${E(o.title)}</b><small>${E(o.client)}</small><small>📍 ${E(o.addr)}</small></button>`;
-}
-function nextBtn(o) {
-  const n = { asignada: ['aceptada', '✓ Aceptar orden'], aceptada: ['encamino', o.site === 'city' ? '🚗 Voy en camino' : '🚶 Voy para allá'], encamino: ['ensitio', '📍 Ya llegué'], ensitio: ['finish', '✅ Terminar trabajo'] }[o.status];
-  return n ? `<button class="btn lime" data-next="${o.id}" data-to="${n[0]}">${n[1]}</button>` : '';
-}
-function scrOrdenes() {
-  if (ui.order) return scrOrden();
-  const op = openMine(), dn = myOrders().filter(o => o.status === 'completada' && today(o.done)).sort((a, b) => b.done - a.done);
-  return `<h2 style="font-size:24px;margin:4px 0 12px">Mis servicios</h2>
-    ${op.map(orderCard).join('') || '<div class="card muted" style="text-align:center">Sin servicios pendientes 🎉</div>'}
-    ${dn.length ? `<h3 style="font-size:15px;margin:18px 0 10px" class="muted">Completadas hoy · ${dn.length}</h3>${dn.map(orderCard).join('')}` : ''}`;
-}
-function scrOrden() {
-  const o = S.orders.find(x => x.id === ui.order); if (!o) { ui.order = null; return scrOrdenes(); }
-  const idx = ['asignada', 'aceptada', 'encamino', 'ensitio', 'completada'].indexOf(o.status), open = !['completada', 'cancelada'].includes(o.status);
-  const ll = M.toLL(o.x, o.y), city = o.site === 'city';
-  return `<button class="back" data-a="back">← Mis servicios</button>
-    <div class="muted" style="font-size:12.5px">${E(o.folio)} · ${M.ORDER_ST[o.status]}</div>
-    <h2 style="font-size:24px;margin:4px 0">${E(o.title)}</h2>
-    <div class="steps">${[0, 1, 2, 3, 4].map(i => `<i class="${i <= idx ? 'on' : ''}"></i>`).join('')}</div>
-    <div class="card"><b style="font-size:16px">${E(o.client)}</b><div class="muted" style="font-size:14px">📍 ${city ? '' : E(M.site(S, o.site).name.split(' · ')[0]) + ' · '}${E(o.addr)}</div>
-      <div class="omap" id="omap" data-o="${o.id}"></div>
-      <div class="row">${city ? `<a class="btn sm" style="flex:1" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${ll[0].toFixed(5)},${ll[1].toFixed(5)}">🧭 Google Maps</a><a class="btn sm" style="flex:1" target="_blank" href="https://waze.com/ul?ll=${ll[0].toFixed(5)},${ll[1].toFixed(5)}&navigate=yes">🚘 Waze</a>` : ''}<button class="btn sm" style="flex:1" data-a="chatc">💬 Central</button></div>
-      ${o.notes ? `<p style="font-size:13.5px;margin-top:10px;background:#ffffff0a;border-radius:12px;padding:10px">📝 ${E(o.notes)}</p>` : ''}</div>
-    ${o.status === 'ensitio' || o.status === 'completada' ? `<div class="card"><h3>Checklist<small>${o.checklist.filter(c => c.done).length}/${o.checklist.length}</small></h3>
-      ${o.checklist.map((c, i) => `<button class="ck ${c.done ? 'on' : ''}" data-ck="${i}" ${open ? '' : 'disabled'}><span>${c.done ? '✓' : ''}</span>${E(c.t)}</button>`).join('')}</div>
-      ${o.needPhoto ? `<div class="card"><h3>📷 Foto de evidencia</h3>${o.photo || ui.photo ? `<img class="photo" src="${o.photo || ui.photo}" alt="Evidencia">` : ''}${open ? `<label class="btn sm" style="width:100%;margin-top:8px">${o.photo || ui.photo ? 'Tomar otra' : 'Tomar foto'}<input type="file" accept="image/*" capture="environment" id="ph1" hidden></label>` : ''}</div>` : ''}
-      ${o.needSign ? `<div class="card"><h3>✍️ Firma del cliente</h3>${o.sign ? `<img class="photo" src="${o.sign}" style="background:#fff" alt="Firma">` : `<canvas class="sig" id="sig"></canvas><button class="btn sm" data-a="clr" style="margin-top:8px">Borrar firma</button>`}</div>` : ''}
-      ${open && city ? `<div class="card"><h3>⭐ ¿Cómo calificó el cliente el servicio?</h3><div class="chips">${[1, 2, 3, 4, 5].map(n => `<button data-r="${n}" class="${o.rating === n ? 'on' : ''}">${'⭐'.repeat(n)}</button>`).join('')}</div></div>` : ''}` : ''}
-    ${open ? nextBtn(o) : `<div class="card" style="text-align:center;border-color:#b4e32f66">✅ Completada a las ${M.fmtT(o.done)}${o.done <= o.due ? ' · a tiempo' : ''}</div>`}`;
-}
-// mapa de la orden: calles reales en la ciudad, plano del almacén adentro
-function orderMap() {
-  const el = document.getElementById('omap'); if (!el || el._L) return;
-  const o = S.orders.find(x => x.id === el.dataset.o), p = me(), st = M.site(S, o.site);
-  let m;
-  const LL = (x, y) => st.kind === 'indoor' ? [st.h - y, x] : M.toLL(x, y);
-  if (st.kind === 'indoor') {
-    m = L.map(el, { crs: L.CRS.Simple, zoomControl: false, attributionControl: false, minZoom: 1, maxZoom: 6, zoomSnap: .25 });
-    L.imageOverlay(M.planSVG(st), [[0, 0], [st.h, st.w]]).addTo(m); m.fitBounds([[0, 0], [st.h, st.w]]);
-  } else {
-    m = L.map(el, { zoomControl: false });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, className: 'dark-tiles', attribution: '© OpenStreetMap' }).addTo(m);
-  }
-  L.marker(LL(o.x, o.y), { icon: L.divIcon({ className: '', html: '<div class="dpin">📍</div>', iconSize: [28, 28], iconAnchor: [14, 28] }) }).addTo(m);
-  if (p.site === o.site) {
-    el._me = L.marker(LL(p.x, p.y), { icon: L.divIcon({ className: '', html: '<div class="mepin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(m);
-    el._line = L.polyline([LL(p.x, p.y), LL(o.x, o.y)], { color: '#B4E32F', weight: 3, dashArray: '5 6' }).addTo(m);
-    if (st.kind !== 'indoor') m.fitBounds([LL(p.x, p.y), LL(o.x, o.y)], { padding: [30, 30], maxZoom: 16 });
-  } else m.setView(LL(o.x, o.y), 15);
-  el._L = m; el._LL = LL; el._o = o;
-  setTimeout(() => m.invalidateSize(), 50);
-}
-function moveMe() { const el = document.getElementById('omap'); if (!el || !el._me) return; const p = me(); el._me.setLatLng(el._LL(p.x, p.y)); el._line.setLatLngs([el._LL(p.x, p.y), el._LL(el._o.x, el._o.y)]); }
 function scrRadio() {
   const p = me(), ch = ui.radioCh || p.group;
   const v = S.msgs.filter(m => m.kind === 'voz' && (ch === 'consola' ? (m.from === meId && m.to === 'consola') || (m.from === 'consola' && m.to === meId) : (m.to === ch || (ch === p.group && m.to === 'all')))).slice(-15).reverse();
@@ -440,18 +381,17 @@ function scrRondin() {
 function render() {
   S = M.load();
   if (!meId || !me()) return login();
-  const p = me(), nU = unread(), nO = openMine().filter(o => o.status === 'asignada').length;
-  const body = { inicio: scrInicio, ordenes: scrOrdenes, radio: scrRadio, chat: scrChat, mas: scrMas, rondin: scrRondin }[ui.tab]();
+  const p = me(), nU = unread();
+  if (ui.tab === 'ordenes') ui.tab = 'inicio';
+  const body = { inicio: scrInicio, radio: scrRadio, chat: scrChat, mas: scrMas, rondin: scrRondin }[ui.tab]();
   const scr = ph.querySelector('.scr'), st = scr ? scr.scrollTop : 0;
-  const keepMap = ph.querySelector('#omap'), keepT = ph.querySelector('#tmap');
+  const keepT = ph.querySelector('#tmap');
   ph.innerHTML = `<header class="hd">${avatar(p)}<div class="who"><b>${E(p.name)}</b><small>${E(grpN(p.group))} · ${site().icon} ${E(indoor() ? here() : S.empresa)}</small></div><button class="stb" data-a="status"><i class="dot" style="background:${stc(p)}"></i>${M.STATUS[p.status].t}</button><button class="hb" data-a="refresh" title="Refrescar la app" aria-label="Refrescar la app">⟳</button><button class="hb out" data-a="logout" title="Salir" aria-label="Cerrar sesión">⏻</button></header>
     <div class="scr" id="scr">${body}</div>
     ${ui.tab === 'chat' && ui.chat ? '<div class="comp"><input class="f" id="mIn" placeholder="Escribe un mensaje…" autocomplete="off"><button class="btn lime sm" id="mSend">Enviar</button></div>' : ''}
     <button class="sos" id="sos"><span class="fill"></span><i>🆘</i><span>EMERGENCIA<small>mantén 2 s</small></span></button>
-    <nav class="tabbar">${[['inicio', '🏠', 'Inicio'], ['ordenes', '📋', 'Servicios', nO], ['radio', '🎙️', 'Radio'], ['chat', '💬', 'Chat', nU], ['mas', '☰', 'Más']].map(([k, i, t, n]) => `<button data-tab="${k}" class="${ui.tab === k || (k === 'mas' && ui.tab === 'rondin') ? 'on' : ''}"><i>${i}</i>${t}${n ? `<em>${n}</em>` : ''}</button>`).join('')}</nav>`;
+    <nav class="tabbar">${[['inicio', '🏠', 'Inicio'], ['radio', '🎙️', 'Radio'], ['chat', '💬', 'Chat', nU], ['mas', '☰', 'Más']].map(([k, i, t, n]) => `<button data-tab="${k}" class="${ui.tab === k || (k === 'mas' && ui.tab === 'rondin') ? 'on' : ''}"><i>${i}</i>${t}${n ? `<em>${n}</em>` : ''}</button>`).join('')}</nav>`;
   const s2 = document.getElementById('scr'); s2.scrollTop = st;
-  // el mapa de la orden se conserva entre refrescos
-  const nm = ph.querySelector('#omap'); if (nm && keepMap && keepMap._L && keepMap.dataset.o === nm.dataset.o) { nm.replaceWith(keepMap); keepMap._L.invalidateSize(); moveMe(); } else orderMap();
   const nt = ph.querySelector('#tmap'); if (nt && keepT && keepT._L && keepT.dataset.t === nt.dataset.t) { nt.replaceWith(keepT); keepT._L.invalidateSize(); }
   tripMap();
   if (ui.tab === 'chat' && ui.chat) { s2.scrollTop = s2.scrollHeight; markRead(); }
@@ -467,12 +407,8 @@ function bind() {
   ph.querySelector('.tabbar').onclick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.order = null; if (ui.tab === 'chat') ui.chat = null; render(); };
   ph.onclick = e => {
     const t = e.target;
-    if (t.closest('#omap') || t.closest('#tmap')) return;
-    const o = t.closest('[data-o]'); if (o && !t.closest('[data-next]')) { if (ui.order !== o.dataset.o) { ui.photo = null; ui.sig = null; } ui.order = o.dataset.o; ui.tab = 'ordenes'; return render(); }
-    const nx = t.closest('[data-next]'); if (nx) return nextStep(nx.dataset.next, nx.dataset.to);
+    if (t.closest('#tmap')) return;
     const st = t.closest('[data-st]'); if (st) return setStatus(st.dataset.st);
-    const ck = t.closest('[data-ck]'); if (ck && !ck.disabled) { M.update(s => { const c = s.orders.find(x => x.id === ui.order).checklist[+ck.dataset.ck]; c.done = !c.done; }); return render(); }
-    const r = t.closest('[data-r]'); if (r) { M.update(s => { s.orders.find(x => x.id === ui.order).rating = +r.dataset.r; }); return render(); }
     const pl = t.closest('[data-play]'); if (pl) return play(pl.dataset.play);
     const ch = t.closest('[data-chat]'); if (ch) { ui.chat = ch.dataset.chat; return render(); }
     const q = t.closest('#qk button'); if (q) return send(q.textContent);
@@ -482,10 +418,8 @@ function bind() {
     if (a === 'gps') { stopGps(); ui.gpsErr = null; startGps(); paintGps(); }
     if (a === 'area') areaSheet();
     if (a === 'status') statusSheet();
-    if (a === 'back') { ui.order = null; render(); }
     if (a === 'chats') { ui.chat = null; render(); }
     if (a === 'chatc') { ui.tab = 'chat'; ui.chat = 'consola'; ui.order = null; render(); }
-    if (a === 'clr') initSig(true);
     if (a === 'solo') { M.update(s => { const p = s.ops.find(x => x.id === meId); p.solo = !p.solo; p.soloOk = Date.now(); p.soloAsk = null; M.event(s, meId, p.solo ? 'Activó modo trabajo solo' : 'Desactivó modo trabajo solo', 'estado'); }); render(); }
     if (a === 'install') installSheet();
     if (a === 'refresh') { toast('⟳ Actualizando…'); setTimeout(() => location.reload(), 300); return; }
@@ -496,8 +430,6 @@ function bind() {
     if (a === 'scan') scanSheet();
     if (a === 'altruta') altSheet();
   };
-  const f = document.getElementById('ph1'); if (f) f.onchange = () => photoIn(f.files[0]);
-  if (document.getElementById('sig')) initSig();
   if (document.getElementById('ptt')) bindPtt(document.getElementById('ptt'));
   const rc = document.getElementById('rch'); if (rc) rc.onchange = () => { ui.radioCh = rc.value; render(); };
   if (document.getElementById('mSend')) { const i = document.getElementById('mIn'); document.getElementById('mSend').onclick = () => send(i.value); i.onkeydown = e => { if (e.key === 'Enter') send(i.value); }; }
@@ -510,43 +442,6 @@ function send(t) {
 }
 function play(id) { const m = S.msgs.find(x => x.id === id); if (m && m.audio) new Audio(m.audio).play().catch(() => toast('Toca ▶ para escuchar')); }
 
-function nextStep(oid, to) {
-  const o = S.orders.find(x => x.id === oid);
-  if (to === 'finish') {
-    if (o.checklist.some(c => !c.done)) return toast('Completa el checklist antes de terminar');
-    if (o.needPhoto && !o.photo && !ui.photo) return toast('Falta la foto de evidencia');
-    if (o.needSign && !o.sign && !ui.sig) return toast('Falta la firma del cliente');
-    const sign = o.needSign && !o.sign ? ui.sig : o.sign, photo = ui.photo || o.photo;
-    M.update(s => { const x = s.orders.find(q => q.id === oid); x.photo = photo; x.sign = sign; M.advance(s, oid, 'completada', me().name); });
-    ui.photo = null; ui.sig = null; vib(80); toast('✅ ' + o.folio + ' completada. ¡Buen trabajo!');
-  } else {
-    M.update(s => M.advance(s, oid, to, me().name));
-    if (to === 'aceptada') toast('Orden aceptada');
-    if (to === 'encamino') toast('Tu central ve que vas en camino');
-    ui.order = oid; ui.tab = 'ordenes';
-  }
-  render();
-}
-function photoIn(file) {
-  if (!file) return;
-  const img = new Image(), fr = new FileReader();
-  fr.onload = () => { img.onload = () => { const k = Math.min(1, 520 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ui.photo = c.toDataURL('image/jpeg', .6); render(); }; img.src = fr.result; };
-  fr.readAsDataURL(file);
-}
-function initSig(clear) {
-  const c = document.getElementById('sig'); if (!c) return;
-  const r = c.getBoundingClientRect(); c.width = r.width * 2; c.height = r.height * 2;
-  const x = c.getContext('2d'); x.scale(2, 2); x.lineWidth = 2.4; x.lineCap = 'round'; x.strokeStyle = '#06062E';
-  if (clear) ui.sig = null;
-  c._drawn = !!ui.sig;
-  if (ui.sig) { const im = new Image(); im.onload = () => x.drawImage(im, 0, 0, r.width, r.height); im.src = ui.sig; }
-  else { x.fillStyle = '#9a98c4'; x.font = '13px DM Sans'; x.fillText('Firma aquí', 12, 22); }
-  if (clear) return;
-  let d = false; const pt = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
-  c.onpointerdown = e => { if (!c._drawn) x.clearRect(0, 0, c.width, c.height); d = true; ui.drawing = true; c._drawn = true; c.setPointerCapture(e.pointerId); x.beginPath(); x.moveTo(...pt(e)); };
-  c.onpointermove = e => { if (d) { x.lineTo(...pt(e)); x.stroke(); } };
-  c.onpointerup = () => { d = false; ui.drawing = false; ui.sig = c.toDataURL('image/png'); };
-}
 function sheet(html) { const ov = document.createElement('div'); ov.className = 'ov'; ov.innerHTML = `<div class="sheet">${html}<button class="btn" data-x style="margin-top:10px">Cerrar</button></div>`; ov.onclick = e => { if (e.target === ov || e.target.closest('[data-x]')) { stopScan(); ov.remove(); } }; ph.appendChild(ov); return ov; }
 function statusSheet() {
   const ov = sheet(`<h3>Tu estado</h3><p class="muted" style="font-size:13.5px;margin-bottom:12px">Tu central lo ve al instante.</p>
@@ -702,9 +597,6 @@ function checkPrompts() {
 }
 function notify() {
   const p = me(); if (!p) return;
-  const as = myOrders().filter(o => o.status === 'asignada').map(o => o.id);
-  if (ui.lastOrders) as.filter(id => !ui.lastOrders.includes(id)).forEach(id => { const o = S.orders.find(x => x.id === id); toast('📋 Nuevo servicio: ' + o.title + ' · ' + o.client); vib([120, 60, 120]); M.beep(); });
-  ui.lastOrders = as;
   // aviso al chofer si se sale de su ruta
   const tr = M.activeTrip(S, meId);
   if (tr && tr.off && !ui.wasOff) { toast('⚠️ Te saliste de tu ruta. Tu central ya fue avisada.'); vib([300, 120, 300]); M.beep(true); }
@@ -724,7 +616,7 @@ setInterval(() => {
   M.update(s => { const p = s.ops.find(x => x.id === meId); if (p) p.seen = Date.now(); }, true);
 }, 4000);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-render(); ui.lastOrders = meId && me() ? myOrders().filter(o => o.status === 'asignada').map(o => o.id) : null;
+render();
 if (meId && me() && me().shift) startGps();
 </script>
 </body>

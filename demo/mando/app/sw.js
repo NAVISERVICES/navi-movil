@@ -1,6 +1,6 @@
 // service worker de la app del operador: abre aunque no haya señal
-const CACHE = 'navi-mando-v8';
-const FILES = ['./', 'manifest.webmanifest', '../mando.js?v=8', '../tech.css?v=1','../../assets/icon-192.png', '../../assets/navi-logo.png'];
+const CACHE = 'navi-mando-v9';
+const FILES = ['./', 'manifest.webmanifest', '../mando.js?v=9', '../tech.css?v=1','../../assets/icon-192.png', '../../assets/navi-logo.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
