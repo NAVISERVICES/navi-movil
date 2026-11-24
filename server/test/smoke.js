@@ -61,6 +61,13 @@ try {
   const st3 = await call('/api/mando/state', { headers: { Authorization: 'Bearer ' + v2.j.token } });
   assert.equal(st3.j.doc.client, 'operativa'); assert.ok(!st3.j.doc.msgs.find(m => m.id === 'mtest')); ok('cada empresa ve solo sus datos');
 
+  // avisos del operador (webhooks)
+  const wg = await call('/webhooks/operador'); assert.equal(wg.s, 200); assert.equal(wg.j.ok, true); ok('dirección de avisos responde a la prueba de conexión');
+  const w1 = await post('/webhooks/operador', { event: 'recarga', event_id: 'ev-1', data: { msisdn: '5500000000', monto: 150 } }); assert.equal(w1.s, 200); assert.ok(w1.j.recibido); ok('recibe un aviso de recarga y lo guarda (#' + w1.j.recibido + ')');
+  const w2 = await post('/webhooks/operador', { event: 'recarga', event_id: 'ev-1' }); assert.equal(w2.s, 200); assert.equal(w2.j.duplicado, true); ok('un reintento del mismo aviso no se guarda dos veces');
+  const w3 = await call('/webhooks/operador', { method: 'POST', body: 'no es json', headers: { 'Content-Type': 'text/plain' } }); assert.equal(w3.s, 200); ok('acepta avisos que no son JSON (se guardan tal cual)');
+  assert.equal((await call('/webhooks/otra')).s, 404); ok('otras rutas de avisos no existen');
+
   console.log('\nTodo bien ✔');
 } catch (e) {
   console.error('\nFALLÓ:', e.message, '\n--- bitácora del servidor ---\n' + log);

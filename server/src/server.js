@@ -8,6 +8,7 @@ import { CONFIG } from './config.js';
 import { q, audit, backup } from './db.js';
 import { seedDemo, Patch, Mando } from './seed.js';
 import * as Auth from './auth.js';
+import { handleWebhook } from './webhooks.js';
 
 seedDemo();
 
@@ -151,6 +152,7 @@ const server = http.createServer(async (req, res) => {
       headers(res, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-cache' });
       return res.end(`window.NAVI_API = '/api'; window.NAVI_DEMO = ${CONFIG.demo};\n`);
     }
+    if (url.pathname.startsWith('/webhooks/') && await handleWebhook(req, res, url, ipOf(req), json)) return;
     if (url.pathname.startsWith('/api/')) return await api(req, res, url);
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { err: 'método no permitido' });
     return serveStatic(req, res, url);
